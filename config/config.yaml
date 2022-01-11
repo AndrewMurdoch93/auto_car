@@ -18,5 +18,5 @@ max_delta: 0.4
 max_delta_dot: 3.2
 
 time_step: 0.01
-
+control_steps: 10
 

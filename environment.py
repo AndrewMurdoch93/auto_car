@@ -8,9 +8,12 @@ class environment():
 
     def __init__(self, sim_conf):
         self.sim_conf = sim_conf
+        self.local_path=True
         self.reset()
 
     def reset(self):
+        self.num_actions = 8
+        
         self.x = 0
         self.y = 0
         self.theta = 0 
@@ -26,7 +29,7 @@ class environment():
         
         #self.prev_loc = 0
         self.dt = self.sim_conf.time_step
-
+        self.control_steps = self.sim_conf.control_steps
         #Initialise car parameters from 
         self.mass = self.sim_conf.m                              #car mass
         self.max_delta = self.sim_conf.max_delta                 #car maximum steering angle
@@ -38,75 +41,69 @@ class environment():
         self.goal = [2,2]
         self.steps = 0
 
-    def take_action(self, action):
-        waypoint = [int((action+1)%3), int((action+1)/3)]
-        
-        #waypoint_relative_angle = self.theta+math.pi/2-math.pi*(action/8)
-        #waypoint = [self.x + math.cos(waypoint_relative_angle), self.y + math.sin(waypoint_relative_angle)]
-        
-        cx = (((np.arange(0.1, 1, 0.01))*(waypoint[0] - self.x)) + self.x).tolist()
-        cy = ((np.arange(0.1, 1, 0.01))*(waypoint[1] - self.y) + self.y)
-        self.record_waypoints(cx, cy)
-        target_index, _ = self.search_target_waypoint(self.x, self.y, self.v)
-
-        #print(waypoint)
-        v_ref = 2
-        
-        distance_to_waypoint = math.sqrt((self.x-waypoint[0])**2 + (self.y-waypoint[1])**2)
-        
-        #print(distance_to_waypoint)
+    def take_action(self, act):
         reward = 0
         done=False
         
-        '''
-        delta_ref = self.pure_pursuit(waypoint)
-        delta_dot, a = self.control_system(self.delta, delta_ref, self.v, v_ref)
-        self.update_kinematic_state(a, delta_dot)
+        waypoint = self.convert_action_to_coord(strategy='local', action=act)
+        v_ref = 2
+
+        if self.local_path==False:
+            for _ in range(self.control_steps):
+                delta_ref = self.pure_pursuit(waypoint)
+                delta_dot, a = self.control_system(self.delta, delta_ref, self.v, v_ref)
+                self.update_kinematic_state(a, delta_dot)
+                #distance_to_waypoint = math.sqrt((self.x-waypoint[0])**2 + (self.y-waypoint[1])**2)
+                self.steps += 1
+                self.state = [self.x, self.y, self.theta, self.delta, self.v]
+                self.state_history.append(self.state[:])
+                self.action_history.append(waypoint)
+                reward += self.getReward()
+                done = self.isEnd()
+                if done==True:
+                    break
+
+            return self.state, reward, done
+
+        else:
+            cx = (((np.arange(0.1, 1, 0.01))*(waypoint[0] - self.x)) + self.x).tolist()
+            cy = ((np.arange(0.1, 1, 0.01))*(waypoint[1] - self.y) + self.y)
+            self.record_waypoints(cx, cy)
+            target_index, _ = self.search_target_waypoint(self.x, self.y, self.v)
+
+            lastIndex = len(cx)-1
+            i=0
+            while (lastIndex > target_index) and i<10:
+
+
+                delta_ref, target_index = self.pure_pursuit_steer_control(self.x, self.y, self.theta, self.v, target_index)
+                delta_dot, a = self.control_system(self.delta, delta_ref, self.v, v_ref)
+                self.update_kinematic_state(a, delta_dot)
+                
+                self.steps += 1
+
+                self.state = [self.x, self.y, self.theta, self.delta, self.v]
+                self.state_history.append(self.state[:])
+                self.action_history.append(waypoint)
+                self.local_path_history.append([cx, cy][:])
+                
+                reward += self.getReward()
+                done = self.isEnd()
+                if done == True:
+                    break
+   
+                i+=1
+            return self.state, reward, done
+    
+    def convert_action_to_coord(self, strategy, action):
+        if strategy=='global':
+            waypoint = [int((action+1)%3), int((action+1)/3)]
+
+        if strategy=='local':
+            waypoint_relative_angle = self.theta+math.pi/2-math.pi*(action/8)
+            waypoint = [self.x + math.cos(waypoint_relative_angle), self.y + math.sin(waypoint_relative_angle)]
         
-        #distance_to_waypoint = math.sqrt((self.x-waypoint[0])**2 + (self.y-waypoint[1])**2)
-        self.steps += 1
-        
-        self.state = [self.x, self.y, self.theta, self.delta, self.v]
-        self.state_history.append(self.state[:])
-        self.action_history.append(waypoint)
-        reward += self.getReward()
-        done = self.isEnd()
-        '''
-
-        lastIndex = len(cx)-2
-        i=0
-        #while distance_to_waypoint > 0.2:
-        while (lastIndex > target_index) and i<10:
-        #for _ in range(1):    
-            #delta_ref = self.pure_pursuit(waypoint)
-            #if target_index==90:
-            #    print("target index = 90")
-
-            delta_ref, target_index = self.pure_pursuit_steer_control(self.x, self.y, self.theta, self.v, target_index)
-            delta_dot, a = self.control_system(self.delta, delta_ref, self.v, v_ref)
-            self.update_kinematic_state(a, delta_dot)
-            
-         
-
-            distance_to_waypoint = math.sqrt((self.x-waypoint[0])**2 + (self.y-waypoint[1])**2)
-            
-            #if distance_to_waypoint <=0.2:
-            #    print('distance_to_waypoint <= 0.2')
-
-            self.steps += 1
-
-            self.state = [self.x, self.y, self.theta, self.delta, self.v]
-            self.state_history.append(self.state[:])
-            self.action_history.append(waypoint)
-            self.local_path_history.append([cx, cy][:])
-            
-            reward += self.getReward()
-            done = self.isEnd()
-            if done == True:
-                break
-        #self.steps += 1
-            i+=1
-        return self.state, reward, done
+        return waypoint
 
     def record_waypoints(self, cx, cy):
         #Initialise waypoints for planner
@@ -134,31 +131,19 @@ class environment():
             #Search for closest waypoint after ind
             ind = self.old_nearest_point_index  
             self.ind_history.append(ind)
-            #print(ind)
+         
             distance_this_index = functions.distance_between_points(self.cx[ind], x, self.cy[ind], y)   
             
             while True:
-                
                 if (ind+1)>=len(self.cx):
-                    #print('index error 1')
                     break
                 
                 distance_next_index = functions.distance_between_points(self.cx[ind + 1], x, self.cy[ind + 1], y)
                 
-                #if (ind+1)>=len(self.cx)-1:
-                #    print('index error 2')
-                
                 if distance_this_index < distance_next_index:
                     break
 
-                #if (ind+1)>=len(self.cx)-1:
-                #    print('index error 3')
-
                 ind = ind + 1 if (ind + 1) < len(self.cx) else ind  #Increment index - search for closest waypoint
-                
-                #if (ind+1)>=len(self.cx):
-                #    print('index error 4')
-                    
                 
                 distance_this_index = distance_next_index
             self.old_nearest_point_index = ind  
@@ -175,6 +160,9 @@ class environment():
 
 
     def pure_pursuit_steer_control(self, x, y, theta, v, pind):
+        '''
+        More complex pure pursuit for multiple waypoint/ path following
+        '''
         ind, Lf = self.search_target_waypoint(x, y, v)
 
         if pind >= ind:
@@ -189,10 +177,23 @@ class environment():
             ind = len(self.cx) - 1
 
         alpha = math.atan2(ty - y, tx - x) - theta
-
         delta = math.atan2(2.0 * self.wheelbase * math.sin(alpha) / Lf, 1.0)
 
         return delta, ind
+
+
+    def pure_pursuit(self, waypoint):
+        '''
+        A simple pure pursuit implementation for single waypoint following
+        Based on formulas in the youtube video:
+        https://www.youtube.com/watch?v=zMdoLO4kRKg&t=73s
+        '''
+        
+        ld = math.sqrt((waypoint[0]-self.x)**2 + (waypoint[1]-self.y)**2)
+        alpha = math.atan2(waypoint[1] - self.y, waypoint[0] - self.x) - self.theta
+        delta_ref = math.atan2(2.0 * self.wheelbase * math.sin(alpha) / ld, 1.0)
+
+        return delta_ref
 
 
     def getReward(self):
@@ -215,15 +216,6 @@ class environment():
             return True
         else:
             return False
-
-    def pure_pursuit(self, waypoint):
-        "https://www.youtube.com/watch?v=zMdoLO4kRKg&t=73s"
-        
-        ld = math.sqrt((waypoint[0]-self.x)**2 + (waypoint[1]-self.y)**2)
-        alpha = math.atan2(waypoint[1] - self.y, waypoint[0] - self.x) - self.theta
-        delta_ref = math.atan2(2.0 * self.wheelbase * math.sin(alpha) / ld, 1.0)
-
-        return delta_ref
     
     def control_system(self, delta, delta_ref, v, v_ref):
         '''
