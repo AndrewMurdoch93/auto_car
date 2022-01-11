@@ -127,25 +127,45 @@ class trainingLoop():
                 self.local_path_history = pickle.load(infile)
             infile.close()
 
-        for sh, ah, lph in zip(self.state_history, self.action_history, self.local_path_history):
-            plt.cla()
-            # Stop the simulation with the esc key.
-            plt.gcf().canvas.mpl_connect('key_release_event', lambda event: [exit(0) if event.key == 'escape' else None])
-            plt.arrow(sh[0], sh[1], 0.1*math.cos(sh[2]), 0.1*math.sin(sh[2]), head_length=0.04,head_width=0.02, ec='None', fc='blue')
-            plt.arrow(sh[0], sh[1], 0.1*math.cos(sh[2]+sh[3]), 0.1*math.sin(sh[2]+sh[3]), head_length=0.04,head_width=0.02, ec='None', fc='red')
-            plt.plot(sh[0], sh[1], 'o')
-            plt.plot(ah[0], ah[1], 'x')
-            plt.plot(lph[0], lph[1], 'g')
-            plt.plot([1.5, 2.5, 2.5, 1.5, 1.5], [1.5, 1.5, 2.5, 2.5, 1.5], 'r')
-            plt.legend(["position", "waypoint", "local path", "goal area", "heading", "steering angle"])
-            plt.xlabel('x coordinate')
-            plt.ylabel('y coordinate')
-            plt.xlim([-0.5,3])
-            plt.ylim([-0.5,3])
-            plt.grid(True)
-            plt.title('Episode history')
-            plt.pause(0.01)
-                
+        if self.env.local_path==True:
+            for sh, ah, lph in zip(self.state_history, self.action_history, self.local_path_history):
+                plt.cla()
+                # Stop the simulation with the esc key.
+                plt.gcf().canvas.mpl_connect('key_release_event', lambda event: [exit(0) if event.key == 'escape' else None])
+                plt.arrow(sh[0], sh[1], 0.1*math.cos(sh[2]), 0.1*math.sin(sh[2]), head_length=0.04,head_width=0.02, ec='None', fc='blue')
+                plt.arrow(sh[0], sh[1], 0.1*math.cos(sh[2]+sh[3]), 0.1*math.sin(sh[2]+sh[3]), head_length=0.04,head_width=0.02, ec='None', fc='red')
+                plt.plot(sh[0], sh[1], 'o')
+                plt.plot(ah[0], ah[1], 'x')
+                plt.plot(lph[0], lph[1], 'g')
+                plt.plot([1.5, 2.5, 2.5, 1.5, 1.5], [1.5, 1.5, 2.5, 2.5, 1.5], 'r')
+                plt.legend(["position", "waypoint", "local path", "goal area", "heading", "steering angle"])
+                plt.xlabel('x coordinate')
+                plt.ylabel('y coordinate')
+                plt.xlim([-0.5,3])
+                plt.ylim([-0.5,3])
+                plt.grid(True)
+                plt.title('Episode history')
+                plt.pause(0.01)
+        else:
+            for sh, ah in zip(self.state_history, self.action_history):
+                plt.cla()
+                # Stop the simulation with the esc key.
+                plt.gcf().canvas.mpl_connect('key_release_event', lambda event: [exit(0) if event.key == 'escape' else None])
+                plt.arrow(sh[0], sh[1], 0.1*math.cos(sh[2]), 0.1*math.sin(sh[2]), head_length=0.04,head_width=0.02, ec='None', fc='blue')
+                plt.arrow(sh[0], sh[1], 0.1*math.cos(sh[2]+sh[3]), 0.1*math.sin(sh[2]+sh[3]), head_length=0.04,head_width=0.02, ec='None', fc='red')
+                plt.plot(sh[0], sh[1], 'o')
+                plt.plot(ah[0], ah[1], 'x')
+                plt.plot([1.5, 2.5, 2.5, 1.5, 1.5], [1.5, 1.5, 2.5, 2.5, 1.5], 'r')
+                plt.legend(["position", "waypoint", "goal area", "heading", "steering angle"])
+                plt.xlabel('x coordinate')
+                plt.ylabel('y coordinate')
+                plt.xlim([-0.5,3])
+                plt.ylim([-0.5,3])
+                plt.grid(True)
+                plt.title('Episode history')
+                plt.pause(0.01)
+
+                    
 
 if __name__=='__main__':
     
