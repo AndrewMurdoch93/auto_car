@@ -8,22 +8,32 @@ class environment():
 
     def __init__(self, sim_conf):
         self.sim_conf = sim_conf
-        self.local_path=True
+        self.local_path=False
         self.reset()
 
     def reset(self):
+             
         self.num_actions = 8
         
-        self.x = 0
-        self.y = 0
-        self.theta = 0 
+        self.goals = [[1,0.5], [2,1], [1,2], [0.5,1]]
+        self.current_goal = 0
+        self.s=0.2
+        
+        self.x = (np.random.rand(1)*0.2)[0]
+        self.y = (np.random.rand(1)*0.2)[0]
+        self.theta = (np.random.rand(1)*(math.pi/4))[0] 
+        
         self.v = 0    
         self.delta = 0
-        self.state = [self.x, self.y, self.theta, self.delta, self.v]
+        self.x_to_goal = self.goals[self.current_goal][0] - self.x
+        self.y_to_goal = self.goals[self.current_goal][1] - self.y
+        self.state = [self.x, self.y, self.theta, self.delta, self.v, self.x_to_goal, self.y_to_goal]
         self.state_history = []
         self.action_history = []
         self.local_path_history = []
+        self.goal_history = []
         self.ind_history = []
+        
         self.theta_dot = 0      #car rate of change of heading
         self.delta_dot = 0
         
@@ -38,8 +48,21 @@ class environment():
         self.max_a = self.sim_conf.max_a
         self.wheelbase = self.sim_conf.l_f + self.sim_conf.l_r        #Distance between rear and front wheels  
 
-        self.goal = [2,2]
+        self.upper_bound = 2.5
+        self.lower_bound = -0.5
+        self.right_bound = 2.5
+        self.left_bound = -0.5
+        
+        #self.goal1 = [2,0.5]
+        #self.goal1_reached = False
+        #self.goal2 = [2,2]
+        #self.goal2_reached = False
+        
+        self.out_of_bounds = False
+        self.max_steps_reached = False
+        
         self.steps = 0
+        self.max_steps = 300
 
     def take_action(self, act):
         reward = 0
@@ -53,11 +76,8 @@ class environment():
                 delta_ref = self.pure_pursuit(waypoint)
                 delta_dot, a = self.control_system(self.delta, delta_ref, self.v, v_ref)
                 self.update_kinematic_state(a, delta_dot)
-                #distance_to_waypoint = math.sqrt((self.x-waypoint[0])**2 + (self.y-waypoint[1])**2)
                 self.steps += 1
-                self.state = [self.x, self.y, self.theta, self.delta, self.v]
-                self.state_history.append(self.state[:])
-                self.action_history.append(waypoint)
+                self.save_state(waypoint)
                 reward += self.getReward()
                 done = self.isEnd()
                 if done==True:
@@ -75,16 +95,13 @@ class environment():
             i=0
             while (lastIndex > target_index) and i<10:
 
-
                 delta_ref, target_index = self.pure_pursuit_steer_control(self.x, self.y, self.theta, self.v, target_index)
                 delta_dot, a = self.control_system(self.delta, delta_ref, self.v, v_ref)
                 self.update_kinematic_state(a, delta_dot)
                 
                 self.steps += 1
 
-                self.state = [self.x, self.y, self.theta, self.delta, self.v]
-                self.state_history.append(self.state[:])
-                self.action_history.append(waypoint)
+                self.save_state(waypoint)
                 self.local_path_history.append([cx, cy][:])
                 
                 reward += self.getReward()
@@ -94,6 +111,14 @@ class environment():
    
                 i+=1
             return self.state, reward, done
+    
+    def save_state(self, waypoint):
+        
+        self.state = [self.x, self.y, self.theta, self.delta, self.v, self.x_to_goal, self.y_to_goal]
+        self.state_history.append(self.state[:])
+        self.action_history.append(waypoint)
+        self.goal_history.append(self.goals[self.current_goal])
+    
     
     def convert_action_to_coord(self, strategy, action):
         if strategy=='global':
@@ -197,22 +222,36 @@ class environment():
 
 
     def getReward(self):
-        if (self.x>self.goal[0]-0.5 and self.x<self.goal[0]+0.5) and (self.y>self.goal[1]-0.5 and self.y<self.goal[1]+0.5):
-            return 100
-        elif self.x>2 or self.x<-0.2 or self.y>2 or self.y<-0.2:        
-            return -100
-        elif self.steps >=300:
-            return -100
+        
+
+        if (self.x>self.goals[self.current_goal][0]-self.s and self.x<self.goals[self.current_goal][0]+self.s) and (self.y>self.goals[self.current_goal][1]-self.s and self.y<self.goals[self.current_goal][1]+self.s):
+            self.current_goal+=1
+            return 1
+
+        #if (self.x>self.goal1[0]-self.s and self.x<self.goal1[0]+self.s) and (self.y>self.goal1[1]-self.s and self.y<self.goal1[1]+self.s) and self.goal1_reached==False:
+        #    self.goal1_reached=True
+        #    return 1
+        
+        #elif (self.x>self.goal2[0]-self.s and self.x<self.goal2[0]+self.s) and (self.y>self.goal2[1]-self.s and self.y<self.goal2[1]+self.s) and self.goal1_reached==True and self.goal2_reached==False:
+        #    self.goal2_reached=True
+        #    return 1
+            
+        elif self.x>self.right_bound or self.x<self.left_bound or self.y>self.upper_bound or self.y<self.lower_bound:        
+            self.out_of_bounds=True
+            return -1
+        
+        elif self.steps >= self.max_steps:
+            self.max_steps_reached=True
+            return 0
+        
         else:
-            return -0.1
+            return -0.0001
             
     
     def isEnd(self):
-        if (self.x>self.goal[0]-0.5 and self.x<self.goal[0]+0.5) and (self.y>self.goal[1]-0.5 and self.y<self.goal[1]+0.5):
+        if self.current_goal==(len(self.goals)):
             return True
-        elif self.x>2 or self.x<-0.2 or self.y>2 or self.y<-0.2:       
-            return True
-        elif self.steps >=300:
+        elif self.out_of_bounds==True:       
             return True
         else:
             return False
@@ -259,6 +298,10 @@ class environment():
         #Update (rear axle) position
         self.x = self.x + self.v * np.cos(self.theta) * self.dt
         self.y = self.y + self.v * np.sin(self.theta) * self.dt
+        
+        #Update 
+        self.x_to_goal = self.goals[self.current_goal][0] - self.x
+        self.y_to_goal = self.goals[self.current_goal][1] - self.y
         
         #Update car heading angle
         self.theta_dot = (self.v / self.wheelbase) * np.tan(self.delta)  #rate of change of heading

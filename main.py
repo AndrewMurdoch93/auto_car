@@ -27,15 +27,15 @@ class trainingLoop():
         self.gamma=0.99
         self.epsilon = 1
         self.eps_end = 0.01
-        self.eps_dec = 1e-4
+        self.eps_dec = 5e-5
         self.batch_size = 64
         self.lr = 0.001
-        self.max_episodes = 1000
+        self.max_episodes = 10000
         self.max_mem_size = 100000
 
         #Agent constraints
         self.n_actions = self.env.num_actions
-        self.input_dims = 3
+        self.input_dims = 5
 
     def train(self, save_agent):
         
@@ -50,7 +50,8 @@ class trainingLoop():
             
             #Reset the environment every episode
             self.env.reset()
-            state = [self.env.state[0], self.env.state[1], self.env.state[2]]  #Records starting state
+            state = [self.env.state[0], self.env.state[1], self.env.state[2], self.env.state[5], self.env.state[6]]  #Records starting state
+            #state = [self.env.state[0], self.env.state[1], self.env.state[2]]
             done = False
             score=0 #Initialise score counter for every episode
 
@@ -59,14 +60,19 @@ class trainingLoop():
                 
                 action = self.agent.choose_action(state)    #Select an action
                 observation, reward, done = self.env.take_action(action) #Environment executes action
-                next_state = [observation[0], observation[1], observation[2]]  #Prune and record next state
+                next_state = [observation[0], observation[1], observation[2], observation[5], observation[6]]  #Prune and record next state
                 score += reward 
                 self.agent.store_transition(state, action, reward, next_state, done)
                 self.agent.learn()  #Learn using state transition history
                 state = next_state  #Update the state
             
             scores.append(score)
-            avg_score = np.mean(scores[-100:])  
+            avg_score = np.mean(scores[-100:])
+
+            if save_agent==True and episode%1000==0:
+                outfile=open(self.agent_file_name, 'wb')
+                pickle.dump(self.agent, outfile)
+                outfile.close()  
 
             print('episode ', episode, 'score %.2f' % score, 'average score %.2f' % avg_score, 'epsilon %.2f' % self.agent.epsilon)
         
@@ -91,7 +97,7 @@ class trainingLoop():
         score=0
 
         while not done:
-            action = self.agent.choose_action([state[0], state[1], state[2]])
+            action = self.agent.choose_action([state[0], state[1], state[2], state[5], state[6]])
             next_state, reward, done = self.env.take_action(action)
             score += reward
             state = next_state
@@ -101,6 +107,7 @@ class trainingLoop():
             outfile=open(self.history_file_name, 'wb')
             pickle.dump(self.env.state_history, outfile)
             pickle.dump(self.env.action_history, outfile)
+            pickle.dump(self.env.goal_history, outfile)
             if self.env.local_path==True:
                 pickle.dump(self.env.local_path_history, outfile)
             outfile.close()
@@ -111,6 +118,7 @@ class trainingLoop():
         if display==True:
             self.state_history = self.env.state_history
             self.action_history = self.env.action_history
+            self.goal_history = self.env.goal_history
             if self.env.local_path==True:
                 self.local_path_history = self.env.local_path_history
             
@@ -123,6 +131,7 @@ class trainingLoop():
             infile = open(self.history_file_name, 'rb')
             self.state_history = pickle.load(infile)
             self.action_history = pickle.load(infile)
+            self.goal_history = pickle.load(infile)
             if self.env.local_path==True:
                 self.local_path_history = pickle.load(infile)
             infile.close()
@@ -147,7 +156,7 @@ class trainingLoop():
                 plt.title('Episode history')
                 plt.pause(0.01)
         else:
-            for sh, ah in zip(self.state_history, self.action_history):
+            for sh, ah, gh in zip(self.state_history, self.action_history, self.goal_history):
                 plt.cla()
                 # Stop the simulation with the esc key.
                 plt.gcf().canvas.mpl_connect('key_release_event', lambda event: [exit(0) if event.key == 'escape' else None])
@@ -155,8 +164,11 @@ class trainingLoop():
                 plt.arrow(sh[0], sh[1], 0.1*math.cos(sh[2]+sh[3]), 0.1*math.sin(sh[2]+sh[3]), head_length=0.04,head_width=0.02, ec='None', fc='red')
                 plt.plot(sh[0], sh[1], 'o')
                 plt.plot(ah[0], ah[1], 'x')
-                plt.plot([1.5, 2.5, 2.5, 1.5, 1.5], [1.5, 1.5, 2.5, 2.5, 1.5], 'r')
-                plt.legend(["position", "waypoint", "goal area", "heading", "steering angle"])
+                #plt.plot([self.env.goal1[0]-self.env.s, self.env.goal1[0]+self.env.s, self.env.goal1[0]+self.env.s, self.env.goal1[0]-self.env.s, self.env.goal1[0]-self.env.s], [self.env.goal1[1]-self.env.s, self.env.goal1[1]-self.env.s, self.env.goal1[1]+self.env.s, self.env.goal1[1]+self.env.s, self.env.goal1[1]-self.env.s], 'r')
+                #plt.plot([self.env.goal2[0]-self.env.s, self.env.goal2[0]+self.env.s, self.env.goal2[0]+self.env.s, self.env.goal2[0]-self.env.s, self.env.goal2[0]-self.env.s], [self.env.goal2[1]-self.env.s, self.env.goal2[1]-self.env.s, self.env.goal2[1]+self.env.s, self.env.goal2[1]+self.env.s, self.env.goal2[1]-self.env.s], 'r')
+                #plt.plot([self.env.goals[self.env.current_goal][0]-self.env.s, self.env.goals[self.env.current_goal][0]+self.env.s, self.env.goals[self.env.current_goal][0]+self.env.s, self.env.goals[self.env.current_goal][0]-self.env.s, self.env.goals[self.env.current_goal][0]-self.env.s], [self.env.goals[self.env.current_goal][1]-self.env.s, self.env.goals[self.env.current_goal][1]-self.env.s, self.env.goals[self.env.current_goal][1]+self.env.s, self.env.goals[self.env.current_goal][1]+self.env.s, self.env.goals[self.env.current_goal][1]-self.env.s], 'r')
+                plt.plot([gh[0]-self.env.s, gh[0]+self.env.s, gh[0]+self.env.s, gh[0]-self.env.s, gh[0]-self.env.s], [gh[1]-self.env.s, gh[1]-self.env.s, gh[1]+self.env.s, gh[1]+self.env.s, gh[1]-self.env.s], 'r')
+                #plt.legend(["position", "waypoint", "goal area", "heading", "steering angle"])
                 plt.xlabel('x coordinate')
                 plt.ylabel('y coordinate')
                 plt.xlim([-0.5,3])
@@ -169,6 +181,7 @@ class trainingLoop():
 
 if __name__=='__main__':
     
-    a = trainingLoop(agent_name='neat_agent')
+    a = trainingLoop(agent_name='multiple_goals_agent')
     #a.train(save_agent=True)
-    a.test(save_history=True, display=True, verbose=True)
+    #a.test(save_history=True, display=True, verbose=True)
+    a.display_history()
