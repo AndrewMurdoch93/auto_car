@@ -15,7 +15,15 @@ class environment():
              
         self.num_actions = 8
         
-        self.goals = [[1,0.5], [2,1], [1,2], [0.5,1]]
+        theta=np.linspace(0, 2*math.pi, 9)
+        R=1
+        goal_xs = 1+np.cos(theta-math.pi/2)
+        goal_ys = 1+np.sin(theta-math.pi/2)
+        self.goals = []
+
+        for gx, gy in zip(goal_xs, goal_ys):
+            self.goals.append([gx, gy])
+        
         self.current_goal = 0
         self.s=0.2
         
@@ -48,21 +56,16 @@ class environment():
         self.max_a = self.sim_conf.max_a
         self.wheelbase = self.sim_conf.l_f + self.sim_conf.l_r        #Distance between rear and front wheels  
 
-        self.upper_bound = 2.5
-        self.lower_bound = -0.5
-        self.right_bound = 2.5
-        self.left_bound = -0.5
-        
-        #self.goal1 = [2,0.5]
-        #self.goal1_reached = False
-        #self.goal2 = [2,2]
-        #self.goal2_reached = False
+        self.upper_bound = 3
+        self.lower_bound = -1
+        self.right_bound = 3
+        self.left_bound = -1
         
         self.out_of_bounds = False
         self.max_steps_reached = False
         
         self.steps = 0
-        self.max_steps = 300
+        self.max_steps = 1000
 
     def take_action(self, act):
         reward = 0
@@ -156,7 +159,7 @@ class environment():
             #Search for closest waypoint after ind
             ind = self.old_nearest_point_index  
             self.ind_history.append(ind)
-         
+        
             distance_this_index = functions.distance_between_points(self.cx[ind], x, self.cy[ind], y)   
             
             while True:
@@ -225,7 +228,7 @@ class environment():
         
 
         if (self.x>self.goals[self.current_goal][0]-self.s and self.x<self.goals[self.current_goal][0]+self.s) and (self.y>self.goals[self.current_goal][1]-self.s and self.y<self.goals[self.current_goal][1]+self.s):
-            self.current_goal+=1
+            self.current_goal = (self.current_goal+1)
             return 1
 
         #if (self.x>self.goal1[0]-self.s and self.x<self.goal1[0]+self.s) and (self.y>self.goal1[1]-self.s and self.y<self.goal1[1]+self.s) and self.goal1_reached==False:
@@ -252,6 +255,8 @@ class environment():
         if self.current_goal==(len(self.goals)):
             return True
         elif self.out_of_bounds==True:       
+            return True
+        elif self.max_steps_reached==True:
             return True
         else:
             return False

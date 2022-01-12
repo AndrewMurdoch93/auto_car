@@ -31,7 +31,7 @@ class trainingLoop():
         self.batch_size = 64
         self.lr = 0.001
         self.max_episodes = 10000
-        self.max_mem_size = 100000
+        self.max_mem_size = 1000000
 
         #Agent constraints
         self.n_actions = self.env.num_actions
@@ -137,7 +137,7 @@ class trainingLoop():
             infile.close()
 
         if self.env.local_path==True:
-            for sh, ah, lph in zip(self.state_history, self.action_history, self.local_path_history):
+            for sh, ah, gh, lph in zip(self.state_history, self.action_history, self.goal_history, self.local_path_history):
                 plt.cla()
                 # Stop the simulation with the esc key.
                 plt.gcf().canvas.mpl_connect('key_release_event', lambda event: [exit(0) if event.key == 'escape' else None])
@@ -146,7 +146,7 @@ class trainingLoop():
                 plt.plot(sh[0], sh[1], 'o')
                 plt.plot(ah[0], ah[1], 'x')
                 plt.plot(lph[0], lph[1], 'g')
-                plt.plot([1.5, 2.5, 2.5, 1.5, 1.5], [1.5, 1.5, 2.5, 2.5, 1.5], 'r')
+                plt.plot([gh[0]-self.env.s, gh[0]+self.env.s, gh[0]+self.env.s, gh[0]-self.env.s, gh[0]-self.env.s], [gh[1]-self.env.s, gh[1]-self.env.s, gh[1]+self.env.s, gh[1]+self.env.s, gh[1]-self.env.s], 'r')
                 plt.legend(["position", "waypoint", "local path", "goal area", "heading", "steering angle"])
                 plt.xlabel('x coordinate')
                 plt.ylabel('y coordinate')
@@ -164,9 +164,6 @@ class trainingLoop():
                 plt.arrow(sh[0], sh[1], 0.1*math.cos(sh[2]+sh[3]), 0.1*math.sin(sh[2]+sh[3]), head_length=0.04,head_width=0.02, ec='None', fc='red')
                 plt.plot(sh[0], sh[1], 'o')
                 plt.plot(ah[0], ah[1], 'x')
-                #plt.plot([self.env.goal1[0]-self.env.s, self.env.goal1[0]+self.env.s, self.env.goal1[0]+self.env.s, self.env.goal1[0]-self.env.s, self.env.goal1[0]-self.env.s], [self.env.goal1[1]-self.env.s, self.env.goal1[1]-self.env.s, self.env.goal1[1]+self.env.s, self.env.goal1[1]+self.env.s, self.env.goal1[1]-self.env.s], 'r')
-                #plt.plot([self.env.goal2[0]-self.env.s, self.env.goal2[0]+self.env.s, self.env.goal2[0]+self.env.s, self.env.goal2[0]-self.env.s, self.env.goal2[0]-self.env.s], [self.env.goal2[1]-self.env.s, self.env.goal2[1]-self.env.s, self.env.goal2[1]+self.env.s, self.env.goal2[1]+self.env.s, self.env.goal2[1]-self.env.s], 'r')
-                #plt.plot([self.env.goals[self.env.current_goal][0]-self.env.s, self.env.goals[self.env.current_goal][0]+self.env.s, self.env.goals[self.env.current_goal][0]+self.env.s, self.env.goals[self.env.current_goal][0]-self.env.s, self.env.goals[self.env.current_goal][0]-self.env.s], [self.env.goals[self.env.current_goal][1]-self.env.s, self.env.goals[self.env.current_goal][1]-self.env.s, self.env.goals[self.env.current_goal][1]+self.env.s, self.env.goals[self.env.current_goal][1]+self.env.s, self.env.goals[self.env.current_goal][1]-self.env.s], 'r')
                 plt.plot([gh[0]-self.env.s, gh[0]+self.env.s, gh[0]+self.env.s, gh[0]-self.env.s, gh[0]-self.env.s], [gh[1]-self.env.s, gh[1]-self.env.s, gh[1]+self.env.s, gh[1]+self.env.s, gh[1]-self.env.s], 'r')
                 #plt.legend(["position", "waypoint", "goal area", "heading", "steering angle"])
                 plt.xlabel('x coordinate')
@@ -181,7 +178,7 @@ class trainingLoop():
 
 if __name__=='__main__':
     
-    a = trainingLoop(agent_name='multiple_goals_agent')
+    a = trainingLoop(agent_name='circle_goals_agent')
     #a.train(save_agent=True)
-    #a.test(save_history=True, display=True, verbose=True)
-    a.display_history()
+    a.test(save_history=True, display=True, verbose=True)
+    #a.display_history()

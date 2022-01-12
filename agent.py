@@ -42,7 +42,7 @@ class agent():
         self.iter_cntr = 0
         self.replace_target = 100
 
-        self.Q_eval = deepQNetwork(lr, n_actions=n_actions, input_dims=input_dims, fc1_dims=64, fc2_dims=64)
+        self.Q_eval = deepQNetwork(lr, n_actions=n_actions, input_dims=input_dims, fc1_dims=256, fc2_dims=256)
 
         self.state_memory = np.zeros((self.mem_size, input_dims), dtype=np.float32)
         self.next_state_memory = np.zeros((self.mem_size, input_dims), dtype=np.float32)
