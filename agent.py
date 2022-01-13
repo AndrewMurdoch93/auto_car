@@ -84,6 +84,14 @@ class agent():
 
         return action
 
+
+    def decrease_epsilon(self):
+        if self.epsilon > self.eps_min:
+            self.epsilon = self.epsilon - self.eps_dec
+        else:
+            self.epsilon = self.eps_min
+
+    
     def learn(self):
         if self.mem_cntr < self.batch_size:
             return
@@ -102,10 +110,5 @@ class agent():
         self.Q_eval.optimizer.step()
 
         self.iter_cntr += 1
-
-        if self.epsilon > self.eps_min:
-            self.epsilon = self.epsilon - self.eps_dec
-        else:
-            self.epsilon = self.eps_min
 
             

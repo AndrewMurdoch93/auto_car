@@ -11,8 +11,8 @@ class environment():
         self.local_path=False
         self.reset()
 
-    def reset(self):
-             
+    def reset(self, save_history=False):
+        self.save_history=save_history   
         self.num_actions = 8
         
         theta=np.linspace(0, 2*math.pi, 9)
@@ -27,21 +27,21 @@ class environment():
         self.current_goal = 0
         self.s=0.2
         
-        self.x = (np.random.rand(1)*0.2)[0]
-        self.y = (np.random.rand(1)*0.2)[0]
-        self.theta = (np.random.rand(1)*(math.pi/4))[0] 
+        self.x = 0
+        self.y = 0
+        self.theta = 0
+
+        #self.x = (np.random.rand(1)*0.2)[0]
+        #self.y = (np.random.rand(1)*0.2)[0]
+        #self.theta = (np.random.rand(1)*(math.pi/4))[0] 
         
         self.v = 0    
         self.delta = 0
         self.x_to_goal = self.goals[self.current_goal][0] - self.x
         self.y_to_goal = self.goals[self.current_goal][1] - self.y
-        self.state = [self.x, self.y, self.theta, self.delta, self.v, self.x_to_goal, self.y_to_goal]
-        self.state_history = []
-        self.action_history = []
-        self.local_path_history = []
-        self.goal_history = []
-        self.ind_history = []
-        
+        self.old_d_goal = np.linalg.norm(np.array([self.x_to_goal, self.y_to_goal]))
+        self.new_d_goal = np.linalg.norm(np.array([self.x_to_goal, self.y_to_goal]))
+
         self.theta_dot = 0      #car rate of change of heading
         self.delta_dot = 0
         
@@ -60,9 +60,24 @@ class environment():
         self.lower_bound = -1
         self.right_bound = 3
         self.left_bound = -1
+
+        self.state = [self.x, self.y, self.theta, self.delta, self.v]
+        self.observation = [(self.x-self.left_bound)/(self.right_bound-self.left_bound), (self.y-self.lower_bound)/(self.upper_bound-self.lower_bound), (self.theta+math.pi)/(2*math.pi), (self.x_to_goal-0.5*(self.right_bound-self.left_bound))/(self.right_bound-self.left_bound), (self.y_to_goal-0.5*(self.upper_bound-self.lower_bound))/(self.upper_bound-self.lower_bound)]
+        
+        self.state_history = []
+        self.action_history = []
+        self.local_path_history = []
+        self.goal_history = []
+        self.ind_history = []
+        self.observation_history = []
+        self.reward_history = []
+
+        self.state_history.append(self.state)
+        self.observation_history.append(self.observation)
         
         self.out_of_bounds = False
         self.max_steps_reached = False
+        self.goal_reached = False
         
         self.steps = 0
         self.max_steps = 1000
@@ -80,13 +95,11 @@ class environment():
                 delta_dot, a = self.control_system(self.delta, delta_ref, self.v, v_ref)
                 self.update_kinematic_state(a, delta_dot)
                 self.steps += 1
-                self.save_state(waypoint)
-                reward += self.getReward()
+                reward += self.getReward() 
+                self.save_state(waypoint, reward)
                 done = self.isEnd()
                 if done==True:
                     break
-
-            return self.state, reward, done
 
         else:
             cx = (((np.arange(0.1, 1, 0.01))*(waypoint[0] - self.x)) + self.x).tolist()
@@ -104,7 +117,7 @@ class environment():
                 
                 self.steps += 1
 
-                self.save_state(waypoint)
+                self.save_state(waypoint, reward)
                 self.local_path_history.append([cx, cy][:])
                 
                 reward += self.getReward()
@@ -113,14 +126,20 @@ class environment():
                     break
    
                 i+=1
-            return self.state, reward, done
+  
+        return self.observation, reward, done
     
-    def save_state(self, waypoint):
+    def save_state(self, waypoint, reward):
         
-        self.state = [self.x, self.y, self.theta, self.delta, self.v, self.x_to_goal, self.y_to_goal]
-        self.state_history.append(self.state[:])
-        self.action_history.append(waypoint)
-        self.goal_history.append(self.goals[self.current_goal])
+        self.state = [self.x, self.y, self.theta, self.delta, self.v]
+        self.observation = [(self.x-self.left_bound)/(self.right_bound-self.left_bound), (self.y-self.lower_bound)/(self.upper_bound-self.lower_bound), (self.theta+math.pi)/(2*math.pi), (self.x_to_goal+0.5*(self.right_bound-self.left_bound))/(self.right_bound-self.left_bound), (self.y_to_goal+0.5*(self.upper_bound-self.lower_bound))/(self.upper_bound-self.lower_bound)]
+        
+        if self.save_history==True:
+            self.state_history.append(self.state[:])
+            self.action_history.append(waypoint)
+            self.goal_history.append(self.goals[self.current_goal])
+            self.observation_history.append(self.observation)
+            self.reward_history.append(reward)
     
     
     def convert_action_to_coord(self, strategy, action):
@@ -131,6 +150,9 @@ class environment():
             waypoint_relative_angle = self.theta+math.pi/2-math.pi*(action/8)
             waypoint = [self.x + math.cos(waypoint_relative_angle), self.y + math.sin(waypoint_relative_angle)]
         
+        if strategy == 'waypoint':
+            waypoint = action
+
         return waypoint
 
     def record_waypoints(self, cx, cy):
@@ -225,19 +247,11 @@ class environment():
 
 
     def getReward(self):
-        
 
         if (self.x>self.goals[self.current_goal][0]-self.s and self.x<self.goals[self.current_goal][0]+self.s) and (self.y>self.goals[self.current_goal][1]-self.s and self.y<self.goals[self.current_goal][1]+self.s):
-            self.current_goal = (self.current_goal+1)
+            self.current_goal = (self.current_goal+1)%len(self.goals)
+            self.goal_reached = True
             return 1
-
-        #if (self.x>self.goal1[0]-self.s and self.x<self.goal1[0]+self.s) and (self.y>self.goal1[1]-self.s and self.y<self.goal1[1]+self.s) and self.goal1_reached==False:
-        #    self.goal1_reached=True
-        #    return 1
-        
-        #elif (self.x>self.goal2[0]-self.s and self.x<self.goal2[0]+self.s) and (self.y>self.goal2[1]-self.s and self.y<self.goal2[1]+self.s) and self.goal1_reached==True and self.goal2_reached==False:
-        #    self.goal2_reached=True
-        #    return 1
             
         elif self.x>self.right_bound or self.x<self.left_bound or self.y>self.upper_bound or self.y<self.lower_bound:        
             self.out_of_bounds=True
@@ -245,12 +259,20 @@ class environment():
         
         elif self.steps >= self.max_steps:
             self.max_steps_reached=True
-            return 0
+            return -1
         
+        elif self.current_goal>len(self.goals):
+            return 1
+        
+        elif self.goal_reached == True:
+            self.goal_reached=False
+            return 0
+
         else:
-            return -0.0001
+           goal_progress = self.old_d_goal-self.new_d_goal
+           return goal_progress
+        
             
-    
     def isEnd(self):
         if self.current_goal==(len(self.goals)):
             return True
@@ -300,6 +322,8 @@ class environment():
             delta_dot: rate of change of steering angle
         '''
 
+        self.old_d_goal = self.new_d_goal
+        
         #Update (rear axle) position
         self.x = self.x + self.v * np.cos(self.theta) * self.dt
         self.y = self.y + self.v * np.sin(self.theta) * self.dt
@@ -308,6 +332,8 @@ class environment():
         self.x_to_goal = self.goals[self.current_goal][0] - self.x
         self.y_to_goal = self.goals[self.current_goal][1] - self.y
         
+        self.new_d_goal = np.linalg.norm(np.array([self.x_to_goal, self.y_to_goal]))
+
         #Update car heading angle
         self.theta_dot = (self.v / self.wheelbase) * np.tan(self.delta)  #rate of change of heading
         dtheta = self.theta_dot * self.dt   #change in heading angle
@@ -326,32 +352,36 @@ class environment():
 def test_environment():
 
     env = environment(functions.load_config(sys.path[0], "config"))
-    n = 1
-    state_history = []
-    while n<=1:
+    env.reset(save_history=True)
+    done=False
+    
+    while done==False:
 
-        #action = int(input())
-        action = 7
+        action = env.goals[env.current_goal]
         state, reward, done = env.take_action(action)
-        #print(f"state = {state}")
-        #print(f"reward =  {reward}")
-        #print(f"done = {done}")
-        #print(f'Position = {env.position}')
-        #print(f'State = {env.state}')
 
+        np.sum(np.array(env.reward_history))
         if done==True:
-            n+=1
-            print(f"n = {n}")
 
-            plt.plot([x[0] for x in env.state_history], [x[1] for x in env.state_history])
-            plt.plot(env.local_path_history[0][0], env.local_path_history[0][1])
-            plt.legend(["car trajectory", "local path"])
-            
-            plt.xlim([-0.5,2.5])
-            plt.ylim([-0.5, 2.5])
-            plt.show()
-            pass
+            for sh, ah, gh, rh in zip(env.state_history, env.action_history, env.goal_history, env.reward_history):
+                print('reward at time step = ', rh)
+                plt.cla()
+                # Stop the simulation with the esc key.
+                plt.gcf().canvas.mpl_connect('key_release_event', lambda event: [exit(0) if event.key == 'escape' else None])
+                plt.arrow(sh[0], sh[1], 0.1*math.cos(sh[2]), 0.1*math.sin(sh[2]), head_length=0.04,head_width=0.02, ec='None', fc='blue')
+                plt.arrow(sh[0], sh[1], 0.1*math.cos(sh[2]+sh[3]), 0.1*math.sin(sh[2]+sh[3]), head_length=0.04,head_width=0.02, ec='None', fc='red')
+                plt.plot(sh[0], sh[1], 'o')
+                plt.plot(ah[0], ah[1], 'x')
+                plt.plot([gh[0]-env.s, gh[0]+env.s, gh[0]+env.s, gh[0]-env.s, gh[0]-env.s], [gh[1]-env.s, gh[1]-env.s, gh[1]+env.s, gh[1]+env.s, gh[1]-env.s], 'r')
+                #plt.legend(["position", "waypoint", "goal area", "heading", "steering angle"])
+                plt.xlabel('x coordinate')
+                plt.ylabel('y coordinate')
+                plt.xlim([-0.5,3])
+                plt.ylim([-0.5,3])
+                plt.grid(True)
+                plt.title('Episode history')
+                plt.pause(0.01)
 
-#test_environment()
+test_environment()
 
         
