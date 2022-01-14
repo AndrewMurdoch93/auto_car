@@ -3,6 +3,7 @@ import math
 import functions
 import sys
 import matplotlib.pyplot as plt
+from PIL import Image
 
 class environment():
 
@@ -12,7 +13,10 @@ class environment():
         self.reset()
 
     def reset(self, save_history=False):
-        self.save_history=save_history   
+        
+        self.occupancy_grid, self.map_height, self.map_width, self.res = functions.map_generator(map_name='berlin')
+        
+        self.save_history = save_history   
         self.num_actions = 8
         
         theta=np.linspace(0, 2*math.pi, 9)
@@ -23,13 +27,15 @@ class environment():
 
         for gx, gy in zip(goal_xs, goal_ys):
             self.goals.append([gx, gy])
+
+        self.goals = [[17,10], [18,14], [20, 19], [19.5,22], [16,26], [10,26]]
         
         self.current_goal = 0
         self.s=0.2
         
-        self.x = 0
-        self.y = 0
-        self.theta = 0
+        self.x = 16
+        self.y = 2
+        self.theta = math.pi/4
 
         #self.x = (np.random.rand(1)*0.2)[0]
         #self.y = (np.random.rand(1)*0.2)[0]
@@ -56,13 +62,9 @@ class environment():
         self.max_a = self.sim_conf.max_a
         self.wheelbase = self.sim_conf.l_f + self.sim_conf.l_r        #Distance between rear and front wheels  
 
-        self.upper_bound = 3
-        self.lower_bound = -1
-        self.right_bound = 3
-        self.left_bound = -1
 
         self.state = [self.x, self.y, self.theta, self.delta, self.v]
-        self.observation = [(self.x-self.left_bound)/(self.right_bound-self.left_bound), (self.y-self.lower_bound)/(self.upper_bound-self.lower_bound), (self.theta+math.pi)/(2*math.pi), (self.x_to_goal-0.5*(self.right_bound-self.left_bound))/(self.right_bound-self.left_bound), (self.y_to_goal-0.5*(self.upper_bound-self.lower_bound))/(self.upper_bound-self.lower_bound)]
+        self.observation = [self.x/self.map_width, self.y/self.map_height, (self.theta+math.pi)/(2*math.pi), (self.x_to_goal+0.5*self.map_width)/self.map_width, (self.y_to_goal+0.5*self.map_height)/self.map_height]
         
         self.state_history = []
         self.action_history = []
@@ -78,6 +80,7 @@ class environment():
         self.out_of_bounds = False
         self.max_steps_reached = False
         self.goal_reached = False
+        self.collision=False
         
         self.steps = 0
         self.max_steps = 1000
@@ -86,8 +89,8 @@ class environment():
         reward = 0
         done=False
         
-        waypoint = self.convert_action_to_coord(strategy='local', action=act)
-        v_ref = 2
+        waypoint = self.convert_action_to_coord(strategy='waypoint', action=act)
+        v_ref = 7
 
         if self.local_path==False:
             for _ in range(self.control_steps):
@@ -132,7 +135,7 @@ class environment():
     def save_state(self, waypoint, reward):
         
         self.state = [self.x, self.y, self.theta, self.delta, self.v]
-        self.observation = [(self.x-self.left_bound)/(self.right_bound-self.left_bound), (self.y-self.lower_bound)/(self.upper_bound-self.lower_bound), (self.theta+math.pi)/(2*math.pi), (self.x_to_goal+0.5*(self.right_bound-self.left_bound))/(self.right_bound-self.left_bound), (self.y_to_goal+0.5*(self.upper_bound-self.lower_bound))/(self.upper_bound-self.lower_bound)]
+        self.observation = [self.x/self.map_width, self.y/self.map_height, (self.theta+math.pi)/(2*math.pi), (self.x_to_goal+0.5*self.map_width)/self.map_width, (self.y_to_goal+0.5*self.map_height)/self.map_height]
         
         if self.save_history==True:
             self.state_history.append(self.state[:])
@@ -174,9 +177,6 @@ class environment():
             ind = np.argmin(d)      #Get nearest point
             self.ind_history.append(ind)
             self.old_nearest_point_index = ind  #Set previous nearest point to nearest point
-            if (ind+1)>=len(self.cx):
-                    print('index error 3')
-
         else:   #If there exists a previous nearest point - after the start
             #Search for closest waypoint after ind
             ind = self.old_nearest_point_index  
@@ -253,7 +253,7 @@ class environment():
             self.goal_reached = True
             return 1
             
-        elif self.x>self.right_bound or self.x<self.left_bound or self.y>self.upper_bound or self.y<self.lower_bound:        
+        elif self.x>self.map_width or self.x<0 or self.y>self.map_height or self.y<0:        
             self.out_of_bounds=True
             return -1
         
@@ -267,6 +267,10 @@ class environment():
         elif self.goal_reached == True:
             self.goal_reached=False
             return 0
+        
+        elif functions.detect_collision(self.occupancy_grid, self.x, self.y, self.res):
+            self.collision=True
+            return -1
 
         else:
            goal_progress = self.old_d_goal-self.new_d_goal
@@ -280,6 +284,8 @@ class environment():
             return True
         elif self.max_steps_reached==True:
             return True
+        #elif self.collision==True:
+        #    return True
         else:
             return False
     
@@ -368,6 +374,7 @@ def test_environment():
                 plt.cla()
                 # Stop the simulation with the esc key.
                 plt.gcf().canvas.mpl_connect('key_release_event', lambda event: [exit(0) if event.key == 'escape' else None])
+                #plt.image
                 plt.arrow(sh[0], sh[1], 0.1*math.cos(sh[2]), 0.1*math.sin(sh[2]), head_length=0.04,head_width=0.02, ec='None', fc='blue')
                 plt.arrow(sh[0], sh[1], 0.1*math.cos(sh[2]+sh[3]), 0.1*math.sin(sh[2]+sh[3]), head_length=0.04,head_width=0.02, ec='None', fc='red')
                 plt.plot(sh[0], sh[1], 'o')
@@ -376,8 +383,8 @@ def test_environment():
                 #plt.legend(["position", "waypoint", "goal area", "heading", "steering angle"])
                 plt.xlabel('x coordinate')
                 plt.ylabel('y coordinate')
-                plt.xlim([-0.5,3])
-                plt.ylim([-0.5,3])
+                plt.xlim([0,30])
+                plt.ylim([0,30])
                 plt.grid(True)
                 plt.title('Episode history')
                 plt.pause(0.01)
