@@ -12,6 +12,8 @@ import sys
 import matplotlib.patches as patches
 import matplotlib.animation as animation
 import math
+from matplotlib import image
+from PIL import Image
 
 class trainingLoop():
     def __init__(self, agent_name):
@@ -26,11 +28,11 @@ class trainingLoop():
         #Hyper parameters for training the agent
         self.gamma=0.99
         self.epsilon = 1
-        self.eps_end = 0.01
+        self.eps_end = 0.1
         self.eps_dec = 1e-3
         self.batch_size = 64
         self.lr = 0.001
-        self.max_episodes = 5000
+        self.max_episodes = 10000
         self.max_mem_size = 1000000
 
         #Agent constraints
@@ -140,13 +142,18 @@ class trainingLoop():
                 self.local_path_history = pickle.load(infile)
             infile.close()
 
+        image_path = sys.path[0] + '/maps/' + 'berlin' + '.png'
+        im = image.imread(image_path)
+        plt.imshow(im, extent=(0,30,0,30))
+
         if self.env.local_path==True:
             for sh, ah, gh, lph in zip(self.state_history, self.action_history, self.goal_history, self.local_path_history):
                 plt.cla()
                 # Stop the simulation with the esc key.
                 plt.gcf().canvas.mpl_connect('key_release_event', lambda event: [exit(0) if event.key == 'escape' else None])
-                plt.arrow(sh[0], sh[1], 0.1*math.cos(sh[2]), 0.1*math.sin(sh[2]), head_length=0.04,head_width=0.02, ec='None', fc='blue')
-                plt.arrow(sh[0], sh[1], 0.1*math.cos(sh[2]+sh[3]), 0.1*math.sin(sh[2]+sh[3]), head_length=0.04,head_width=0.02, ec='None', fc='red')
+                plt.imshow(im, extent=(0,30,0,30))
+                plt.arrow(sh[0], sh[1], 0.5*math.cos(sh[2]), 0.1*math.sin(sh[2]), head_length=0.5, head_width=0.5, shape='full', ec='None', fc='blue')
+                plt.arrow(sh[0], sh[1], 0.5*math.cos(sh[2]+sh[3]), 0.1*math.sin(sh[2]+sh[3]), head_length=0.5, head_width=0.5, shape='full',ec='None', fc='red')
                 plt.plot(sh[0], sh[1], 'o')
                 plt.plot(ah[0], ah[1], 'x')
                 plt.plot(lph[0], lph[1], 'g')
@@ -154,8 +161,8 @@ class trainingLoop():
                 plt.legend(["position", "waypoint", "local path", "goal area", "heading", "steering angle"])
                 plt.xlabel('x coordinate')
                 plt.ylabel('y coordinate')
-                plt.xlim([-0.5,3])
-                plt.ylim([-0.5,3])
+                plt.xlim([0,30])
+                plt.ylim([0,30])
                 plt.grid(True)
                 plt.title('Episode history')
                 plt.pause(0.01)
@@ -164,16 +171,17 @@ class trainingLoop():
                 plt.cla()
                 # Stop the simulation with the esc key.
                 plt.gcf().canvas.mpl_connect('key_release_event', lambda event: [exit(0) if event.key == 'escape' else None])
-                plt.arrow(sh[0], sh[1], 0.1*math.cos(sh[2]), 0.1*math.sin(sh[2]), head_length=0.04,head_width=0.02, ec='None', fc='blue')
-                plt.arrow(sh[0], sh[1], 0.1*math.cos(sh[2]+sh[3]), 0.1*math.sin(sh[2]+sh[3]), head_length=0.04,head_width=0.02, ec='None', fc='red')
+                plt.imshow(im, extent=(0,30,0,30))
+                plt.arrow(sh[0], sh[1], 0.5*math.cos(sh[2]), 0.1*math.sin(sh[2]), head_length=0.5, head_width=0.5, shape='full', ec='None', fc='blue')
+                plt.arrow(sh[0], sh[1], 0.5*math.cos(sh[2]+sh[3]), 0.1*math.sin(sh[2]+sh[3]), head_length=0.5, head_width=0.5, shape='full',ec='None', fc='red')
                 plt.plot(sh[0], sh[1], 'o')
                 plt.plot(ah[0], ah[1], 'x')
                 plt.plot([gh[0]-self.env.s, gh[0]+self.env.s, gh[0]+self.env.s, gh[0]-self.env.s, gh[0]-self.env.s], [gh[1]-self.env.s, gh[1]-self.env.s, gh[1]+self.env.s, gh[1]+self.env.s, gh[1]-self.env.s], 'r')
                 #plt.legend(["position", "waypoint", "goal area", "heading", "steering angle"])
                 plt.xlabel('x coordinate')
                 plt.ylabel('y coordinate')
-                plt.xlim([-0.5,3])
-                plt.ylim([-0.5,3])
+                plt.xlim([0,30])
+                plt.ylim([0,30])
                 plt.grid(True)
                 plt.title('Episode history')
                 plt.pause(0.01)
@@ -182,7 +190,7 @@ class trainingLoop():
 
 if __name__=='__main__':
     
-    a = trainingLoop(agent_name='circle_goals_agent')
-    a.train(save_agent=True)
+    a = trainingLoop(agent_name='track_agent')
+    #a.train(save_agent=True)
     a.test(save_history=True, display=True, verbose=True)
     #a.display_history()

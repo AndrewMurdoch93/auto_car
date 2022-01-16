@@ -3,6 +3,7 @@ import math
 import functions
 import sys
 import matplotlib.pyplot as plt
+from matplotlib import image
 from PIL import Image
 
 class environment():
@@ -28,13 +29,13 @@ class environment():
         for gx, gy in zip(goal_xs, goal_ys):
             self.goals.append([gx, gy])
 
-        self.goals = [[17,10], [18,14], [20, 19], [19.5,22], [16,26], [10,26]]
+        self.goals = [[18, 4], [18,7], [18,10], [18.5, 13], [19.5,16], [20.5,19], [19.5,22], [17.5,24.5], [15.5,26], [13,26.5], [10,26], [7.5,25], [6,23], [7,21.5], [9.5,21.5], [11, 21.5], [11,20], [10.5,18], [11,16], [12,14], [13,12], [13.5,10], [13.5,8], [14,6], [14.5,4.5]]
         
         self.current_goal = 0
-        self.s=0.2
+        self.s=2
         
         self.x = 16
-        self.y = 2
+        self.y = 3
         self.theta = math.pi/4
 
         #self.x = (np.random.rand(1)*0.2)[0]
@@ -89,7 +90,7 @@ class environment():
         reward = 0
         done=False
         
-        waypoint = self.convert_action_to_coord(strategy='waypoint', action=act)
+        waypoint = self.convert_action_to_coord(strategy='local', action=act)
         v_ref = 7
 
         if self.local_path==False:
@@ -103,6 +104,7 @@ class environment():
                 done = self.isEnd()
                 if done==True:
                     break
+           
 
         else:
             cx = (((np.arange(0.1, 1, 0.01))*(waypoint[0] - self.x)) + self.x).tolist()
@@ -151,7 +153,7 @@ class environment():
 
         if strategy=='local':
             waypoint_relative_angle = self.theta+math.pi/2-math.pi*(action/8)
-            waypoint = [self.x + math.cos(waypoint_relative_angle), self.y + math.sin(waypoint_relative_angle)]
+            waypoint = [self.x + 4*math.cos(waypoint_relative_angle), self.y + 4*math.sin(waypoint_relative_angle)]
         
         if strategy == 'waypoint':
             waypoint = action
@@ -274,7 +276,8 @@ class environment():
 
         else:
            goal_progress = self.old_d_goal-self.new_d_goal
-           return goal_progress
+           return goal_progress*0.1
+           #return -0.001
         
             
     def isEnd(self):
@@ -284,8 +287,8 @@ class environment():
             return True
         elif self.max_steps_reached==True:
             return True
-        #elif self.collision==True:
-        #    return True
+        elif self.collision==True:
+            return True
         else:
             return False
     
@@ -368,15 +371,19 @@ def test_environment():
 
         np.sum(np.array(env.reward_history))
         if done==True:
+            
+            image_path = sys.path[0] + '/maps/' + 'berlin' + '.png'
+            im = image.imread(image_path)
+            plt.imshow(im, extent=(0,30,0,30))
 
             for sh, ah, gh, rh in zip(env.state_history, env.action_history, env.goal_history, env.reward_history):
-                print('reward at time step = ', rh)
                 plt.cla()
                 # Stop the simulation with the esc key.
                 plt.gcf().canvas.mpl_connect('key_release_event', lambda event: [exit(0) if event.key == 'escape' else None])
                 #plt.image
-                plt.arrow(sh[0], sh[1], 0.1*math.cos(sh[2]), 0.1*math.sin(sh[2]), head_length=0.04,head_width=0.02, ec='None', fc='blue')
-                plt.arrow(sh[0], sh[1], 0.1*math.cos(sh[2]+sh[3]), 0.1*math.sin(sh[2]+sh[3]), head_length=0.04,head_width=0.02, ec='None', fc='red')
+                plt.imshow(im, extent=(0,30,0,30))
+                plt.arrow(sh[0], sh[1], 0.5*math.cos(sh[2]), 0.1*math.sin(sh[2]), head_length=0.5, head_width=0.5, shape='full', ec='None', fc='blue')
+                plt.arrow(sh[0], sh[1], 0.5*math.cos(sh[2]+sh[3]), 0.1*math.sin(sh[2]+sh[3]), head_length=0.5, head_width=0.5, shape='full',ec='None', fc='red')
                 plt.plot(sh[0], sh[1], 'o')
                 plt.plot(ah[0], ah[1], 'x')
                 plt.plot([gh[0]-env.s, gh[0]+env.s, gh[0]+env.s, gh[0]-env.s, gh[0]-env.s], [gh[1]-env.s, gh[1]-env.s, gh[1]+env.s, gh[1]+env.s, gh[1]-env.s], 'r')
@@ -385,10 +392,10 @@ def test_environment():
                 plt.ylabel('y coordinate')
                 plt.xlim([0,30])
                 plt.ylim([0,30])
-                plt.grid(True)
+                #plt.grid(True)
                 plt.title('Episode history')
-                plt.pause(0.01)
+                plt.pause(0.001)
 
-test_environment()
+#test_environment()
 
         

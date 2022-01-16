@@ -59,38 +59,60 @@ def map_generator(map_name):
         map_height = gray_im.height*res
         map_width = gray_im.width*res
         occupancy_grid = map_array<1
-    
-        #im = image.imread(image_path)
-        #plt.imshow(im, extent=(0,30,0,30))
-        #plt.plot(16, 2, 'x')
-        #plt.show()
+        '''
+        im = image.imread(image_path)
+        plt.imshow(im, extent=(0,30,0,30))
+        plt.plot(16, 3, 'x')
+        plt.plot(18,4, 'x')
+        plt.plot(18, 7, 'x')
+        plt.plot(18, 10, 'x')
+        plt.plot(18.5, 13, 'x')
+        plt.plot(19.5, 16, 'x')
+        plt.plot(20.5, 19, 'x')   
+        plt.plot(19.5, 22, 'x')
+        plt.plot(17.5, 24.5, 'x')
+        plt.plot(15.5, 26, 'x')
+        plt.plot(13, 26.5, 'x')
+        plt.plot(10, 26, 'x')
+        plt.plot(7.5, 25, 'x')
+        plt.plot(6, 23, 'x')
+        plt.plot(7, 21.5, 'x')
+        plt.plot(9.5, 21.5, 'x')
+        plt.plot(11, 21.2, 'x')
+        plt.plot(11, 20, 'x')
+        plt.plot(10.5, 18, 'x')
+        plt.plot(11, 16, 'x')
+        plt.plot(12, 14, 'x')
+        plt.plot(13, 12, 'x')
+        plt.plot(13.5, 10, 'x')
+        plt.plot(13.5, 8, 'x')
+        plt.plot(14, 6, 'x')
+        plt.plot(14.5, 4.5, 'x')
+        plt.show()
+        '''
+         #[[18, 4], [18, 4], [18,7], [18,10], [18.5, 13], [19.5,16], [20.5,19], [19.5,22], [17.5,24.5], [15.5,26], [13,26.5], [10,26], [7.5,25], [6,23], [7,21.5], 
+         # [9.5,21.5], [11,20], [10.5,18], [11,16], [12,14], [13,12], [13.5,10], [13.5,8], [14,6], [14.5,4.5]]
     
     return occupancy_grid, map_height, map_width, res 
 
 
 def detect_collision(occupancy_grid, x, y, res):
-    cell = (np.array([30-x, 30-y])/res).astype(int)
+    cell = (np.array([30-y, x])/res).astype(int)
     #plt.imshow(occupancy_grid)
     #plt.show()
-    #if occupancy_grid[cell[0], cell[1]] == True:
-    #    return True
-    #else:
-    #    return False
+    if occupancy_grid[cell[0], cell[1]] == True:
+        return True
+    else:
+        return False
 
-    for y in range(0,100):
-        print('row ', y)
-        for x in range(0,600):
-            if occupancy_grid[x, y] == False:
-                plt.plot(x, y, 'x')
-    plt.show()
         
 
     
 
 
         
-occupancy_grid, map_height, map_width, res = map_generator(map_name='berlin')
-print(detect_collision(occupancy_grid, 16, 2, res))
+#ccupancy_grid, map_height, map_width, res = map_generator(map_name='berlin')
+#print(detect_collision(occupancy_grid, 16, 2, res))
 
 #im = image.imread(image_path)
 #plt.imshow(im, extent=(0,30,0,30))
