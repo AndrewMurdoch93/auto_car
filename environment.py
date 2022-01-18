@@ -15,32 +15,24 @@ class environment():
 
     def reset(self, save_history=False):
         
-        self.occupancy_grid, self.map_height, self.map_width, self.res = functions.map_generator(map_name='berlin')
+        self.occupancy_grid, self.map_height, self.map_width, self.res = functions.map_generator(map_name='circle')
+        goal_x, goal_y, rx, ry, ryaw, rk, s = functions.generate_circle_goals()
+        self.goals=[]
         
+        for x,y in zip(goal_x,goal_y):
+            self.goals.append([x, y])
+
+        start_x, start_y, start_theta, next_goal = functions.random_start(goal_x, goal_y, rx, ry, ryaw, rk, s)
+        
+        self.x = start_x
+        self.y = start_y
+        self.theta = start_theta
+        self.current_goal = next_goal
+
         self.save_history = save_history   
         self.num_actions = 8
-        
-        theta=np.linspace(0, 2*math.pi, 9)
-        R=1
-        goal_xs = 1+np.cos(theta-math.pi/2)
-        goal_ys = 1+np.sin(theta-math.pi/2)
-        self.goals = []
 
-        for gx, gy in zip(goal_xs, goal_ys):
-            self.goals.append([gx, gy])
-
-        self.goals = [[18, 4], [18,7], [18,10], [18.5, 13], [19.5,16], [20.5,19], [19.5,22], [17.5,24.5], [15.5,26], [13,26.5], [10,26], [7.5,25], [6,23], [7,21.5], [9.5,21.5], [11, 21.5], [11,20], [10.5,18], [11,16], [12,14], [13,12], [13.5,10], [13.5,8], [14,6], [14.5,4.5]]
-        
-        self.current_goal = 0
         self.s=2
-        
-        self.x = 16
-        self.y = 3
-        self.theta = math.pi/4
-
-        #self.x = (np.random.rand(1)*0.2)[0]
-        #self.y = (np.random.rand(1)*0.2)[0]
-        #self.theta = (np.random.rand(1)*(math.pi/4))[0] 
         
         self.v = 0    
         self.delta = 0
@@ -48,6 +40,9 @@ class environment():
         self.y_to_goal = self.goals[self.current_goal][1] - self.y
         self.old_d_goal = np.linalg.norm(np.array([self.x_to_goal, self.y_to_goal]))
         self.new_d_goal = np.linalg.norm(np.array([self.x_to_goal, self.y_to_goal]))
+        
+        self.angle = math.atan2(self.y-15, self.x-15)
+        self.new_angle = math.atan2(self.y-15, self.x-15)
 
         self.theta_dot = 0      #car rate of change of heading
         self.delta_dot = 0
@@ -65,7 +60,7 @@ class environment():
 
 
         self.state = [self.x, self.y, self.theta, self.delta, self.v]
-        self.observation = [self.x/self.map_width, self.y/self.map_height, (self.theta+math.pi)/(2*math.pi), (self.x_to_goal+0.5*self.map_width)/self.map_width, (self.y_to_goal+0.5*self.map_height)/self.map_height]
+        self.observation = [self.x/self.map_width, self.y/self.map_height, (self.theta+math.pi)/(2*math.pi)]#, (self.x_to_goal+0.5*self.map_width)/self.map_width, (self.y_to_goal+0.5*self.map_height)/self.map_height]
         
         self.state_history = []
         self.action_history = []
@@ -131,13 +126,13 @@ class environment():
                     break
    
                 i+=1
-  
+        #print(reward)
         return self.observation, reward, done
     
     def save_state(self, waypoint, reward):
         
         self.state = [self.x, self.y, self.theta, self.delta, self.v]
-        self.observation = [self.x/self.map_width, self.y/self.map_height, (self.theta+math.pi)/(2*math.pi), (self.x_to_goal+0.5*self.map_width)/self.map_width, (self.y_to_goal+0.5*self.map_height)/self.map_height]
+        self.observation = [self.x/self.map_width, self.y/self.map_height, (self.theta+math.pi)/(2*math.pi)] #, (self.x_to_goal+0.5*self.map_width)/self.map_width, (self.y_to_goal+0.5*self.map_height)/self.map_height]
         
         if self.save_history==True:
             self.state_history.append(self.state[:])
@@ -250,21 +245,18 @@ class environment():
 
     def getReward(self):
 
-        if (self.x>self.goals[self.current_goal][0]-self.s and self.x<self.goals[self.current_goal][0]+self.s) and (self.y>self.goals[self.current_goal][1]-self.s and self.y<self.goals[self.current_goal][1]+self.s):
-            self.current_goal = (self.current_goal+1)%len(self.goals)
-            self.goal_reached = True
-            return 1
+        #if (self.x>self.goals[self.current_goal][0]-self.s and self.x<self.goals[self.current_goal][0]+self.s) and (self.y>self.goals[self.current_goal][1]-self.s and self.y<self.goals[self.current_goal][1]+self.s):
+        #    self.current_goal = (self.current_goal+1)%(len(self.goals)-1)
+        #    self.goal_reached = True
+        #    return 1
             
-        elif self.x>self.map_width or self.x<0 or self.y>self.map_height or self.y<0:        
+        if self.x>self.map_width or self.x<0 or self.y>self.map_height or self.y<0:        
             self.out_of_bounds=True
             return -1
         
         elif self.steps >= self.max_steps:
             self.max_steps_reached=True
             return -1
-        
-        elif self.current_goal>len(self.goals):
-            return 1
         
         elif self.goal_reached == True:
             self.goal_reached=False
@@ -274,11 +266,17 @@ class environment():
             self.collision=True
             return -1
 
+
         else:
-           goal_progress = self.old_d_goal-self.new_d_goal
-           return goal_progress*0.1
+           #goal_progress = self.old_d_goal-self.new_d_goal
+           #return goal_progress*0.1
            #return -0.001
-        
+            progress = self.new_angle-self.old_angle
+            if progress <-6:
+                print('bad')
+                pass
+
+            return progress
             
     def isEnd(self):
         if self.current_goal==(len(self.goals)):
@@ -332,7 +330,8 @@ class environment():
         '''
 
         self.old_d_goal = self.new_d_goal
-        
+        self.old_angle = self.new_angle%(2*math.pi-0.05)
+
         #Update (rear axle) position
         self.x = self.x + self.v * np.cos(self.theta) * self.dt
         self.y = self.y + self.v * np.sin(self.theta) * self.dt
@@ -342,6 +341,7 @@ class environment():
         self.y_to_goal = self.goals[self.current_goal][1] - self.y
         
         self.new_d_goal = np.linalg.norm(np.array([self.x_to_goal, self.y_to_goal]))
+        self.new_angle = math.atan2(self.y-15, self.x-15)%(2*math.pi)
 
         #Update car heading angle
         self.theta_dot = (self.v / self.wheelbase) * np.tan(self.delta)  #rate of change of heading
@@ -372,7 +372,7 @@ def test_environment():
         np.sum(np.array(env.reward_history))
         if done==True:
             
-            image_path = sys.path[0] + '/maps/' + 'berlin' + '.png'
+            image_path = sys.path[0] + '/maps/' + 'circle' + '.png'
             im = image.imread(image_path)
             plt.imshow(im, extent=(0,30,0,30))
 

@@ -28,9 +28,10 @@ def generate_circle_goals():
     x = 15+R*np.cos(theta-math.pi/2)
     y = 15+R*np.sin(theta-math.pi/2)
     rx, ry, ryaw, rk, s = cubic_spline_planner.calc_spline_course(x, y)
-    plt.plot(rx, ry, "-r", label="spline")
-    plt.plot(x, y, 'x')
-    plt.show()
+    #plt.plot(rx, ry, "-r", label="spline")
+    #plt.plot(x, y, 'x')
+    #plt.show()
+    return x, y, rx, ry, ryaw, rk, s
 
-generate_circle_image()
-generate_circle_goals()
+#enerate_circle_image()
+#generate_circle_goals()

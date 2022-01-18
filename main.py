@@ -28,7 +28,7 @@ class trainingLoop():
         #Hyper parameters for training the agent
         self.gamma=0.99
         self.epsilon = 1
-        self.eps_end = 0.1
+        self.eps_end = 0.01
         self.eps_dec = 1e-3
         self.batch_size = 64
         self.lr = 0.001
@@ -63,6 +63,8 @@ class trainingLoop():
                 action = self.agent.choose_action(obs)    #Select an action
                 next_obs, reward, done = self.env.take_action(action) #Environment executes action
                 score += reward 
+                if score >100:
+                    print('incorrect')
                 self.agent.store_transition(obs, action, reward, next_obs, done)
                 self.agent.learn()  #Learn using state transition history
                 obs = next_obs  #Update the state
@@ -142,7 +144,7 @@ class trainingLoop():
                 self.local_path_history = pickle.load(infile)
             infile.close()
 
-        image_path = sys.path[0] + '/maps/' + 'berlin' + '.png'
+        image_path = sys.path[0] + '/maps/' + 'circle' + '.png'
         im = image.imread(image_path)
         plt.imshow(im, extent=(0,30,0,30))
 
@@ -190,7 +192,7 @@ class trainingLoop():
 
 if __name__=='__main__':
     
-    a = trainingLoop(agent_name='track_agent')
-    #a.train(save_agent=True)
+    a = trainingLoop(agent_name='circle_track_agent')
+    a.train(save_agent=True)
     a.test(save_history=True, display=True, verbose=True)
     #a.display_history()

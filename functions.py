@@ -9,7 +9,11 @@ import math
 import numpy as np
 import bisect
 import sys
-from PIL import Image, ImageOps
+import cubic_spline_planner
+import yaml
+from PIL import Image, ImageOps, ImageDraw
+import random
+from datetime import datetime
 
 
 def load_config(path, fname):
@@ -44,6 +48,61 @@ def distance_between_points(x1, x2, y1, y2):
     return distance
 
 
+def generate_circle_image():
+    from matplotlib import image
+    image = Image.new('RGBA', (600, 600))
+    draw = ImageDraw.Draw(image)
+    draw.rectangle((0, 0, 600, 600), fill = 'black', outline ='black')
+    draw.ellipse((50, 50, 550, 550), fill = 'white', outline ='white')
+    draw.ellipse((150, 150, 450, 450), fill = 'black', outline ='black')
+    draw.point((100, 100), 'red')
+    image_path = sys.path[0] + '\\maps\\circle' + '.png'
+    image.save(image_path, 'png')
+
+
+def generate_circle_goals():
+    from matplotlib import image
+    #image_path = sys.path[0] + '\\maps\\circle' + '.png'
+    #im = image.imread(image_path)
+    #plt.imshow(im, extent=(0,30,0,30))
+
+    R=10
+    theta=np.linspace(0, 2*math.pi, 17)
+    x = 15+R*np.cos(theta-math.pi/2)
+    y = 15+R*np.sin(theta-math.pi/2)
+    rx, ry, ryaw, rk, s = cubic_spline_planner.calc_spline_course(x, y)
+    #plt.plot(rx, ry, "-r", label="spline")
+    #plt.plot(x, y, 'x')
+    #plt.show()
+    return x, y, rx, ry, ryaw, rk, s
+
+
+def generate_berlin_goals():
+    from matplotlib import image
+    #image_path = sys.path[0] + '/maps/berlin' + '.png'
+    #im = image.imread(image_path)
+    #plt.imshow(im, extent=(0,30,0,30))
+    
+    goals = [[16,3], [18,4], [18,7], [18,10], [18.5, 13], [19.5,16], [20.5,19], [19.5,22], [17.5,24.5], 
+            [15.5,26], [13,26.5], [10,26], [7.5,25], [6,23], [7,21.5], [9.5,21.5], [11, 21.5], 
+            [11,20], [10.5,18], [11,16], [12,14], [13,12], [13.5,10], [13.5,8], [14,6], [14.5,4.5], [16,3]]
+    
+    x = []
+    y = []
+
+    for xy in goals:
+        x.append(xy[0])
+        y.append(xy[1])
+    
+    rx, ry, ryaw, rk, s = cubic_spline_planner.calc_spline_course(x, y)
+
+    #plt.plot(rx, ry, "-r", label="spline")
+    #plt.plot(x, y, 'x')
+    #plt.show()
+
+    return x, y, rx, ry, ryaw, rk, s
+    
+
 def map_generator(map_name):
     map_config_path = sys.path[0] + '/maps/' + map_name + '.yaml'
     image_path = sys.path[0] + '/maps/' + map_name + '.png'
@@ -59,39 +118,6 @@ def map_generator(map_name):
         map_height = gray_im.height*res
         map_width = gray_im.width*res
         occupancy_grid = map_array<1
-        '''
-        im = image.imread(image_path)
-        plt.imshow(im, extent=(0,30,0,30))
-        plt.plot(16, 3, 'x')
-        plt.plot(18,4, 'x')
-        plt.plot(18, 7, 'x')
-        plt.plot(18, 10, 'x')
-        plt.plot(18.5, 13, 'x')
-        plt.plot(19.5, 16, 'x')
-        plt.plot(20.5, 19, 'x')   
-        plt.plot(19.5, 22, 'x')
-        plt.plot(17.5, 24.5, 'x')
-        plt.plot(15.5, 26, 'x')
-        plt.plot(13, 26.5, 'x')
-        plt.plot(10, 26, 'x')
-        plt.plot(7.5, 25, 'x')
-        plt.plot(6, 23, 'x')
-        plt.plot(7, 21.5, 'x')
-        plt.plot(9.5, 21.5, 'x')
-        plt.plot(11, 21.2, 'x')
-        plt.plot(11, 20, 'x')
-        plt.plot(10.5, 18, 'x')
-        plt.plot(11, 16, 'x')
-        plt.plot(12, 14, 'x')
-        plt.plot(13, 12, 'x')
-        plt.plot(13.5, 10, 'x')
-        plt.plot(13.5, 8, 'x')
-        plt.plot(14, 6, 'x')
-        plt.plot(14.5, 4.5, 'x')
-        plt.show()
-        '''
-         #[[18, 4], [18, 4], [18,7], [18,10], [18.5, 13], [19.5,16], [20.5,19], [19.5,22], [17.5,24.5], [15.5,26], [13,26.5], [10,26], [7.5,25], [6,23], [7,21.5], 
-         # [9.5,21.5], [11,20], [10.5,18], [11,16], [12,14], [13,12], [13.5,10], [13.5,8], [14,6], [14.5,4.5]]
     
     return occupancy_grid, map_height, map_width, res 
 
@@ -105,15 +131,39 @@ def detect_collision(occupancy_grid, x, y, res):
     else:
         return False
 
-        
+      
+def random_start(x, y, rx, ry, ryaw, rk, s):
+    offset=0.5
 
-    
+    random.seed(datetime.now())
+    i = int(random.uniform(0, len(x)-2))
+    next_i = (i+1)%len(y)
+    start_x = x[i] + (random.uniform(-1.5, 1.5))
+    start_y = y[i] + (random.uniform(-1.5, 1.5))
+    start_theta = math.atan2(y[next_i]-start_y, x[next_i]-start_x) + (random.uniform(-math.pi/4, math.pi/4))
+    next_goal = (i+1)%len(x)
+
+    return start_x, start_y, start_theta, next_i
 
 
-        
-#ccupancy_grid, map_height, map_width, res = map_generator(map_name='berlin')
-#print(detect_collision(occupancy_grid, 16, 2, res))
+def measure_progress(goals, goals_reached):
+    return goals_reached/(len(goals)-1)
+
+
+#generate_berlin_goals()
+#x, y, rx, ry, ryaw, rk, s = generate_circle_goals()
+#start_x, start_y, start_theta, next_goal = random_start(x, y, rx, ry, ryaw, rk, s)
+
+#image_path = sys.path[0] + '/maps/' + 'circle' + '.png'       
+#occupancy_grid, map_height, map_width, res = map_generator(map_name='circle')
+#print(detect_collision(occupancy_grid, 15, 5, res))
 
 #im = image.imread(image_path)
 #plt.imshow(im, extent=(0,30,0,30))
+#plt.plot(start_x, start_y, 'x')
+#print(start_theta)
+#plt.arrow(start_x, start_y, math.cos(start_theta), math.sin(start_theta))
+#plt.plot(x, y, 's')
+#plt.plot(x[next_goal], y[next_goal], 'o')
 #plt.show()
+
