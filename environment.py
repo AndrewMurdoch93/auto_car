@@ -58,7 +58,6 @@ class environment():
         self.max_a = self.sim_conf.max_a
         self.wheelbase = self.sim_conf.l_f + self.sim_conf.l_r        #Distance between rear and front wheels  
 
-
         self.state = [self.x, self.y, self.theta, self.delta, self.v]
         self.observation = [self.x/self.map_width, self.y/self.map_height, (self.theta+math.pi)/(2*math.pi)]#, (self.x_to_goal+0.5*self.map_width)/self.map_width, (self.y_to_goal+0.5*self.map_height)/self.map_height]
         
@@ -245,10 +244,10 @@ class environment():
 
     def getReward(self):
 
-        #if (self.x>self.goals[self.current_goal][0]-self.s and self.x<self.goals[self.current_goal][0]+self.s) and (self.y>self.goals[self.current_goal][1]-self.s and self.y<self.goals[self.current_goal][1]+self.s):
-        #    self.current_goal = (self.current_goal+1)%(len(self.goals)-1)
-        #    self.goal_reached = True
-        #    return 1
+        if (self.x>self.goals[self.current_goal][0]-self.s and self.x<self.goals[self.current_goal][0]+self.s) and (self.y>self.goals[self.current_goal][1]-self.s and self.y<self.goals[self.current_goal][1]+self.s):
+            self.current_goal = (self.current_goal+1)%(len(self.goals)-1)
+            self.goal_reached = True
+            return 1
             
         if self.x>self.map_width or self.x<0 or self.y>self.map_height or self.y<0:        
             self.out_of_bounds=True
@@ -266,17 +265,10 @@ class environment():
             self.collision=True
             return -1
 
-
         else:
-           #goal_progress = self.old_d_goal-self.new_d_goal
-           #return goal_progress*0.1
-           #return -0.001
-            progress = self.new_angle-self.old_angle
-            if progress <-6:
-                print('bad')
-                pass
-
-            return progress
+           goal_progress = self.old_d_goal-self.new_d_goal
+           return goal_progress*0.1
+    
             
     def isEnd(self):
         if self.current_goal==(len(self.goals)):
