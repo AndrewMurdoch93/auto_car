@@ -78,7 +78,10 @@ class environment():
         self.collision=False
         
         self.steps = 0
-        self.max_steps = 1000
+        self.max_steps = 1500
+
+        self.goals_reached = 0
+        self.progress = 0
 
     def take_action(self, act):
         reward = 0
@@ -94,10 +97,11 @@ class environment():
                 self.update_kinematic_state(a, delta_dot)
                 self.steps += 1
                 reward += self.getReward() 
-                self.save_state(waypoint, reward)
                 done = self.isEnd()
+                self.save_state(waypoint, reward)
                 if done==True:
                     break
+            #self.save_state(waypoint, reward)
            
 
         else:
@@ -132,7 +136,7 @@ class environment():
         
         self.state = [self.x, self.y, self.theta, self.delta, self.v]
         self.observation = [self.x/self.map_width, self.y/self.map_height, (self.theta+math.pi)/(2*math.pi)] #, (self.x_to_goal+0.5*self.map_width)/self.map_width, (self.y_to_goal+0.5*self.map_height)/self.map_height]
-        
+
         if self.save_history==True:
             self.state_history.append(self.state[:])
             self.action_history.append(waypoint)
@@ -247,6 +251,9 @@ class environment():
         if (self.x>self.goals[self.current_goal][0]-self.s and self.x<self.goals[self.current_goal][0]+self.s) and (self.y>self.goals[self.current_goal][1]-self.s and self.y<self.goals[self.current_goal][1]+self.s):
             self.current_goal = (self.current_goal+1)%(len(self.goals)-1)
             self.goal_reached = True
+            self.goals_reached+=1
+            self.progress = self.goals_reached/len(self.goals)
+            #print(self.progress)
             return 1
             
         if self.x>self.map_width or self.x<0 or self.y>self.map_height or self.y<0:        
@@ -266,12 +273,13 @@ class environment():
             return -1
 
         else:
-           goal_progress = self.old_d_goal-self.new_d_goal
-           return goal_progress*0.1
+           #goal_progress = self.old_d_goal-self.new_d_goal
+           #return goal_progress*0.1
+           return -0.001
     
             
     def isEnd(self):
-        if self.current_goal==(len(self.goals)):
+        if self.goals_reached==(len(self.goals)):
             return True
         elif self.out_of_bounds==True:       
             return True
