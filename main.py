@@ -445,14 +445,14 @@ class trainingLoop():
 
 if __name__=='__main__':
     
-    a = trainingLoop(agent_name='agent_24_Jan')
+    a = trainingLoop(agent_name='goals_agent_full_state')
     #a.train(save_agent=True)
     #a.learning_curve_score(show_average=True, show_median=True)
-    a.learning_curve_progress(show_average=True, show_median=True)
+    #a.learning_curve_progress(show_average=True, show_median=True)
     #a.test(n_episodes=1000)
     #a.agent_score_statistics()
     #a.agent_progress_statistics()
     #a.histogram_score()
     #a.histogram_progress()
 
-    #a.display_agent(load_history=False, save_history=False)
+    a.display_agent(load_history=False, save_history=False)
