@@ -37,24 +37,15 @@ class trainingLoop():
         self.eps_dec = 1e-3
         self.batch_size = 64
         self.lr = 0.001
-        self.max_episodes = 3000
-        self.max_mem_size = 100000
+        self.max_episodes = 10000
+        self.max_mem_size = 1000000
 
         #Agent constraints
         self.n_actions = self.env.num_actions
         self.input_dims = len(self.env.observation)
 
+        #Display constraints
         self.window=100
-        self.scores = []
-        self.times = []
-        self.avg_scores = []
-        self.percentile25 = []
-        self.median = []
-        self.percentile75 = []
-        self.std_dev = []
-
-        self.test_scores = []
-        self.test_avg_scores = []
 
         
     def train(self, save_agent=True, save_score=True):
@@ -64,10 +55,10 @@ class trainingLoop():
         batch_size=self.batch_size, n_actions=self.n_actions, max_mem_size=self.max_mem_size, eps_end=self.eps_end, 
         eps_dec=self.eps_dec)
 
+        scores = []
         progress = []
-        avg_progresses = []
+        times = []
  
-        window=100
         
         for episode in range(self.max_episodes):
             
@@ -83,22 +74,18 @@ class trainingLoop():
                 action = self.agent.choose_action(obs)    #Select an action
                 next_obs, reward, done = self.env.take_action(action) #Environment executes action
                 score += reward 
-                if score >100:
-                    print('incorrect')
                 self.agent.store_transition(obs, action, reward, next_obs, done)
                 self.agent.learn()  #Learn using state transition history
                 obs = next_obs  #Update the state
             
             end_time = time.time()
-            self.times.append(end_time-start_time)
-            self.scores.append(score)
-            
-            avg_score = np.mean(self.scores[-100:])
-            self.avg_scores.append(avg_score)
+            times.append(end_time-start_time)
+
+            scores.append(score)
+            avg_score = np.mean(scores[-100:])
 
             progress.append(self.env.progress)
             avg_progress = np.mean(progress[-100:])
-            avg_progresses.append(avg_progress)
 
             self.agent.decrease_epsilon()
 
@@ -108,9 +95,10 @@ class trainingLoop():
                 outfile.close()  
 
             if episode%10==0:
-                print('episode ', episode, 'score %.2f' % score, 'average score %.2f' % avg_score, 'progress %.2f' % self.env.progress, 'average progress %.2f' % avg_progress, 'epsilon %.2f' % self.agent.epsilon)
-        
+                print(f"{'Episode':8s} {episode:5.0f} {'| Score':8s} {score:6.2f} {'| Average score':15s} {avg_score:6.2f} {'| Progress':12s} {self.env.progress:3.2f} {'| Average progress':18s} {avg_progress:3.2f} {'| Epsilon':9s} {self.agent.epsilon:.2f}")
       
+            
+
         if save_agent==True:
             outfile=open(self.agent_file_name, 'wb')
             pickle.dump(self.agent, outfile)
@@ -118,7 +106,7 @@ class trainingLoop():
 
         if save_score==True:
             outfile=open(self.train_results_file_name, 'wb')
-            pickle.dump(self.scores, outfile)
+            pickle.dump(scores, outfile)
             pickle.dump(progress, outfile)
             outfile.close()
 
@@ -217,70 +205,138 @@ class trainingLoop():
             plt.show()
 
 
-    def test(self, save_results=True, load_results=False, show_average=False, show_median=True, n_episodes=500):
+    def test(self, n_episodes=1000):
         
 
         infile = open(self.agent_file_name, 'rb')
         agent = pickle.load(infile)
         infile.close()
 
-        if load_results==True:
-            infile = open(self.results_file_name, 'rb')
-            test_progress = pickle.load(infile)
-            infile.close()
-        else: 
-            test_progress=[]
-            for episode in range(n_episodes):
-
-                self.env.reset(save_history=True)
-                obs = self.env.observation
-                done = False
-                score=0
-
-                while not done:
-                    action = agent.choose_action(obs)
-                    next_obs, reward, done = self.env.take_action(action)
-                    score += reward
-                    obs = next_obs
-                    test_progress.append(self.env.progress)
-                if episode%50==0:
-                    print('Test episode', episode, 'Progress = %.2f' % self.env.progress)
-                
-                
-        percentile_25 = np.percentile(test_progress, 25)
-        percentile_50 = np.percentile(test_progress, 50)
-        percentile_75 = np.percentile(test_progress, 75)
-        max = np.max(test_progress)
-
         
-        sns.displot(test_progress)
-        #y, x, _ = plt.hist(self.test_scores, bins=12)
-        #plt.plot([percentile25, percentile25], [0, y.max()])
-        #plt.plot([percentile50, percentile50], [0, y.max()])
-        #plt.plot([percentile75, percentile75], [0, y.max()])
-        average = np.average(self.test_scores)
-        std_dev = np.std(self.test_scores)
+        test_progress = []
+        test_score = []
+
+        for episode in range(n_episodes):
+
+            self.env.reset(save_history=True)
+            obs = self.env.observation
+            done = False
+            score=0
+
+            while not done:
+                action = agent.choose_action(obs)
+                next_obs, reward, done = self.env.take_action(action)
+                score += reward
+                obs = next_obs
+            
+            test_progress.append(self.env.progress)
+            test_score.append(score)
+            if episode%50==0:
+                print('Test episode', episode, '| Progress = %.2f' % self.env.progress, '| Score = %.2f' % score)
+            
+        outfile=open(self.results_file_name, 'wb')
+        pickle.dump(test_score, outfile)
+        pickle.dump(test_progress, outfile)
+        outfile.close()
         
-        print('\n')
-        print('25th percentile = %.2f' % percentile_25)
-        print('Median = %.2f' % percentile_50)
-        print('75th percentile = %.2f' % percentile_75)
-        print('maximum = %.2f' % max )
-        print('\n')
-        print('Average = %.2f' % average)
-        print('Standard deviation = %.2f' % std_dev)
 
+    def histogram_score(self):
 
-        plt.legend(['25th percentile', 'Median', '75th percentile', 'Agent scores'])
+        infile = open(self.results_file_name, 'rb')
+        test_score = pickle.load(infile)
+        test_progress = pickle.load(infile)
+        infile.close()
+
+        #sns.displot(test_progress)
+        percentile25 = np.percentile(test_score, 25)
+        percentile50 = np.percentile(test_score, 50)
+        percentile75 = np.percentile(test_score, 75)
+
+        y, x, _ = plt.hist(test_score, bins=12)
+        plt.plot([percentile25, percentile25], [0, y.max()])
+        plt.plot([percentile50, percentile50], [0, y.max()])
+        plt.plot([percentile75, percentile75], [0, y.max()])
+        
         plt.title('Score distribution')
         plt.xlabel('Score')
         plt.ylabel('Number of agents')
+        plt.legend(['25th percentile', 'Median', '75th percentile', 'Agent scores'])
         plt.show()
+    
+    
+    def histogram_progress(self):
+
+        infile = open(self.results_file_name, 'rb')
+        test_score = pickle.load(infile)
+        test_progress = pickle.load(infile)
+        infile.close()
+
+        #sns.displot(test_progress)
+        percentile25 = np.percentile(test_progress, 25)
+        percentile50 = np.percentile(test_progress, 50)
+        percentile75 = np.percentile(test_progress, 75)
+
+        y, x, _ = plt.hist(test_progress, bins=12)
+        plt.plot([percentile25, percentile25], [0, y.max()])
+        plt.plot([percentile50, percentile50], [0, y.max()])
+        plt.plot([percentile75, percentile75], [0, y.max()])
         
-        if save_results == True:
-            outfile=open(self.results_file_name, 'wb')
-            pickle.dump(test_progress, outfile)
-            outfile.close()
+        plt.title('Progress distribution')
+        plt.xlabel('Score')
+        plt.ylabel('Number of agents')
+        plt.legend(['25th percentile', 'Median', '75th percentile', 'Agent progress'])
+        plt.show()
+    
+
+    def agent_score_statistics(self):
+        infile = open(self.results_file_name, 'rb')
+        test_score = pickle.load(infile)
+        test_progress = pickle.load(infile)
+        infile.close()
+
+        minimum = np.min(test_score)
+        percentile_25 = np.percentile(test_score, 25)
+        percentile_50 = np.percentile(test_score, 50)
+        percentile_75 = np.percentile(test_score, 75)
+        maximum = np.max(test_score)
+        average = np.average(test_score)
+        std_dev = np.std(test_score)
+
+        print('\n')
+        print('Agent score statistics: \n')
+        print(f"{'Minimum':20s} {minimum:6.2f}")
+        print(f"{'25th percentile':20s} {percentile_25:6.2f}")
+        print(f"{'Median':20s} {percentile_50:6.2f}")
+        print(f"{'75th percentile':20s} {percentile_75:6.2f}")
+        print(f"{'Maximum':20s} {maximum:6.2f}")
+        print(f"{'Average':20s} {average:6.2f}")
+        print(f"{'Standard deviation':20s} {std_dev:6.2f}")
+        
+
+    def agent_progress_statistics(self):
+        infile = open(self.results_file_name, 'rb')
+        test_score = pickle.load(infile)
+        test_progress = pickle.load(infile)
+        infile.close()
+
+        minimum = np.min(test_progress)
+        percentile_25 = np.percentile(test_progress, 25)
+        percentile_50 = np.percentile(test_progress, 50)
+        percentile_75 = np.percentile(test_progress, 75)
+        maximum = np.max(test_progress)
+        average = np.average(test_progress)
+        std_dev = np.std(test_progress)
+
+        print('\n')
+        print('Agent progress statistics: \n')
+        print(f"{'Minimum':20s} {minimum:6.2f}")
+        print(f"{'25th percentile':20s} {percentile_25:6.2f}")
+        print(f"{'Median':20s} {percentile_50:6.2f}")
+        print(f"{'75th percentile':20s} {percentile_75:6.2f}")
+        print(f"{'Maximum':20s} {maximum:6.2f}")
+        print(f"{'Average':20s} {average:6.2f}")
+        print(f"{'Standard deviation':20s} {std_dev:6.2f}")
+
 
     #Display a history of the episode
     def display_agent(self, load_history=False, save_history=False):
@@ -334,7 +390,9 @@ class trainingLoop():
                 #    pickle.dump(self.state_history, outfile)
                 outfile.close()
            
-        
+        print('\nTotal reward = ', np.sum(self.reward_history))
+        print('\nTotal score = ', score)
+
         image_path = sys.path[0] + '/maps/' + 'circle' + '.png'
         im = image.imread(image_path)
         plt.imshow(im, extent=(0,30,0,30))
@@ -383,16 +441,18 @@ class trainingLoop():
                 plt.pause(0.01)
                 #print(rh)
             
-            print('Total reward = ', np.sum(self.reward_history))
-
                     
 
 if __name__=='__main__':
     
-    a = trainingLoop(agent_name='random_agent')
+    a = trainingLoop(agent_name='agent_24_Jan')
     #a.train(save_agent=True)
     #a.learning_curve_score(show_average=True, show_median=True)
-    #a.learning_curve_progress(show_average=True, show_median=True)
-    
-    a.test(save_results=True, load_results=False, n_episodes=1000)
+    a.learning_curve_progress(show_average=True, show_median=True)
+    #a.test(n_episodes=1000)
+    #a.agent_score_statistics()
+    #a.agent_progress_statistics()
+    #a.histogram_score()
+    #a.histogram_progress()
+
     #a.display_agent(load_history=False, save_history=False)
