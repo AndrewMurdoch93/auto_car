@@ -9,91 +9,96 @@ import path_tracker
 
 class environment():
 
-    def __init__(self, sim_conf):
+    def __init__(self, sim_conf, save_history, map_name, max_steps, local_path, waypoint_strategy, reward_signal, num_actions, control_steps):
+        
+        self.save_history=save_history
         self.sim_conf = sim_conf
-        self.local_path=True
-        self.reset()
-
-    def reset(self, save_history=False):
+        self.map_name = map_name
+        self.max_steps = max_steps
+        self.local_path = local_path
+        self.waypoint_strategy = waypoint_strategy
+        self.reward_signal = reward_signal
+        self.num_actions = num_actions
+        self.control_steps = control_steps
         
-        self.occupancy_grid, self.map_height, self.map_width, self.res = functions.map_generator(map_name='circle')
-        goal_x, goal_y, rx, ry, ryaw, rk, s = functions.generate_circle_goals()
-        self.goals=[]
-        self.max_goals_reached=False
+        #simulation parameters
+        self.dt = self.sim_conf.time_step
         
-        for x,y in zip(goal_x,goal_y):
-            self.goals.append([x, y])
+        #Initialise car parameters
+        self.mass = self.sim_conf.m                              
+        self.max_delta = self.sim_conf.max_delta                 
+        self.max_delta_dot = self.sim_conf.max_delta_dot            
+        self.max_v = self.sim_conf.max_v                         
+        self.max_a = self.sim_conf.max_a
+        self.wheelbase = self.sim_conf.l_f + self.sim_conf.l_r   
 
-        start_x, start_y, start_theta, next_goal = functions.random_start(goal_x, goal_y, rx, ry, ryaw, rk, s)
+        if self.local_path == True:
+            self.path_tracker = path_tracker.local_path_tracker(self.wheelbase)
         
-        self.x = start_x
-        self.y = start_y
-        self.theta = start_theta
-        self.current_goal = next_goal
-
-        self.save_history = save_history   
-        self.num_actions = 8
-
+        #Initialise map and goal settings
+        self.occupancy_grid, self.map_height, self.map_width, self.res = functions.map_generator(map_name = self.map_name)
         self.s=2
         
+        self.goal_x, self.goal_y, self.rx, self.ry, self.ryaw, self.rk, self.d = functions.generate_circle_goals()
+        self.goals=[]
+        self.max_goals_reached=False
+
+        for x,y in zip(self.goal_x, self.goal_y):
+            self.goals.append([x, y])
+
+        self.reset(self.save_history)
+
+    def reset(self, save_history):
+        self.save_history=save_history
+
+        #Inialise state variables
+        self.x, self.y, self.theta, self.current_goal = functions.random_start(self.goal_x, self.goal_y, self.rx, self.ry, self.ryaw, self.rk, self.d)
         self.v = 0    
         self.delta = 0
+        self.theta_dot = 0      
+        self.delta_dot = 0
+        
         self.x_to_goal = self.goals[self.current_goal][0] - self.x
         self.y_to_goal = self.goals[self.current_goal][1] - self.y
         self.old_d_goal = np.linalg.norm(np.array([self.x_to_goal, self.y_to_goal]))
         self.new_d_goal = np.linalg.norm(np.array([self.x_to_goal, self.y_to_goal]))
-        
-        self.angle = math.atan2(self.y-15, self.x-15)
-        self.new_angle = math.atan2(self.y-15, self.x-15)
-
-        self.theta_dot = 0      #car rate of change of heading
-        self.delta_dot = 0
-        
-        #self.prev_loc = 0
-        self.dt = self.sim_conf.time_step
-        self.control_steps = self.sim_conf.control_steps
-        #Initialise car parameters from 
-        self.mass = self.sim_conf.m                              #car mass
-        self.max_delta = self.sim_conf.max_delta                 #car maximum steering angle
-        self.max_delta_dot = self.sim_conf.max_delta_dot             #car maximum maximum rate of steering angle change
-        self.max_v = self.sim_conf.max_v                         
-        self.max_a = self.sim_conf.max_a
-        self.wheelbase = self.sim_conf.l_f + self.sim_conf.l_r        #Distance between rear and front wheels  
-
+    
+        #Initialise state and observation vector 
         self.state = [self.x, self.y, self.theta, self.delta, self.v]
-        self.observation = [self.x/self.map_width, self.y/self.map_height, (self.delta+self.max_delta)/(2*self.max_delta), self.v/self.max_v, (self.theta+math.pi)/(2*math.pi), (self.x_to_goal+0.5*self.map_width)/self.map_width, (self.y_to_goal+0.5*self.map_height)/self.map_height]
+        #self.observation = [self.x/self.map_width, self.y/self.map_height, (self.delta+self.max_delta)/(2*self.max_delta), self.v/self.max_v, (self.theta+math.pi)/(2*math.pi), (self.x_to_goal+0.5*self.map_width)/self.map_width, (self.y_to_goal+0.5*self.map_height)/self.map_height]
         #self.observation = [self.x/self.map_width, self.y/self.map_height,(self.theta+math.pi)/(2*math.pi)]
+        self.observation = [self.x/self.map_width, self.y/self.map_height, (self.theta+math.pi)/(2*math.pi), (self.x_to_goal+0.5*self.map_width)/self.map_width, (self.y_to_goal+0.5*self.map_height)/self.map_height]
         
+        
+        #Initialise history
         self.state_history = []
         self.action_history = []
         self.local_path_history = []
         self.goal_history = []
-        #self.ind_history = []
         self.observation_history = []
         self.reward_history = []
 
         self.state_history.append(self.state)
         self.observation_history.append(self.observation)
         
+        #Initialise flags
+        self.max_goals_reached=False
         self.out_of_bounds = False
         self.max_steps_reached = False
         self.goal_reached = False
         self.collision=False
         
+        #Progress indicators
         self.steps = 0
-        self.max_steps = 1500
-
         self.goals_reached = 0
         self.progress = 0
 
-        if self.local_path == True:
-            self.path_tracker = path_tracker.local_path_tracker(self.wheelbase)
 
     def take_action(self, act):
         reward = 0
         done=False
         
-        waypoint = self.convert_action_to_coord(strategy='waypoint', action=act)
+        waypoint = self.convert_action_to_coord(strategy=self.waypoint_strategy, action=act)
         v_ref = 7
 
         if self.local_path==False:
@@ -142,8 +147,9 @@ class environment():
     def save_state(self, waypoint, reward):
         
         self.state = [self.x, self.y, self.theta, self.delta, self.v]
-        self.observation = [self.x/self.map_width, self.y/self.map_height, (self.delta+self.max_delta)/(2*self.max_delta), self.v/self.max_v, (self.theta+math.pi)/(2*math.pi), (self.x_to_goal+0.5*self.map_width)/self.map_width, (self.y_to_goal+0.5*self.map_height)/self.map_height]
+        #self.observation = [self.x/self.map_width, self.y/self.map_height, (self.delta+self.max_delta)/(2*self.max_delta), self.v/self.max_v, (self.theta+math.pi)/(2*math.pi), (self.x_to_goal+0.5*self.map_width)/self.map_width, (self.y_to_goal+0.5*self.map_height)/self.map_height]
         #self.observation = [self.x/self.map_width, self.y/self.map_height,(self.theta+math.pi)/(2*math.pi)]
+        self.observation = [self.x/self.map_width, self.y/self.map_height, (self.theta+math.pi)/(2*math.pi), (self.x_to_goal+0.5*self.map_width)/self.map_width, (self.y_to_goal+0.5*self.map_height)/self.map_height]
         
         if self.save_history==True:
             self.state_history.append(self.state[:])
@@ -181,9 +187,6 @@ class environment():
             
         if self.steps >= self.max_steps:
             self.max_steps_reached=True
-        
-        if self.goal_reached == True:
-            self.goal_reached=False
 
         if self.goals_reached==(len(self.goals)):
             self.max_goals_reached=True
@@ -195,24 +198,19 @@ class environment():
     def getReward(self):
 
         if self.goal_reached==True:
-            return 1
-            
+            return self.reward_signal[0]
+
         if  self.out_of_bounds==True:
-            return -1
-        
+            return self.reward_signal[1]
+
         elif self.max_steps_reached==True:
-            return -1
-        
-        elif self.goal_reached==True:
-            return 0
-        
+            return self.reward_signal[2]
+
         elif self.collision==True:
-            return -1
+            return self.reward_signal[3]
 
         else:
-           #goal_progress = self.old_d_goal-self.new_d_goal
-           #return goal_progress*0.1
-           return -0.001
+           return self.reward_signal[4]
     
             
     def isEnd(self):
@@ -266,9 +264,6 @@ class environment():
             delta_dot: rate of change of steering angle
         '''
 
-        self.old_d_goal = self.new_d_goal
-        self.old_angle = self.new_angle%(2*math.pi-0.05)
-
         #Update (rear axle) position
         self.x = self.x + self.v * np.cos(self.theta) * self.dt
         self.y = self.y + self.v * np.sin(self.theta) * self.dt
@@ -295,10 +290,13 @@ class environment():
         self.v = np.clip(self.v, -self.max_v, self.max_v)         #truncate velocity
 
 
+
 def test_environment():
 
-    env = environment(functions.load_config(sys.path[0], "config"))
-    env.reset(save_history=True)
+    env = environment(sim_conf=functions.load_config(sys.path[0], "config"), save_history=True, map_name='circle', max_steps=1500, 
+    local_path=True, waypoint_strategy='waypoint', reward_signal=[1,-1,-1,-1,-0.001], num_actions=8, control_steps=20)
+    
+    env.reset()
     done=False
     
     while done==False:
@@ -321,8 +319,8 @@ def test_environment():
                     plt.gcf().canvas.mpl_connect('key_release_event', lambda event: [exit(0) if event.key == 'escape' else None])
                     #plt.image
                     plt.imshow(im, extent=(0,30,0,30))
-                    plt.arrow(sh[0], sh[1], 0.5*math.cos(sh[2]), 0.1*math.sin(sh[2]), head_length=0.5, head_width=0.5, shape='full', ec='None', fc='blue')
-                    plt.arrow(sh[0], sh[1], 0.5*math.cos(sh[2]+sh[3]), 0.1*math.sin(sh[2]+sh[3]), head_length=0.5, head_width=0.5, shape='full',ec='None', fc='red')
+                    plt.arrow(sh[0], sh[1], 0.5*math.cos(sh[2]), 0.5*math.sin(sh[2]), head_length=0.5, head_width=0.5, shape='full', ec='None', fc='blue')
+                    plt.arrow(sh[0], sh[1], 0.5*math.cos(sh[2]+sh[3]), 0.5*math.sin(sh[2]+sh[3]), head_length=0.5, head_width=0.5, shape='full',ec='None', fc='red')
                     plt.plot(sh[0], sh[1], 'o')
                     plt.plot(ah[0], ah[1], 'x')
                     plt.plot([gh[0]-env.s, gh[0]+env.s, gh[0]+env.s, gh[0]-env.s, gh[0]-env.s], [gh[1]-env.s, gh[1]-env.s, gh[1]+env.s, gh[1]+env.s, gh[1]-env.s], 'r')
@@ -358,6 +356,6 @@ def test_environment():
                     plt.title('Episode history')
                     plt.pause(0.001)
 
-test_environment()
+#test_environment()
 
         

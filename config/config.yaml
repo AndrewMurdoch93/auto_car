@@ -6,17 +6,9 @@ g: 9.81
 l_r: 0.171
 l_f: 0.158
 
-initial_x: 0
-initial_y: 0.5
-initial_theta: 0.2
-initial_v: 0
-initial_delta: 0
-
 max_v: 7
 max_a: 8.5
 max_delta: 0.4
 max_delta_dot: 3.2
 
 time_step: 0.01
-control_steps: 10
-

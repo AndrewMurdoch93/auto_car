@@ -17,6 +17,7 @@ from matplotlib import image
 from PIL import Image
 import time
 import seaborn as sns
+import display_results
 
 class trainingLoop():
     def __init__(self, agent_name):
@@ -24,10 +25,7 @@ class trainingLoop():
         #Initialise file names for saving data
         self.agent_file_name = 'agents/' + agent_name
         self.train_results_file_name = 'train_results/' + agent_name
-        self.history_file_name = 'test_history/' + agent_name
-        self.results_file_name = 'test_results/' + agent_name
         self.environment_name = 'environments/' + agent_name
-
 
         #Hyper parameters for training the agent
         self.gamma=0.99
@@ -39,19 +37,21 @@ class trainingLoop():
         self.max_episodes = 10000
         self.max_mem_size = 1000000
 
+        #Initialising environment
+        self.env = environment(functions.load_config(sys.path[0], "config"), save_history=True, map_name='circle', max_steps=1500, 
+                    local_path=False, waypoint_strategy='local', reward_signal=[1,-1,-1,-1,-0.001], num_actions=8, control_steps=10)
+
+        
         #Agent constraints
-        self.n_actions = self.env.num_actions
+        self.n_actions = 8
         self.input_dims = len(self.env.observation)
 
         #Display constraints
         self.window=100
 
         
-    def train(self, save_agent=True, save_score=True):
+    def train(self):
         
-        #Initialising environment
-        self.env = environment(functions.load_config(sys.path[0], "config"))
-
         #Save the environment
         outfile=open(self.environment_name, 'wb')
         pickle.dump(self.env, outfile)
@@ -69,7 +69,7 @@ class trainingLoop():
         
         for episode in range(self.max_episodes):
             
-            self.env.reset()                #Reset the environment every episode
+            self.env.reset(save_history=False)                #Reset the environment every episode
             obs = self.env.observation      #Records starting state
             done = False
             score = 0                       #Initialise score counter for every episode
@@ -96,26 +96,29 @@ class trainingLoop():
 
             self.agent.decrease_epsilon()
 
-            if save_agent==True and episode%1000==0:
+            if episode%1000==0 and episode!=0:
                 outfile=open(self.agent_file_name, 'wb')
                 pickle.dump(self.agent, outfile)
-                outfile.close()  
+                outfile.close()
+
+                outfile=open(self.train_results_file_name, 'wb')
+                pickle.dump(scores, outfile)
+                pickle.dump(progress, outfile)
+                outfile.close()
+
 
             if episode%10==0:
                 print(f"{'Episode':8s} {episode:5.0f} {'| Score':8s} {score:6.2f} {'| Average score':15s} {avg_score:6.2f} {'| Progress':12s} {self.env.progress:3.2f} {'| Average progress':18s} {avg_progress:3.2f} {'| Epsilon':9s} {self.agent.epsilon:.2f}")
       
-            
+        
+        outfile=open(self.agent_file_name, 'wb')
+        pickle.dump(self.agent, outfile)
+        outfile.close()
 
-        if save_agent==True:
-            outfile=open(self.agent_file_name, 'wb')
-            pickle.dump(self.agent, outfile)
-            outfile.close()
-
-        if save_score==True:
-            outfile=open(self.train_results_file_name, 'wb')
-            pickle.dump(scores, outfile)
-            pickle.dump(progress, outfile)
-            outfile.close()
+        outfile=open(self.train_results_file_name, 'wb')
+        pickle.dump(scores, outfile)
+        pickle.dump(progress, outfile)
+        outfile.close()
 
 
     def learning_curve_score(self, show_average=False, show_median=True):
@@ -392,8 +395,8 @@ class trainingLoop():
             goal_history = self.env.goal_history
             observation_history = self.env.observation_history
             reward_history = self.env.reward_history
-            #if self.env.local_path==True:
-            #    self.local_path_history = self.env.local_path_history
+            if self.env.local_path==True:
+                self.local_path_history = self.env.local_path_history
 
             if save_history==True:
                 outfile = open(self.history_file_name, 'wb')
@@ -403,8 +406,8 @@ class trainingLoop():
                 pickle.dump(self.observation_history, outfile)
                 pickle.dump(self.reward_history, outfile)
                 pickle.dump(score)
-                #if self.env.local_path==True:
-                #    pickle.dump(self.state_history, outfile)
+                if self.env.local_path==True:
+                    pickle.dump(self.state_history, outfile)
                 outfile.close()
            
         #print('\nTotal reward = ', np.sum(self.reward_history))
@@ -416,7 +419,7 @@ class trainingLoop():
 
         if self.env.local_path==True:
             
-            for sh, ah, gh, lph in zip(state_history, action_history, goal_history, local_path_history):
+            for sh, ah, gh, lph in zip(state_history, action_history, goal_history, self.local_path_history):
                 plt.cla()
                 # Stop the simulation with the esc key.
                 plt.gcf().canvas.mpl_connect('key_release_event', lambda event: [exit(0) if event.key == 'escape' else None])
@@ -463,8 +466,11 @@ class trainingLoop():
 
 if __name__=='__main__':
     
+    agent_name='agent_25_jan'
+    
     a = trainingLoop(agent_name='agent_25_jan')
-    #a.train(save_agent=True)
+    #a.train()
+    
     #a.learning_curve_score(show_average=True, show_median=True)
     #a.learning_curve_progress(show_average=True, show_median=True)
     #a.test(n_episodes=1000)
@@ -472,5 +478,12 @@ if __name__=='__main__':
     #a.agent_progress_statistics()
     #a.histogram_score()
     #a.histogram_progress()
+
+    #display_results.learning_curve_score(agent_name=agent_name, show_average=True, show_median=True)
+    #display_results.learning_curve_progress(agent_name=agent_name, show_average=True, show_median=True)
+    #display_results.agent_score_statistics(agent_name=agent_name)
+    #display_results.agent_progress_statistics(agent_name=agent_name)
+    #display_results.histogram_score(agent_name=agent_name)
+    #display_results.histogram_progress(agent_name=agent_name)
 
     a.display_agent(load_history=False, save_history=False)
