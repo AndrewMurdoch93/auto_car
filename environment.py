@@ -5,12 +5,13 @@ import sys
 import matplotlib.pyplot as plt
 from matplotlib import image
 from PIL import Image
+import path_tracker
 
 class environment():
 
     def __init__(self, sim_conf):
         self.sim_conf = sim_conf
-        self.local_path=False
+        self.local_path=True
         self.reset()
 
     def reset(self, save_history=False):
@@ -18,6 +19,7 @@ class environment():
         self.occupancy_grid, self.map_height, self.map_width, self.res = functions.map_generator(map_name='circle')
         goal_x, goal_y, rx, ry, ryaw, rk, s = functions.generate_circle_goals()
         self.goals=[]
+        self.max_goals_reached=False
         
         for x,y in zip(goal_x,goal_y):
             self.goals.append([x, y])
@@ -59,14 +61,14 @@ class environment():
         self.wheelbase = self.sim_conf.l_f + self.sim_conf.l_r        #Distance between rear and front wheels  
 
         self.state = [self.x, self.y, self.theta, self.delta, self.v]
-        #self.observation = [self.x/self.map_width, self.y/self.map_height, (self.delta+self.max_delta)/(2*self.max_delta), self.v/self.max_v, (self.theta+math.pi)/(2*math.pi), (self.x_to_goal+0.5*self.map_width)/self.map_width, (self.y_to_goal+0.5*self.map_height)/self.map_height]
-        self.observation = [self.x/self.map_width, self.y/self.map_height,(self.theta+math.pi)/(2*math.pi)]
+        self.observation = [self.x/self.map_width, self.y/self.map_height, (self.delta+self.max_delta)/(2*self.max_delta), self.v/self.max_v, (self.theta+math.pi)/(2*math.pi), (self.x_to_goal+0.5*self.map_width)/self.map_width, (self.y_to_goal+0.5*self.map_height)/self.map_height]
+        #self.observation = [self.x/self.map_width, self.y/self.map_height,(self.theta+math.pi)/(2*math.pi)]
         
         self.state_history = []
         self.action_history = []
         self.local_path_history = []
         self.goal_history = []
-        self.ind_history = []
+        #self.ind_history = []
         self.observation_history = []
         self.reward_history = []
 
@@ -84,19 +86,23 @@ class environment():
         self.goals_reached = 0
         self.progress = 0
 
+        if self.local_path == True:
+            self.path_tracker = path_tracker.local_path_tracker(self.wheelbase)
+
     def take_action(self, act):
         reward = 0
         done=False
         
-        waypoint = self.convert_action_to_coord(strategy='local', action=act)
+        waypoint = self.convert_action_to_coord(strategy='waypoint', action=act)
         v_ref = 7
 
         if self.local_path==False:
             for _ in range(self.control_steps):
-                delta_ref = self.pure_pursuit(waypoint)
+                delta_ref = path_tracker.pure_pursuit(self.wheelbase, waypoint, self.x, self.y, self.theta)
                 delta_dot, a = self.control_system(self.delta, delta_ref, self.v, v_ref)
                 self.update_kinematic_state(a, delta_dot)
                 self.steps += 1
+                self.set_flags()
                 reward += self.getReward() 
                 done = self.isEnd()
                 self.save_state(waypoint, reward)
@@ -108,14 +114,14 @@ class environment():
         else:
             cx = (((np.arange(0.1, 1, 0.01))*(waypoint[0] - self.x)) + self.x).tolist()
             cy = ((np.arange(0.1, 1, 0.01))*(waypoint[1] - self.y) + self.y)
-            self.record_waypoints(cx, cy)
-            target_index, _ = self.search_target_waypoint(self.x, self.y, self.v)
+            self.path_tracker.record_waypoints(cx, cy)
+            target_index, _ = self.path_tracker.search_target_waypoint(self.x, self.y, self.v)
 
             lastIndex = len(cx)-1
             i=0
             while (lastIndex > target_index) and i<10:
 
-                delta_ref, target_index = self.pure_pursuit_steer_control(self.x, self.y, self.theta, self.v, target_index)
+                delta_ref, target_index = self.path_tracker.pure_pursuit_steer_control(self.x, self.y, self.theta, self.v, target_index)
                 delta_dot, a = self.control_system(self.delta, delta_ref, self.v, v_ref)
                 self.update_kinematic_state(a, delta_dot)
                 
@@ -123,7 +129,7 @@ class environment():
 
                 self.save_state(waypoint, reward)
                 self.local_path_history.append([cx, cy][:])
-                
+                self.set_flags()
                 reward += self.getReward()
                 done = self.isEnd()
                 if done == True:
@@ -136,8 +142,8 @@ class environment():
     def save_state(self, waypoint, reward):
         
         self.state = [self.x, self.y, self.theta, self.delta, self.v]
-        #self.observation = [self.x/self.map_width, self.y/self.map_height, (self.delta+self.max_delta)/(2*self.max_delta), self.v/self.max_v, (self.theta+math.pi)/(2*math.pi), (self.x_to_goal+0.5*self.map_width)/self.map_width, (self.y_to_goal+0.5*self.map_height)/self.map_height]
-        self.observation = [self.x/self.map_width, self.y/self.map_height,(self.theta+math.pi)/(2*math.pi)]
+        self.observation = [self.x/self.map_width, self.y/self.map_height, (self.delta+self.max_delta)/(2*self.max_delta), self.v/self.max_v, (self.theta+math.pi)/(2*math.pi), (self.x_to_goal+0.5*self.map_width)/self.map_width, (self.y_to_goal+0.5*self.map_height)/self.map_height]
+        #self.observation = [self.x/self.map_width, self.y/self.map_height,(self.theta+math.pi)/(2*math.pi)]
         
         if self.save_history==True:
             self.state_history.append(self.state[:])
@@ -160,118 +166,47 @@ class environment():
 
         return waypoint
 
-    def record_waypoints(self, cx, cy):
-        #Initialise waypoints for planner
-        self.cx = cx
-        self.cy = cy
-        self.old_nearest_point_index = None
-
-    def search_target_waypoint(self, x, y, v):
-        k = 0.1
-        Lfc = 0.2
-        
-        #If there is no previous nearest point - at the start
-        if self.old_nearest_point_index is None:
-            #Get distances to every point
-            dx = [x - icx for icx in self.cx]
-            dy = [y - icy for icy in self.cy]
-            d = np.hypot(dx, dy)    
-            ind = np.argmin(d)      #Get nearest point
-            self.ind_history.append(ind)
-            self.old_nearest_point_index = ind  #Set previous nearest point to nearest point
-        else:   #If there exists a previous nearest point - after the start
-            #Search for closest waypoint after ind
-            ind = self.old_nearest_point_index  
-            self.ind_history.append(ind)
-        
-            distance_this_index = functions.distance_between_points(self.cx[ind], x, self.cy[ind], y)   
-            
-            while True:
-                if (ind+1)>=len(self.cx):
-                    break
-                
-                distance_next_index = functions.distance_between_points(self.cx[ind + 1], x, self.cy[ind + 1], y)
-                
-                if distance_this_index < distance_next_index:
-                    break
-
-                ind = ind + 1 if (ind + 1) < len(self.cx) else ind  #Increment index - search for closest waypoint
-                
-                distance_this_index = distance_next_index
-            self.old_nearest_point_index = ind  
-
-        Lf = k * v + Lfc  # update look ahead distance
-
-        # search look ahead target point index
-        while Lf > functions.distance_between_points(self.cx[ind], x, self.cy[ind], y):
-            if (ind + 1) >= len(self.cx):
-                break  # not exceed goal
-            ind += 1
-
-        return ind, Lf
-
-
-    def pure_pursuit_steer_control(self, x, y, theta, v, pind):
-        '''
-        More complex pure pursuit for multiple waypoint/ path following
-        '''
-        ind, Lf = self.search_target_waypoint(x, y, v)
-
-        if pind >= ind:
-            ind = pind
-
-        if ind < len(self.cx):
-            tx = self.cx[ind]
-            ty = self.cy[ind]
-        else:  # toward goal
-            tx = self.cx[-1]
-            ty = self.cy[-1]
-            ind = len(self.cx) - 1
-
-        alpha = math.atan2(ty - y, tx - x) - theta
-        delta = math.atan2(2.0 * self.wheelbase * math.sin(alpha) / Lf, 1.0)
-
-        return delta, ind
-
-
-    def pure_pursuit(self, waypoint):
-        '''
-        A simple pure pursuit implementation for single waypoint following
-        Based on formulas in the youtube video:
-        https://www.youtube.com/watch?v=zMdoLO4kRKg&t=73s
-        '''
-        
-        ld = math.sqrt((waypoint[0]-self.x)**2 + (waypoint[1]-self.y)**2)
-        alpha = math.atan2(waypoint[1] - self.y, waypoint[0] - self.x) - self.theta
-        delta_ref = math.atan2(2.0 * self.wheelbase * math.sin(alpha) / ld, 1.0)
-
-        return delta_ref
-
-
-    def getReward(self):
-
+    def set_flags(self):
         if (self.x>self.goals[self.current_goal][0]-self.s and self.x<self.goals[self.current_goal][0]+self.s) and (self.y>self.goals[self.current_goal][1]-self.s and self.y<self.goals[self.current_goal][1]+self.s):
             self.current_goal = (self.current_goal+1)%(len(self.goals)-1)
             self.goal_reached = True
             self.goals_reached+=1
             self.progress = self.goals_reached/len(self.goals)
-            #print(self.progress)
-            return 1
             
+        elif self.goal_reached == True:
+            self.goal_reached = False
+        
         if self.x>self.map_width or self.x<0 or self.y>self.map_height or self.y<0:        
             self.out_of_bounds=True
-            return -1
-        
-        elif self.steps >= self.max_steps:
+            
+        if self.steps >= self.max_steps:
             self.max_steps_reached=True
+        
+        if self.goal_reached == True:
+            self.goal_reached=False
+
+        if self.goals_reached==(len(self.goals)):
+            self.max_goals_reached=True
+
+        if functions.detect_collision(self.occupancy_grid, self.x, self.y, self.res):
+            self.collision=True
+
+
+    def getReward(self):
+
+        if self.goal_reached==True:
+            return 1
+            
+        if  self.out_of_bounds==True:
             return -1
         
-        elif self.goal_reached == True:
-            self.goal_reached=False
+        elif self.max_steps_reached==True:
+            return -1
+        
+        elif self.goal_reached==True:
             return 0
         
-        elif functions.detect_collision(self.occupancy_grid, self.x, self.y, self.res):
-            self.collision=True
+        elif self.collision==True:
             return -1
 
         else:
@@ -281,7 +216,7 @@ class environment():
     
             
     def isEnd(self):
-        if self.goals_reached==(len(self.goals)):
+        if self.max_goals_reached==True:
             return True
         elif self.out_of_bounds==True:       
             return True
@@ -378,26 +313,51 @@ def test_environment():
             im = image.imread(image_path)
             plt.imshow(im, extent=(0,30,0,30))
 
-            for sh, ah, gh, rh in zip(env.state_history, env.action_history, env.goal_history, env.reward_history):
-                plt.cla()
-                # Stop the simulation with the esc key.
-                plt.gcf().canvas.mpl_connect('key_release_event', lambda event: [exit(0) if event.key == 'escape' else None])
-                #plt.image
-                plt.imshow(im, extent=(0,30,0,30))
-                plt.arrow(sh[0], sh[1], 0.5*math.cos(sh[2]), 0.1*math.sin(sh[2]), head_length=0.5, head_width=0.5, shape='full', ec='None', fc='blue')
-                plt.arrow(sh[0], sh[1], 0.5*math.cos(sh[2]+sh[3]), 0.1*math.sin(sh[2]+sh[3]), head_length=0.5, head_width=0.5, shape='full',ec='None', fc='red')
-                plt.plot(sh[0], sh[1], 'o')
-                plt.plot(ah[0], ah[1], 'x')
-                plt.plot([gh[0]-env.s, gh[0]+env.s, gh[0]+env.s, gh[0]-env.s, gh[0]-env.s], [gh[1]-env.s, gh[1]-env.s, gh[1]+env.s, gh[1]+env.s, gh[1]-env.s], 'r')
-                #plt.legend(["position", "waypoint", "goal area", "heading", "steering angle"])
-                plt.xlabel('x coordinate')
-                plt.ylabel('y coordinate')
-                plt.xlim([0,30])
-                plt.ylim([0,30])
-                #plt.grid(True)
-                plt.title('Episode history')
-                plt.pause(0.001)
+            if env.local_path==False:
 
-#test_environment()
+                for sh, ah, gh, rh in zip(env.state_history, env.action_history, env.goal_history, env.reward_history):
+                    plt.cla()
+                    # Stop the simulation with the esc key.
+                    plt.gcf().canvas.mpl_connect('key_release_event', lambda event: [exit(0) if event.key == 'escape' else None])
+                    #plt.image
+                    plt.imshow(im, extent=(0,30,0,30))
+                    plt.arrow(sh[0], sh[1], 0.5*math.cos(sh[2]), 0.1*math.sin(sh[2]), head_length=0.5, head_width=0.5, shape='full', ec='None', fc='blue')
+                    plt.arrow(sh[0], sh[1], 0.5*math.cos(sh[2]+sh[3]), 0.1*math.sin(sh[2]+sh[3]), head_length=0.5, head_width=0.5, shape='full',ec='None', fc='red')
+                    plt.plot(sh[0], sh[1], 'o')
+                    plt.plot(ah[0], ah[1], 'x')
+                    plt.plot([gh[0]-env.s, gh[0]+env.s, gh[0]+env.s, gh[0]-env.s, gh[0]-env.s], [gh[1]-env.s, gh[1]-env.s, gh[1]+env.s, gh[1]+env.s, gh[1]-env.s], 'r')
+                    #plt.legend(["position", "waypoint", "goal area", "heading", "steering angle"])
+                    plt.xlabel('x coordinate')
+                    plt.ylabel('y coordinate')
+                    plt.xlim([0,30])
+                    plt.ylim([0,30])
+                    #plt.grid(True)
+                    plt.title('Episode history')
+                    plt.pause(0.001)
+
+            else:
+
+                for sh, ah, gh, rh, lph in zip(env.state_history, env.action_history, env.goal_history, env.reward_history, env.local_path_history):
+                    plt.cla()
+                    # Stop the simulation with the esc key.
+                    plt.gcf().canvas.mpl_connect('key_release_event', lambda event: [exit(0) if event.key == 'escape' else None])
+                    #plt.image
+                    plt.imshow(im, extent=(0,30,0,30))
+                    plt.arrow(sh[0], sh[1], 0.5*math.cos(sh[2]), 0.1*math.sin(sh[2]), head_length=0.5, head_width=0.5, shape='full', ec='None', fc='blue')
+                    plt.arrow(sh[0], sh[1], 0.5*math.cos(sh[2]+sh[3]), 0.1*math.sin(sh[2]+sh[3]), head_length=0.5, head_width=0.5, shape='full',ec='None', fc='red')
+                    plt.plot(sh[0], sh[1], 'o')
+                    plt.plot(ah[0], ah[1], 'x')
+                    plt.plot([gh[0]-env.s, gh[0]+env.s, gh[0]+env.s, gh[0]-env.s, gh[0]-env.s], [gh[1]-env.s, gh[1]-env.s, gh[1]+env.s, gh[1]+env.s, gh[1]-env.s], 'r')
+                    plt.plot(lph[0], lph[1])
+                    #plt.legend(["position", "waypoint", "goal area", "heading", "steering angle"])
+                    plt.xlabel('x coordinate')
+                    plt.ylabel('y coordinate')
+                    plt.xlim([0,30])
+                    plt.ylim([0,30])
+                    #plt.grid(True)
+                    plt.title('Episode history')
+                    plt.pause(0.001)
+
+test_environment()
 
         

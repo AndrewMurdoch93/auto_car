@@ -26,9 +26,8 @@ class trainingLoop():
         self.train_results_file_name = 'train_results/' + agent_name
         self.history_file_name = 'test_history/' + agent_name
         self.results_file_name = 'test_results/' + agent_name
+        self.environment_name = 'environments/' + agent_name
 
-        #Initialising environment
-        self.env = environment(functions.load_config(sys.path[0], "config"))
 
         #Hyper parameters for training the agent
         self.gamma=0.99
@@ -49,6 +48,14 @@ class trainingLoop():
 
         
     def train(self, save_agent=True, save_score=True):
+        
+        #Initialising environment
+        self.env = environment(functions.load_config(sys.path[0], "config"))
+
+        #Save the environment
+        outfile=open(self.environment_name, 'wb')
+        pickle.dump(self.env, outfile)
+        outfile.close()
         
         #Initialise the agent
         self.agent = agent.agent(gamma=self.gamma, epsilon=self.epsilon, lr=self.lr, input_dims=self.input_dims, 
@@ -207,12 +214,14 @@ class trainingLoop():
 
     def test(self, n_episodes=1000):
         
-
         infile = open(self.agent_file_name, 'rb')
         agent = pickle.load(infile)
         infile.close()
 
-        
+        infile = open(self.environment_name, 'rb')
+        self.action_historyenv = pickle.load(infile)
+        infile.close()
+
         test_progress = []
         test_score = []
 
@@ -351,17 +360,22 @@ class trainingLoop():
         if load_history==True:
             
             infile = open(self.history_file_name, 'rb')
-            self.state_history = pickle.load(infile)
-            self.action_history = pickle.load(infile)
-            self.goal_history = pickle.load(infile)
-            self.observation_history = pickle.load(infile)
-            self.reward_history = pickle.load(infile)
+            state_history = pickle.load(infile)
+            action_history = pickle.load(infile)
+            goal_history = pickle.load(infile)
+            observation_history = pickle.load(infile)
+            reward_history = pickle.load(infile)
+            score = pickle.load(infile)
             #if self.env.local_path==True:
             #    self.local_path_history = pickle.load(infile)
             infile.close()
         
         else:
-
+            
+            infile = open(self.environment_name, 'rb')
+            self.env = pickle.load(infile)
+            infile.close()
+            
             self.env.reset(save_history=True)
             obs = self.env.observation
             done = False
@@ -373,11 +387,11 @@ class trainingLoop():
                 score += reward
                 obs = next_obs
             
-            self.state_history = self.env.state_history
-            self.action_history = self.env.action_history
-            self.goal_history = self.env.goal_history
-            self.observation_history = self.env.observation_history
-            self.reward_history = self.env.reward_history
+            state_history = self.env.state_history
+            action_history = self.env.action_history
+            goal_history = self.env.goal_history
+            observation_history = self.env.observation_history
+            reward_history = self.env.reward_history
             #if self.env.local_path==True:
             #    self.local_path_history = self.env.local_path_history
 
@@ -388,6 +402,7 @@ class trainingLoop():
                 pickle.dump(self.goal_history, outfile)
                 pickle.dump(self.observation_history, outfile)
                 pickle.dump(self.reward_history, outfile)
+                pickle.dump(score)
                 #if self.env.local_path==True:
                 #    pickle.dump(self.state_history, outfile)
                 outfile.close()
@@ -401,7 +416,7 @@ class trainingLoop():
 
         if self.env.local_path==True:
             
-            for sh, ah, gh, lph in zip(self.state_history, self.action_history, self.goal_history, self.local_path_history):
+            for sh, ah, gh, lph in zip(state_history, action_history, goal_history, local_path_history):
                 plt.cla()
                 # Stop the simulation with the esc key.
                 plt.gcf().canvas.mpl_connect('key_release_event', lambda event: [exit(0) if event.key == 'escape' else None])
@@ -423,7 +438,7 @@ class trainingLoop():
         
         else:
             
-            for sh, ah, gh, rh in zip(self.state_history, self.action_history, self.goal_history, self.reward_history):
+            for sh, ah, gh, rh in zip(state_history, action_history, goal_history, reward_history):
                 plt.cla()
                 # Stop the simulation with the esc key.
                 plt.gcf().canvas.mpl_connect('key_release_event', lambda event: [exit(0) if event.key == 'escape' else None])
@@ -442,12 +457,13 @@ class trainingLoop():
                 plt.title('Episode history')
                 plt.pause(0.01)
                 #print(rh)
-            
+        
+        print(score)
                     
 
 if __name__=='__main__':
     
-    a = trainingLoop(agent_name='agent_24_jan')
+    a = trainingLoop(agent_name='agent_25_jan')
     #a.train(save_agent=True)
     #a.learning_curve_score(show_average=True, show_median=True)
     #a.learning_curve_progress(show_average=True, show_median=True)
@@ -457,4 +473,4 @@ if __name__=='__main__':
     #a.histogram_score()
     #a.histogram_progress()
 
-    a.display_agent(load_history=True, save_history=False)
+    a.display_agent(load_history=False, save_history=False)
