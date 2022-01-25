@@ -282,7 +282,7 @@ class trainingLoop():
         plt.plot([percentile75, percentile75], [0, y.max()])
         
         plt.title('Progress distribution')
-        plt.xlabel('Score')
+        plt.xlabel('Fraction of track completed')
         plt.ylabel('Number of agents')
         plt.legend(['25th percentile', 'Median', '75th percentile', 'Agent progress'])
         plt.show()
@@ -326,6 +326,7 @@ class trainingLoop():
         maximum = np.max(test_progress)
         average = np.average(test_progress)
         std_dev = np.std(test_progress)
+        frac_complete = np.sum(np.array(test_progress)>=1)/len(test_progress)
 
         print('\n')
         print('Agent progress statistics: \n')
@@ -336,7 +337,7 @@ class trainingLoop():
         print(f"{'Maximum':20s} {maximum:6.2f}")
         print(f"{'Average':20s} {average:6.2f}")
         print(f"{'Standard deviation':20s} {std_dev:6.2f}")
-
+        print(f"{'Fraction completed':20s} {frac_complete:6.2f}")
 
     #Display a history of the episode
     def display_agent(self, load_history=False, save_history=False):
@@ -354,6 +355,7 @@ class trainingLoop():
             self.action_history = pickle.load(infile)
             self.goal_history = pickle.load(infile)
             self.observation_history = pickle.load(infile)
+            self.reward_history = pickle.load(infile)
             #if self.env.local_path==True:
             #    self.local_path_history = pickle.load(infile)
             infile.close()
@@ -385,13 +387,13 @@ class trainingLoop():
                 pickle.dump(self.action_history, outfile)
                 pickle.dump(self.goal_history, outfile)
                 pickle.dump(self.observation_history, outfile)
-                pickle.dump(self.reward_history)
+                pickle.dump(self.reward_history, outfile)
                 #if self.env.local_path==True:
                 #    pickle.dump(self.state_history, outfile)
                 outfile.close()
            
-        print('\nTotal reward = ', np.sum(self.reward_history))
-        print('\nTotal score = ', score)
+        #print('\nTotal reward = ', np.sum(self.reward_history))
+        #print('\nTotal score = ', score)
 
         image_path = sys.path[0] + '/maps/' + 'circle' + '.png'
         im = image.imread(image_path)
@@ -445,7 +447,7 @@ class trainingLoop():
 
 if __name__=='__main__':
     
-    a = trainingLoop(agent_name='goals_agent_full_state')
+    a = trainingLoop(agent_name='agent_24_jan')
     #a.train(save_agent=True)
     #a.learning_curve_score(show_average=True, show_median=True)
     #a.learning_curve_progress(show_average=True, show_median=True)
@@ -455,4 +457,4 @@ if __name__=='__main__':
     #a.histogram_score()
     #a.histogram_progress()
 
-    a.display_agent(load_history=False, save_history=False)
+    a.display_agent(load_history=True, save_history=False)

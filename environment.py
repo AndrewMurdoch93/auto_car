@@ -59,7 +59,8 @@ class environment():
         self.wheelbase = self.sim_conf.l_f + self.sim_conf.l_r        #Distance between rear and front wheels  
 
         self.state = [self.x, self.y, self.theta, self.delta, self.v]
-        self.observation = [self.x/self.map_width, self.y/self.map_height, (self.delta+self.max_delta)/(2*self.max_delta), self.v/self.max_v, (self.theta+math.pi)/(2*math.pi), (self.x_to_goal+0.5*self.map_width)/self.map_width, (self.y_to_goal+0.5*self.map_height)/self.map_height]
+        #self.observation = [self.x/self.map_width, self.y/self.map_height, (self.delta+self.max_delta)/(2*self.max_delta), self.v/self.max_v, (self.theta+math.pi)/(2*math.pi), (self.x_to_goal+0.5*self.map_width)/self.map_width, (self.y_to_goal+0.5*self.map_height)/self.map_height]
+        self.observation = [self.x/self.map_width, self.y/self.map_height,(self.theta+math.pi)/(2*math.pi)]
         
         self.state_history = []
         self.action_history = []
@@ -135,8 +136,9 @@ class environment():
     def save_state(self, waypoint, reward):
         
         self.state = [self.x, self.y, self.theta, self.delta, self.v]
-        self.observation = [self.x/self.map_width, self.y/self.map_height, (self.delta+self.max_delta)/(2*self.max_delta), self.v/self.max_v, (self.theta+math.pi)/(2*math.pi), (self.x_to_goal+0.5*self.map_width)/self.map_width, (self.y_to_goal+0.5*self.map_height)/self.map_height]
-
+        #self.observation = [self.x/self.map_width, self.y/self.map_height, (self.delta+self.max_delta)/(2*self.max_delta), self.v/self.max_v, (self.theta+math.pi)/(2*math.pi), (self.x_to_goal+0.5*self.map_width)/self.map_width, (self.y_to_goal+0.5*self.map_height)/self.map_height]
+        self.observation = [self.x/self.map_width, self.y/self.map_height,(self.theta+math.pi)/(2*math.pi)]
+        
         if self.save_history==True:
             self.state_history.append(self.state[:])
             self.action_history.append(waypoint)
