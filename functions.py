@@ -146,8 +146,52 @@ def random_start(x, y, rx, ry, ryaw, rk, s):
     return start_x, start_y, start_theta, next_i
 
 
-def measure_progress(goals, goals_reached):
-    return goals_reached/(len(goals)-1)
+class measure_progress():
+    def __init__(self, rx, ry):
+        self.rx = rx
+        self.ry = ry
+        self.old_nearest_point_index = None
+
+    def search_nearest_index(self, x, y):
+    
+        if self.old_nearest_point_index is None:
+            #Get distances to every point
+            dx = [x - icx for icx in self.cx]
+            dy = [y - icy for icy in self.cy]
+            d = np.hypot(dx, dy)    
+            ind = np.argmin(d)      #Get nearest point
+            self.old_nearest_point_index = ind  #Set previous nearest point to nearest point
+        
+        else:   #If there exists a previous nearest point - after the start
+            #Search for closest waypoint after ind
+            ind = self.old_nearest_point_index  
+            #self.ind_history.append(ind)
+        
+            distance_this_index = distance_between_points(self.cx[ind], x, self.cy[ind], y)   
+            
+            while True:
+                if (ind+1)>=len(self.cx):
+                    break
+                
+                distance_next_index = distance_between_points(self.cx[ind + 1], x, self.cy[ind + 1], y)
+                
+                if distance_this_index < distance_next_index:
+                    break
+
+                ind = ind + 1 if (ind + 1) < len(self.cx) else ind  #Increment index - search for closest waypoint
+                
+                distance_this_index = distance_next_index
+            self.old_nearest_point_index = ind
+
+        return ind
+    
+    def progress(self, x, y):
+
+        new_ind = self.search_nearest_index(x, y)
+        prg = (new_ind-self.old_nearest_point_index)/len(self.rx)
+        self.old_nearest_point_index = new_ind
+        return prg
+
 
 
 #generate_berlin_goals()

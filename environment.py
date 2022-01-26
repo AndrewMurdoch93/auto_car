@@ -42,6 +42,7 @@ class environment():
         self.goal_x, self.goal_y, self.rx, self.ry, self.ryaw, self.rk, self.d = functions.generate_circle_goals()
         self.goals=[]
         self.max_goals_reached=False
+        self.det_prg = functions.measure_progress(self.rx, self.ry)
 
         for x,y in zip(self.goal_x, self.goal_y):
             self.goals.append([x, y])
@@ -62,7 +63,8 @@ class environment():
         self.y_to_goal = self.goals[self.current_goal][1] - self.y
         self.old_d_goal = np.linalg.norm(np.array([self.x_to_goal, self.y_to_goal]))
         self.new_d_goal = np.linalg.norm(np.array([self.x_to_goal, self.y_to_goal]))
-    
+        
+
         #Initialise state and observation vector 
         self.state = [self.x, self.y, self.theta, self.delta, self.v]
         #self.observation = [self.x/self.map_width, self.y/self.map_height, (self.delta+self.max_delta)/(2*self.max_delta), self.v/self.max_v, (self.theta+math.pi)/(2*math.pi), (self.x_to_goal+0.5*self.map_width)/self.map_width, (self.y_to_goal+0.5*self.map_height)/self.map_height]
@@ -177,7 +179,9 @@ class environment():
             self.current_goal = (self.current_goal+1)%(len(self.goals)-1)
             self.goal_reached = True
             self.goals_reached+=1
-            self.progress = self.goals_reached/len(self.goals)
+            #self.progress = self.goals_reached/len(self.goals)
+            self.progress = self.det_prg.progress(self.x,self.y)
+            
             
         elif self.goal_reached == True:
             self.goal_reached = False
@@ -296,7 +300,7 @@ def test_environment():
     env = environment(sim_conf=functions.load_config(sys.path[0], "config"), save_history=True, map_name='circle', max_steps=1500, 
     local_path=True, waypoint_strategy='waypoint', reward_signal=[1,-1,-1,-1,-0.001], num_actions=8, control_steps=20)
     
-    env.reset()
+    env.reset(save_history=True)
     done=False
     
     while done==False:
@@ -324,6 +328,7 @@ def test_environment():
                     plt.plot(sh[0], sh[1], 'o')
                     plt.plot(ah[0], ah[1], 'x')
                     plt.plot([gh[0]-env.s, gh[0]+env.s, gh[0]+env.s, gh[0]-env.s, gh[0]-env.s], [gh[1]-env.s, gh[1]-env.s, gh[1]+env.s, gh[1]+env.s, gh[1]-env.s], 'r')
+                    plt.plot(env.rx, env.ry)
                     #plt.legend(["position", "waypoint", "goal area", "heading", "steering angle"])
                     plt.xlabel('x coordinate')
                     plt.ylabel('y coordinate')
@@ -341,12 +346,13 @@ def test_environment():
                     plt.gcf().canvas.mpl_connect('key_release_event', lambda event: [exit(0) if event.key == 'escape' else None])
                     #plt.image
                     plt.imshow(im, extent=(0,30,0,30))
-                    plt.arrow(sh[0], sh[1], 0.5*math.cos(sh[2]), 0.1*math.sin(sh[2]), head_length=0.5, head_width=0.5, shape='full', ec='None', fc='blue')
-                    plt.arrow(sh[0], sh[1], 0.5*math.cos(sh[2]+sh[3]), 0.1*math.sin(sh[2]+sh[3]), head_length=0.5, head_width=0.5, shape='full',ec='None', fc='red')
+                    plt.arrow(sh[0], sh[1], 0.5*math.cos(sh[2]), 0.5*math.sin(sh[2]), head_length=0.5, head_width=0.5, shape='full', ec='None', fc='blue')
+                    plt.arrow(sh[0], sh[1], 0.5*math.cos(sh[2]+sh[3]), 0.5*math.sin(sh[2]+sh[3]), head_length=0.5, head_width=0.5, shape='full',ec='None', fc='red')
                     plt.plot(sh[0], sh[1], 'o')
                     plt.plot(ah[0], ah[1], 'x')
                     plt.plot([gh[0]-env.s, gh[0]+env.s, gh[0]+env.s, gh[0]-env.s, gh[0]-env.s], [gh[1]-env.s, gh[1]-env.s, gh[1]+env.s, gh[1]+env.s, gh[1]-env.s], 'r')
                     plt.plot(lph[0], lph[1])
+                    plt.plot(env.rx, env.ry)
                     #plt.legend(["position", "waypoint", "goal area", "heading", "steering angle"])
                     plt.xlabel('x coordinate')
                     plt.ylabel('y coordinate')
