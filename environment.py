@@ -356,6 +356,6 @@ def test_environment():
                     plt.title('Episode history')
                     plt.pause(0.001)
 
-#test_environment()
+test_environment()
 
         

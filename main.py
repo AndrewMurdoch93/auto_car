@@ -168,7 +168,7 @@ def test(agent_name, n_episodes=1000):
 
 if __name__=='__main__':
     
-    agent_name='standard'
+    agent_name='agent_25_jan'
     #a = trainingLoop (agent_name=agent_name, gamma=0.99, epsilon=1, eps_end=0.01, eps_dec=1e-3, batch_size=64, lr=0.001, max_episodes=50000, max_mem_size=2000000,
     #                map_name='circle', max_steps=1500,local_path=False, waypoint_strategy='local', reward_signal=[1,-1,-1,-1,-0.001], control_steps=10)
     #a.train()
@@ -181,10 +181,10 @@ if __name__=='__main__':
     #test(agent_name=agent_name)
 
     #agent_name='standard'
-    display_results.learning_curve_score(agent_name=agent_name, show_average=True, show_median=True)
-    display_results.learning_curve_progress(agent_name=agent_name, show_average=True, show_median=True)
-    display_results.agent_score_statistics(agent_name=agent_name)
-    display_results.agent_progress_statistics(agent_name=agent_name)
-    display_results.histogram_score(agent_name=agent_name)
-    display_results.histogram_progress(agent_name=agent_name)
-    display_results.display_moving_agent(agent_name=agent_name, load_history=False, save_history=False)
+    #display_results.learning_curve_score(agent_name=agent_name, show_average=True, show_median=True)
+    #display_results.learning_curve_progress(agent_name=agent_name, show_average=True, show_median=True)
+    #display_results.agent_score_statistics(agent_name=agent_name)
+    #display_results.agent_progress_statistics(agent_name=agent_name)
+    #display_results.histogram_score(agent_name=agent_name)
+    #display_results.histogram_progress(agent_name=agent_name)
+    display_results.display_moving_agent(agent_name=agent_name, load_history=True, save_history=False)
