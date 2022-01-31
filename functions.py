@@ -153,6 +153,11 @@ def find_closest_point(rx, ry, x, y):
     ind = np.argmin(d)
     return ind
 
+def find_angle_to_line(ind, ryaw, theta):
+    line_angle = ryaw[ind]
+    angle = line_angle-theta
+    return angle
+
 
 
 

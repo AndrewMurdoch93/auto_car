@@ -93,11 +93,7 @@ class environment():
         self.save_state()
 
         if self.save_history==True:
-            self.state_history.append(self.state[:])
-            self.goal_history.append(self.goals[self.current_goal])
-            self.observation_history.append(self.observation)
-            self.progress_history.append(self.progress)
-            self.closest_point_history.append(self.old_closest_point)
+            self.save_history_func()
 
 
     def take_action(self, act):
@@ -107,8 +103,12 @@ class environment():
         waypoint = self.convert_action_to_coord(strategy=self.waypoint_strategy, action=act)
         v_ref = 7
 
+
         if self.local_path==False:
             for _ in range(self.control_steps):
+                if self.save_history==True:
+                    self.action_history.append(waypoint)
+                
                 delta_ref = path_tracker.pure_pursuit(self.wheelbase, waypoint, self.x, self.y, self.theta)
                 delta_dot, a = self.control_system(self.delta, delta_ref, self.v, v_ref)
                 self.update_kinematic_state(a, delta_dot)
@@ -117,12 +117,15 @@ class environment():
                 reward += self.getReward() 
                 done = self.isEnd()
                 self.save_state()
-                self.save_history_func(waypoint, reward)
+                
+                if self.save_history==True:
+                    self.reward_history.append(reward)
+                    self.save_history_func()
+                
                 if done==True:
                     break
             #self.save_state(waypoint, reward)
            
-
         else:
             cx = (((np.arange(0.1, 1, 0.01))*(waypoint[0] - self.x)) + self.x).tolist()
             cy = ((np.arange(0.1, 1, 0.01))*(waypoint[1] - self.y) + self.y)
@@ -132,7 +135,9 @@ class environment():
             lastIndex = len(cx)-1
             i=0
             while (lastIndex > target_index) and i<10:
-
+                if self.save_history==True:
+                    self.action_history.append(waypoint)
+                
                 delta_ref, target_index = self.path_tracker.pure_pursuit_steer_control(self.x, self.y, self.theta, self.v, target_index)
                 delta_dot, a = self.control_system(self.delta, delta_ref, self.v, v_ref)
                 self.update_kinematic_state(a, delta_dot)
@@ -144,7 +149,10 @@ class environment():
                 reward += self.getReward()
 
                 self.save_state()
-                self.save_history_func(waypoint, reward)
+
+                if self.save_history==True:
+                    self.reward_history.append(reward)
+                    self.save_history_func()
                 
                 #plt.plot(self.rx, self.ry)
                 #plt.plot(self.x, self.y, 'x')
@@ -166,16 +174,12 @@ class environment():
         #self.observation = [self.x/self.map_width, self.y/self.map_height,(self.theta+math.pi)/(2*math.pi)]
         self.observation = [self.x/self.map_width, self.y/self.map_height, (self.theta+math.pi)/(2*math.pi), (self.x_to_goal+0.5*self.map_width)/self.map_width, (self.y_to_goal+0.5*self.map_height)/self.map_height]
     
-    def save_history_func(self, waypoint, reward):
-
-        if self.save_history==True:
-            self.state_history.append(self.state[:])
-            self.action_history.append(waypoint)
-            self.goal_history.append(self.goals[self.current_goal])
-            self.observation_history.append(self.observation)
-            self.reward_history.append(reward)
-            self.progress_history.append(self.progress)
-            self.closest_point_history.append(self.old_closest_point)
+    def save_history_func(self):
+        self.state_history.append(self.state[:])
+        self.goal_history.append(self.goals[self.current_goal])
+        self.observation_history.append(self.observation)
+        self.progress_history.append(self.progress)
+        self.closest_point_history.append(self.old_closest_point)
     
     
     def convert_action_to_coord(self, strategy, action):
@@ -299,8 +303,8 @@ class environment():
         self.new_angle = math.atan2(self.y-15, self.x-15)%(2*math.pi)
 
         new_closest_point = functions.find_closest_point(self.rx, self.ry, self.x, self.y)
-        #self.progress = (new_closest_point-self.closest_point_history[0])/len(self.rx)
-        self.current_progress = (new_closest_point - self.old_closest_point)/len(self.rx)
+        self.progress = (new_closest_point-self.closest_point_history[0])
+        self.current_progress = (new_closest_point - self.old_closest_point)
         self.old_closest_point = new_closest_point
 
         #Update car heading angle
@@ -361,7 +365,6 @@ def test_environment():
                     plt.ylim([0,30])
                     #plt.grid(True)
                     plt.title('Episode history')
-
                     print('Progress = ', ph)
                     plt.pause(0.001)
 
@@ -388,7 +391,7 @@ def test_environment():
                     plt.ylim([0,30])
                     #plt.grid(True)
                     plt.title('Episode history')
-                    #print('Progress = ', ph)
+                    print('Progress = ', ph)
                     plt.pause(0.001)
 
 test_environment()
