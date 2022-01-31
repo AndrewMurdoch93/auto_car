@@ -65,9 +65,6 @@ class environment():
         self.old_d_goal = np.linalg.norm(np.array([self.x_to_goal, self.y_to_goal]))
         self.new_d_goal = np.linalg.norm(np.array([self.x_to_goal, self.y_to_goal]))
 
-        #Initialise state and observation vector 
-        self.save_state()
-        
         #Initialise history
         self.state_history = []
         self.action_history = []
@@ -76,6 +73,7 @@ class environment():
         self.observation_history = []
         self.reward_history = []
         self.progress_history = []
+        self.closest_point_history = []
         
         #Initialise flags
         self.max_goals_reached=False
@@ -91,6 +89,15 @@ class environment():
         #self.det_prg.search_index(self.x, self.y)
         self.old_closest_point = functions.find_closest_point(self.rx, self.ry, self.x, self.y)
 
+        #Initialise state and observation vector 
+        self.save_state()
+
+        if self.save_history==True:
+            self.state_history.append(self.state[:])
+            self.goal_history.append(self.goals[self.current_goal])
+            self.observation_history.append(self.observation)
+            self.progress_history.append(self.progress)
+            self.closest_point_history.append(self.old_closest_point)
 
 
     def take_action(self, act):
@@ -109,7 +116,8 @@ class environment():
                 self.set_flags()
                 reward += self.getReward() 
                 done = self.isEnd()
-                self.save_state(waypoint, reward)
+                self.save_state()
+                self.save_history_func(waypoint, reward)
                 if done==True:
                     break
             #self.save_state(waypoint, reward)
@@ -135,7 +143,8 @@ class environment():
                 self.set_flags()
                 reward += self.getReward()
 
-                self.save_state(waypoint, reward)
+                self.save_state()
+                self.save_history_func(waypoint, reward)
                 
                 #plt.plot(self.rx, self.ry)
                 #plt.plot(self.x, self.y, 'x')
@@ -166,6 +175,7 @@ class environment():
             self.observation_history.append(self.observation)
             self.reward_history.append(reward)
             self.progress_history.append(self.progress)
+            self.closest_point_history.append(self.old_closest_point)
     
     
     def convert_action_to_coord(self, strategy, action):
@@ -288,9 +298,10 @@ class environment():
         self.new_d_goal = np.linalg.norm(np.array([self.x_to_goal, self.y_to_goal]))
         self.new_angle = math.atan2(self.y-15, self.x-15)%(2*math.pi)
 
-        new_nearest_point = functions.find_closest_point(self.rx, self.ry, self.x, self.y)
-        self.progress = (new_nearest_point - self.old_nearest_point)/len(self.rx)
-        self.old_nearest_point = new_nearest_point
+        new_closest_point = functions.find_closest_point(self.rx, self.ry, self.x, self.y)
+        #self.progress = (new_closest_point-self.closest_point_history[0])/len(self.rx)
+        self.current_progress = (new_closest_point - self.old_closest_point)/len(self.rx)
+        self.old_closest_point = new_closest_point
 
         #Update car heading angle
         self.theta_dot = (self.v / self.wheelbase) * np.tan(self.delta)  #rate of change of heading
@@ -330,7 +341,7 @@ def test_environment():
 
             if env.local_path==False:
 
-                for sh, ah, gh, rh, ph in zip(env.state_history, env.action_history, env.goal_history, env.reward_history, env.progress_history):
+                for sh, ah, gh, rh, ph, cph in zip(env.state_history, env.action_history, env.goal_history, env.reward_history, env.progress_history, env.closest_point_history):
                     plt.cla()
                     # Stop the simulation with the esc key.
                     plt.gcf().canvas.mpl_connect('key_release_event', lambda event: [exit(0) if event.key == 'escape' else None])
@@ -342,6 +353,7 @@ def test_environment():
                     plt.plot(ah[0], ah[1], 'x')
                     plt.plot([gh[0]-env.s, gh[0]+env.s, gh[0]+env.s, gh[0]-env.s, gh[0]-env.s], [gh[1]-env.s, gh[1]-env.s, gh[1]+env.s, gh[1]+env.s, gh[1]-env.s], 'r')
                     plt.plot(env.rx, env.ry)
+                    plt.plot(env.rx[cph], env.ry[cph], 'x')
                     #plt.legend(["position", "waypoint", "goal area", "heading", "steering angle"])
                     plt.xlabel('x coordinate')
                     plt.ylabel('y coordinate')
@@ -355,7 +367,7 @@ def test_environment():
 
             else:
 
-                for sh, ah, gh, rh, lph, ph in zip(env.state_history, env.action_history, env.goal_history, env.reward_history, env.local_path_history, env.progress_history):
+                for sh, ah, gh, rh, lph, ph, cph in zip(env.state_history, env.action_history, env.goal_history, env.reward_history, env.local_path_history, env.progress_history, env.closest_point_history):
                     plt.cla()
                     # Stop the simulation with the esc key.
                     plt.gcf().canvas.mpl_connect('key_release_event', lambda event: [exit(0) if event.key == 'escape' else None])
@@ -368,6 +380,7 @@ def test_environment():
                     plt.plot([gh[0]-env.s, gh[0]+env.s, gh[0]+env.s, gh[0]-env.s, gh[0]-env.s], [gh[1]-env.s, gh[1]-env.s, gh[1]+env.s, gh[1]+env.s, gh[1]-env.s], 'r')
                     plt.plot(lph[0], lph[1])
                     plt.plot(env.rx, env.ry)
+                    plt.plot(env.rx[cph], env.ry[cph], 'x')
                     #plt.legend(["position", "waypoint", "goal area", "heading", "steering angle"])
                     plt.xlabel('x coordinate')
                     plt.ylabel('y coordinate')
@@ -375,7 +388,7 @@ def test_environment():
                     plt.ylim([0,30])
                     #plt.grid(True)
                     plt.title('Episode history')
-                    print('Progress = ', ph)
+                    #print('Progress = ', ph)
                     plt.pause(0.001)
 
 test_environment()
