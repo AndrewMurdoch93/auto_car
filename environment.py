@@ -42,8 +42,6 @@ class environment():
         self.goal_x, self.goal_y, self.rx, self.ry, self.ryaw, self.rk, self.d = functions.generate_circle_goals()
         self.goals=[]
         self.max_goals_reached=False
-        
-        self.det_prg = functions.measure_progress(self.rx, self.ry)
 
         for x,y in zip(self.goal_x, self.goal_y):
             self.goals.append([x, y])
@@ -201,7 +199,7 @@ class environment():
             self.goal_reached = True
             self.goals_reached+=1
             #self.progress = self.goals_reached/len(self.goals)
-            self.progress = self.det_prg.progress(self.x,self.y)
+            #self.progress = self.det_prg.progress(self.x,self.y)
             
         elif self.goal_reached == True:
             self.goal_reached = False
@@ -302,11 +300,6 @@ class environment():
         self.new_d_goal = np.linalg.norm(np.array([self.x_to_goal, self.y_to_goal]))
         self.new_angle = math.atan2(self.y-15, self.x-15)%(2*math.pi)
 
-        new_closest_point = functions.find_closest_point(self.rx, self.ry, self.x, self.y)
-        self.progress = (new_closest_point-self.closest_point_history[0])
-        self.current_progress = (new_closest_point - self.old_closest_point)
-        self.old_closest_point = new_closest_point
-
         #Update car heading angle
         self.theta_dot = (self.v / self.wheelbase) * np.tan(self.delta)  #rate of change of heading
         dtheta = self.theta_dot * self.dt   #change in heading angle
@@ -320,6 +313,20 @@ class environment():
 
         self.delta = np.clip(self.delta, -self.max_delta, self.max_delta)    #truncate steering angle
         self.v = np.clip(self.v, -self.max_v, self.max_v)         #truncate velocity
+
+        new_closest_point = functions.find_closest_point(self.rx, self.ry, self.x, self.y)
+        #self.progress = (new_closest_point-self.closest_point_history[0])
+        angle = np.abs(functions.sub_angles_complex(self.ryaw[new_closest_point], self.theta))
+
+        if angle<=np.pi/2:
+            self.current_progress = ((new_closest_point-self.old_closest_point)%len(self.rx))/len(self.rx)
+        if angle>np.pi/2:
+            self.current_progress = (-(new_closest_point-self.old_closest_point)%len(self.rx))/len(self.rx)
+        
+        self.progress += self.current_progress
+        
+        
+        self.old_closest_point = new_closest_point
 
 
 

@@ -31,6 +31,10 @@ def add_angles(a1, a2):
 
     return angle
 
+def sub_angles(a1, a2):
+    angle = (a1-a2)%(2*np.pi)
+
+    return angle
 
 def add_angles_complex(a1, a2):
     real = math.cos(a1) * math.cos(a2) - math.sin(a1) * math.sin(a2)
@@ -41,6 +45,14 @@ def add_angles_complex(a1, a2):
 
     return phase
 
+def sub_angles_complex(a1, a2): 
+    real = math.cos(a1) * math.cos(a2) + math.sin(a1) * math.sin(a2)
+    im = - math.cos(a1) * math.sin(a2) + math.sin(a1) * math.cos(a2)
+
+    cpx = complex(real, im)
+    phase = cmath.phase(cpx)
+
+    return phase
 
 def distance_between_points(x1, x2, y1, y2):
     distance = math.hypot(x2-x1, y2-y1)
@@ -153,59 +165,13 @@ def find_closest_point(rx, ry, x, y):
     ind = np.argmin(d)
     return ind
 
-def find_angle_to_line(ind, ryaw, theta):
-    line_angle = ryaw[ind]
-    angle = line_angle-theta
+def find_angle_to_line(ryaw, theta):
+
+    angle = np.abs(sub_angles_complex(ryaw, theta))
+
     return angle
 
-
-
-
-
-class measure_progress():
-    def __init__(self, rx, ry):
-        self.rx = rx
-        self.ry = ry
-        self.old_nearest_point_index = None
-
-    def search_index(self, x, y):
-        #find closest index
-
-        if self.old_nearest_point_index is None:
-            #Get distances to every point
-            dx = [x - irx for irx in self.rx]
-            dy = [y - iry for iry in self.ry]
-            d = np.hypot(dx, dy)    
-            ind = np.argmin(d)      #Get nearest point
-            self.old_nearest_point_index = ind  #Set previous nearest point to nearest point
-        
-        else:   #If there exists a previous nearest point - after the start
-            ind = self.old_nearest_point_index  
-            distance_this_index = distance_between_points(self.rx[ind], x, self.ry[ind], y)   
-            
-            while True:
-                if (ind+1)>=len(self.rx):
-                    break
-                distance_next_index = distance_between_points(self.rx[ind + 1], x, self.ry[ind + 1], y)
-                if distance_this_index < distance_next_index:
-                    break
-                ind = ind + 1 if (ind + 1) < len(self.rx) else ind  #Increment index - search for closest waypoint
-                distance_this_index = distance_next_index
-
-        return ind
-
-
-    def progress(self, x, y):
-
-        new_ind = self.search_index(x, y)
-        
-        #if new_ind>self.old_nearest_point_index:
-        #    print('new>old')
-
-        prg = (new_ind-self.old_nearest_point_index)/len(self.rx)
-        self.old_nearest_point_index = new_ind
-        return prg
-
+#def velocity_along_line(theta, velocity, ryaw, )
 
 
 #generate_berlin_goals()
