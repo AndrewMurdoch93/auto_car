@@ -166,6 +166,38 @@ def histogram_progress(agent_name):
     plt.show()
 
 
+def density_plot_score(agent_names):
+    
+    for a in agent_names:
+        results_file_name = 'test_results/' + a
+        infile = open(results_file_name, 'rb')
+        test_score = pickle.load(infile)
+        test_progress = pickle.load(infile)
+        infile.close()
+        sns.displot(test_score)
+    plt.legend(agent_names)
+    plt.title('Agent score distribution')
+    plt.xlabel('Score')
+    plt.ylabel('Density probability')
+    plt.show()
+    
+
+def density_plot_progress(agent_names):
+    
+    for a in agent_names:
+        results_file_name = 'test_results/' + a
+        infile = open(results_file_name, 'rb')
+        test_score = pickle.load(infile)
+        test_progress = pickle.load(infile)
+        infile.close()
+        sns.displot(test_progress)
+    plt.legend(agent_names)
+    plt.title('Agent progress distribution')
+    plt.xlabel('Progress')
+    plt.ylabel('Density probability')
+    plt.show()
+    
+
 def agent_score_statistics(agent_name):
     
     results_file_name = 'test_results/' + agent_name
@@ -221,6 +253,7 @@ def agent_progress_statistics(agent_name):
     print(f"{'Standard deviation':20s} {std_dev:6.2f}")
     print(f"{'Fraction completed':20s} {frac_complete:6.2f}")
 
+
 def display_train_parameters(agent_name):
     
     train_parameters_name = 'train_parameters/' + agent_name
@@ -230,7 +263,6 @@ def display_train_parameters(agent_name):
     
     for key in train_parameters_dict:
         print(key, ': ', train_parameters_dict[key])
-
 
 
 def display_moving_agent(agent_name, load_history=False):
