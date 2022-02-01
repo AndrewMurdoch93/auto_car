@@ -67,6 +67,8 @@ class trainingLoop():
         
     def train(self):
         
+        print("Agent = ", self.agent_name)
+
         #Save the environment
         outfile=open(self.environment_name, 'wb')
         pickle.dump(self.env, outfile)
@@ -124,7 +126,7 @@ class trainingLoop():
             if episode%10==0:
                 print(f"{'Episode':8s} {episode:5.0f} {'| Score':8s} {score:6.2f} {'| Progress':12s} {self.env.progress:3.2f} {'| Average score':15s} {avg_score:6.2f} {'| Average progress':18s} {avg_progress:3.2f} {'| Epsilon':9s} {self.agent.epsilon:.2f}")
       
-        
+        self.agent.reset_transition_memory()
         outfile=open(self.agent_file_name, 'wb')
         pickle.dump(self.agent, outfile)
         outfile.close()
@@ -183,16 +185,101 @@ def test(agent_name, n_episodes=1000):
 if __name__=='__main__':
     
 
-    agent_name = ''
+    agent_name = 'time_penalty_0'
     a = trainingLoop (agent_name=agent_name, gamma=0.99, epsilon=1, eps_end=0.01, eps_dec=1e-3, batch_size=64, lr=0.001, 
-       max_episodes=100, max_mem_size=10000, map_name='circle', max_steps=1500,local_path=True, waypoint_strategy='local', 
-       reward_signal=[1, -1, 0, -1, -0.001, 0, 0, 0, 0], control_steps=10, comment = '')
+       max_episodes=10000, max_mem_size=100000, map_name='circle', max_steps=1500,local_path=True, waypoint_strategy='local', 
+       reward_signal=[1, -1, 0, -1, 0, 0, 0, 0, 0], control_steps=10, comment = 'increasing time penalty while keeping goal reward constant.')
     a.train()
     test(agent_name=agent_name, n_episodes=1000)
 
+    agent_name = 'time_penalty_0_0001'
+    a = trainingLoop (agent_name=agent_name, gamma=0.99, epsilon=1, eps_end=0.01, eps_dec=1e-3, batch_size=64, lr=0.001, 
+       max_episodes=10000, max_mem_size=100000, map_name='circle', max_steps=1500,local_path=True, waypoint_strategy='local', 
+       reward_signal=[1, -1, 0, -1, -0.0001, 0, 0, 0, 0], control_steps=10, comment = 'increasing time penalty while keeping goal reward constant.')
+    a.train()
+    test(agent_name=agent_name, n_episodes=1000)
+
+    agent_name = 'time_penalty_0_001'
+    a = trainingLoop (agent_name=agent_name, gamma=0.99, epsilon=1, eps_end=0.01, eps_dec=1e-3, batch_size=64, lr=0.001, 
+       max_episodes=10000, max_mem_size=100000, map_name='circle', max_steps=1500,local_path=True, waypoint_strategy='local', 
+       reward_signal=[1, -1, 0, -1, -0.001, 0, 0, 0, 0], control_steps=10, comment = 'increasing time penalty while keeping goal reward constant.')
+    a.train()
+    test(agent_name=agent_name, n_episodes=1000)
+
+    agent_name = 'time_penalty_0_01'
+    a = trainingLoop (agent_name=agent_name, gamma=0.99, epsilon=1, eps_end=0.01, eps_dec=1e-3, batch_size=64, lr=0.001, 
+       max_episodes=10000, max_mem_size=100000, map_name='circle', max_steps=1500,local_path=True, waypoint_strategy='local', 
+       reward_signal=[1, -1, 0, -1, -0.01, 0, 0, 0, 0], control_steps=10, comment = 'increasing time penalty while keeping goal reward constant.')
+    a.train()
+    test(agent_name=agent_name, n_episodes=1000)
     
+    agent_name = 'time_penalty_0_1'
+    a = trainingLoop (agent_name=agent_name, gamma=0.99, epsilon=1, eps_end=0.01, eps_dec=1e-3, batch_size=64, lr=0.001, 
+       max_episodes=10000, max_mem_size=100000, map_name='circle', max_steps=1500,local_path=True, waypoint_strategy='local', 
+       reward_signal=[1, -1, 0, -1, -0.1, 0, 0, 0, 0], control_steps=10, comment = 'increasing time penalty while keeping goal reward constant.')
+    a.train()
+    test(agent_name=agent_name, n_episodes=1000)
+
+    agent_name = 'collision_penalty_0'
+    a = trainingLoop (agent_name=agent_name, gamma=0.99, epsilon=1, eps_end=0.01, eps_dec=1e-3, batch_size=64, lr=0.001, 
+       max_episodes=10000, max_mem_size=100000, map_name='circle', max_steps=1500,local_path=True, waypoint_strategy='local', 
+       reward_signal=[1, -1, 0, 0, 0, 0, 0, 0, 0], control_steps=10, comment = 'varying collision penalties')
+    a.train()
+    test(agent_name=agent_name, n_episodes=1000)
+
+
+    agent_name = 'collision_penalty_0_1'
+    a = trainingLoop (agent_name=agent_name, gamma=0.99, epsilon=1, eps_end=0.01, eps_dec=1e-3, batch_size=64, lr=0.001, 
+       max_episodes=10000, max_mem_size=100000, map_name='circle', max_steps=1500,local_path=True, waypoint_strategy='local', 
+       reward_signal=[1, -1, 0, -0.1, 0, 0, 0, 0, 0], control_steps=10, comment = 'increasing time penalty while keeping goal reward constant.')
+    a.train()
+    test(agent_name=agent_name, n_episodes=1000)
+
+    agent_name = 'collision_penalty_0_5'
+    a = trainingLoop (agent_name=agent_name, gamma=0.99, epsilon=1, eps_end=0.01, eps_dec=1e-3, batch_size=64, lr=0.001, 
+       max_episodes=10000, max_mem_size=100000, map_name='circle', max_steps=1500,local_path=True, waypoint_strategy='local', 
+       reward_signal=[1, -1, 0, -0.5, 0, 0, 0, 0, 0], control_steps=10, comment = 'increasing time penalty while keeping goal reward constant.')
+    a.train()
+    test(agent_name=agent_name, n_episodes=1000)
+
+    agent_name = 'collision_penalty_1'
+    a = trainingLoop (agent_name=agent_name, gamma=0.99, epsilon=1, eps_end=0.01, eps_dec=1e-3, batch_size=64, lr=0.001, 
+       max_episodes=10000, max_mem_size=100000, map_name='circle', max_steps=1500,local_path=True, waypoint_strategy='local', 
+       reward_signal=[1, -1, 0, -1, 0, 0, 0, 0, 0], control_steps=10, comment = 'increasing time penalty while keeping goal reward constant.')
+    a.train()
+    test(agent_name=agent_name, n_episodes=1000)
+
+    agent_name = 'progress_1'
+    a = trainingLoop (agent_name=agent_name, gamma=0.99, epsilon=1, eps_end=0.01, eps_dec=1e-3, batch_size=64, lr=0.001, 
+       max_episodes=10000, max_mem_size=100000, map_name='circle', max_steps=1500,local_path=True, waypoint_strategy='local', 
+       reward_signal=[0, 0, 0, 0, 0, 1, 0, 0, 0], control_steps=10, comment = 'only reward agent based on progress along ref_line')
+    a.train()
+    test(agent_name=agent_name, n_episodes=1000)
+
+    agent_name = 'velocity_1'
+    a = trainingLoop (agent_name=agent_name, gamma=0.99, epsilon=1, eps_end=0.01, eps_dec=1e-3, batch_size=64, lr=0.001, 
+       max_episodes=10000, max_mem_size=100000, map_name='circle', max_steps=1500,local_path=True, waypoint_strategy='local', 
+       reward_signal=[0, 0, 0, 0, 0, 0, 1, 0, 0], control_steps=10, comment = 'only reward agent based on velocity parallel to ref_line')
+    a.train()
+    test(agent_name=agent_name, n_episodes=1000)
+
+    agent_name = 'ref_angle'
+    a = trainingLoop (agent_name=agent_name, gamma=0.99, epsilon=1, eps_end=0.01, eps_dec=1e-3, batch_size=64, lr=0.001, 
+       max_episodes=10000, max_mem_size=100000, map_name='circle', max_steps=1500,local_path=True, waypoint_strategy='local', 
+       reward_signal=[0, 0, 0, 0, 0, 0, 0, -1, 0], control_steps=10, comment = 'only penalise agent based on angle to ref_line')
+    a.train()
+    test(agent_name=agent_name, n_episodes=1000)
+
+    agent_name = 'ref_dist'
+    a = trainingLoop (agent_name=agent_name, gamma=0.99, epsilon=1, eps_end=0.01, eps_dec=1e-3, batch_size=64, lr=0.001, 
+       max_episodes=10000, max_mem_size=100000, map_name='circle', max_steps=1500,local_path=True, waypoint_strategy='local', 
+       reward_signal=[0, 0, 0, 0, 0, 0, 0, 0, -1], control_steps=10, comment = 'only penalise agent based on distance to ref_line')
+    a.train()
+    test(agent_name=agent_name, n_episodes=1000)
+
+
     
-    display_results.display_train_parameters(agent_name=agent_name)
+    #display_results.display_train_parameters(agent_name=agent_name)
     #display_results.learning_curve_score(agent_name=agent_name, show_average=True, show_median=True)
     #display_results.learning_curve_progress(agent_name=agent_name, show_average=True, show_median=True)
     #display_results.agent_score_statistics(agent_name=agent_name)

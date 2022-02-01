@@ -51,6 +51,13 @@ class agent():
         self.reward_memory = np.zeros(self.mem_size, dtype=np.float32)
         self.terminal_memory = np.zeros(self.mem_size, dtype=np.bool)
 
+    def reset_transition_memory(self):
+        self.state_memory = 0
+        self.next_state_memory = 0
+        self.reward_memory = 0
+        self.action_memory = 0
+        self.terminal_memory = 0
+    
     def store_transition(self, state, action, reward, next_state, terminal):
         index = self.mem_cntr % self.mem_size
         self.state_memory[index] = state
