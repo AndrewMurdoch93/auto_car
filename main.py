@@ -20,16 +20,21 @@ import seaborn as sns
 import display_results
 
 class trainingLoop():
-    def __init__(self, agent_name, gamma=0.99, epsilon=1, eps_end=0.01, eps_dec=1e-3, batch_size=64, lr=0.001, max_episodes=10000, max_mem_size=1000000,
-                    map_name='circle', max_steps=1500,local_path=False, waypoint_strategy='local', reward_signal=[1,-1,-1,-1,-0.001], control_steps=10):
+    def __init__(self, agent_name, gamma=0.99, epsilon=1, eps_end=0.01, eps_dec=1e-3, batch_size=64, lr=0.001, max_episodes=10000, 
+                max_mem_size=1000000, map_name='circle', max_steps=1500,local_path=False, waypoint_strategy='local', 
+                reward_signal=[1, -1, 0, -1, -0.001, 0, 0, 0, 0], control_steps=10, comment=''):
         
+        self.comment = comment
+        self.agent_name = agent_name
+
         #Initialise file names for saving data
         self.agent_file_name = 'agents/' + agent_name
         self.train_results_file_name = 'train_results/' + agent_name
         self.environment_name = 'environments/' + agent_name
+        self.train_parameters_name = 'train_parameters/' + agent_name
 
         #Hyper parameters for training the agent
-        self.gamma=gamma
+        self.gamma = gamma
         self.epsilon = epsilon
         self.eps_end = eps_end
         self.eps_dec = eps_dec
@@ -43,13 +48,22 @@ class trainingLoop():
 
         #Initialising environment
         self.env = environment(functions.load_config(sys.path[0], "config"), save_history=True, map_name=map_name, max_steps=max_steps, 
-        local_path=local_path, waypoint_strategy=waypoint_strategy, reward_signal=reward_signal, num_actions=self.n_actions, control_steps=control_steps)
+        local_path=local_path, waypoint_strategy=waypoint_strategy, reward_signal=reward_signal, num_actions=self.n_actions, 
+        control_steps=control_steps, agent_name=agent_name)
 
         self.input_dims = len(self.env.observation)
         
         #Display constraints
         self.window=100
 
+        train_parameters_dict = {'agent_name': agent_name, 'gamma': gamma, 'epsilon': epsilon, 'eps_end': eps_end, 'eps_dec': eps_dec
+        , 'batch_size': batch_size, 'lr': lr, 'max_episodes': max_episodes, 'max_mem_size': max_mem_size, 'map_name': map_name
+        , 'max_steps': max_steps, 'local_path': local_path, 'waypoint_strategy': waypoint_strategy, 'reward_signal': reward_signal
+        , 'control_steps': control_steps, 'comment': comment}
+        
+        outfile=open(self.train_parameters_name, 'wb')
+        pickle.dump(train_parameters_dict, outfile)
+        outfile.close()
         
     def train(self):
         
@@ -168,23 +182,22 @@ def test(agent_name, n_episodes=1000):
 
 if __name__=='__main__':
     
-    agent_name='agent_25_jan'
-    #a = trainingLoop (agent_name=agent_name, gamma=0.99, epsilon=1, eps_end=0.01, eps_dec=1e-3, batch_size=64, lr=0.001, max_episodes=50000, max_mem_size=2000000,
-    #                map_name='circle', max_steps=1500,local_path=False, waypoint_strategy='local', reward_signal=[1,-1,-1,-1,-0.001], control_steps=10)
-    #a.train()
-    #test(agent_name=agent_name)
 
-    #agent_name='local_path'
-    #b = trainingLoop (agent_name=agent_name, gamma=0.99, epsilon=1, eps_end=0.01, eps_dec=1e-3, batch_size=64, lr=0.001, max_episodes=50000, max_mem_size=2000000,
-    #                map_name='circle', max_steps=1500,local_path=True, waypoint_strategy='local', reward_signal=[1,-1,-1,-1,-0.001], control_steps=10)
-    #b.train()
-    #test(agent_name=agent_name)
+    agent_name = ''
+    a = trainingLoop (agent_name=agent_name, gamma=0.99, epsilon=1, eps_end=0.01, eps_dec=1e-3, batch_size=64, lr=0.001, 
+       max_episodes=100, max_mem_size=10000, map_name='circle', max_steps=1500,local_path=True, waypoint_strategy='local', 
+       reward_signal=[1, -1, 0, -1, -0.001, 0, 0, 0, 0], control_steps=10, comment = '')
+    a.train()
+    test(agent_name=agent_name, n_episodes=1000)
 
-    #agent_name='standard'
+    
+    
+    display_results.display_train_parameters(agent_name=agent_name)
     #display_results.learning_curve_score(agent_name=agent_name, show_average=True, show_median=True)
     #display_results.learning_curve_progress(agent_name=agent_name, show_average=True, show_median=True)
     #display_results.agent_score_statistics(agent_name=agent_name)
     #display_results.agent_progress_statistics(agent_name=agent_name)
     #display_results.histogram_score(agent_name=agent_name)
     #display_results.histogram_progress(agent_name=agent_name)
-    display_results.display_moving_agent(agent_name=agent_name, load_history=True, save_history=False)
+    #display_results.display_moving_agent(agent_name=agent_name, load_history=True)
+    #display_results.display_path(agent_name=agent_name, load_history=True)

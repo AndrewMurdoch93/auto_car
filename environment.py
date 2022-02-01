@@ -6,10 +6,14 @@ import matplotlib.pyplot as plt
 from matplotlib import image
 from PIL import Image
 import path_tracker
+import pickle
 
 class environment():
 
-    def __init__(self, sim_conf, save_history, map_name, max_steps, local_path, waypoint_strategy, reward_signal, num_actions, control_steps):
+    def __init__(self, sim_conf, save_history, map_name, max_steps, local_path, waypoint_strategy, 
+                reward_signal, num_actions, control_steps, agent_name):
+        
+        self.history_file_name = 'test_history/' + agent_name
         
         self.save_history=save_history
         self.sim_conf = sim_conf
@@ -63,6 +67,11 @@ class environment():
         self.old_d_goal = np.linalg.norm(np.array([self.x_to_goal, self.y_to_goal]))
         self.new_d_goal = np.linalg.norm(np.array([self.x_to_goal, self.y_to_goal]))
 
+        self.current_progress = 0
+        self.vel_par_line = 0
+        self.dist_to_line = 0
+        self.angle_to_line = 0
+
         #Initialise history
         self.state_history = []
         self.action_history = []
@@ -91,7 +100,7 @@ class environment():
         self.save_state()
 
         if self.save_history==True:
-            self.save_history_func()
+            self.append_history_func()
 
 
     def take_action(self, act):
@@ -118,7 +127,7 @@ class environment():
                 
                 if self.save_history==True:
                     self.reward_history.append(reward)
-                    self.save_history_func()
+                    self.append_history_func()
                 
                 if done==True:
                     break
@@ -150,7 +159,7 @@ class environment():
 
                 if self.save_history==True:
                     self.reward_history.append(reward)
-                    self.save_history_func()
+                    self.append_history_func()
                 
                 #plt.plot(self.rx, self.ry)
                 #plt.plot(self.x, self.y, 'x')
@@ -158,7 +167,10 @@ class environment():
                 #plt.show()
 
                 done = self.isEnd()
+                
                 if done == True:
+                    if self.save_history == True:
+                        self.save_history_func()
                     break
    
                 i+=1
@@ -169,16 +181,42 @@ class environment():
         
         self.state = [self.x, self.y, self.theta, self.delta, self.v]
         #self.observation = [self.x/self.map_width, self.y/self.map_height, (self.delta+self.max_delta)/(2*self.max_delta), self.v/self.max_v, (self.theta+math.pi)/(2*math.pi), (self.x_to_goal+0.5*self.map_width)/self.map_width, (self.y_to_goal+0.5*self.map_height)/self.map_height]
-        #self.observation = [self.x/self.map_width, self.y/self.map_height,(self.theta+math.pi)/(2*math.pi)]
-        self.observation = [self.x/self.map_width, self.y/self.map_height, (self.theta+math.pi)/(2*math.pi), (self.x_to_goal+0.5*self.map_width)/self.map_width, (self.y_to_goal+0.5*self.map_height)/self.map_height]
+        self.observation = [self.x/self.map_width, self.y/self.map_height,(self.theta+math.pi)/(2*math.pi)]
+        #self.observation = [self.x/self.map_width, self.y/self.map_height, (self.theta+math.pi)/(2*math.pi), (self.x_to_goal+0.5*self.map_width)/self.map_width, (self.y_to_goal+0.5*self.map_height)/self.map_height]
+    
     
     def save_history_func(self):
+        outfile = open(self.history_file_name, 'wb')
+        pickle.dump(self.action_history, outfile)
+        pickle.dump(self.reward_history, outfile)
+        pickle.dump(self.state_history, outfile)
+        pickle.dump(self.goal_history, outfile)
+        pickle.dump(self.observation_history, outfile)
+        pickle.dump(self.progress_history, outfile)
+        pickle.dump(self.closest_point_history, outfile)
+        if self.local_path == True:
+            pickle.dump(self.local_path_history, outfile)
+        outfile.close()
+
+    def load_history_func(self):
+        infile = open(self.history_file_name, 'rb')
+        self.action_history = pickle.load(infile)
+        self.reward_history = pickle.load(infile)
+        self.state_history = pickle.load(infile)
+        self.goal_history = pickle.load(infile)
+        self.observation_history = pickle.load(infile)
+        self.progress_history = pickle.load(infile)
+        self.closest_point_history = pickle.load(infile)
+        if self.local_path == True:
+            self.local_path_history = pickle.load(infile)
+        infile.close()
+        
+    def append_history_func(self):
         self.state_history.append(self.state[:])
         self.goal_history.append(self.goals[self.current_goal])
         self.observation_history.append(self.observation)
         self.progress_history.append(self.progress)
         self.closest_point_history.append(self.old_closest_point)
-    
     
     def convert_action_to_coord(self, strategy, action):
         if strategy=='global':
@@ -230,12 +268,20 @@ class environment():
 
         elif self.collision==True:
             return self.reward_signal[3]
-
+        
         else:
             reward=0
+
+            #Time penalty
             reward+=self.reward_signal[4]
-            reward+=self.progress
-            return reward
+            #reward+=self.progress
+            #return reward
+            reward += self.current_progress * self.reward_signal[5]
+            reward += self.vel_par_line * (1/self.max_v) * self.reward_signal[6]
+            reward -= np.abs(self.angle_to_line) * (1/(np.pi)) * self.reward_signal[7]
+            reward -= self.dist_to_line * self.reward_signal[8]
+
+        return reward
     
             
     def isEnd(self):
@@ -315,17 +361,26 @@ class environment():
         self.v = np.clip(self.v, -self.max_v, self.max_v)         #truncate velocity
 
         new_closest_point = functions.find_closest_point(self.rx, self.ry, self.x, self.y)
-        #self.progress = (new_closest_point-self.closest_point_history[0])
-        angle = np.abs(functions.sub_angles_complex(self.ryaw[new_closest_point], self.theta))
+        
+        #Find angle between vehicle and line (vehicle heading error)
+        self.angle_to_line = np.abs(functions.sub_angles_complex(self.ryaw[new_closest_point], self.theta))
 
-        if angle<=np.pi/2:
+        #Find vehicle progress along line
+        if np.abs(self.angle_to_line)<=np.pi/2:
             self.current_progress = ((new_closest_point-self.old_closest_point)%len(self.rx))/len(self.rx)
-        if angle>np.pi/2:
-            self.current_progress = (-(new_closest_point-self.old_closest_point)%len(self.rx))/len(self.rx)
+        if np.abs(self.angle_to_line)>np.pi/2:
+            self.current_progress = -((-(new_closest_point-self.old_closest_point)%len(self.rx))/len(self.rx))
         
         self.progress += self.current_progress
         
-        
+        #Velocity component along line
+        self.vel_par_line = self.v * np.cos(self.angle_to_line)
+
+        #Distance to nearest point 
+        self.dist_to_line = np.hypot(self.x-self.rx[new_closest_point], self.y-self.ry[new_closest_point])
+
+        #print('angle = ', self.angle_to_line, 'velocity = ', self.vel_par_line, 'distance', self.dist_to_line)
+
         self.old_closest_point = new_closest_point
 
 
@@ -401,6 +456,6 @@ def test_environment():
                     print('Progress = ', ph)
                     plt.pause(0.001)
 
-test_environment()
+#test_environment()
 
         
