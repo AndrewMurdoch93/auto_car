@@ -173,6 +173,15 @@ def test(agent_name, n_episodes=1000):
         
         if episode%50==0:
             print('Test episode', episode, '| Progress = %.2f' % env.progress, '| Score = %.2f' % score)
+
+        if env.progress>1 or env.progress<-1:
+            print('Simulation is broken')
+            print('Progress = ', env.progress)
+            
+            #outfile = open('bad_actions', 'wb')
+            #pickle.dump(env.action_history, outfile)
+            #outfile.close()
+            break
         
     outfile=open(results_file_name, 'wb')
     pickle.dump(test_score, outfile)
@@ -180,11 +189,12 @@ def test(agent_name, n_episodes=1000):
     outfile.close()
 
 
+
              
 
 if __name__=='__main__':
     
-
+    '''
     agent_name = 'time_penalty_0'
     a = trainingLoop (agent_name=agent_name, gamma=0.99, epsilon=1, eps_end=0.01, eps_dec=1e-3, batch_size=64, lr=0.001, 
        max_episodes=10000, max_mem_size=100000, map_name='circle', max_steps=1500,local_path=True, waypoint_strategy='local', 
@@ -276,9 +286,13 @@ if __name__=='__main__':
        reward_signal=[0, 0, 0, 0, 0, 0, 0, 0, -1], control_steps=10, comment = 'only penalise agent based on distance to ref_line')
     a.train()
     test(agent_name=agent_name, n_episodes=1000)
+    '''
 
-
-    
+    agent_name = 'ref_dist'
+    a = trainingLoop (agent_name=agent_name, gamma=0.99, epsilon=1, eps_end=0.01, eps_dec=1e-3, batch_size=64, lr=0.001, 
+       max_episodes=10000, max_mem_size=100000, map_name='circle', max_steps=1500,local_path=True, waypoint_strategy='local', 
+       reward_signal=[0, 0, 0, 0, 0, 0, 0, 0, -1], control_steps=10, comment = 'only penalise agent based on distance to ref_line')
+    test(agent_name=agent_name, n_episodes=1000)
     #display_results.display_train_parameters(agent_name=agent_name)
     #display_results.learning_curve_score(agent_name=agent_name, show_average=True, show_median=True)
     #display_results.learning_curve_progress(agent_name=agent_name, show_average=True, show_median=True)
@@ -286,5 +300,5 @@ if __name__=='__main__':
     #display_results.agent_progress_statistics(agent_name=agent_name)
     #display_results.histogram_score(agent_name=agent_name)
     #display_results.histogram_progress(agent_name=agent_name)
-    #display_results.display_moving_agent(agent_name=agent_name, load_history=True)
-    #display_results.display_path(agent_name=agent_name, load_history=True)
+    display_results.display_moving_agent(agent_name=agent_name, load_history=True)
+    display_results.display_path(agent_name=agent_name, load_history=True)

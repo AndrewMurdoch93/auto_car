@@ -387,15 +387,24 @@ class environment():
 
 def test_environment():
 
-    env = environment(sim_conf=functions.load_config(sys.path[0], "config"), save_history=True, map_name='circle', max_steps=1500, 
-    local_path=True, waypoint_strategy='waypoint', reward_signal=[1,-1,-1,-1,-0.001], num_actions=8, control_steps=20)
+    env = environment(functions.load_config(sys.path[0], "config"), save_history=True, map_name='circle', max_steps=1000, 
+        local_path=True, waypoint_strategy='waypoint', reward_signal=[1, -1, 0, -1, -0.001, 0, 0, 0, 0], num_actions=8, 
+        control_steps=10, agent_name='test')
     
     env.reset(save_history=True)
     done=False
     
     while done==False:
-
-        action = env.goals[env.current_goal]
+        
+        i=0
+        #action = env.goals[env.current_goal]
+        #action=7
+        infile=open('bad_actions', 'rb')
+        actions = pickle.load(infile)
+        infile.close()
+        
+        action = actions[i%len(actions)]
+        i+=1
         state, reward, done = env.take_action(action)
 
         np.sum(np.array(env.reward_history))

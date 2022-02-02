@@ -289,7 +289,7 @@ def display_moving_agent(agent_name, load_history=False):
             plt.ylim([0,30])
             #plt.grid(True)
             plt.title('Episode history')
-            #print('Progress = ', ph)
+            print('Progress = ', ph)
             plt.pause(0.001)
 
     else:
@@ -315,7 +315,7 @@ def display_moving_agent(agent_name, load_history=False):
             plt.ylim([0,30])
             #plt.grid(True)
             plt.title('Episode history')
-            #print('Progress = ', ph)
+            print('Progress = ', ph)
             plt.pause(0.001)
 
 
