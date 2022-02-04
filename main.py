@@ -18,7 +18,6 @@ from PIL import Image
 import time
 import seaborn as sns
 import display_results
-import dill
 
 class trainingLoop():
     def __init__(self, agent_name, gamma=0.99, epsilon=1, eps_end=0.01, eps_dec=1e-3, batch_size=64, lr=0.001, max_episodes=10000, 

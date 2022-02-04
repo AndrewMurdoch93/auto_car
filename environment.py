@@ -10,25 +10,25 @@ import pickle
 
 class environment():
 
-    def __init__(self, sim_conf, save_history, map_name, max_steps, local_path, waypoint_strategy, 
-                reward_signal, num_actions, control_steps, agent_name, display, set_start_state,
-                start_condition):
+    #def __init__(self, sim_conf, save_history, map_name, max_steps, local_path, waypoint_strategy, 
+    #            reward_signal, num_actions, control_steps, agent_name, display, start_condition):
+    def __init__(self, input_dict): 
         
-        self.history_file_name = 'test_history/' + agent_name
-        self.set_start_state=set_start_state
-        self.save_history=save_history
-        self.sim_conf = sim_conf
-        self.map_name = map_name
-        self.max_steps = max_steps
-        self.local_path = local_path
-        self.waypoint_strategy = waypoint_strategy
-        self.reward_signal = reward_signal
-        self.num_actions = num_actions
-        self.control_steps = control_steps
-        self.display=display
         
-        self.set_start_state = set_start_state
-        self.start_condition = start_condition
+        self.history_file_name = 'test_history/' + input_dict['agent_name']
+        self.initial_condition_name = 'initial_conditions/' + input_dict['agent_name']
+        
+        self.save_history = input_dict['save_history']
+        self.sim_conf = input_dict['sim_conf']
+        self.map_name = input_dict['map_name']
+        self.max_steps = input_dict['max_steps']
+        self.local_path = input_dict['local_path']
+        self.waypoint_strategy = input_dict['waypoint_strategy']
+        self.reward_signal = input_dict['reward_signal']
+        self.num_actions = input_dict['num_actions']
+        self.control_steps = input_dict['control_steps']
+        self.display=input_dict['display']
+        self.start_condition = input_dict['start_condition']
         
         #simulation parameters
         self.dt = self.sim_conf.time_step
@@ -58,19 +58,24 @@ class environment():
         for x,y in zip(self.goal_x, self.goal_y):
             self.goals.append([x, y])
 
+        self.initial_condition_dict = input_dict['start_condition']
         self.reset(self.save_history)
+
+
 
     def reset(self, save_history):
         self.save_history=save_history
 
         #Inialise state variables
-        if self.set_start_state==False:
-            self.x, self.y, self.theta, self.current_goal = functions.random_start(self.goal_x, self.goal_y, self.rx, self.ry, self.ryaw, self.rk, self.d)
+        if self.start_condition:
+            self.x = self.initial_condition_dict['x']
+            self.y = self.initial_condition_dict['y']
+            self.theta = self.initial_condition_dict['theta']
+            self.current_goal = self.initial_condition_dict['goal']
         else:
-            self.x = self.start_condition[0]
-            self.y = self.start_condition[1]
-            self.theta = self.start_condition[2]
-            self.current_goal = 0
+            self.x, self.y, self.theta, self.current_goal = functions.random_start(self.goal_x, self.goal_y, self.rx, self.ry, self.ryaw, self.rk, self.d)
+            
+      
 
         self.v = 0    
         self.delta = 0
@@ -96,7 +101,8 @@ class environment():
         self.reward_history = []
         self.progress_history = []
         self.closest_point_history = []
-        
+        self.waypoint_history = []
+
         #Initialise flags
         self.max_goals_reached=False
         self.out_of_bounds = False
@@ -117,8 +123,11 @@ class environment():
         if self.save_history==True:
             self.append_history_func()
 
+        self.initial_condition_dict = {'x':self.x, 'y':self.y, 'theta':self.theta, 'v':self.v, 'delta':self.delta, 'goal': self.current_goal}
 
     def take_action(self, act):
+        self.action_history.append(act)
+
         reward = 0
         done=False
         
@@ -129,7 +138,7 @@ class environment():
         if self.local_path==False:
             for _ in range(self.control_steps):
                 if self.save_history==True:
-                    self.action_history.append(waypoint)
+                    self.waypoint_history.append(waypoint)
                 
                 delta_ref = path_tracker.pure_pursuit(self.wheelbase, waypoint, self.x, self.y, self.theta)
                 delta_dot, a = self.control_system(self.delta, delta_ref, self.v, v_ref)
@@ -161,7 +170,7 @@ class environment():
                     self.visualise(waypoint)
                
                 if self.save_history==True:
-                    self.action_history.append(waypoint)
+                    self.waypoint_history.append(waypoint)
                 
                 delta_ref, target_index = self.path_tracker.pure_pursuit_steer_control(self.x, self.y, self.theta, self.v, target_index)
                 delta_dot, a = self.control_system(self.delta, delta_ref, self.v, v_ref)
@@ -224,6 +233,13 @@ class environment():
         plt.title('Episode history')
         plt.pause(0.001)
 
+    
+    def save_initial_condition(self):
+        
+        outfile = open(self.initial_condition_name, 'wb')
+        pickle.dump(self.initial_condition_dict, outfile)
+        outfile.close()
+    
     def save_state(self):
         
         self.state = [self.x, self.y, self.theta, self.delta, self.v]
@@ -234,7 +250,7 @@ class environment():
     
     def save_history_func(self):
         outfile = open(self.history_file_name, 'wb')
-        pickle.dump(self.action_history, outfile)
+        pickle.dump(self.waypoint_history, outfile)
         pickle.dump(self.reward_history, outfile)
         pickle.dump(self.state_history, outfile)
         pickle.dump(self.goal_history, outfile)
@@ -248,7 +264,7 @@ class environment():
     
     def load_history_func(self):
         infile = open(self.history_file_name, 'rb')
-        self.action_history = pickle.load(infile)
+        self.waypoint_history = pickle.load(infile)
         self.reward_history = pickle.load(infile)
         self.state_history = pickle.load(infile)
         self.goal_history = pickle.load(infile)
@@ -442,8 +458,11 @@ class environment():
 
 def test_environment():
     
-    agent_name = 'ref_dist'
+
+    
+    agent_name = 'test'
     bad_episode_replay_name = 'bad_episode/' + agent_name
+    initial_condition_name = 'initial_conditions/' + agent_name
     
     infile=open(bad_episode_replay_name, 'rb')
     action_history = pickle.load(infile)
@@ -451,28 +470,34 @@ def test_environment():
     goal_history = pickle.load(infile)
     infile.close()
 
-    start_x = state_history[0][1]
-    start_y = state_history[0][2]
-    start_theta = state_history[0][3]
-    start_goal = goal_history[0]
+    #start_x = 10
+    #start_y = 7
+    #start_theta = 0
+    #start_goal = goal_history[0]
+
+    infile=open(initial_condition_name, 'rb')
+    initial_condition = pickle.load(infile)
+    infile.close()
+
+    input_dict = {'sim_conf': functions.load_config(sys.path[0], "config"), 'save_history': True, 'map_name': 'circle'
+            , 'max_steps': 1000, 'local_path': True, 'waypoint_strategy': 'waypoint'
+            , 'reward_signal': [1, -1, 0, -1, -0.001, 0, 0, 0, 0], 'num_actions': 8, 'control_steps': 10 
+            , 'agent_name': 'test', 'display': True, 'start_condition':initial_condition}
+
     
-    env = environment(functions.load_config(sys.path[0], "config"), save_history=True, map_name='circle', max_steps=1000, 
-        local_path=True, waypoint_strategy='local', reward_signal=[1, -1, 0, -1, -0.001, 0, 0, 0, 0], num_actions=8, 
-        control_steps=10, agent_name='test', display=True, set_start_state=True, start_condition=[start_x, start_y, start_theta, start_goal])
-    
+    env = environment(input_dict)
+
     env.reset(save_history=True)
     done=False
     
     i=0
     while done==False:
-        #action = env.goals[env.current_goal]
-        #action=6
-    
-        
         action = action_history[i]
         i+=1
+        #action = env.goals[env.current_goal]
         state, reward, done = env.take_action(action)
 
+    env.save_initial_condition()
 
 if __name__=='__main__':
     test_environment()
