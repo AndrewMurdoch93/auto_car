@@ -11,10 +11,11 @@ import pickle
 class environment():
 
     def __init__(self, sim_conf, save_history, map_name, max_steps, local_path, waypoint_strategy, 
-                reward_signal, num_actions, control_steps, agent_name):
+                reward_signal, num_actions, control_steps, agent_name, display, set_start_state,
+                start_condition):
         
         self.history_file_name = 'test_history/' + agent_name
-        
+        self.set_start_state=set_start_state
         self.save_history=save_history
         self.sim_conf = sim_conf
         self.map_name = map_name
@@ -24,6 +25,10 @@ class environment():
         self.reward_signal = reward_signal
         self.num_actions = num_actions
         self.control_steps = control_steps
+        self.display=display
+        
+        self.set_start_state = set_start_state
+        self.start_condition = start_condition
         
         #simulation parameters
         self.dt = self.sim_conf.time_step
@@ -42,6 +47,9 @@ class environment():
         #Initialise map and goal settings
         self.occupancy_grid, self.map_height, self.map_width, self.res = functions.map_generator(map_name = self.map_name)
         self.s=2
+
+        image_path = sys.path[0] + '/maps/' + 'circle' + '.png'
+        self.im = image.imread(image_path)
         
         self.goal_x, self.goal_y, self.rx, self.ry, self.ryaw, self.rk, self.d = functions.generate_circle_goals()
         self.goals=[]
@@ -56,7 +64,14 @@ class environment():
         self.save_history=save_history
 
         #Inialise state variables
-        self.x, self.y, self.theta, self.current_goal = functions.random_start(self.goal_x, self.goal_y, self.rx, self.ry, self.ryaw, self.rk, self.d)
+        if self.set_start_state==False:
+            self.x, self.y, self.theta, self.current_goal = functions.random_start(self.goal_x, self.goal_y, self.rx, self.ry, self.ryaw, self.rk, self.d)
+        else:
+            self.x = self.start_condition[0]
+            self.y = self.start_condition[1]
+            self.theta = self.start_condition[2]
+            self.current_goal = 0
+
         self.v = 0    
         self.delta = 0
         self.theta_dot = 0      
@@ -142,6 +157,9 @@ class environment():
             lastIndex = len(cx)-1
             i=0
             while (lastIndex > target_index) and i<10:
+                if self.display==True:
+                    self.visualise(waypoint)
+               
                 if self.save_history==True:
                     self.action_history.append(waypoint)
                 
@@ -177,6 +195,35 @@ class environment():
         #print(reward)
         return self.observation, reward, done
     
+    def visualise(self, waypoint):
+        
+        current_goal = self.goals[self.current_goal]
+        plt.cla()
+        plt.gcf().canvas.mpl_connect('key_release_event', lambda event: [exit(0) if event.key == 'escape' else None])
+        plt.imshow(self.im, extent=(0,30,0,30))
+        
+        if self.local_path==True:
+            plt.plot(self.path_tracker.cx, self.path_tracker.cy)
+        
+        plt.arrow(self.x, self.y, 0.5*math.cos(self.theta), 0.5*math.sin(self.theta), head_length=0.5, head_width=0.5, shape='full', ec='None', fc='blue')
+        plt.arrow(self.x, self.y, 0.5*math.cos(self.theta+self.delta), 0.5*math.sin(self.theta+self.delta), head_length=0.5, head_width=0.5, shape='full',ec='None', fc='red')
+        
+        plt.plot(self.x, self.y, 'o')
+        plt.plot(waypoint[0], waypoint[1], 'x')
+
+        plt.plot([current_goal[0]-self.s, current_goal[0]+self.s, current_goal[0]+self.s, current_goal[0]-self.s, 
+        current_goal[0]-self.s], [current_goal[1]-self.s, current_goal[1]-self.s, current_goal[1]+self.s, 
+        current_goal[1]+self.s, current_goal[1]-self.s], 'r')
+
+        plt.plot(self.rx, self.ry)
+        plt.plot(self.rx[self.old_closest_point], self.ry[self.old_closest_point], 'x')
+        plt.xlabel('x coordinate')
+        plt.ylabel('y coordinate')
+        plt.xlim([0,30])
+        plt.ylim([0,30])
+        plt.title('Episode history')
+        plt.pause(0.001)
+
     def save_state(self):
         
         self.state = [self.x, self.y, self.theta, self.delta, self.v]
@@ -198,6 +245,7 @@ class environment():
             pickle.dump(self.local_path_history, outfile)
         outfile.close()
 
+    
     def load_history_func(self):
         infile = open(self.history_file_name, 'rb')
         self.action_history = pickle.load(infile)
@@ -211,12 +259,13 @@ class environment():
             self.local_path_history = pickle.load(infile)
         infile.close()
         
+    
     def append_history_func(self):
         self.state_history.append(self.state[:])
         self.goal_history.append(self.goals[self.current_goal])
         self.observation_history.append(self.observation)
         self.progress_history.append(self.progress)
-        self.closest_point_history.append(self.old_closest_point)
+    
     
     def convert_action_to_coord(self, strategy, action):
         if strategy=='global':
@@ -361,17 +410,23 @@ class environment():
         self.v = np.clip(self.v, -self.max_v, self.max_v)         #truncate velocity
 
         new_closest_point = functions.find_closest_point(self.rx, self.ry, self.x, self.y)
-        
+        self.closest_point_history.append(new_closest_point)
+
         #Find angle between vehicle and line (vehicle heading error)
         self.angle_to_line = np.abs(functions.sub_angles_complex(self.ryaw[new_closest_point], self.theta))
 
         #Find vehicle progress along line
-        if np.abs(self.angle_to_line)<=np.pi/2:
+        point_dif = new_closest_point-self.old_closest_point
+
+        if point_dif>=0 or point_dif<-100:
             self.current_progress = ((new_closest_point-self.old_closest_point)%len(self.rx))/len(self.rx)
-        if np.abs(self.angle_to_line)>np.pi/2:
-            self.current_progress = -((-(new_closest_point-self.old_closest_point)%len(self.rx))/len(self.rx))
+        else:
+            self.current_progress = -((self.old_closest_point-new_closest_point)%len(self.rx))/len(self.rx)
+        
         
         self.progress += self.current_progress
+
+        #print(f"{'angle to ref':15s}{self.angle_to_line} {'progress':10s}{self.progress}")
         
         #Velocity component along line
         self.vel_par_line = self.v * np.cos(self.angle_to_line)
@@ -386,85 +441,40 @@ class environment():
 
 
 def test_environment():
+    
+    agent_name = 'ref_dist'
+    bad_episode_replay_name = 'bad_episode/' + agent_name
+    
+    infile=open(bad_episode_replay_name, 'rb')
+    action_history = pickle.load(infile)
+    state_history = pickle.load(infile)
+    goal_history = pickle.load(infile)
+    infile.close()
 
+    start_x = state_history[0][1]
+    start_y = state_history[0][2]
+    start_theta = state_history[0][3]
+    start_goal = goal_history[0]
+    
     env = environment(functions.load_config(sys.path[0], "config"), save_history=True, map_name='circle', max_steps=1000, 
-        local_path=True, waypoint_strategy='waypoint', reward_signal=[1, -1, 0, -1, -0.001, 0, 0, 0, 0], num_actions=8, 
-        control_steps=10, agent_name='test')
+        local_path=True, waypoint_strategy='local', reward_signal=[1, -1, 0, -1, -0.001, 0, 0, 0, 0], num_actions=8, 
+        control_steps=10, agent_name='test', display=True, set_start_state=True, start_condition=[start_x, start_y, start_theta, start_goal])
     
     env.reset(save_history=True)
     done=False
     
+    i=0
     while done==False:
-        
-        i=0
         #action = env.goals[env.current_goal]
-        #action=7
-        infile=open('bad_actions', 'rb')
-        actions = pickle.load(infile)
-        infile.close()
+        #action=6
+    
         
-        action = actions[i%len(actions)]
+        action = action_history[i]
         i+=1
         state, reward, done = env.take_action(action)
 
-        np.sum(np.array(env.reward_history))
-        if done==True:
-            
-            image_path = sys.path[0] + '/maps/' + 'circle' + '.png'
-            im = image.imread(image_path)
-            plt.imshow(im, extent=(0,30,0,30))
 
-            if env.local_path==False:
-
-                for sh, ah, gh, rh, ph, cph in zip(env.state_history, env.action_history, env.goal_history, env.reward_history, env.progress_history, env.closest_point_history):
-                    plt.cla()
-                    # Stop the simulation with the esc key.
-                    plt.gcf().canvas.mpl_connect('key_release_event', lambda event: [exit(0) if event.key == 'escape' else None])
-                    #plt.image
-                    plt.imshow(im, extent=(0,30,0,30))
-                    plt.arrow(sh[0], sh[1], 0.5*math.cos(sh[2]), 0.5*math.sin(sh[2]), head_length=0.5, head_width=0.5, shape='full', ec='None', fc='blue')
-                    plt.arrow(sh[0], sh[1], 0.5*math.cos(sh[2]+sh[3]), 0.5*math.sin(sh[2]+sh[3]), head_length=0.5, head_width=0.5, shape='full',ec='None', fc='red')
-                    plt.plot(sh[0], sh[1], 'o')
-                    plt.plot(ah[0], ah[1], 'x')
-                    plt.plot([gh[0]-env.s, gh[0]+env.s, gh[0]+env.s, gh[0]-env.s, gh[0]-env.s], [gh[1]-env.s, gh[1]-env.s, gh[1]+env.s, gh[1]+env.s, gh[1]-env.s], 'r')
-                    plt.plot(env.rx, env.ry)
-                    plt.plot(env.rx[cph], env.ry[cph], 'x')
-                    #plt.legend(["position", "waypoint", "goal area", "heading", "steering angle"])
-                    plt.xlabel('x coordinate')
-                    plt.ylabel('y coordinate')
-                    plt.xlim([0,30])
-                    plt.ylim([0,30])
-                    #plt.grid(True)
-                    plt.title('Episode history')
-                    print('Progress = ', ph)
-                    plt.pause(0.001)
-
-            else:
-
-                for sh, ah, gh, rh, lph, ph, cph in zip(env.state_history, env.action_history, env.goal_history, env.reward_history, env.local_path_history, env.progress_history, env.closest_point_history):
-                    plt.cla()
-                    # Stop the simulation with the esc key.
-                    plt.gcf().canvas.mpl_connect('key_release_event', lambda event: [exit(0) if event.key == 'escape' else None])
-                    #plt.image
-                    plt.imshow(im, extent=(0,30,0,30))
-                    plt.arrow(sh[0], sh[1], 0.5*math.cos(sh[2]), 0.5*math.sin(sh[2]), head_length=0.5, head_width=0.5, shape='full', ec='None', fc='blue')
-                    plt.arrow(sh[0], sh[1], 0.5*math.cos(sh[2]+sh[3]), 0.5*math.sin(sh[2]+sh[3]), head_length=0.5, head_width=0.5, shape='full',ec='None', fc='red')
-                    plt.plot(sh[0], sh[1], 'o')
-                    plt.plot(ah[0], ah[1], 'x')
-                    plt.plot([gh[0]-env.s, gh[0]+env.s, gh[0]+env.s, gh[0]-env.s, gh[0]-env.s], [gh[1]-env.s, gh[1]-env.s, gh[1]+env.s, gh[1]+env.s, gh[1]-env.s], 'r')
-                    plt.plot(lph[0], lph[1])
-                    plt.plot(env.rx, env.ry)
-                    plt.plot(env.rx[cph], env.ry[cph], 'x')
-                    #plt.legend(["position", "waypoint", "goal area", "heading", "steering angle"])
-                    plt.xlabel('x coordinate')
-                    plt.ylabel('y coordinate')
-                    plt.xlim([0,30])
-                    plt.ylim([0,30])
-                    #plt.grid(True)
-                    plt.title('Episode history')
-                    print('Progress = ', ph)
-                    plt.pause(0.001)
-
-#test_environment()
+if __name__=='__main__':
+    test_environment()
 
         

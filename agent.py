@@ -30,7 +30,8 @@ class deepQNetwork(nn.Module):
         return action_values
 
 class agent():
-    def __init__(self, gamma, epsilon, lr, input_dims, batch_size, n_actions, max_mem_size, eps_end, eps_dec):
+    def __init__(self, name, gamma, epsilon, lr, input_dims, batch_size, n_actions, max_mem_size, eps_end, eps_dec):
+        
         self.gamma = gamma
         self.epsilon = epsilon
         self.eps_min = eps_end
@@ -44,6 +45,9 @@ class agent():
         self.replace_target = 100
 
         self.Q_eval = deepQNetwork(lr, n_actions=n_actions, input_dims=input_dims, fc1_dims=64, fc2_dims=64)
+        if name:
+            self.Q_eval.load_state_dict(T.load('agents/'+name))
+
 
         self.state_memory = np.zeros((self.mem_size, input_dims), dtype=np.float32)
         self.next_state_memory = np.zeros((self.mem_size, input_dims), dtype=np.float32)
@@ -52,11 +56,11 @@ class agent():
         self.terminal_memory = np.zeros(self.mem_size, dtype=np.bool)
 
     def reset_transition_memory(self):
-        self.state_memory = 0
-        self.next_state_memory = 0
-        self.reward_memory = 0
-        self.action_memory = 0
-        self.terminal_memory = 0
+        self.state_memory = []
+        self.next_state_memory = []
+        self.reward_memory = []
+        self.action_memory = []
+        self.terminal_memory = []
     
     def store_transition(self, state, action, reward, next_state, terminal):
         index = self.mem_cntr % self.mem_size
@@ -118,5 +122,11 @@ class agent():
         self.Q_eval.optimizer.step()
 
         self.iter_cntr += 1
+    
+
+    def save_agent(self, name):
+        T.save(self.Q_eval.state_dict(), 'agents/'+name)
+    
+
 
             

@@ -1,7 +1,7 @@
 from audioop import avg
 import numpy as np
 import agent
-from environment import environment
+#from environment import environment
 import torch as T
 import torch.nn as nn
 import torch.nn.functional as F
