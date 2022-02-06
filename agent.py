@@ -3,6 +3,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 import torch.optim as optim
 import numpy as np
+import pickle
 
 class deepQNetwork(nn.Module):
     def __init__(self, lr, input_dims, fc1_dims, fc2_dims, n_actions):
@@ -30,6 +31,36 @@ class deepQNetwork(nn.Module):
         return action_values
 
 class agent():
+    def __init__(self, agent_dict, new_agent):
+        
+        self.agent_dict = agent_dict
+        self.name = self.agent_dict['name']
+        self.gamma = self.agent_dict['gamma']
+        self.epsilon = self.agent_dict['epsilon']
+        self.eps_min = self.agent_dict['eps_end']
+        self.eps_dec = self.agent_dict['eps_dec']
+        self.lr = self.agent_dict['lr']
+        self.n_actions = self.agent_dict['n_actions']
+        self.action_space = [i for i in range(self.n_actions)]
+        self.mem_size = self.agent_dict['max_mem_size']
+        self.batch_size = self.agent_dict['batch_size']
+        self.input_dims = self.agent_dict['input_dims']
+        self.mem_cntr = 0
+        self.iter_cntr = 0
+        self.replace_target = 100
+
+        self.Q_eval = deepQNetwork(self.lr, n_actions=self.n_actions, input_dims=self.input_dims, fc1_dims=64, fc2_dims=64)
+        if new_agent==False:
+            self.Q_eval.load_state_dict(T.load('agents/'+self.name+'weights'))
+
+        self.state_memory = np.zeros((self.mem_size, self.input_dims), dtype=np.float32)
+        self.next_state_memory = np.zeros((self.mem_size, self.input_dims), dtype=np.float32)
+        self.action_memory = np.zeros(self.mem_size, dtype=np.int32)
+        self.reward_memory = np.zeros(self.mem_size, dtype=np.float32)
+        self.terminal_memory = np.zeros(self.mem_size, dtype=np.bool)
+
+
+    '''
     def __init__(self, name, gamma, epsilon, lr, input_dims, batch_size, n_actions, max_mem_size, eps_end, eps_dec):
         
         self.gamma = gamma
@@ -54,6 +85,7 @@ class agent():
         self.action_memory = np.zeros(self.mem_size, dtype=np.int32)
         self.reward_memory = np.zeros(self.mem_size, dtype=np.float32)
         self.terminal_memory = np.zeros(self.mem_size, dtype=np.bool)
+        '''
 
     def reset_transition_memory(self):
         self.state_memory = []
@@ -124,9 +156,13 @@ class agent():
         self.iter_cntr += 1
     
 
-    def save_agent(self, name):
-        T.save(self.Q_eval.state_dict(), 'agents/'+name)
-    
+    def save_agent(self):
+        T.save(self.Q_eval.state_dict(), 'agents/' + self.name + '_weights')
+        self.agent_dict['epsilon'] = self.epsilon
+        
+        outfile = open('agents/' + self.name + '_hyper_parameters', 'wb')
+        pickle.dump(self.agent_dict, outfile)
+        outfile.close()
 
 
             

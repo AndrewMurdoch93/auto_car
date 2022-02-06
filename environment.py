@@ -1,3 +1,4 @@
+from tracemalloc import start
 import numpy as np
 import math
 import functions
@@ -12,11 +13,11 @@ class environment():
 
     #def __init__(self, sim_conf, save_history, map_name, max_steps, local_path, waypoint_strategy, 
     #            reward_signal, num_actions, control_steps, agent_name, display, start_condition):
-    def __init__(self, input_dict): 
+    def __init__(self, input_dict, start_condition): 
         
         
-        self.history_file_name = 'test_history/' + input_dict['agent_name']
-        self.initial_condition_name = 'initial_conditions/' + input_dict['agent_name']
+        self.history_file_name = 'test_history/' + input_dict['name']
+        self.initial_condition_name = 'initial_conditions/' + input_dict['name']
         
         self.save_history = input_dict['save_history']
         self.sim_conf = input_dict['sim_conf']
@@ -25,10 +26,10 @@ class environment():
         self.local_path = input_dict['local_path']
         self.waypoint_strategy = input_dict['waypoint_strategy']
         self.reward_signal = input_dict['reward_signal']
-        self.num_actions = input_dict['num_actions']
+        self.num_actions = input_dict['n_actions']
         self.control_steps = input_dict['control_steps']
         self.display=input_dict['display']
-        self.start_condition = input_dict['start_condition']
+        self.start_condition = start_condition
         
         #simulation parameters
         self.dt = self.sim_conf.time_step
@@ -58,7 +59,8 @@ class environment():
         for x,y in zip(self.goal_x, self.goal_y):
             self.goals.append([x, y])
 
-        self.initial_condition_dict = input_dict['start_condition']
+        #self.initial_condition_dict = input_dict['start_condition']
+        
         self.reset(self.save_history)
 
 
@@ -68,15 +70,13 @@ class environment():
 
         #Inialise state variables
         if self.start_condition:
-            self.x = self.initial_condition_dict['x']
-            self.y = self.initial_condition_dict['y']
-            self.theta = self.initial_condition_dict['theta']
-            self.current_goal = self.initial_condition_dict['goal']
+            self.x = self.start_condition['x']
+            self.y = self.start_condition['y']
+            self.theta = self.start_condition['theta']
+            self.current_goal = self.start_condition['goal']
         else:
             self.x, self.y, self.theta, self.current_goal = functions.random_start(self.goal_x, self.goal_y, self.rx, self.ry, self.ryaw, self.rk, self.d)
             
-      
-
         self.v = 0    
         self.delta = 0
         self.theta_dot = 0      
@@ -460,32 +460,21 @@ def test_environment():
     
 
     
-    agent_name = 'test'
-    bad_episode_replay_name = 'bad_episode/' + agent_name
-    initial_condition_name = 'initial_conditions/' + agent_name
+    agent_name = 'dict_agent'
+    replay_episode_name = 'replay_episodes/' + agent_name
     
-    infile=open(bad_episode_replay_name, 'rb')
+    infile=open(replay_episode_name, 'rb')
     action_history = pickle.load(infile)
-    state_history = pickle.load(infile)
-    goal_history = pickle.load(infile)
-    infile.close()
-
-    #start_x = 10
-    #start_y = 7
-    #start_theta = 0
-    #start_goal = goal_history[0]
-
-    infile=open(initial_condition_name, 'rb')
     initial_condition = pickle.load(infile)
     infile.close()
 
     input_dict = {'sim_conf': functions.load_config(sys.path[0], "config"), 'save_history': True, 'map_name': 'circle'
-            , 'max_steps': 1000, 'local_path': True, 'waypoint_strategy': 'waypoint'
-            , 'reward_signal': [1, -1, 0, -1, -0.001, 0, 0, 0, 0], 'num_actions': 8, 'control_steps': 10 
-            , 'agent_name': 'test', 'display': True, 'start_condition':initial_condition}
+            , 'max_steps': 1000, 'local_path': True, 'waypoint_strategy': 'local'
+            , 'reward_signal': [1, -1, 0, -1, -0.001, 0, 0, 0, 0], 'n_actions': 8, 'control_steps': 10 
+            , 'name': agent_name, 'display': True}
 
     
-    env = environment(input_dict)
+    env = environment(input_dict, initial_condition)
 
     env.reset(save_history=True)
     done=False
@@ -501,5 +490,6 @@ def test_environment():
 
 if __name__=='__main__':
     test_environment()
+
 
         

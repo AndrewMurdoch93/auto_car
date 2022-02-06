@@ -17,6 +17,7 @@ from matplotlib import image
 from PIL import Image
 import time
 import seaborn as sns
+from environment import environment
 
 
 def learning_curve_score(agent_name, show_average=False, show_median=True):
@@ -256,27 +257,44 @@ def agent_progress_statistics(agent_name):
 
 def display_train_parameters(agent_name):
     
-    train_parameters_name = 'train_parameters/' + agent_name
-    infile = open(train_parameters_name, 'rb')
+    infile = open('train_parameters/' + agent_name, 'rb')
     train_parameters_dict = pickle.load(infile)
     infile.close()
     
+    print('\nTraining Parameters')
     for key in train_parameters_dict:
         print(key, ': ', train_parameters_dict[key])
 
+    infile = open('environments/' + agent_name, 'rb')
+    env_dict = pickle.load(infile)
+    infile.close()
+    
+    print('\nEnvironment Parameters')
+    for key in env_dict:
+        print(key, ': ', env_dict[key])
+
+    infile = open('agents/' + agent_name + '_hyper_parameters', 'rb')
+    agent_dict = pickle.load(infile)
+    infile.close()
+    
+    print('\nAgent Parameters')
+    for key in agent_dict:
+        print(key, ': ', agent_dict[key])
+
 
 def display_moving_agent(agent_name, load_history=False):
+
+    infile = open('environments/' + agent_name, 'rb')
+    env_dict = pickle.load(infile)
+    infile.close()
     
-    agent_file_name = 'agents/' + agent_name
-    environment_name = 'environments/' + agent_name
-
-    infile = open(agent_file_name, 'rb')
-    agent = pickle.load(infile)
+    env = environment(env_dict, start_condition=[])
+    
+    infile = open('agents/' + agent_name + '_hyper_parameters', 'rb')
+    agent_dict = pickle.load(infile)
     infile.close()
 
-    infile = open(environment_name, 'rb')
-    env = pickle.load(infile)
-    infile.close()
+    a = agent.agent(agent_dict, new_agent=False)
 
     if load_history==True:
         env.load_history_func()
@@ -288,7 +306,7 @@ def display_moving_agent(agent_name, load_history=False):
         score=0
 
         while not done:
-            action = agent.choose_action(obs)
+            action = a.choose_action(obs)
             next_obs, reward, done = env.take_action(action)
             score += reward
             obs = next_obs
@@ -301,7 +319,7 @@ def display_moving_agent(agent_name, load_history=False):
 
     if env.local_path==False:
         
-        for sh, ah, gh, rh, ph, cph in zip(env.state_history, env.action_history, env.goal_history, env.reward_history, env.progress_history, env.closest_point_history):
+        for sh, wh, gh, rh, ph, cph in zip(env.state_history, env.waypoint_history, env.goal_history, env.reward_history, env.progress_history, env.closest_point_history):
             plt.cla()
             # Stop the simulation with the esc key.
             plt.gcf().canvas.mpl_connect('key_release_event', lambda event: [exit(0) if event.key == 'escape' else None])
@@ -310,7 +328,7 @@ def display_moving_agent(agent_name, load_history=False):
             plt.arrow(sh[0], sh[1], 0.5*math.cos(sh[2]), 0.5*math.sin(sh[2]), head_length=0.5, head_width=0.5, shape='full', ec='None', fc='blue')
             plt.arrow(sh[0], sh[1], 0.5*math.cos(sh[2]+sh[3]), 0.5*math.sin(sh[2]+sh[3]), head_length=0.5, head_width=0.5, shape='full',ec='None', fc='red')
             plt.plot(sh[0], sh[1], 'o')
-            plt.plot(ah[0], ah[1], 'x')
+            plt.plot(wh[0], wh[1], 'x')
             plt.plot([gh[0]-env.s, gh[0]+env.s, gh[0]+env.s, gh[0]-env.s, gh[0]-env.s], [gh[1]-env.s, gh[1]-env.s, gh[1]+env.s, gh[1]+env.s, gh[1]-env.s], 'r')
             plt.plot(env.rx, env.ry)
             plt.plot(env.rx[cph], env.ry[cph], 'x')
@@ -326,7 +344,7 @@ def display_moving_agent(agent_name, load_history=False):
 
     else:
 
-        for sh, ah, gh, rh, lph, ph, cph in zip(env.state_history, env.action_history, env.goal_history, env.reward_history, env.local_path_history, env.progress_history, env.closest_point_history):
+        for sh, wh, gh, rh, lph, ph, cph in zip(env.state_history, env.waypoint_history, env.goal_history, env.reward_history, env.local_path_history, env.progress_history, env.closest_point_history):
             plt.cla()
             # Stop the simulation with the esc key.
             plt.gcf().canvas.mpl_connect('key_release_event', lambda event: [exit(0) if event.key == 'escape' else None])
@@ -335,7 +353,7 @@ def display_moving_agent(agent_name, load_history=False):
             plt.arrow(sh[0], sh[1], 0.5*math.cos(sh[2]), 0.5*math.sin(sh[2]), head_length=0.5, head_width=0.5, shape='full', ec='None', fc='blue')
             plt.arrow(sh[0], sh[1], 0.5*math.cos(sh[2]+sh[3]), 0.5*math.sin(sh[2]+sh[3]), head_length=0.5, head_width=0.5, shape='full',ec='None', fc='red')
             plt.plot(sh[0], sh[1], 'o')
-            plt.plot(ah[0], ah[1], 'x')
+            plt.plot(wh[0], wh[1], 'x')
             plt.plot([gh[0]-env.s, gh[0]+env.s, gh[0]+env.s, gh[0]-env.s, gh[0]-env.s], [gh[1]-env.s, gh[1]-env.s, gh[1]+env.s, gh[1]+env.s, gh[1]-env.s], 'r')
             plt.plot(lph[0], lph[1])
             plt.plot(env.rx, env.ry)
@@ -356,13 +374,17 @@ def display_path(agent_name, load_history=False):
     agent_file_name = 'agents/' + agent_name
     environment_name = 'environments/' + agent_name
 
-    infile = open(agent_file_name, 'rb')
-    agent = pickle.load(infile)
+    infile = open('environments/' + agent_name, 'rb')
+    env_dict = pickle.load(infile)
+    infile.close()
+    
+    env = environment(env_dict, start_condition=[])
+    
+    infile = open('agents/' + agent_name + '_hyper_parameters', 'rb')
+    agent_dict = pickle.load(infile)
     infile.close()
 
-    infile = open(environment_name, 'rb')
-    env = pickle.load(infile)
-    infile.close()
+    a = agent.agent(agent_dict, new_agent=False)
 
     if load_history==True:
         env.load_history_func()
@@ -374,7 +396,7 @@ def display_path(agent_name, load_history=False):
         score=0
 
         while not done:
-            action = agent.choose_action(obs)
+            action = a.choose_action(obs)
             next_obs, reward, done = env.take_action(action)
             score += reward
             obs = next_obs
