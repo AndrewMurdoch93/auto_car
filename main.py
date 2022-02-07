@@ -169,19 +169,38 @@ class trainingLoop():
              
 if __name__=='__main__':
    
-   agent_name = 'dict_agent'
-   main_dict = {'name': agent_name, 'max_episodes':100, 'comment':''}
+   agent_name = 'bench_agent'
 
-   agent_dict = {'gamma':0.99, 'epsilon':1, 'eps_end':0.01, 'eps_dec':1e-3, 'lr':0.001, 'batch_size':64, 'max_mem_size':1000}
+   main_dict = {'name': agent_name, 'max_episodes':5000, 'comment':''}
 
-   env_dict = {'sim_conf': functions.load_config(sys.path[0], "config"), 'save_history': True, 'map_name': 'circle'
-            , 'max_steps': 1000, 'local_path': True, 'waypoint_strategy': 'local'
-            , 'reward_signal': [1, -1, 0, -1, -0.001, 0, 0, 0, 0], 'n_actions': 8, 'control_steps': 10 
+   agent_dict = {'gamma':0.99, 'epsilon':1, 'eps_end':0.01, 'eps_dec':1e-3, 'lr':0.001, 'batch_size':64, 'max_mem_size':100000}
+
+   env_dict = {'sim_conf': functions.load_config(sys.path[0], "config"), 'save_history': False, 'map_name': 'circle'
+            , 'max_steps': 1000, 'local_path': False, 'waypoint_strategy': 'local'
+            , 'reward_signal': [1, -1, 0, -1, -0.001, 0, 0, 0, 0], 'n_actions': 8, 'control_steps': 20 
             , 'display': False} 
  
-   #a = trainingLoop(main_dict, agent_dict, env_dict)
-   #a.train()
-   #a.test(n_episodes=100, detect_issues=True)
+
+
+   main_dict['name'] = 'velocity_01'
+   env_dict['reward_signal'] = [0, -1, 0, -1, -0.001, 1, 0.1, 0, 0]
+
+   a = trainingLoop(main_dict, agent_dict, env_dict)
+   a.train()
+   a.test(n_episodes=1000, detect_issues=False)
+
+
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
    #display_results.display_train_parameters(agent_name=agent_name)
    #display_results.learning_curve_score(agent_name=agent_name, show_average=True, show_median=True)
    #display_results.learning_curve_progress(agent_name=agent_name, show_average=True, show_median=True)

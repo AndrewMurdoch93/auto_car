@@ -51,7 +51,7 @@ class agent():
 
         self.Q_eval = deepQNetwork(self.lr, n_actions=self.n_actions, input_dims=self.input_dims, fc1_dims=64, fc2_dims=64)
         if new_agent==False:
-            self.Q_eval.load_state_dict(T.load('agents/'+self.name+'weights'))
+            self.Q_eval.load_state_dict(T.load('agents/'+self.name+'_weights'))
 
         self.state_memory = np.zeros((self.mem_size, self.input_dims), dtype=np.float32)
         self.next_state_memory = np.zeros((self.mem_size, self.input_dims), dtype=np.float32)
