@@ -18,6 +18,7 @@ from PIL import Image
 import time
 import seaborn as sns
 from environment import environment
+import pandas as pd
 
 
 def learning_curve_score(agent_name, show_average=False, show_median=True):
@@ -169,13 +170,16 @@ def histogram_progress(agent_name):
 
 def density_plot_score(agent_names):
     
+    test_score = []
     for a in agent_names:
         results_file_name = 'test_results/' + a
         infile = open(results_file_name, 'rb')
-        test_score = pickle.load(infile)
-        test_progress = pickle.load(infile)
+        test_score.append(pickle.load(infile))
+        _ = pickle.load(infile)
         infile.close()
-        sns.displot(test_score)
+    
+    df = pd.DataFrame(test_score)
+    sns.displot(test_score, legend=False)
     plt.legend(agent_names)
     plt.title('Agent score distribution')
     plt.xlabel('Score')
@@ -185,14 +189,16 @@ def density_plot_score(agent_names):
 
 def density_plot_progress(agent_names):
     
+    test_progress = []
     for a in agent_names:
         results_file_name = 'test_results/' + a
         infile = open(results_file_name, 'rb')
-        test_score = pickle.load(infile)
-        test_progress = pickle.load(infile)
+        _ = pickle.load(infile)
+        test_progress.append(pickle.load(infile))
         infile.close()
-        sns.displot(test_progress)
-    plt.legend(agent_names)
+    
+    sns.displot(test_progress, legend=True, kind="kde")
+    #plt.legend(agent_names)
     plt.title('Agent progress distribution')
     plt.xlabel('Progress')
     plt.ylabel('Density probability')
