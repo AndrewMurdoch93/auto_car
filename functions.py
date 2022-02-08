@@ -208,25 +208,25 @@ class lidar_scan():
 
 
 
+if __name__ == 'main':
+    #def velocity_along_line(theta, velocity, ryaw, )
 
-#def velocity_along_line(theta, velocity, ryaw, )
+    #generate_berlin_goals()
+    #x, y, rx, ry, ryaw, rk, s = generate_circle_goals()
+    #start_x, start_y, start_theta, next_goal = random_start(x, y, rx, ry, ryaw, rk, s)
 
-#generate_berlin_goals()
-#x, y, rx, ry, ryaw, rk, s = generate_circle_goals()
-#start_x, start_y, start_theta, next_goal = random_start(x, y, rx, ry, ryaw, rk, s)
-
-image_path = sys.path[0] + '/maps/' + 'circle' + '.png'       
-occupancy_grid, map_height, map_width, res = map_generator(map_name='circle')
-a = lidar_scan(res, 3, 10, occupancy_grid, np.pi)
-a.get_scan(15,5,0)
+    image_path = sys.path[0] + '/maps/' + 'circle' + '.png'       
+    occupancy_grid, map_height, map_width, res = map_generator(map_name='circle')
+    a = lidar_scan(res, 3, 10, occupancy_grid, np.pi)
+    a.get_scan(15,5,0)
 
 
-#im = image.imread(image_path)
-#plt.imshow(im, extent=(0,30,0,30))
-#plt.plot(start_x, start_y, 'x')
-#print(start_theta)
-#plt.arrow(start_x, start_y, math.cos(start_theta), math.sin(start_theta))
-#plt.plot(x, y, 's')
-#plt.plot(x[next_goal], y[next_goal], 'o')
-#plt.show()
+    #im = image.imread(image_path)
+    #plt.imshow(im, extent=(0,30,0,30))
+    #plt.plot(start_x, start_y, 'x')
+    #print(start_theta)
+    #plt.arrow(start_x, start_y, math.cos(start_theta), math.sin(start_theta))
+    #plt.plot(x, y, 's')
+    #plt.plot(x[next_goal], y[next_goal], 'o')
+    #plt.show()
 
