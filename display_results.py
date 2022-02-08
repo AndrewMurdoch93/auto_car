@@ -325,7 +325,7 @@ def display_moving_agent(agent_name, load_history=False):
 
     if env.local_path==False:
         
-        for sh, wh, gh, rh, ph, cph in zip(env.state_history, env.waypoint_history, env.goal_history, env.reward_history, env.progress_history, env.closest_point_history):
+        for sh, wh, gh, rh, ph, cph, lh in zip(env.state_history, env.waypoint_history, env.goal_history, env.reward_history, env.progress_history, env.closest_point_history, env.lidar_coords_history):
             plt.cla()
             # Stop the simulation with the esc key.
             plt.gcf().canvas.mpl_connect('key_release_event', lambda event: [exit(0) if event.key == 'escape' else None])
@@ -338,6 +338,8 @@ def display_moving_agent(agent_name, load_history=False):
             plt.plot([gh[0]-env.s, gh[0]+env.s, gh[0]+env.s, gh[0]-env.s, gh[0]-env.s], [gh[1]-env.s, gh[1]-env.s, gh[1]+env.s, gh[1]+env.s, gh[1]-env.s], 'r')
             plt.plot(env.rx, env.ry)
             plt.plot(env.rx[cph], env.ry[cph], 'x')
+            for coord in lh:
+                plt.plot(coord[0], coord[1], 'xb')
             #plt.legend(["position", "waypoint", "goal area", "heading", "steering angle"])
             plt.xlabel('x coordinate')
             plt.ylabel('y coordinate')
@@ -350,7 +352,7 @@ def display_moving_agent(agent_name, load_history=False):
 
     else:
 
-        for sh, wh, gh, rh, lph, ph, cph in zip(env.state_history, env.waypoint_history, env.goal_history, env.reward_history, env.local_path_history, env.progress_history, env.closest_point_history):
+        for sh, wh, gh, rh, lph, ph, cph, lh in zip(env.state_history, env.waypoint_history, env.goal_history, env.reward_history, env.local_path_history, env.progress_history, env.closest_point_history, env.lidar_coords_history):
             plt.cla()
             # Stop the simulation with the esc key.
             plt.gcf().canvas.mpl_connect('key_release_event', lambda event: [exit(0) if event.key == 'escape' else None])
@@ -364,6 +366,9 @@ def display_moving_agent(agent_name, load_history=False):
             plt.plot(lph[0], lph[1])
             plt.plot(env.rx, env.ry)
             plt.plot(env.rx[cph], env.ry[cph], 'x')
+            for coord in lh:
+                plt.plot(coord[0], coord[1], 'xb')
+            
             #plt.legend(["position", "waypoint", "goal area", "heading", "steering angle"])
             plt.xlabel('x coordinate')
             plt.ylabel('y coordinate')

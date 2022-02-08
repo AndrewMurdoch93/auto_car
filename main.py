@@ -172,7 +172,7 @@ if __name__=='__main__':
    agent_name = 'progress_10'
 
    
-   main_dict = {'name': agent_name, 'max_episodes':5000, 'comment':''}
+   main_dict = {'name': agent_name, 'max_episodes':100, 'comment':''}
 
    agent_dict = {'gamma':0.99, 'epsilon':1, 'eps_end':0.01, 'eps_dec':1e-3, 'lr':0.001, 'batch_size':64, 'max_mem_size':100000}
 
@@ -185,7 +185,7 @@ if __name__=='__main__':
 
    #a = trainingLoop(main_dict, agent_dict, env_dict)
    #a.train()
-   #a.test(n_episodes=1000, detect_issues=False)
+   #a.test(n_episodes=100, detect_issues=False)
 
    
    
@@ -204,7 +204,7 @@ if __name__=='__main__':
    #display_results.agent_progress_statistics(agent_name=agent_name)
    #display_results.histogram_score(agent_name=agent_name)
    #display_results.histogram_progress(agent_name=agent_name)
-   display_results.display_moving_agent(agent_name=agent_name, load_history=False)
+   #display_results.display_moving_agent(agent_name=agent_name, load_history=False)
    #display_results.display_path(agent_name=agent_name, load_history=False)
 
 

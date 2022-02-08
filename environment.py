@@ -59,6 +59,9 @@ class environment():
         for x,y in zip(self.goal_x, self.goal_y):
             self.goals.append([x, y])
 
+        #Car sensors - lidar
+        self.lidar = functions.lidar_scan(self.res, 3, 30, self.occupancy_grid, np.pi)
+        
         #self.initial_condition_dict = input_dict['start_condition']
         
         self.reset(self.save_history)
@@ -87,6 +90,8 @@ class environment():
         self.old_d_goal = np.linalg.norm(np.array([self.x_to_goal, self.y_to_goal]))
         self.new_d_goal = np.linalg.norm(np.array([self.x_to_goal, self.y_to_goal]))
 
+        self.lidar_dists, self.lidar_coords = self.lidar.get_scan(self.x, self.y, self.theta)
+        
         self.current_progress = 0
         self.vel_par_line = 0
         self.dist_to_line = 0
@@ -102,6 +107,8 @@ class environment():
         self.progress_history = []
         self.closest_point_history = []
         self.waypoint_history = []
+        self.lidar_dist_history = []
+        self.lidar_coords_history = []
 
         #Initialise flags
         self.max_goals_reached=False
@@ -143,6 +150,7 @@ class environment():
                 delta_ref = path_tracker.pure_pursuit(self.wheelbase, waypoint, self.x, self.y, self.theta)
                 delta_dot, a = self.control_system(self.delta, delta_ref, self.v, v_ref)
                 self.update_kinematic_state(a, delta_dot)
+                self.update_variables()
                 self.steps += 1
                 self.set_flags()
                 reward += self.getReward() 
@@ -175,7 +183,8 @@ class environment():
                 delta_ref, target_index = self.path_tracker.pure_pursuit_steer_control(self.x, self.y, self.theta, self.v, target_index)
                 delta_dot, a = self.control_system(self.delta, delta_ref, self.v, v_ref)
                 self.update_kinematic_state(a, delta_dot)
-                
+                self.update_variables()
+
                 self.steps += 1
 
                 self.local_path_history.append([cx, cy][:])
@@ -204,6 +213,7 @@ class environment():
         #print(reward)
         return self.observation, reward, done
     
+
     def visualise(self, waypoint):
         
         current_goal = self.goals[self.current_goal]
@@ -224,6 +234,9 @@ class environment():
         current_goal[0]-self.s], [current_goal[1]-self.s, current_goal[1]-self.s, current_goal[1]+self.s, 
         current_goal[1]+self.s, current_goal[1]-self.s], 'r')
 
+        for coord in self.lidar_coords:
+            plt.plot(coord[0], coord[1], 'xb')
+        
         plt.plot(self.rx, self.ry)
         plt.plot(self.rx[self.old_closest_point], self.ry[self.old_closest_point], 'x')
         plt.xlabel('x coordinate')
@@ -257,6 +270,7 @@ class environment():
         pickle.dump(self.observation_history, outfile)
         pickle.dump(self.progress_history, outfile)
         pickle.dump(self.closest_point_history, outfile)
+        pickle.dump(self.lidar_coords_history, outfile)
         if self.local_path == True:
             pickle.dump(self.local_path_history, outfile)
         outfile.close()
@@ -271,6 +285,7 @@ class environment():
         self.observation_history = pickle.load(infile)
         self.progress_history = pickle.load(infile)
         self.closest_point_history = pickle.load(infile)
+        self.lidar_coords_history = pickle.load(infile)
         if self.local_path == True:
             self.local_path_history = pickle.load(infile)
         infile.close()
@@ -281,6 +296,7 @@ class environment():
         self.goal_history.append(self.goals[self.current_goal])
         self.observation_history.append(self.observation)
         self.progress_history.append(self.progress)
+        self.lidar_coords_history.append(self.lidar_coords)
     
     
     def convert_action_to_coord(self, strategy, action):
@@ -386,7 +402,37 @@ class environment():
 
         return delta_dot, a
 
-    
+    def update_variables(self):
+        self.x_to_goal = self.goals[self.current_goal][0] - self.x
+        self.y_to_goal = self.goals[self.current_goal][1] - self.y
+        
+        self.new_d_goal = np.linalg.norm(np.array([self.x_to_goal, self.y_to_goal]))
+        self.new_angle = math.atan2(self.y-15, self.x-15)%(2*math.pi)
+
+        new_closest_point = functions.find_closest_point(self.rx, self.ry, self.x, self.y)
+        self.closest_point_history.append(new_closest_point)
+
+        #Find angle between vehicle and line (vehicle heading error)
+        self.angle_to_line = np.abs(functions.sub_angles_complex(self.ryaw[new_closest_point], self.theta))
+
+        #Find vehicle progress along line
+        point_dif = new_closest_point-self.old_closest_point
+        if point_dif>=0 or point_dif<-100:
+            self.current_progress = ((new_closest_point-self.old_closest_point)%len(self.rx))/len(self.rx)
+        else:
+            self.current_progress = -((self.old_closest_point-new_closest_point)%len(self.rx))/len(self.rx)   
+        self.progress += self.current_progress
+        #Velocity component along line
+        self.vel_par_line = self.v * np.cos(self.angle_to_line)
+        #Distance to nearest point 
+        self.dist_to_line = np.hypot(self.x-self.rx[new_closest_point], self.y-self.ry[new_closest_point])
+        self.old_closest_point = new_closest_point
+
+        self.lidar_dists, self.lidar_coords = self.lidar.get_scan(self.x, self.y, self.theta)
+
+
+        
+
     def update_kinematic_state(self, a, delta_dot):
         '''
         Updates the internal state of the vehicle according to the kinematic equations for a bicycle model
@@ -403,13 +449,6 @@ class environment():
         #Update (rear axle) position
         self.x = self.x + self.v * np.cos(self.theta) * self.dt
         self.y = self.y + self.v * np.sin(self.theta) * self.dt
-        
-        #Update 
-        self.x_to_goal = self.goals[self.current_goal][0] - self.x
-        self.y_to_goal = self.goals[self.current_goal][1] - self.y
-        
-        self.new_d_goal = np.linalg.norm(np.array([self.x_to_goal, self.y_to_goal]))
-        self.new_angle = math.atan2(self.y-15, self.x-15)%(2*math.pi)
 
         #Update car heading angle
         self.theta_dot = (self.v / self.wheelbase) * np.tan(self.delta)  #rate of change of heading
@@ -425,40 +464,11 @@ class environment():
         self.delta = np.clip(self.delta, -self.max_delta, self.max_delta)    #truncate steering angle
         self.v = np.clip(self.v, -self.max_v, self.max_v)         #truncate velocity
 
-        new_closest_point = functions.find_closest_point(self.rx, self.ry, self.x, self.y)
-        self.closest_point_history.append(new_closest_point)
 
-        #Find angle between vehicle and line (vehicle heading error)
-        self.angle_to_line = np.abs(functions.sub_angles_complex(self.ryaw[new_closest_point], self.theta))
-
-        #Find vehicle progress along line
-        point_dif = new_closest_point-self.old_closest_point
-
-        if point_dif>=0 or point_dif<-100:
-            self.current_progress = ((new_closest_point-self.old_closest_point)%len(self.rx))/len(self.rx)
-        else:
-            self.current_progress = -((self.old_closest_point-new_closest_point)%len(self.rx))/len(self.rx)
-        
-        
-        self.progress += self.current_progress
-
-        #print(f"{'angle to ref':15s}{self.angle_to_line} {'progress':10s}{self.progress}")
-        
-        #Velocity component along line
-        self.vel_par_line = self.v * np.cos(self.angle_to_line)
-
-        #Distance to nearest point 
-        self.dist_to_line = np.hypot(self.x-self.rx[new_closest_point], self.y-self.ry[new_closest_point])
-
-        #print('angle = ', self.angle_to_line, 'velocity = ', self.vel_par_line, 'distance', self.dist_to_line)
-
-        self.old_closest_point = new_closest_point
 
 
 
 def test_environment():
-    
-
     
     agent_name = 'dict_agent'
     replay_episode_name = 'replay_episodes/' + agent_name
@@ -469,7 +479,7 @@ def test_environment():
     infile.close()
 
     input_dict = {'sim_conf': functions.load_config(sys.path[0], "config"), 'save_history': True, 'map_name': 'circle'
-            , 'max_steps': 1000, 'local_path': True, 'waypoint_strategy': 'local'
+            , 'max_steps': 1000, 'local_path': True, 'waypoint_strategy': 'waypoint'
             , 'reward_signal': [1, -1, 0, -1, -0.001, 0, 0, 0, 0], 'n_actions': 8, 'control_steps': 10 
             , 'name': agent_name, 'display': True}
 
@@ -481,12 +491,13 @@ def test_environment():
     
     i=0
     while done==False:
-        action = action_history[i]
-        i+=1
-        #action = env.goals[env.current_goal]
+        #action = action_history[i]
+        #i+=1
+
+        action = env.goals[env.current_goal]
         state, reward, done = env.take_action(action)
 
-    env.save_initial_condition()
+    #env.save_initial_condition()
 
 if __name__=='__main__':
     test_environment()

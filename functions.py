@@ -133,16 +133,6 @@ def map_generator(map_name):
     
     return occupancy_grid, map_height, map_width, res 
 
-
-def detect_collision(occupancy_grid, x, y, res):
-    cell = (np.array([30-y, x])/res).astype(int)
-    #plt.imshow(occupancy_grid)
-    #plt.show()
-    if occupancy_grid[cell[0], cell[1]] == True:
-        return True
-    else:
-        return False
-
       
 def random_start(x, y, rx, ry, ryaw, rk, s):
     offset=0.5
@@ -171,16 +161,65 @@ def find_angle_to_line(ryaw, theta):
 
     return angle
 
-#def velocity_along_line(theta, velocity, ryaw, )
 
+def detect_collision(occupancy_grid, x, y, res):
+    cell = (np.array([30-y, x])/res).astype(int)
+    #plt.imshow(occupancy_grid)
+    #plt.show()
+    if occupancy_grid[cell[0], cell[1]] == True:
+        return True
+    else:
+        return False
+
+
+
+class lidar_scan():
+    def __init__(self, resolution, n_beams, max_range, occupancy_grid, fov):
+        self.resolution = resolution
+        self.n_beams  = n_beams
+        self.max_range = max_range
+        self.occupancy_grid = occupancy_grid
+        self.fov = fov
+        self.beam_angles = (fov/(self.n_beams-1))*np.arange(self.n_beams)
+
+    def get_scan(self, x, y, theta):
+        
+        scan = []
+        coords = []
+        
+        for n in self.beam_angles:
+            i=1
+            occupied=False
+
+            while i<(self.max_range/self.resolution) and occupied==False:
+                x_beam = x + np.cos(theta+n-self.fov/2)*i*self.resolution
+                y_beam = y + np.sin(theta+n-self.fov/2)*i*self.resolution
+                occupied = detect_collision(self.occupancy_grid, x_beam, y_beam, self.resolution)
+                i+=1
+            
+            coords.append([x_beam, y_beam])
+            dist = np.linalg.norm([x_beam-x, y_beam-y])
+            scan.append(dist)
+
+        return scan, coords
+    
+
+
+
+
+
+
+#def velocity_along_line(theta, velocity, ryaw, )
 
 #generate_berlin_goals()
 #x, y, rx, ry, ryaw, rk, s = generate_circle_goals()
 #start_x, start_y, start_theta, next_goal = random_start(x, y, rx, ry, ryaw, rk, s)
 
-#image_path = sys.path[0] + '/maps/' + 'circle' + '.png'       
-#occupancy_grid, map_height, map_width, res = map_generator(map_name='circle')
-#print(detect_collision(occupancy_grid, 15, 5, res))
+image_path = sys.path[0] + '/maps/' + 'circle' + '.png'       
+occupancy_grid, map_height, map_width, res = map_generator(map_name='circle')
+a = lidar_scan(res, 3, 10, occupancy_grid, np.pi)
+a.get_scan(15,5,0)
+
 
 #im = image.imread(image_path)
 #plt.imshow(im, extent=(0,30,0,30))
