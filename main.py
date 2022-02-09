@@ -187,8 +187,8 @@ if __name__=='__main__':
    #a.train()
    #a.test(n_episodes=100, detect_issues=False)
 
-   
-   #display_results.density_plot_progress(['bench_agent'])
+   #agent_name = 'progress_100'
+   #display_results.density_plot_progress([agent_name])
    #display_results.density_plot_progress(['progress_01', 'progress_05','progress_1'])
    #display_results.density_plot_progress(['progress_1', 'angle_01', 'angle_05'])
    #display_results.density_plot_progress(['progress_1', 'velocity_01', 'velocity_1'])
