@@ -31,7 +31,7 @@ class deepQNetwork(nn.Module):
         return action_values
 
 class agent():
-    def __init__(self, agent_dict, new_agent):
+    def __init__(self, agent_dict):
         
         self.agent_dict = agent_dict
         self.name = self.agent_dict['name']
@@ -50,8 +50,6 @@ class agent():
         self.replace_target = 100
 
         self.Q_eval = deepQNetwork(self.lr, n_actions=self.n_actions, input_dims=self.input_dims, fc1_dims=64, fc2_dims=64)
-        if new_agent==False:
-            self.Q_eval.load_state_dict(T.load('agents/'+self.name+'_weights'))
 
         self.state_memory = np.zeros((self.mem_size, self.input_dims), dtype=np.float32)
         self.next_state_memory = np.zeros((self.mem_size, self.input_dims), dtype=np.float32)
@@ -60,40 +58,6 @@ class agent():
         self.terminal_memory = np.zeros(self.mem_size, dtype=np.bool)
 
 
-    '''
-    def __init__(self, name, gamma, epsilon, lr, input_dims, batch_size, n_actions, max_mem_size, eps_end, eps_dec):
-        
-        self.gamma = gamma
-        self.epsilon = epsilon
-        self.eps_min = eps_end
-        self.eps_dec = eps_dec
-        self.lr = lr
-        self.action_space = [i for i in range(n_actions)]
-        self.mem_size = max_mem_size
-        self.batch_size = batch_size
-        self.mem_cntr = 0
-        self.iter_cntr = 0
-        self.replace_target = 100
-
-        self.Q_eval = deepQNetwork(lr, n_actions=n_actions, input_dims=input_dims, fc1_dims=64, fc2_dims=64)
-        if name:
-            self.Q_eval.load_state_dict(T.load('agents/'+name))
-
-
-        self.state_memory = np.zeros((self.mem_size, input_dims), dtype=np.float32)
-        self.next_state_memory = np.zeros((self.mem_size, input_dims), dtype=np.float32)
-        self.action_memory = np.zeros(self.mem_size, dtype=np.int32)
-        self.reward_memory = np.zeros(self.mem_size, dtype=np.float32)
-        self.terminal_memory = np.zeros(self.mem_size, dtype=np.bool)
-        '''
-
-    def reset_transition_memory(self):
-        self.state_memory = []
-        self.next_state_memory = []
-        self.reward_memory = []
-        self.action_memory = []
-        self.terminal_memory = []
-    
     def store_transition(self, state, action, reward, next_state, terminal):
         index = self.mem_cntr % self.mem_size
         self.state_memory[index] = state
@@ -101,9 +65,9 @@ class agent():
         self.reward_memory[index] = reward
         self.action_memory[index] = action
         self.terminal_memory[index] = terminal
-
         self.mem_cntr += 1
     
+
     def get_batch(self):
         max_mem = min(self.mem_cntr, self.mem_size)
         batch = np.random.choice(max_mem, self.batch_size, replace=False)
@@ -163,6 +127,10 @@ class agent():
         outfile = open('agents/' + self.name + '_hyper_parameters', 'wb')
         pickle.dump(self.agent_dict, outfile)
         outfile.close()
+
+
+    def load_weights(self, name):
+        self.Q_eval.load_state_dict(T.load('agents/' + name + '_weights'))
 
 
             

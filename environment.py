@@ -15,10 +15,9 @@ class environment():
     #            reward_signal, num_actions, control_steps, agent_name, display, start_condition):
     def __init__(self, input_dict, start_condition): 
         
-        
-        self.history_file_name = 'test_history/' + input_dict['name']
         self.initial_condition_name = 'initial_conditions/' + input_dict['name']
-        
+        self.history_file_name = 'test_history/' + input_dict['name'] 
+
         self.save_history = input_dict['save_history']
         self.sim_conf = input_dict['sim_conf']
         self.map_name = input_dict['map_name']
@@ -144,6 +143,9 @@ class environment():
 
         if self.local_path==False:
             for _ in range(self.control_steps):
+                if self.display==True:
+                    self.visualise(waypoint)
+                
                 if self.save_history==True:
                     self.waypoint_history.append(waypoint)
                 
@@ -234,8 +236,8 @@ class environment():
         current_goal[0]-self.s], [current_goal[1]-self.s, current_goal[1]-self.s, current_goal[1]+self.s, 
         current_goal[1]+self.s, current_goal[1]-self.s], 'r')
 
-        for coord in self.lidar_coords:
-            plt.plot(coord[0], coord[1], 'xb')
+        #for coord in self.lidar_coords:
+        #    plt.plot(coord[0], coord[1], 'xb')
         
         plt.plot(self.rx, self.ry)
         plt.plot(self.rx[self.old_closest_point], self.ry[self.old_closest_point], 'x')
@@ -332,10 +334,14 @@ class environment():
         if self.goals_reached==(len(self.goals)):
             self.max_goals_reached=True
 
-        if functions.detect_collision(self.occupancy_grid, self.x, self.y, self.res):
+        col = functions.detect_collision(self.occupancy_grid, self.x, self.y, self.res)
+        if col==True:    
             self.collision=True
-
-
+            if col==3:
+                print("what?")
+                
+        
+        
     def getReward(self):
 
         if self.goal_reached==True:
@@ -366,7 +372,7 @@ class environment():
     
             
     def isEnd(self):
-        if self.max_goals_reached==True:
+        if 2*self.max_goals_reached==True:
             return True
         elif self.out_of_bounds==True:       
             return True
@@ -467,7 +473,7 @@ class environment():
 
 def test_environment():
     
-    agent_name = 'dict_agent'
+    agent_name = '10Feb_2'
     replay_episode_name = 'replay_episodes/' + agent_name
     
     infile=open(replay_episode_name, 'rb')
@@ -475,23 +481,22 @@ def test_environment():
     initial_condition = pickle.load(infile)
     infile.close()
 
-    input_dict = {'sim_conf': functions.load_config(sys.path[0], "config"), 'save_history': True, 'map_name': 'circle'
-            , 'max_steps': 1000, 'local_path': True, 'waypoint_strategy': 'waypoint'
-            , 'reward_signal': [1, -1, 0, -1, -0.001, 0, 0, 0, 0], 'n_actions': 8, 'control_steps': 10 
-            , 'name': agent_name, 'display': True}
+    infile = open('environments/' + agent_name, 'rb')
+    env_dict = pickle.load(infile)
+    infile.close()
+    env_dict['display']=True
 
-    
-    env = environment(input_dict, initial_condition)
+    env = environment(env_dict, initial_condition)
 
     env.reset(save_history=True)
     done=False
     
     i=0
     while done==False:
-        #action = action_history[i]
-        #i+=1
+        action = action_history[i]
+        i+=1
 
-        action = env.goals[env.current_goal]
+        #action = env.goals[env.current_goal]
         state, reward, done = env.take_action(action)
 
     #env.save_initial_condition()

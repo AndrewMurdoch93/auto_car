@@ -163,7 +163,13 @@ def find_angle_to_line(ryaw, theta):
 
 
 def detect_collision(occupancy_grid, x, y, res):
+    
+    
     cell = (np.array([30-y, x])/res).astype(int)
+
+    if not (0<cell[0]<599 and 0<cell[1]<599):
+        print("error")
+        return 3
     #plt.imshow(occupancy_grid)
     #plt.show()
     if occupancy_grid[cell[0], cell[1]] == True:

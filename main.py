@@ -21,11 +21,12 @@ import display_results
 
 
 class trainingLoop():
-   def __init__(self, main_dict, agent_dict, env_dict):
+   def __init__(self, main_dict, agent_dict, env_dict, load_agent):
       
       self.main_dict = main_dict
       self.agent_dict = agent_dict
       self.env_dict = env_dict
+      self.load_agent = load_agent
       
       self.agent_name = main_dict['name']
       self.max_episodes = main_dict['max_episodes']
@@ -35,23 +36,24 @@ class trainingLoop():
       self.train_results_file_name = 'train_results/' + self.agent_name
       self.environment_name = "environments/" + self.agent_name
       self.train_parameters_name = 'train_parameters/' + self.agent_name
-      self.results_file_name = 'test_results/' + self.agent_name
-      self.replay_episode_name = 'replay_episodes/' + self.agent_name
 
 
    def train(self):
-      
-      self.best_ave_progress=0
 
-      #Initialising environment
       self.env_dict['name'] = self.main_dict['name']
       self.env = environment(self.env_dict, start_condition=[])
       self.agent_dict['name'] = self.main_dict['name']
       self.agent_dict['input_dims'] = len(self.env.observation)
       self.agent_dict['n_actions'] = self.env_dict['n_actions']
-      
-      self.agent = agent.agent(self.agent_dict, new_agent=True)
-      print("Agent = ", self.agent_name)
+
+      self.old_ave_score = -np.inf
+      self.old_ave_progress = -np.inf
+      self.best_ave_progress = -np.inf
+      self.best_ave_score = -np.inf
+
+      self.agent = agent.agent(self.agent_dict)
+      if self.load_agent:
+         self.agent.load_weights(self.load_agent)
 
       outfile = open('environments/' + self.agent_name, 'wb')
       pickle.dump(self.env_dict, outfile)
@@ -67,7 +69,7 @@ class trainingLoop():
 
       for episode in range(self.max_episodes):
          
-         self.env.reset(save_history=False)                #Reset the environment every episode
+         self.env.reset(save_history=True)  #Reset the environment every episode
          obs = self.env.observation      #Records starting state
          done = False
          score = 0                       #Initialise score counter for every episode
@@ -96,13 +98,13 @@ class trainingLoop():
 
          if episode%1000==0 and episode!=0:
 
-               ave_progress = self.test_while_train(n_episodes=200)
-               self.save_agent(ave_progress)
+            ave_progress = self.test_while_train(n_episodes=200)
+            self.save_agent(ave_progress)
 
-               outfile=open(self.train_results_file_name, 'wb')
-               pickle.dump(scores, outfile)
-               pickle.dump(progress, outfile)
-               outfile.close()
+            outfile=open(self.train_results_file_name, 'wb')
+            pickle.dump(scores, outfile)
+            pickle.dump(progress, outfile)
+            outfile.close()
 
 
          if episode%10==0:
@@ -117,11 +119,14 @@ class trainingLoop():
       pickle.dump(progress, outfile)
       outfile.close()
 
+
    def test_while_train(self, n_episodes):
       
       print(f"{'Testing agent for '}{n_episodes}{' episodes'}")
       
+      
       test_progress = []
+      test_score = []
       
       for episode in range(n_episodes):
          self.env.reset(save_history=True)
@@ -134,103 +139,122 @@ class trainingLoop():
             next_obs, reward, done = self.env.take_action(action)
             score += reward
             obs = next_obs
+         
          test_progress.append(self.env.progress)
+         test_score.append(score)
          
       ave_progress = np.average(test_progress)
-      
-      if ave_progress >= self.best_ave_progress:
-         print(f"{'Average progress increased from '}{self.best_ave_progress:.2f}{' to '}{ave_progress:.2f}")
+      ave_score = np.average(test_score)
+
+      if ave_progress >= self.old_ave_progress:
+         print(f"{'Average progress increased from '}{self.old_ave_progress:.2f}{' to '}{ave_progress:.2f}")
       else:
-         print(f"{'Average progress decreased from '}{self.best_ave_progress:.2f}{' to '}{ave_progress:.2f}")
+         print(f"{'Average progress decreased from '}{self.old_ave_progress:.2f}{' to '}{ave_progress:.2f}")
 
-      return ave_progress
+      if ave_score >= self.old_ave_score:
+         print(f"{'Average score increased from '}{self.old_ave_score:.2f}{' to '}{ave_score:.2f}")
+      else:
+         print(f"{'Average score decreased from '}{self.old_ave_score:.2f}{' to '}{ave_score:.2f}")
+      
+      self.old_ave_progress = ave_progress 
+      self.old_ave_score = ave_score
+
+      return test_score
       
 
-   def save_agent(self, ave_progress):
+   def save_agent(self, test_score):
+      
+      ave_score = np.average(test_score)
+      std = np.std(test_score)
 
-      if ave_progress >= self.best_ave_progress:
-         self.best_ave_progress=ave_progress
+      if  ave_score >= (self.best_ave_score-std):
+         self.best_ave_score = ave_score
          self.agent.save_agent()
          print("Agent was saved")
       else:
          print("Agent was not saved")
 
-
    
-   
-   def test(self, n_episodes, detect_issues):
+def test(agent_name, n_episodes, detect_issues):
 
-      self.env = environment(self.env_dict, start_condition=[])
-      
+   results_file_name = 'test_results/' + agent_name
+   replay_episode_name = 'replay_episodes/' + agent_name
+   
+   infile = open('environments/' + agent_name, 'rb')
+   env_dict = pickle.load(infile)
+   infile.close()
+   
+   env = environment(env_dict, start_condition=[])
+   
+   action_history = []
+
+   infile = open('agents/' + agent_name + '_hyper_parameters', 'rb')
+   agent_dict = pickle.load(infile)
+   infile.close()
+
+   a = agent.agent(agent_dict)
+   a.load_weights(agent_name)
+
+   test_progress = []
+   test_score = []
+
+   for episode in range(n_episodes):
+
+      env.reset(save_history=True)
       action_history = []
+      obs = env.observation
+      done = False
+      score = 0
 
-      infile = open('agents/' + self.agent_name + '_hyper_parameters', 'rb')
-      self.agent_dict = pickle.load(infile)
-      infile.close()
-
-      self.agent = agent.agent(self.agent_dict, new_agent=False)
-
-      test_progress = []
-      test_score = []
-
-      for episode in range(n_episodes):
-
-         self.env.reset(save_history=True)
-         action_history = []
-         obs = self.env.observation
-         done = False
-         score=0
-
-         while not done:
-            action = self.agent.choose_action(obs)
-            action_history.append(action)
-            
-            next_obs, reward, done = self.env.take_action(action)
-            score += reward
-            obs = next_obs
-            
-         test_progress.append(self.env.progress)
-         test_score.append(score)
-            
-         if episode%50==0:
-            print('Test episode', episode, '| Progress = %.2f' % self.env.progress, '| Score = %.2f' % score)
-
-         if detect_issues==True and (self.env.progress>0.05 or self.env.progress<-0.05):
-            print('Simulation is broken')
-            print('Progress = ', self.env.progress)
-
-            outfile = open(self.replay_episode_name, 'wb')
-            pickle.dump(action_history, outfile)
-            pickle.dump(self.env.initial_condition_dict, outfile)
-            outfile.close()
-            break
+      while not done:
+         action = a.choose_action(obs)
+         action_history.append(action)
          
-      outfile=open(self.results_file_name, 'wb')
-      pickle.dump(test_score, outfile)
-      pickle.dump(test_progress, outfile)
-      outfile.close()
+         next_obs, reward, done = env.take_action(action)
+         score += reward
+         obs = next_obs
+         
+      test_progress.append(env.progress)
+      test_score.append(score)
+         
+      if episode%50==0:
+         print('Test episode', episode, '| Progress = %.2f' % env.progress, '| Score = %.2f' % score)
+
+      if detect_issues==True and (env.progress>1 and score>2):
+         print('Stop condition met')
+         print('Progress = ', env.progress)
+
+         outfile = open(replay_episode_name, 'wb')
+         pickle.dump(action_history, outfile)
+         pickle.dump(env.initial_condition_dict, outfile)
+         outfile.close()
+         break
+      
+   outfile=open(results_file_name, 'wb')
+   pickle.dump(test_score, outfile)
+   pickle.dump(test_progress, outfile)
+   outfile.close()
 
              
 if __name__=='__main__':
    
-   agent_name = '10Feb_1'
+   agent_name = '10Feb_4'
 
-   main_dict = {'name': agent_name, 'max_episodes':5000, 'comment':'progress reward constant, vary time step penalty'}
+   main_dict = {'name': agent_name, 'max_episodes':8000, 'comment':'progress reward constant, vary time step penalty'}
 
    agent_dict = {'gamma':0.99, 'epsilon':1, 'eps_end':0.01, 'eps_dec':1e-3, 'lr':0.001, 'batch_size':64, 'max_mem_size':100000}
 
    env_dict = {'sim_conf': functions.load_config(sys.path[0], "config"), 'save_history': False, 'map_name': 'circle'
-            , 'max_steps': 1000, 'local_path': False, 'waypoint_strategy': 'local'
+            , 'max_steps': 1500, 'local_path': False, 'waypoint_strategy': 'local'
             , 'reward_signal': [0, -1, 0, -1, -0.01, 10, 0, 0, 0], 'n_actions': 8, 'control_steps': 20 
             , 'display': False} 
  
    
-   #a = trainingLoop(main_dict, agent_dict, env_dict)
+   #a = trainingLoop(main_dict, agent_dict, env_dict, load_agent='')
    #a.train()
-   #a.test(n_episodes=1000, detect_issues=False)
+   #test(agent_name=agent_name, n_episodes=1000, detect_issues=False)
 
 
-   agent_name = '9Feb_6'
    #display_results.display_train_parameters(agent_name=agent_name)
    #display_results.learning_curve_score(agent_name=agent_name, show_average=True, show_median=True)
    #display_results.learning_curve_progress(agent_name=agent_name, show_average=True, show_median=True)
@@ -239,8 +263,8 @@ if __name__=='__main__':
    #display_results.density_plot_progress([agent_name])
    #display_results.histogram_score(agent_name=agent_name)
    #display_results.histogram_progress(agent_name=agent_name)
-   display_results.display_moving_agent(agent_name=agent_name, load_history=False)
-   #display_results.display_path(agent_name=agent_name, load_history=False)
+   display_results.display_moving_agent(agent_name=agent_name, load_history=True)
+   #display_results.display_path(agent_name=agent_name, load_history=True)
 
   
 
