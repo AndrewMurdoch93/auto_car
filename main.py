@@ -41,6 +41,8 @@ class trainingLoop():
 
    def train(self):
       
+      self.best_ave_progress=0
+
       #Initialising environment
       self.env_dict['name'] = self.main_dict['name']
       self.env = environment(self.env_dict, start_condition=[])
@@ -94,7 +96,8 @@ class trainingLoop():
 
          if episode%1000==0 and episode!=0:
 
-               self.agent.save_agent()
+               ave_progress = self.test_while_train(n_episodes=200)
+               self.save_agent(ave_progress)
 
                outfile=open(self.train_results_file_name, 'wb')
                pickle.dump(scores, outfile)
@@ -106,14 +109,55 @@ class trainingLoop():
             print(f"{'Episode':8s} {episode:5.0f} {'| Score':8s} {score:6.2f} {'| Progress':12s} {self.env.progress:3.2f} {'| Average score':15s} {avg_score:6.2f} {'| Average progress':18s} {avg_progress:3.2f} {'| Epsilon':9s} {self.agent.epsilon:.2f}")
    
       
-      self.agent.save_agent()
+      ave_progress = self.test_while_train(n_episodes=200)
+      self.save_agent(ave_progress)
 
       outfile=open(self.train_results_file_name, 'wb')
       pickle.dump(scores, outfile)
       pickle.dump(progress, outfile)
       outfile.close()
 
+   def test_while_train(self, n_episodes):
+      
+      print(f"{'Testing agent for '}{n_episodes}{' episodes'}")
+      
+      test_progress = []
+      
+      for episode in range(n_episodes):
+         self.env.reset(save_history=True)
+         obs = self.env.observation
+         done = False
+         score=0
 
+         while not done:
+            action = self.agent.choose_action(obs)
+            next_obs, reward, done = self.env.take_action(action)
+            score += reward
+            obs = next_obs
+         test_progress.append(self.env.progress)
+         
+      ave_progress = np.average(test_progress)
+      
+      if ave_progress >= self.best_ave_progress:
+         print(f"{'Average progress increased from '}{self.best_ave_progress:.2f}{' to '}{ave_progress:.2f}")
+      else:
+         print(f"{'Average progress decreased from '}{self.best_ave_progress:.2f}{' to '}{ave_progress:.2f}")
+
+      return ave_progress
+      
+
+   def save_agent(self, ave_progress):
+
+      if ave_progress >= self.best_ave_progress:
+         self.best_ave_progress=ave_progress
+         self.agent.save_agent()
+         print("Agent was saved")
+      else:
+         print("Agent was not saved")
+
+
+   
+   
    def test(self, n_episodes, detect_issues):
 
       self.env = environment(self.env_dict, start_condition=[])
@@ -145,8 +189,8 @@ class trainingLoop():
             score += reward
             obs = next_obs
             
-            test_progress.append(self.env.progress)
-            test_score.append(score)
+         test_progress.append(self.env.progress)
+         test_score.append(score)
             
          if episode%50==0:
             print('Test episode', episode, '| Progress = %.2f' % self.env.progress, '| Score = %.2f' % score)
@@ -169,43 +213,36 @@ class trainingLoop():
              
 if __name__=='__main__':
    
-   agent_name = 'progress_10'
+   agent_name = '10Feb_1'
 
-   
-   main_dict = {'name': agent_name, 'max_episodes':100, 'comment':''}
+   main_dict = {'name': agent_name, 'max_episodes':5000, 'comment':'progress reward constant, vary time step penalty'}
 
    agent_dict = {'gamma':0.99, 'epsilon':1, 'eps_end':0.01, 'eps_dec':1e-3, 'lr':0.001, 'batch_size':64, 'max_mem_size':100000}
 
    env_dict = {'sim_conf': functions.load_config(sys.path[0], "config"), 'save_history': False, 'map_name': 'circle'
             , 'max_steps': 1000, 'local_path': False, 'waypoint_strategy': 'local'
-            , 'reward_signal': [0, -1, 0, -1, -0.001, 10, 0, 0, 0], 'n_actions': 8, 'control_steps': 20 
+            , 'reward_signal': [0, -1, 0, -1, -0.01, 10, 0, 0, 0], 'n_actions': 8, 'control_steps': 20 
             , 'display': False} 
  
    
-
    #a = trainingLoop(main_dict, agent_dict, env_dict)
    #a.train()
-   #a.test(n_episodes=100, detect_issues=False)
+   #a.test(n_episodes=1000, detect_issues=False)
 
-   #agent_name = 'progress_100'
-   #display_results.density_plot_progress([agent_name])
-   #display_results.density_plot_progress(['progress_01', 'progress_05','progress_1'])
-   #display_results.density_plot_progress(['progress_1', 'angle_01', 'angle_05'])
-   #display_results.density_plot_progress(['progress_1', 'velocity_01', 'velocity_1'])
-   #display_results.density_plot_progress(['progress_1', 'dist_01'])
-   
 
+   agent_name = '9Feb_6'
    #display_results.display_train_parameters(agent_name=agent_name)
    #display_results.learning_curve_score(agent_name=agent_name, show_average=True, show_median=True)
    #display_results.learning_curve_progress(agent_name=agent_name, show_average=True, show_median=True)
    #display_results.agent_score_statistics(agent_name=agent_name)
    #display_results.agent_progress_statistics(agent_name=agent_name)
+   #display_results.density_plot_progress([agent_name])
    #display_results.histogram_score(agent_name=agent_name)
    #display_results.histogram_progress(agent_name=agent_name)
-   #display_results.display_moving_agent(agent_name=agent_name, load_history=False)
+   display_results.display_moving_agent(agent_name=agent_name, load_history=False)
    #display_results.display_path(agent_name=agent_name, load_history=False)
 
-
+  
 
 
 

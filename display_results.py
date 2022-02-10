@@ -235,6 +235,7 @@ def agent_score_statistics(agent_name):
 def agent_progress_statistics(agent_name):
     
     results_file_name = 'test_results/' + agent_name
+    
     infile = open(results_file_name, 'rb')
     test_score = pickle.load(infile)
     test_progress = pickle.load(infile)

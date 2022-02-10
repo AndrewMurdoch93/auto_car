@@ -80,7 +80,7 @@ class environment():
         else:
             self.x, self.y, self.theta, self.current_goal = functions.random_start(self.goal_x, self.goal_y, self.rx, self.ry, self.ryaw, self.rk, self.d)
             
-        self.v = 0    
+        self.v = 7    
         self.delta = 0
         self.theta_dot = 0      
         self.delta_dot = 0
@@ -270,7 +270,7 @@ class environment():
         pickle.dump(self.observation_history, outfile)
         pickle.dump(self.progress_history, outfile)
         pickle.dump(self.closest_point_history, outfile)
-        pickle.dump(self.lidar_coords_history, outfile)
+        #pickle.dump(self.lidar_coords_history, outfile)
         if self.local_path == True:
             pickle.dump(self.local_path_history, outfile)
         outfile.close()
@@ -285,7 +285,7 @@ class environment():
         self.observation_history = pickle.load(infile)
         self.progress_history = pickle.load(infile)
         self.closest_point_history = pickle.load(infile)
-        self.lidar_coords_history = pickle.load(infile)
+        #self.lidar_coords_history = pickle.load(infile)
         if self.local_path == True:
             self.local_path_history = pickle.load(infile)
         infile.close()
@@ -296,7 +296,7 @@ class environment():
         self.goal_history.append(self.goals[self.current_goal])
         self.observation_history.append(self.observation)
         self.progress_history.append(self.progress)
-        self.lidar_coords_history.append(self.lidar_coords)
+        #self.lidar_coords_history.append(self.lidar_coords)
     
     
     def convert_action_to_coord(self, strategy, action):
@@ -428,7 +428,7 @@ class environment():
         self.dist_to_line = np.hypot(self.x-self.rx[new_closest_point], self.y-self.ry[new_closest_point])
         self.old_closest_point = new_closest_point
 
-        self.lidar_dists, self.lidar_coords = self.lidar.get_scan(self.x, self.y, self.theta)
+        #self.lidar_dists, self.lidar_coords = self.lidar.get_scan(self.x, self.y, self.theta)
 
 
         
@@ -463,9 +463,6 @@ class environment():
 
         self.delta = np.clip(self.delta, -self.max_delta, self.max_delta)    #truncate steering angle
         self.v = np.clip(self.v, -self.max_v, self.max_v)         #truncate velocity
-
-
-
 
 
 def test_environment():
