@@ -279,6 +279,31 @@ if __name__=='__main__':
    a.train()
    test(agent_name=agent_name, n_episodes=1000, detect_issues=False)
 
+   main_dict['name'] = 'vary_collision_penalty_0'
+   env_dict['reward_signal'] = [0, -1, 0, -1, -0.01, 10, 0, 0, 0]
+   a = trainingLoop(main_dict, agent_dict, env_dict, load_agent='')
+   a.train()
+   test(agent_name=agent_name, n_episodes=1000, detect_issues=False)
+
+   main_dict['name'] = 'vary_collision_penalty_1'
+   env_dict['reward_signal'] = [0, -5, 0, -5, -0.01, 10, 0, 0, 0]
+   a = trainingLoop(main_dict, agent_dict, env_dict, load_agent='')
+   a.train()
+   test(agent_name=agent_name, n_episodes=1000, detect_issues=False)
+
+   main_dict['name'] = 'vary_collision_penalty_2'
+   env_dict['reward_signal'] = [0, -10, 0, -10, -0.01, 10, 0, 0, 0]
+   a = trainingLoop(main_dict, agent_dict, env_dict, load_agent='')
+   a.train()
+   test(agent_name=agent_name, n_episodes=1000, detect_issues=False)
+
+   main_dict['name'] = 'vary_collision_penalty_3'
+   env_dict['reward_signal'] = [0, -20, 0, -20, -0.01, 10, 0, 0, 0]
+   a = trainingLoop(main_dict, agent_dict, env_dict, load_agent='')
+   a.train()
+   test(agent_name=agent_name, n_episodes=1000, detect_issues=False)
+
+
 
 
 
