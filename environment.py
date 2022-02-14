@@ -423,11 +423,40 @@ class environment():
 
         #Find vehicle progress along line
         point_dif = new_closest_point-self.old_closest_point
-        if point_dif>=0 or point_dif<-100:
-            self.current_progress = ((new_closest_point-self.old_closest_point)%len(self.rx))/len(self.rx)
-        else:
-            self.current_progress = -((self.old_closest_point-new_closest_point)%len(self.rx))/len(self.rx)   
+        
+        #if point_dif>=0 or point_dif<-100:
+        #    self.current_progress = ((new_closest_point-self.old_closest_point)%len(self.rx))/len(self.rx)
+        #else:
+        #    self.current_progress = -((self.old_closest_point-new_closest_point)%len(self.rx))/len(self.rx)   
+        
+        if point_dif==0:
+            self.current_progress = 0
+        
+        elif 0<point_dif<int(len(self.rx)/2):
+            self.current_progress = new_closest_point-self.old_closest_point
+        
+        elif point_dif<-int(len(self.rx)/2):
+            self.current_progress = (len(self.rx)-np.abs(self.old_closest_point))+new_closest_point
+
+        elif -int(len(self.rx)/2)<point_dif<0:
+            self.current_progress = new_closest_point-self.old_closest_point
+
+        elif point_dif>=int(len(self.rx)/2):
+            self.current_progress = -(self.old_closest_point+(np.abs(len(self.rx)-new_closest_point)))
+
+        self.current_progress/=len(self.rx)
+
         self.progress += self.current_progress
+        
+        '''
+        print('old point = ', self.old_closest_point)
+        print('new point = ', new_closest_point)
+        print('point difference = ', point_dif)
+        print('current progress = ', self.current_progress)
+        print('Progress = ', self.progress)
+        print('------------------')
+        '''
+
         #Velocity component along line
         self.vel_par_line = self.v * np.cos(self.angle_to_line)
         #Distance to nearest point 
@@ -473,7 +502,7 @@ class environment():
 
 def test_environment():
     
-    agent_name = '10Feb_2'
+    agent_name = '14Feb_5'
     replay_episode_name = 'replay_episodes/' + agent_name
     
     infile=open(replay_episode_name, 'rb')

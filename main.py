@@ -167,7 +167,8 @@ class trainingLoop():
       ave_score = np.average(test_score)
       std = np.std(test_score)
 
-      if  ave_score >= (self.best_ave_score-std):
+      #if  ave_score >= (self.best_ave_score-std):
+      if True:
          self.best_ave_score = ave_score
          self.agent.save_agent()
          print("Agent was saved")
@@ -220,7 +221,7 @@ def test(agent_name, n_episodes, detect_issues):
       if episode%50==0:
          print('Test episode', episode, '| Progress = %.2f' % env.progress, '| Score = %.2f' % score)
 
-      if detect_issues==True and (env.progress>1 and score>2):
+      if detect_issues==True and (score>15):
          print('Stop condition met')
          print('Progress = ', env.progress)
 
@@ -238,21 +239,48 @@ def test(agent_name, n_episodes, detect_issues):
              
 if __name__=='__main__':
    
-   agent_name = '10Feb_4'
+   agent_name = 'vary_progress_reward_0'
 
-   main_dict = {'name': agent_name, 'max_episodes':8000, 'comment':'progress reward constant, vary time step penalty'}
+   main_dict = {'name': agent_name, 'max_episodes':5000, 'comment':'vary progress reward while holding time step and collision penalty constant'}
 
-   agent_dict = {'gamma':0.99, 'epsilon':1, 'eps_end':0.01, 'eps_dec':1e-3, 'lr':0.001, 'batch_size':64, 'max_mem_size':100000}
+   agent_dict = {'gamma':0.99, 'epsilon':0.01, 'eps_end':0.01, 'eps_dec':1e-3, 'lr':0.001, 'batch_size':64, 'max_mem_size':100000}
 
    env_dict = {'sim_conf': functions.load_config(sys.path[0], "config"), 'save_history': False, 'map_name': 'circle'
-            , 'max_steps': 1500, 'local_path': False, 'waypoint_strategy': 'local'
-            , 'reward_signal': [0, -1, 0, -1, -0.01, 10, 0, 0, 0], 'n_actions': 8, 'control_steps': 20 
+            , 'max_steps': 1000, 'local_path': False, 'waypoint_strategy': 'local'
+            , 'reward_signal': [0, -1, 0, -1, -0.01, 1, 0, 0, 0], 'n_actions': 8, 'control_steps': 20 
             , 'display': False} 
  
    
-   #a = trainingLoop(main_dict, agent_dict, env_dict, load_agent='')
-   #a.train()
-   #test(agent_name=agent_name, n_episodes=1000, detect_issues=False)
+   a = trainingLoop(main_dict, agent_dict, env_dict, load_agent='')
+   a.train()
+   test(agent_name=agent_name, n_episodes=1000, detect_issues=False)
+
+   main_dict['name'] = 'vary_progress_reward_1'
+   env_dict['reward_signal'] = [0, -1, 0, -1, -0.01, 10, 0, 0, 0]
+   a = trainingLoop(main_dict, agent_dict, env_dict, load_agent='')
+   a.train()
+   test(agent_name=agent_name, n_episodes=1000, detect_issues=False)
+
+   main_dict['name'] = 'vary_progress_reward_2'
+   env_dict['reward_signal'] = [0, -1, 0, -1, -0.01, 20, 0, 0, 0]
+   a = trainingLoop(main_dict, agent_dict, env_dict, load_agent='')
+   a.train()
+   test(agent_name=agent_name, n_episodes=1000, detect_issues=False)
+
+   main_dict['name'] = 'vary_progress_reward_3'
+   env_dict['reward_signal'] = [0, -1, 0, -1, -0.01, 50, 0, 0, 0]
+   a = trainingLoop(main_dict, agent_dict, env_dict, load_agent='')
+   a.train()
+   test(agent_name=agent_name, n_episodes=1000, detect_issues=False)
+
+   main_dict['name'] = 'vary_progress_reward_4'
+   env_dict['reward_signal'] = [0, -1, 0, -1, -0.01, 100, 0, 0, 0]
+   a = trainingLoop(main_dict, agent_dict, env_dict, load_agent='')
+   a.train()
+   test(agent_name=agent_name, n_episodes=1000, detect_issues=False)
+
+
+
 
 
    #display_results.display_train_parameters(agent_name=agent_name)
@@ -263,8 +291,8 @@ if __name__=='__main__':
    #display_results.density_plot_progress([agent_name])
    #display_results.histogram_score(agent_name=agent_name)
    #display_results.histogram_progress(agent_name=agent_name)
-   display_results.display_moving_agent(agent_name=agent_name, load_history=True)
-   #display_results.display_path(agent_name=agent_name, load_history=True)
+   #display_results.display_moving_agent(agent_name=agent_name, load_history=True)
+   #display_results.display_path(agent_name=agent_name, load_history=False)
 
   
 
