@@ -28,6 +28,7 @@ class environment():
         self.num_actions = input_dict['n_actions']
         self.control_steps = input_dict['control_steps']
         self.display=input_dict['display']
+        self.R=input_dict['R']
         self.start_condition = start_condition
         
         #simulation parameters
@@ -306,8 +307,8 @@ class environment():
             waypoint = [int((action+1)%3), int((action+1)/3)]
 
         if strategy=='local':
-            waypoint_relative_angle = self.theta+math.pi/2-math.pi*(action/8)
-            waypoint = [self.x + 4*math.cos(waypoint_relative_angle), self.y + 4*math.sin(waypoint_relative_angle)]
+            waypoint_relative_angle = self.theta+math.pi/4-(math.pi/2)*(action/self.num_actions)
+            waypoint = [self.x + self.R*math.cos(waypoint_relative_angle), self.y + self.R*math.sin(waypoint_relative_angle)]
         
         if strategy == 'waypoint':
             waypoint = action

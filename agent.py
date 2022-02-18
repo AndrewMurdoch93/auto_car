@@ -4,18 +4,21 @@ import torch.nn.functional as F
 import torch.optim as optim
 import numpy as np
 import pickle
+from collections import OrderedDict
 
 class deepQNetwork(nn.Module):
-    def __init__(self, lr, input_dims, fc1_dims, fc2_dims, n_actions):
+    def __init__(self, lr, input_dims, fc1_dims, fc2_dims, fc3_dims, n_actions):
         super(deepQNetwork, self).__init__()
         self.input_dims = input_dims
         self.fc1_dims = fc1_dims
         self.fc2_dims = fc2_dims
+        self.fc3_dims = fc3_dims
         self.n_actions = n_actions
 
         self.fc1 = nn.Linear(self.input_dims, self.fc1_dims)
         self.fc2 = nn.Linear(self.fc1_dims, self.fc2_dims)
         self.fc3 = nn.Linear(self.fc2_dims, self.n_actions)
+        #self.fc4 = nn.Linear(self.fc3_dims, self.n_actions)
 
         self.optimizer = optim.Adam(self.parameters(), lr=lr)
         self.loss = nn.MSELoss()
@@ -26,9 +29,11 @@ class deepQNetwork(nn.Module):
     def forward(self, state):
         x = F.relu(self.fc1(state.float()))
         x = F.relu(self.fc2(x))
+        #x = F.relu(self.fc3(x))
         action_values = self.fc3(x)
         
         return action_values
+
 
 class agent():
     def __init__(self, agent_dict):
@@ -46,10 +51,15 @@ class agent():
         self.batch_size = self.agent_dict['batch_size']
         self.input_dims = self.agent_dict['input_dims']
         self.mem_cntr = 0
-        self.iter_cntr = 0
+        self.iter_cntr = 0 
         self.replace_target = 100
 
-        self.Q_eval = deepQNetwork(self.lr, n_actions=self.n_actions, input_dims=self.input_dims, fc1_dims=64, fc2_dims=64)
+        self.fc1_dims=self.agent_dict['fc1_dims']
+        self.fc2_dims=self.agent_dict['fc2_dims']
+        self.fc3_dims=self.agent_dict['fc2_dims']
+
+        self.Q_eval = deepQNetwork(self.lr, n_actions=self.n_actions, input_dims=self.input_dims, fc1_dims=self.fc1_dims, fc2_dims=self.fc2_dims, fc3_dims=self.fc3_dims)
+
 
         self.state_memory = np.zeros((self.mem_size, self.input_dims), dtype=np.float32)
         self.next_state_memory = np.zeros((self.mem_size, self.input_dims), dtype=np.float32)

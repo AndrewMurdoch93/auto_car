@@ -21,6 +21,54 @@ from environment import environment
 import pandas as pd
 
 
+def compare_learning_curves_progress(agent_names, legend, legend_title, show_average=True, show_median=False):
+    
+    window = 300
+
+    progress = [[] for _ in range(len(agent_names))]
+    avg = [[] for _ in range(len(agent_names))]
+    std_dev = [[] for _ in range(len(agent_names))]
+    percentile_25 = [[] for _ in range(len(agent_names))]
+    median = [[] for _ in range(len(agent_names))]
+    percentile_75 = [[] for _ in range(len(agent_names))]
+
+    for i in range(len(agent_names)):
+        agent_name = agent_names[i]
+        train_results_file_name = 'train_results/' + agent_name
+        infile = open(train_results_file_name, 'rb')
+        _ = pickle.load(infile)
+        progress[i] = pickle.load(infile)
+        infile.close()
+
+        for j in range(len(progress[i])):
+            if j <= window:
+                x = 0
+            else:
+                x = j-window 
+            avg[i].append(np.mean(progress[i][x:j+1]))
+            median[i].append(np.percentile(progress[i][x:j+1], 50))
+
+
+    if show_median==True:
+       
+        for i in range(len(agent_names)):
+            plt.plot(median[i])
+        
+        plt.title('Learning curve for median progress')
+        plt.xlabel('Episode')
+        plt.ylabel('Progress')
+        plt.legend(legend, title=legend_title, loc='upper left')
+        plt.show()
+
+    if show_average==True:
+        for i in range(len(agent_names)):
+            plt.plot(avg[i])
+        plt.title('Learning curve for average progress')
+        plt.xlabel('Episode')
+        plt.ylabel('Progress')
+        plt.legend(legend, title=legend_title, loc='upper left')
+        plt.show()
+
 def learning_curve_score(agent_name, show_average=False, show_median=True):
     window = 100
     
@@ -50,23 +98,23 @@ def learning_curve_score(agent_name, show_average=False, show_median=True):
         percentile_75.append( np.percentile(scores[x:i+1], 75))
     
     if show_median==True:
-        plt.plot(scores)
+        #plt.plot(scores)
         plt.plot(median, color='black')
         plt.fill_between(np.arange(len(scores)), percentile_25, percentile_75, color='lightblue')
         plt.title('Learning curve')
         plt.xlabel('Episode')
         plt.ylabel('Score')
-        plt.legend(['Episode score', 'Median score', '25th to 75th percentile'])
+        plt.legend(['Median score', '25th to 75th percentile'])
         plt.show()
 
     if show_average==True:
-        plt.plot(scores)
+        #plt.plot(scores)
         plt.plot(avg_scores, color='black')
         plt.fill_between(np.arange(len(scores)), np.add(avg_scores,std_dev), np.subtract(avg_scores,std_dev), color='lightblue')
         plt.title('Learning curve')
         plt.xlabel('Episode')
         plt.ylabel('Score')
-        plt.legend(['Episode score', 'Average score', 'Standard deviation from mean'])
+        plt.legend(['Average score', 'Standard deviation from mean'])
         plt.show()
         
 
@@ -98,23 +146,23 @@ def learning_curve_progress(agent_name, show_average=False, show_median=True):
         percentile_75.append( np.percentile(progress[x:i+1], 75))
     
     if show_median==True:
-        plt.plot(progress)
+        #plt.plot(progress)
         plt.plot(median, color='black')
         plt.fill_between(np.arange(len(progress)), percentile_25, percentile_75, color='lightblue')
         plt.title('Learning curve')
         plt.xlabel('Episode')
-        plt.ylabel('Score')
-        plt.legend(['Episode score', 'Median score', '25th to 75th percentile'])
+        plt.ylabel('Progress')
+        plt.legend(['Median Progress', '25th to 75th percentile'])
         plt.show()
 
     if show_average==True:
-        plt.plot(progress)
+        #plt.plot(progress)
         plt.plot(avg_scores, color='black')
         plt.fill_between(np.arange(len(progress)), np.add(avg_scores,std_dev), np.subtract(avg_scores,std_dev), color='lightblue')
         plt.title('Learning curve')
         plt.xlabel('Episode')
-        plt.ylabel('Score')
-        plt.legend(['Episode score', 'Average score', 'Standard deviation from mean'])
+        plt.ylabel('Progress')
+        plt.legend(['Average progress', 'Standard deviation from mean'])
         plt.show()
 
 
@@ -168,7 +216,7 @@ def histogram_progress(agent_name):
     plt.show()
 
 
-def density_plot_score(agent_names):
+def density_plot_score(agent_names, legend, legend_title):
     
     test_score = []
     for a in agent_names:
@@ -178,16 +226,17 @@ def density_plot_score(agent_names):
         _ = pickle.load(infile)
         infile.close()
     
-    df = pd.DataFrame(test_score)
-    sns.displot(test_score, legend=False)
-    plt.legend(agent_names)
-    plt.title('Agent score distribution')
+    sns.displot(test_score,legend=False, kind="kde")
+    leg=legend.copy()
+    leg.reverse()
+    plt.legend(leg, title=legend_title, loc='upper left')
+    plt.title('Agent score distribution in testing')
     plt.xlabel('Score')
     plt.ylabel('Density probability')
     plt.show()
     
 
-def density_plot_progress(agent_names):
+def density_plot_progress(agent_names, legend, legend_title):
     
     test_progress = []
     for a in agent_names:
@@ -197,11 +246,14 @@ def density_plot_progress(agent_names):
         test_progress.append(pickle.load(infile))
         infile.close()
     
-    sns.displot(test_progress, legend=True, kind="kde")
-    #plt.legend(agent_names)
-    plt.title('Agent progress distribution')
+    sns.displot(test_progress,legend=False, kind="kde")
+    leg=legend.copy()
+    leg.reverse()
+    plt.legend(leg, title=legend_title, loc='upper left')
+    plt.title('Agent progress distribution in testing')
     plt.xlabel('Progress')
     plt.ylabel('Density probability')
+    #plt.xlim([0.9, 1.4])
     plt.show()
     
 
@@ -354,7 +406,7 @@ def display_moving_agent(agent_name, load_history=False):
 
     else:
 
-        for sh, wh, gh, rh, lph, ph, cph, lh in zip(env.state_history, env.waypoint_history, env.goal_history, env.reward_history, env.local_path_history, env.progress_history, env.closest_point_history, env.lidar_coords_history):
+        for sh, wh, gh, rh, lph, ph, cph in zip(env.state_history, env.waypoint_history, env.goal_history, env.reward_history, env.local_path_history, env.progress_history, env.closest_point_history):
             plt.cla()
             # Stop the simulation with the esc key.
             plt.gcf().canvas.mpl_connect('key_release_event', lambda event: [exit(0) if event.key == 'escape' else None])
@@ -368,8 +420,8 @@ def display_moving_agent(agent_name, load_history=False):
             plt.plot(lph[0], lph[1])
             plt.plot(env.rx, env.ry)
             plt.plot(env.rx[cph], env.ry[cph], 'x')
-            for coord in lh:
-                plt.plot(coord[0], coord[1], 'xb')
+            #for coord in lh:
+            #    plt.plot(coord[0], coord[1], 'xb')
             
             #plt.legend(["position", "waypoint", "goal area", "heading", "steering angle"])
             plt.xlabel('x coordinate')
@@ -391,12 +443,14 @@ def display_path(agent_name, load_history=False):
     env_dict = pickle.load(infile)
     infile.close()
     
+    #env = environment(env_dict, start_condition={'x':15,'y':5,'theta':0, 'goal':0})
     env = environment(env_dict, start_condition=[])
     
+
     infile = open('agents/' + agent_name + '_hyper_parameters', 'rb')
     agent_dict = pickle.load(infile)
     infile.close()
-
+    #agent_dict['epsilon']=0
     a = agent.agent(agent_dict)
     a.load_weights(agent_name)
 
