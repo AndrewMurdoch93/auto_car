@@ -253,7 +253,7 @@ def density_plot_progress(agent_names, legend, legend_title):
     plt.title('Agent progress distribution in testing')
     plt.xlabel('Progress')
     plt.ylabel('Density probability')
-    #plt.xlim([0.9, 1.4])
+    plt.xlim([0.8, 1.4])
     plt.show()
     
 
@@ -346,12 +346,19 @@ def display_moving_agent(agent_name, load_history=False):
     infile = open('environments/' + agent_name, 'rb')
     env_dict = pickle.load(infile)
     infile.close()
+
+    #env_dict['R']=4
+    #env_dict['track_dict'] = {'k':0.1, 'Lfc':0.2}
     
     env = environment(env_dict, start_condition=[])
     
     infile = open('agents/' + agent_name + '_hyper_parameters', 'rb')
     agent_dict = pickle.load(infile)
     infile.close()
+
+    #agent_dict['fc1_dims']=64
+    #agent_dict['fc2_dims']=64
+    #agent_dict['fc3_dims']=64
 
     a = agent.agent(agent_dict)
     a.load_weights(agent_name)
@@ -442,14 +449,21 @@ def display_path(agent_name, load_history=False):
     infile = open('environments/' + agent_name, 'rb')
     env_dict = pickle.load(infile)
     infile.close()
+
+    #env_dict['R']=4
+    #env_dict['track_dict'] = {'k':0.1, 'Lfc':0.2}
     
     #env = environment(env_dict, start_condition={'x':15,'y':5,'theta':0, 'goal':0})
     env = environment(env_dict, start_condition=[])
-    
 
     infile = open('agents/' + agent_name + '_hyper_parameters', 'rb')
     agent_dict = pickle.load(infile)
     infile.close()
+
+    #agent_dict['fc1_dims']=64
+    #agent_dict['fc2_dims']=64
+    #gent_dict['fc3_dims']=64
+
     #agent_dict['epsilon']=0
     a = agent.agent(agent_dict)
     a.load_weights(agent_name)

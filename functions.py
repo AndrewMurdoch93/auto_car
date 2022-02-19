@@ -162,53 +162,71 @@ def find_angle_to_line(ryaw, theta):
     return angle
 
 
-def detect_collision(occupancy_grid, x, y, res):
+def occupied_cell(x, y, occupancy_grid, res, map_height):
     
-    
-    cell = (np.array([30-y, x])/res).astype(int)
+    cell = (np.array([map_height-y, x])/res).astype(int)
 
-    if not (0<cell[0]<599 and 0<cell[1]<599):
-        print("error")
-        return 3
-    #plt.imshow(occupancy_grid)
-    #plt.show()
     if occupancy_grid[cell[0], cell[1]] == True:
         return True
     else:
         return False
 
 
+'''
+class collision_detector():
+
+    def __init__(self, occupancy_grid, resolution, map_height):
+        self.occupancy_grid = occupancy_grid
+        self.resolution=resolution
+        self.map_height = map_height
+
+
+    def detect(self, x, y):
+        
+        cell = (np.array([self.map_height-y, x])/res).astype(int)
+
+        #plt.imshow(occupancy_grid)
+        #plt.show()
+
+        if occupancy_grid[cell[0], cell[1]] == True:
+            return True
+        else:
+            return False
+
+'''
 
 class lidar_scan():
-    def __init__(self, resolution, n_beams, max_range, occupancy_grid, fov):
-        self.resolution = resolution
-        self.n_beams  = n_beams
-        self.max_range = max_range
+    def __init__(self, lidar_dict, occupancy_grid, map_res, map_height):
+        self.lidar_res = lidar_dict['lidar_res']
+        self.n_beams  = lidar_dict['n_beams']
+        self.max_range = lidar_dict['max_range']
+        self.fov = lidar_dict['fov']
+        self.beam_angles = (self.fov/(self.n_beams-1))*np.arange(self.n_beams)
         self.occupancy_grid = occupancy_grid
-        self.fov = fov
-        self.beam_angles = (fov/(self.n_beams-1))*np.arange(self.n_beams)
+        self.map_res = map_res
+        self.map_height = map_height
 
     def get_scan(self, x, y, theta):
         
         scan = []
         coords = []
-        
         for n in self.beam_angles:
             i=1
             occupied=False
 
-            while i<(self.max_range/self.resolution) and occupied==False:
-                x_beam = x + np.cos(theta+n-self.fov/2)*i*self.resolution
-                y_beam = y + np.sin(theta+n-self.fov/2)*i*self.resolution
-                occupied = detect_collision(self.occupancy_grid, x_beam, y_beam, self.resolution)
+            while i<(self.max_range/self.lidar_res) and occupied==False:
+                x_beam = x + np.cos(theta+n-self.fov/2)*i*self.lidar_res
+                y_beam = y + np.sin(theta+n-self.fov/2)*i*self.lidar_res
+                occupied = occupied_cell(x_beam, y_beam, self.occupancy_grid, self.map_res, self.map_height)
                 i+=1
             
-            coords.append([x_beam, y_beam])
+            coords.append([np.round(x_beam,3), np.round(y_beam,3)])
             dist = np.linalg.norm([x_beam-x, y_beam-y])
-            scan.append(dist)
+            scan.append(np.round(dist,3))
 
         return scan, coords
     
+  
 
 
 
@@ -221,10 +239,10 @@ if __name__ == 'main':
     #x, y, rx, ry, ryaw, rk, s = generate_circle_goals()
     #start_x, start_y, start_theta, next_goal = random_start(x, y, rx, ry, ryaw, rk, s)
 
-    image_path = sys.path[0] + '/maps/' + 'circle' + '.png'       
-    occupancy_grid, map_height, map_width, res = map_generator(map_name='circle')
-    a = lidar_scan(res, 3, 10, occupancy_grid, np.pi)
-    a.get_scan(15,5,0)
+    #image_path = sys.path[0] + '/maps/' + 'circle' + '.png'       
+    #occupancy_grid, map_height, map_width, res = map_generator(map_name='circle')
+    #a = lidar_scan(res, 3, 10, np.pi, occupancy_grid, res, 30)
+    #print(a.get_scan(15,5,0))
 
 
     #im = image.imread(image_path)
@@ -235,4 +253,5 @@ if __name__ == 'main':
     #plt.plot(x, y, 's')
     #plt.plot(x[next_goal], y[next_goal], 'o')
     #plt.show()
+    pass
 

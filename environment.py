@@ -30,6 +30,7 @@ class environment():
         self.display=input_dict['display']
         self.R=input_dict['R']
         self.track_dict = input_dict['track_dict']
+        self.lidar_dict = input_dict['lidar_dict']
 
         self.start_condition = start_condition
         
@@ -43,14 +44,14 @@ class environment():
         self.max_v = self.sim_conf.max_v                         
         self.max_a = self.sim_conf.max_a
         self.wheelbase = self.sim_conf.l_f + self.sim_conf.l_r 
-
+        
         self.track_dict['wheelbase'] = self.wheelbase 
 
         if self.local_path == True:
             self.path_tracker = path_tracker.local_path_tracker(self.track_dict)
         
         #Initialise map and goal settings
-        self.occupancy_grid, self.map_height, self.map_width, self.res = functions.map_generator(map_name = self.map_name)
+        self.occupancy_grid, self.map_height, self.map_width, self.map_res = functions.map_generator(map_name = self.map_name)
         self.s=2
 
         image_path = sys.path[0] + '/maps/' + 'circle' + '.png'
@@ -62,12 +63,13 @@ class environment():
 
         for x,y in zip(self.goal_x, self.goal_y):
             self.goals.append([x, y])
-
+        
         #Car sensors - lidar
-        self.lidar = functions.lidar_scan(self.res, 3, 30, self.occupancy_grid, np.pi)
+        if self.lidar_dict['is_lidar']==True:
+            self.lidar = functions.lidar_scan(self.lidar_dict, occupancy_grid=self.occupancy_grid, map_res=self.map_res, map_height=self.map_height)
         
         #self.initial_condition_dict = input_dict['start_condition']
-        
+
         self.reset(self.save_history)
 
 
@@ -242,9 +244,10 @@ class environment():
         current_goal[0]-self.s], [current_goal[1]-self.s, current_goal[1]-self.s, current_goal[1]+self.s, 
         current_goal[1]+self.s, current_goal[1]-self.s], 'r')
 
-        #for coord in self.lidar_coords:
-        #    plt.plot(coord[0], coord[1], 'xb')
-        
+        if self.lidar_dict['is_lidar']==True:
+            for coord in self.lidar_coords:
+                plt.plot(coord[0], coord[1], 'xb')
+            
         plt.plot(self.rx, self.ry)
         plt.plot(self.rx[self.old_closest_point], self.ry[self.old_closest_point], 'x')
         plt.xlabel('x coordinate')
@@ -339,12 +342,10 @@ class environment():
 
         if self.goals_reached==(len(self.goals)):
             self.max_goals_reached=True
-
-        col = functions.detect_collision(self.occupancy_grid, self.x, self.y, self.res)
-        if col==True:    
+   
+        if functions.occupied_cell(self.x, self.y, self.occupancy_grid, self.map_res, self.map_height)==True:
             self.collision=True
-            if col==3:
-                print("what?")
+            
                 
         
         
@@ -475,7 +476,7 @@ class environment():
         self.dist_to_line = np.hypot(self.x-self.rx[new_closest_point], self.y-self.ry[new_closest_point])
         self.old_closest_point = new_closest_point
 
-        #self.lidar_dists, self.lidar_coords = self.lidar.get_scan(self.x, self.y, self.theta)
+        self.lidar_dists, self.lidar_coords = self.lidar.get_scan(self.x, self.y, self.theta)
 
 
         
@@ -513,7 +514,7 @@ class environment():
 
 
 def test_environment():
-    
+    '''
     agent_name = '14Feb_5'
     replay_episode_name = 'replay_episodes/' + agent_name
     
@@ -526,7 +527,16 @@ def test_environment():
     env_dict = pickle.load(infile)
     infile.close()
     env_dict['display']=True
+    '''
 
+
+    env_dict = {'name':'test_agent', 'sim_conf': functions.load_config(sys.path[0], "config"), 'save_history': False, 'map_name': 'circle'
+            , 'max_steps': 1000, 'local_path': True, 'waypoint_strategy': 'waypoint'
+            , 'reward_signal': [0, -1, 0, -1, -0.01, 10, 0, 0, 0], 'n_actions': 11, 'control_steps': 20
+            , 'display': True, 'R':6, 'track_dict':{'k':0.1, 'Lfc':0.2}
+            , 'lidar_dict': {'is_lidar':True, 'lidar_res':0.1, 'n_beams':10, 'max_range':20, 'fov':np.pi} } 
+    initial_condition=[]
+    
     env = environment(env_dict, initial_condition)
 
     env.reset(save_history=True)
@@ -534,10 +544,10 @@ def test_environment():
     
     i=0
     while done==False:
-        action = action_history[i]
-        i+=1
+        #action = action_history[i]
+        #i+=1
 
-        #action = env.goals[env.current_goal]
+        action = env.goals[env.current_goal]
         state, reward, done = env.take_action(action)
 
     #env.save_initial_condition()
