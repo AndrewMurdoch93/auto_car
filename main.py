@@ -114,7 +114,7 @@ class trainingLoop():
             print(f"{'Episode':8s} {episode:5.0f} {'| Score':8s} {score:6.2f} {'| Progress':12s} {self.env.progress:3.2f} {'| Average score':15s} {avg_score:6.2f} {'| Average progress':18s} {avg_progress:3.2f} {'| Epsilon':9s} {self.agent.epsilon:.2f}")
    
       
-      ave_progress = self.test_while_train(n_episodes=200)
+      ave_progress = self.test_while_train(n_episodes=10)
       self.save_agent(ave_progress)
 
       outfile=open(self.train_results_file_name, 'wb')
@@ -245,7 +245,7 @@ def test(agent_name, n_episodes, detect_issues):
 if __name__=='__main__':
 
    '''
-   agent_name = 'local_path_true'
+   agent_name = 'vary_Lfc_0'
 
    main_dict = {'name': agent_name, 'max_episodes':5000, 'comment':''}
 
@@ -254,19 +254,45 @@ if __name__=='__main__':
 
    env_dict = {'sim_conf': functions.load_config(sys.path[0], "config"), 'save_history': False, 'map_name': 'circle'
             , 'max_steps': 1000, 'local_path': True, 'waypoint_strategy': 'local'
-            , 'reward_signal': [0, -1, 0, -1, -0.01, 10, 0, 0, 0], 'n_actions': 11, 'control_steps': 20 
-            , 'display': False, 'R':6} 
+            , 'reward_signal': [0, -1, 0, -1, -0.01, 10, 0, 0, 0], 'n_actions': 11, 'control_steps': 20
+            , 'display': False, 'R':6, 'track_dict':{'k':0.1, 'Lfc':0.2}} 
    
+   a = trainingLoop(main_dict, agent_dict, env_dict, '')
+   a.train()
+   test(agent_name=agent_name, n_episodes=1000, detect_issues=False)
+   
+   
+   agent_name = 'vary_Lfc_1'
+   main_dict['name'] = agent_name
+   env_dict['track_dict']['Lfc'] = 0.5
+   a = trainingLoop(main_dict, agent_dict, env_dict, '')
+   a.train()
+   test(agent_name=agent_name, n_episodes=1000, detect_issues=False)
+
+   agent_name = 'vary_Lfc_2'
+   main_dict['name'] = agent_name
+   env_dict['track_dict']['Lfc'] = 1
+   a = trainingLoop(main_dict, agent_dict, env_dict, '')
+   a.train()
+   test(agent_name=agent_name, n_episodes=1000, detect_issues=False)
+
+   agent_name = 'vary_Lfc_3'
+   main_dict['name'] = agent_name
+   env_dict['track_dict']['Lfc'] = 2
+   a = trainingLoop(main_dict, agent_dict, env_dict, '')
+   a.train()
+   test(agent_name=agent_name, n_episodes=1000, detect_issues=False)
+
+   agent_name = 'vary_Lfc_3'
+   main_dict['name'] = agent_name
+   env_dict['track_dict']['Lfc'] = 3
    a = trainingLoop(main_dict, agent_dict, env_dict, '')
    a.train()
    test(agent_name=agent_name, n_episodes=1000, detect_issues=False)
    '''
 
-   #agent_name = ''
-   #main_dict['name'] = agent_name
-   #a = trainingLoop(main_dict, agent_dict, env_dict, '')
-   #a.train()
-   #test(agent_name=agent_name, n_episodes=1000, detect_issues=False)
+
+   
 
    
    
@@ -276,20 +302,18 @@ if __name__=='__main__':
    #display_results.density_plot_progress(comparisons, legend=legend, legend_title=legend_title)
    #display_results.compare_learning_curves_progress(agent_names=comparisons, legend=legend, legend_title=legend_title)
    
-   
-   agent_name = 'local_path_true'
+   agent_name = 'vary_Lfc_2'
    #display_results.display_train_parameters(agent_name=agent_name)
-   #display_results.learning_curve_score(agent_name=agent_name, show_average=True, show_median=True)
    #display_results.learning_curve_progress(agent_name=agent_name, show_average=True, show_median=True)
-   #display_results.agent_score_statistics(agent_name=agent_name)
    #display_results.agent_progress_statistics(agent_name=agent_name)
    #display_results.density_plot_progress([agent_name], legend=[''], legend_title='')
+   display_results.display_moving_agent(agent_name=agent_name, load_history=False)
+   #display_results.display_path(agent_name=agent_name, load_history=False)
+   
+   #display_results.display_train_parameters(agent_name=agent_name)
+   #display_results.learning_curve_score(agent_name=agent_name, show_average=True, show_median=True)
+   #display_results.agent_score_statistics(agent_name=agent_name)
+
    #display_results.histogram_score(agent_name=agent_name)
    #display_results.histogram_progress(agent_name=agent_name)
-   display_results.display_moving_agent(agent_name=agent_name, load_history=True)
-   #display_results.display_path(agent_name=agent_name, load_history=True)
-
-  
-
-
 

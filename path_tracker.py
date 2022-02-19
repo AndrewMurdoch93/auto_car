@@ -25,11 +25,13 @@ class local_path_tracker():
     More complex pure pursuit for multiple waypoint/ path following
     '''
     
-    def __init__(self, wheelbase):
+    def __init__(self, track_dict):
         self.cx = []
         self.cy = []
         self.old_nearest_point_index = None
-        self.wheelbase=wheelbase
+        self.wheelbase=track_dict['wheelbase']
+        self.k = track_dict['k']
+        self.Lfc = track_dict['Lfc']
 
     def record_waypoints(self, cx, cy):
         #Initialise waypoints for planner
@@ -38,8 +40,6 @@ class local_path_tracker():
         self.old_nearest_point_index = None
 
     def search_target_waypoint(self, x, y, v):
-        k = 0.1
-        Lfc = 0.2
         
         #If there is no previous nearest point - at the start
         if self.old_nearest_point_index is None:
@@ -70,7 +70,7 @@ class local_path_tracker():
                 distance_this_index = distance_next_index
             self.old_nearest_point_index = ind  
 
-        Lf = k * v + Lfc  # update look ahead distance
+        Lf = self.k * v + self.Lfc  # update look ahead distance
 
         # search look ahead target point index
         while Lf > functions.distance_between_points(self.cx[ind], x, self.cy[ind], y):

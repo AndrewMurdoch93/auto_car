@@ -29,6 +29,8 @@ class environment():
         self.control_steps = input_dict['control_steps']
         self.display=input_dict['display']
         self.R=input_dict['R']
+        self.track_dict = input_dict['track_dict']
+
         self.start_condition = start_condition
         
         #simulation parameters
@@ -40,10 +42,12 @@ class environment():
         self.max_delta_dot = self.sim_conf.max_delta_dot            
         self.max_v = self.sim_conf.max_v                         
         self.max_a = self.sim_conf.max_a
-        self.wheelbase = self.sim_conf.l_f + self.sim_conf.l_r   
+        self.wheelbase = self.sim_conf.l_f + self.sim_conf.l_r 
+
+        self.track_dict['wheelbase'] = self.wheelbase 
 
         if self.local_path == True:
-            self.path_tracker = path_tracker.local_path_tracker(self.wheelbase)
+            self.path_tracker = path_tracker.local_path_tracker(self.track_dict)
         
         #Initialise map and goal settings
         self.occupancy_grid, self.map_height, self.map_width, self.res = functions.map_generator(map_name = self.map_name)
@@ -116,6 +120,7 @@ class environment():
         self.max_steps_reached = False
         self.goal_reached = False
         self.collision=False
+        self.backwards=False
         
         #Progress indicators
         self.steps = 0
@@ -176,7 +181,7 @@ class environment():
 
             lastIndex = len(cx)-1
             i=0
-            while (lastIndex > target_index) and i<10:
+            while (lastIndex > target_index) and i<self.control_steps:
                 if self.display==True:
                     self.visualise(waypoint)
                
@@ -307,7 +312,7 @@ class environment():
             waypoint = [int((action+1)%3), int((action+1)/3)]
 
         if strategy=='local':
-            waypoint_relative_angle = self.theta+math.pi/4-(math.pi/2)*(action/self.num_actions)
+            waypoint_relative_angle = self.theta+math.pi/4-(math.pi/2)*(action/(self.num_actions-1))
             waypoint = [self.x + self.R*math.cos(waypoint_relative_angle), self.y + self.R*math.sin(waypoint_relative_angle)]
         
         if strategy == 'waypoint':
@@ -357,6 +362,8 @@ class environment():
         elif self.collision==True:
             return self.reward_signal[3]
         
+        elif self.backwards==True:
+            return -1
         else:
             reward=0
 
@@ -380,6 +387,8 @@ class environment():
         elif self.max_steps_reached==True:
             return True
         elif self.collision==True:
+            return True
+        elif self.backwards==True:
             return True
         else:
             return False
@@ -433,17 +442,19 @@ class environment():
         if point_dif==0:
             self.current_progress = 0
         
-        elif 0<point_dif<int(len(self.rx)/2):
+        elif 0<point_dif<int(len(self.rx)/2):   #forward progress
             self.current_progress = new_closest_point-self.old_closest_point
         
-        elif point_dif<-int(len(self.rx)/2):
+        elif point_dif<-int(len(self.rx)/2):    #Crossing start location going forward
             self.current_progress = (len(self.rx)-np.abs(self.old_closest_point))+new_closest_point
 
-        elif -int(len(self.rx)/2)<point_dif<0:
+        elif -int(len(self.rx)/2)<point_dif<0:  #Backwards
             self.current_progress = new_closest_point-self.old_closest_point
+            self.backwards=True
 
-        elif point_dif>=int(len(self.rx)/2):
+        elif point_dif>=int(len(self.rx)/2):    #Crossing start location going backwards
             self.current_progress = -(self.old_closest_point+(np.abs(len(self.rx)-new_closest_point)))
+            self.backwards=True
 
         self.current_progress/=len(self.rx)
 
