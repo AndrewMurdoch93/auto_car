@@ -372,10 +372,12 @@ class environment():
             reward+=self.reward_signal[4]
             #reward+=self.progress
             #return reward
-            reward += self.current_progress * self.reward_signal[5]
-            reward += self.vel_par_line * (1/self.max_v) * self.reward_signal[6]
-            reward += np.abs(self.angle_to_line) * (1/(np.pi)) * self.reward_signal[7]
-            reward += self.dist_to_line * self.reward_signal[8]
+            #reward += self.current_progress * self.reward_signal[5]
+            #reward += self.vel_par_line * (1/self.max_v) * self.reward_signal[6]
+            #reward += np.abs(self.angle_to_line) * (1/(np.pi)) * self.reward_signal[7]
+            #reward += self.dist_to_line * self.reward_signal[8]
+            reward += self.progress * self.reward_signal[5]
+
 
         return reward
     

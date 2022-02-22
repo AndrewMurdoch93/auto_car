@@ -254,9 +254,9 @@ if __name__=='__main__':
 
    env_dict = {'sim_conf': functions.load_config(sys.path[0], "config"), 'save_history': False, 'map_name': 'circle'
             , 'max_steps': 1000, 'local_path': True, 'waypoint_strategy': 'local'
-            , 'reward_signal': [0, -1, 0, -1, -0.01, 10, 0, 0, 0], 'n_actions': 11, 'control_steps': 20
+            , 'reward_signal': [0, -1, 0, -1, -0.01, 1, 0, 0, 0], 'n_actions': 11, 'control_steps': 20
             , 'display': False, 'R':6, 'track_dict':{'k':0.1, 'Lfc':0.2}
-            , 'lidar_dict': {'is_lidar':True, 'lidar_res':0.1, 'n_beams':3, 'max_range':20, 'fov':np.pi} } 
+            , 'lidar_dict': {'is_lidar':False, 'lidar_res':0.1, 'n_beams':3, 'max_range':20, 'fov':np.pi} } 
    
    a = trainingLoop(main_dict, agent_dict, env_dict, '')
    a.train()
