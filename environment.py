@@ -280,10 +280,10 @@ class environment():
         x_norm = self.x/self.map_width
         y_norm = self.y/self.map_height
         theta_norm = (self.theta+math.pi)/(2*math.pi)
-        #lidar_norm = np.array(self.lidar_dists)/self.lidar_dict['max_range']
-        lidar_norm = np.array(self.lidar_dists)<0.5
-        self.observation = [x_norm, y_norm, theta_norm]
-        #self.observation = []
+        lidar_norm = np.array(self.lidar_dists)/self.lidar_dict['max_range']
+        #lidar_norm = np.array(self.lidar_dists)<0.5
+        #self.observation = [x_norm, y_norm, theta_norm]
+        self.observation = []
         for n in lidar_norm:
             self.observation.append(n)
         pass
