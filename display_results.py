@@ -253,7 +253,7 @@ def density_plot_progress(agent_names, legend, legend_title):
     plt.title('Agent progress distribution in testing')
     plt.xlabel('Progress')
     plt.ylabel('Density probability')
-    plt.xlim([0.8, 1.4])
+    #plt.xlim([0.8, 1.4])
     plt.show()
     
 

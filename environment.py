@@ -157,7 +157,10 @@ class environment():
                 if self.save_history==True:
                     self.waypoint_history.append(waypoint)
                 
-                delta_ref = path_tracker.pure_pursuit(self.wheelbase, waypoint, self.x, self.y, self.theta)
+                #delta_ref = path_tracker.pure_pursuit(self.wheelbase, waypoint, self.x, self.y, self.theta)
+        
+                delta_ref = math.pi/4-(math.pi/2)*(act/(self.num_actions-1))         
+                
                 delta_dot, a = self.control_system(self.delta, delta_ref, self.v, v_ref)
                 self.update_kinematic_state(a, delta_dot)
                 self.update_variables()
@@ -222,6 +225,8 @@ class environment():
                 i+=1
         #print(reward)
         
+        #reward = self.getReward()
+        
         if self.lidar_dict['is_lidar']==True:
             self.lidar_dists, self.lidar_coords = self.lidar.get_scan(self.x, self.y, self.theta)
         
@@ -280,14 +285,15 @@ class environment():
         x_norm = self.x/self.map_width
         y_norm = self.y/self.map_height
         theta_norm = (self.theta+math.pi)/(2*math.pi)
-        lidar_norm = np.array(self.lidar_dists)/self.lidar_dict['max_range']
+        #lidar_norm = np.array(self.lidar_dists)/self.lidar_dict['max_range']
         #lidar_norm = np.array(self.lidar_dists)<0.5
-        #self.observation = [x_norm, y_norm, theta_norm]
-        self.observation = []
-        for n in lidar_norm:
-            self.observation.append(n)
-        pass
-        #self.observation = np.concatenate([x_norm, y_norm, theta_norm, lidar_norm]).ravel()
+        self.observation = [x_norm, y_norm, theta_norm]
+        
+        #self.observation = []
+        #for n in lidar_norm:
+        #    self.observation.append(n)
+        #pass
+
 
     
     def save_history_func(self):
@@ -393,11 +399,11 @@ class environment():
             reward+=self.reward_signal[4]
             #reward+=self.progress
             #return reward
-            #reward += self.current_progress * self.reward_signal[5]
+            reward += self.current_progress * self.reward_signal[5]
             #reward += self.vel_par_line * (1/self.max_v) * self.reward_signal[6]
             #reward += np.abs(self.angle_to_line) * (1/(np.pi)) * self.reward_signal[7]
             #reward += self.dist_to_line * self.reward_signal[8]
-            reward += self.progress * self.reward_signal[5]
+            #reward += self.progress * self.reward_signal[5]
 
 
         return reward
