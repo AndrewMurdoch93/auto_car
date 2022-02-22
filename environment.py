@@ -8,6 +8,7 @@ from matplotlib import image
 from PIL import Image
 import path_tracker
 import pickle
+from itertools import chain
 
 class environment():
 
@@ -67,8 +68,6 @@ class environment():
         #Car sensors - lidar
         if self.lidar_dict['is_lidar']==True:
             self.lidar = functions.lidar_scan(self.lidar_dict, occupancy_grid=self.occupancy_grid, map_res=self.map_res, map_height=self.map_height)
-        
-        #self.initial_condition_dict = input_dict['start_condition']
 
         self.reset(self.save_history)
 
@@ -95,8 +94,9 @@ class environment():
         self.y_to_goal = self.goals[self.current_goal][1] - self.y
         self.old_d_goal = np.linalg.norm(np.array([self.x_to_goal, self.y_to_goal]))
         self.new_d_goal = np.linalg.norm(np.array([self.x_to_goal, self.y_to_goal]))
-
-        self.lidar_dists, self.lidar_coords = self.lidar.get_scan(self.x, self.y, self.theta)
+        
+        if self.lidar_dict['is_lidar']==True:
+            self.lidar_dists, self.lidar_coords = self.lidar.get_scan(self.x, self.y, self.theta)
         
         self.current_progress = 0
         self.vel_par_line = 0
@@ -221,6 +221,10 @@ class environment():
    
                 i+=1
         #print(reward)
+        
+        if self.lidar_dict['is_lidar']==True:
+            self.lidar_dists, self.lidar_coords = self.lidar.get_scan(self.x, self.y, self.theta)
+        
         return self.observation, reward, done
     
 
@@ -248,6 +252,8 @@ class environment():
             for coord in self.lidar_coords:
                 plt.plot(coord[0], coord[1], 'xb')
             
+        plt.plot(np.array(self.state_history)[0:self.steps,0], np.array(self.state_history)[0:self.steps,1])
+        
         plt.plot(self.rx, self.ry)
         plt.plot(self.rx[self.old_closest_point], self.ry[self.old_closest_point], 'x')
         plt.xlabel('x coordinate')
@@ -267,10 +273,22 @@ class environment():
     def save_state(self):
         
         self.state = [self.x, self.y, self.theta, self.delta, self.v]
+        
         #self.observation = [self.x/self.map_width, self.y/self.map_height, (self.delta+self.max_delta)/(2*self.max_delta), self.v/self.max_v, (self.theta+math.pi)/(2*math.pi), (self.x_to_goal+0.5*self.map_width)/self.map_width, (self.y_to_goal+0.5*self.map_height)/self.map_height]
-        self.observation = [self.x/self.map_width, self.y/self.map_height,(self.theta+math.pi)/(2*math.pi)]
+        #self.observation = [self.x/self.map_width, self.y/self.map_height,(self.theta+math.pi)/(2*math.pi)]
         #self.observation = [self.x/self.map_width, self.y/self.map_height, (self.theta+math.pi)/(2*math.pi), (self.x_to_goal+0.5*self.map_width)/self.map_width, (self.y_to_goal+0.5*self.map_height)/self.map_height]
-    
+        x_norm = self.x/self.map_width
+        y_norm = self.y/self.map_height
+        theta_norm = (self.theta+math.pi)/(2*math.pi)
+        lidar_norm = np.array(self.lidar_dists)/self.lidar_dict['max_range']
+        #lidar_norm = np.array(self.lidar_dists)<0.5
+        #self.observation = [x_norm, y_norm, theta_norm]
+        self.observation = []
+        for n in lidar_norm:
+            self.observation.append(n)
+        pass
+        #self.observation = np.concatenate([x_norm, y_norm, theta_norm, lidar_norm]).ravel()
+
     
     def save_history_func(self):
         outfile = open(self.history_file_name, 'wb')
@@ -281,7 +299,8 @@ class environment():
         pickle.dump(self.observation_history, outfile)
         pickle.dump(self.progress_history, outfile)
         pickle.dump(self.closest_point_history, outfile)
-        #pickle.dump(self.lidar_coords_history, outfile)
+        if self.lidar_dict['is_lidar']==True:
+            pickle.dump(self.lidar_coords_history, outfile)
         if self.local_path == True:
             pickle.dump(self.local_path_history, outfile)
         outfile.close()
@@ -296,7 +315,8 @@ class environment():
         self.observation_history = pickle.load(infile)
         self.progress_history = pickle.load(infile)
         self.closest_point_history = pickle.load(infile)
-        #self.lidar_coords_history = pickle.load(infile)
+        if self.lidar_dict['is_lidar']==True:
+            self.lidar_coords_history = pickle.load(infile)
         if self.local_path == True:
             self.local_path_history = pickle.load(infile)
         infile.close()
@@ -307,9 +327,10 @@ class environment():
         self.goal_history.append(self.goals[self.current_goal])
         self.observation_history.append(self.observation)
         self.progress_history.append(self.progress)
-        #self.lidar_coords_history.append(self.lidar_coords)
-    
-    
+        if self.lidar_dict['is_lidar']==True:
+            self.lidar_coords_history.append(self.lidar_coords)
+
+          
     def convert_action_to_coord(self, strategy, action):
         if strategy=='global':
             waypoint = [int((action+1)%3), int((action+1)/3)]
@@ -478,7 +499,6 @@ class environment():
         self.dist_to_line = np.hypot(self.x-self.rx[new_closest_point], self.y-self.ry[new_closest_point])
         self.old_closest_point = new_closest_point
 
-        self.lidar_dists, self.lidar_coords = self.lidar.get_scan(self.x, self.y, self.theta)
 
 
         

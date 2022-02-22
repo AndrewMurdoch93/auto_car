@@ -383,63 +383,45 @@ def display_moving_agent(agent_name, load_history=False):
     image_path = sys.path[0] + '/maps/' + env.map_name + '.png'
     im = image.imread(image_path)
     plt.imshow(im, extent=(0,30,0,30))
-
-    if env.local_path==False:
+    
+    for i in range(len(env.waypoint_history)):
+        plt.cla()
+        plt.imshow(im, extent=(0,30,0,30))
+        sh=env.state_history[i]
+        plt.arrow(sh[0], sh[1], 0.5*math.cos(sh[2]), 0.5*math.sin(sh[2]), head_length=0.5, head_width=0.5, shape='full', ec='None', fc='blue')
+        plt.arrow(sh[0], sh[1], 0.5*math.cos(sh[2]+sh[3]), 0.5*math.sin(sh[2]+sh[3]), head_length=0.5, head_width=0.5, shape='full',ec='None', fc='red')
+        plt.plot(sh[0], sh[1], 'o')
+        wh = env.waypoint_history[i]
+        plt.plot(wh[0], wh[1], 'x')
+        gh = env.goal_history[i]
+        plt.plot([gh[0]-env.s, gh[0]+env.s, gh[0]+env.s, gh[0]-env.s, gh[0]-env.s], [gh[1]-env.s, gh[1]-env.s, gh[1]+env.s, gh[1]+env.s, gh[1]-env.s], 'r')
         
-        for sh, wh, gh, rh, ph, cph in zip(env.state_history, env.waypoint_history, env.goal_history, env.reward_history, env.progress_history, env.closest_point_history):
-            plt.cla()
-            # Stop the simulation with the esc key.
-            plt.gcf().canvas.mpl_connect('key_release_event', lambda event: [exit(0) if event.key == 'escape' else None])
-            #plt.image
-            plt.imshow(im, extent=(0,30,0,30))
-            plt.arrow(sh[0], sh[1], 0.5*math.cos(sh[2]), 0.5*math.sin(sh[2]), head_length=0.5, head_width=0.5, shape='full', ec='None', fc='blue')
-            plt.arrow(sh[0], sh[1], 0.5*math.cos(sh[2]+sh[3]), 0.5*math.sin(sh[2]+sh[3]), head_length=0.5, head_width=0.5, shape='full',ec='None', fc='red')
-            plt.plot(sh[0], sh[1], 'o')
-            plt.plot(wh[0], wh[1], 'x')
-            plt.plot([gh[0]-env.s, gh[0]+env.s, gh[0]+env.s, gh[0]-env.s, gh[0]-env.s], [gh[1]-env.s, gh[1]-env.s, gh[1]+env.s, gh[1]+env.s, gh[1]-env.s], 'r')
-            plt.plot(env.rx, env.ry)
-            plt.plot(env.rx[cph], env.ry[cph], 'x')
-            #for coord in lh:
-            #    plt.plot(coord[0], coord[1], 'xb')
-            #plt.legend(["position", "waypoint", "goal area", "heading", "steering angle"])
-            plt.xlabel('x coordinate')
-            plt.ylabel('y coordinate')
-            plt.xlim([0,30])
-            plt.ylim([0,30])
-            #plt.grid(True)
-            plt.title('Episode history')
-            print('Progress = ', ph)
-            plt.pause(0.001)
-
-    else:
-
-        for sh, wh, gh, rh, lph, ph, cph in zip(env.state_history, env.waypoint_history, env.goal_history, env.reward_history, env.local_path_history, env.progress_history, env.closest_point_history):
-            plt.cla()
-            # Stop the simulation with the esc key.
-            plt.gcf().canvas.mpl_connect('key_release_event', lambda event: [exit(0) if event.key == 'escape' else None])
-            #plt.image
-            plt.imshow(im, extent=(0,30,0,30))
-            plt.arrow(sh[0], sh[1], 0.5*math.cos(sh[2]), 0.5*math.sin(sh[2]), head_length=0.5, head_width=0.5, shape='full', ec='None', fc='blue')
-            plt.arrow(sh[0], sh[1], 0.5*math.cos(sh[2]+sh[3]), 0.5*math.sin(sh[2]+sh[3]), head_length=0.5, head_width=0.5, shape='full',ec='None', fc='red')
-            plt.plot(sh[0], sh[1], 'o')
-            plt.plot(wh[0], wh[1], 'x')
-            plt.plot([gh[0]-env.s, gh[0]+env.s, gh[0]+env.s, gh[0]-env.s, gh[0]-env.s], [gh[1]-env.s, gh[1]-env.s, gh[1]+env.s, gh[1]+env.s, gh[1]-env.s], 'r')
+        if env.local_path==True:
+            lph = env.local_path_history[i]
             plt.plot(lph[0], lph[1])
-            plt.plot(env.rx, env.ry)
-            plt.plot(env.rx[cph], env.ry[cph], 'x')
-            #for coord in lh:
-            #    plt.plot(coord[0], coord[1], 'xb')
-            
-            #plt.legend(["position", "waypoint", "goal area", "heading", "steering angle"])
-            plt.xlabel('x coordinate')
-            plt.ylabel('y coordinate')
-            plt.xlim([0,30])
-            plt.ylim([0,30])
-            #plt.grid(True)
-            plt.title('Episode history')
-            print('Progress = ', ph)
-            plt.pause(0.001)
+        
+        plt.plot(env.rx, env.ry)
 
+        cph = env.closest_point_history[i]
+        plt.plot(env.rx[cph], env.ry[cph], 'x')
+        
+        if env_dict['lidar_dict']['is_lidar']==True:
+            lh = env.lidar_coords_history[i]
+            for coord in lh:
+                plt.plot(coord[0], coord[1], 'xb')
+        
+        plt.plot(np.array(env.state_history)[0:i,0], np.array(env.state_history)[0:i,1])
+        
+        ph = env.progress_history[i]
+        #plt.legend(["position", "waypoint", "goal area", "heading", "steering angle"])
+        plt.xlabel('x coordinate')
+        plt.ylabel('y coordinate')
+        plt.xlim([0,30])
+        plt.ylim([0,30])
+        #plt.grid(True)
+        plt.title('Episode history')
+        print('Progress = ', ph)
+        plt.pause(0.001)
 
 def display_path(agent_name, load_history=False):
     
