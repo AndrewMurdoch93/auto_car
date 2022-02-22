@@ -245,7 +245,7 @@ def test(agent_name, n_episodes, detect_issues):
              
 if __name__=='__main__':
 
-   
+   '''
    agent_name = 'end_to_end_reward_0'
 
    main_dict = {'name': agent_name, 'max_episodes':10000, 'comment':''}
@@ -291,7 +291,7 @@ if __name__=='__main__':
    a = trainingLoop(main_dict, agent_dict, env_dict, '')
    a.train()
    test(agent_name=agent_name, n_episodes=1000, detect_issues=False)
-
+   '''
 
    #agent_names = ['end_to_end_0', 'end_to_end_1', 'end_to_end_2', 'end_to_end_3']
    #legend_title = 'control steps'
@@ -306,7 +306,7 @@ if __name__=='__main__':
    #display_results.density_plot_progress(agent_names, legend, legend_title)
    
 
-   agent_name = 'end_to_end_3'
+   agent_name = 'end_to_end_reward_4'
    #display_results.display_train_parameters(agent_name=agent_name)
    #display_results.learning_curve_progress(agent_name=agent_name, show_average=True, show_median=True)
    #display_results.agent_progress_statistics(agent_name=agent_name)
