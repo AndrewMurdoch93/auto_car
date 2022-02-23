@@ -158,6 +158,9 @@ class environment():
                     self.waypoint_history.append(waypoint)
                 
                 delta_ref = path_tracker.pure_pursuit(self.wheelbase, waypoint, self.x, self.y, self.theta)
+        
+                #delta_ref = math.pi/8-(math.pi/4)*(act/(self.num_actions-1))         
+                
                 delta_dot, a = self.control_system(self.delta, delta_ref, self.v, v_ref)
                 self.update_kinematic_state(a, delta_dot)
                 self.update_variables()
@@ -222,6 +225,8 @@ class environment():
                 i+=1
         #print(reward)
         
+        #reward = self.getReward()
+        
         if self.lidar_dict['is_lidar']==True:
             self.lidar_dists, self.lidar_coords = self.lidar.get_scan(self.x, self.y, self.theta)
         
@@ -280,14 +285,15 @@ class environment():
         x_norm = self.x/self.map_width
         y_norm = self.y/self.map_height
         theta_norm = (self.theta+math.pi)/(2*math.pi)
-        lidar_norm = np.array(self.lidar_dists)/self.lidar_dict['max_range']
+        #lidar_norm = np.array(self.lidar_dists)/self.lidar_dict['max_range']
         #lidar_norm = np.array(self.lidar_dists)<0.5
-        #self.observation = [x_norm, y_norm, theta_norm]
-        self.observation = []
-        for n in lidar_norm:
-            self.observation.append(n)
-        pass
-        #self.observation = np.concatenate([x_norm, y_norm, theta_norm, lidar_norm]).ravel()
+        self.observation = [x_norm, y_norm, theta_norm]
+        
+        #self.observation = []
+        #for n in lidar_norm:
+        #    self.observation.append(n)
+        #pass
+
 
     
     def save_history_func(self):
@@ -394,9 +400,12 @@ class environment():
             #reward+=self.progress
             #return reward
             reward += self.current_progress * self.reward_signal[5]
+            
             reward += self.vel_par_line * (1/self.max_v) * self.reward_signal[6]
             reward += np.abs(self.angle_to_line) * (1/(np.pi)) * self.reward_signal[7]
             reward += self.dist_to_line * self.reward_signal[8]
+            #reward += self.progress * self.reward_signal[5]
+
 
         return reward
     
@@ -534,8 +543,8 @@ class environment():
 
 
 def test_environment():
-    '''
-    agent_name = '14Feb_5'
+    
+    agent_name = 'end_to_end'
     replay_episode_name = 'replay_episodes/' + agent_name
     
     infile=open(replay_episode_name, 'rb')
@@ -547,31 +556,40 @@ def test_environment():
     env_dict = pickle.load(infile)
     infile.close()
     env_dict['display']=True
-    '''
-
-
-    env_dict = {'name':'test_agent', 'sim_conf': functions.load_config(sys.path[0], "config"), 'save_history': False, 'map_name': 'circle'
-            , 'max_steps': 1000, 'local_path': True, 'waypoint_strategy': 'waypoint'
-            , 'reward_signal': [0, -1, 0, -1, -0.01, 10, 0, 0, 0], 'n_actions': 11, 'control_steps': 20
-            , 'display': True, 'R':6, 'track_dict':{'k':0.1, 'Lfc':0.2}
-            , 'lidar_dict': {'is_lidar':True, 'lidar_res':0.1, 'n_beams':10, 'max_range':20, 'fov':np.pi} } 
-    initial_condition=[]
     
+
+
+    #env_dict = {'name':'test_agent', 'sim_conf': functions.load_config(sys.path[0], "config"), 'save_history': False, 'map_name': 'circle'
+    #        , 'max_steps': 1000, 'local_path': False, 'waypoint_strategy': 'local'
+    #        , 'reward_signal': [0, -1, 0, -1, -0.01, 10, 0, 0, 0], 'n_actions': 11, 'control_steps': 20
+    #        , 'display': True, 'R':6, 'track_dict':{'k':0.1, 'Lfc':0.2}
+    #        , 'lidar_dict': {'is_lidar':False, 'lidar_res':0.1, 'n_beams':10, 'max_range':20, 'fov':np.pi} } 
+    #initial_condition={'x':15, 'y':5, 'theta':0, 'goal':0}
+    
+    env_dict['R']=6
+    env_dict['track_dict'] = {'k':0.1, 'Lfc':0.2}
+    env_dict['lidar_dict'] = {'is_lidar':False, 'lidar_res':0.1, 'n_beams':10, 'max_range':20, 'fov':np.pi}
+
     env = environment(env_dict, initial_condition)
 
     env.reset(save_history=True)
     done=False
     
+    #action_history = [5,5,5,5,5,5]
+    score=0
     i=0
     while done==False:
-        #action = action_history[i]
-        #i+=1
-
-        action = env.goals[env.current_goal]
+        
+        action = action_history[i]
+        i+=1
+        print('action')
+        #action = env.goals[env.current_goal]
         state, reward, done = env.take_action(action)
+        score+=reward
 
+    print('score = ', score)
     #env.save_initial_condition()
-
+    
 if __name__=='__main__':
     test_environment()
 

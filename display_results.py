@@ -253,7 +253,7 @@ def density_plot_progress(agent_names, legend, legend_title):
     plt.title('Agent progress distribution in testing')
     plt.xlabel('Progress')
     plt.ylabel('Density probability')
-    plt.xlim([0.8, 1.4])
+    #plt.xlim([0.8, 1.4])
     plt.show()
     
 
@@ -465,7 +465,8 @@ def display_path(agent_name, load_history=False):
             score += reward
             obs = next_obs
         
-        print('\nTotal score = ', score)
+        print('Total score = ', score)
+        print('Progress = ', env.progress)
 
     image_path = sys.path[0] + '/maps/' + env.map_name + '.png'
     im = image.imread(image_path)
