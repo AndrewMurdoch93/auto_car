@@ -159,7 +159,7 @@ class environment():
                 
                 #delta_ref = path_tracker.pure_pursuit(self.wheelbase, waypoint, self.x, self.y, self.theta)
         
-                delta_ref = math.pi/4-(math.pi/2)*(act/(self.num_actions-1))         
+                delta_ref = math.pi/16-(math.pi/8)*(act/(self.num_actions-1))         
                 
                 delta_dot, a = self.control_system(self.delta, delta_ref, self.v, v_ref)
                 self.update_kinematic_state(a, delta_dot)
@@ -558,23 +558,25 @@ def test_environment():
     
 
 
-    #env_dict = {'name':'test_agent', 'sim_conf': functions.load_config(sys.path[0], "config"), 'save_history': False, 'map_name': 'circle'
-    #        , 'max_steps': 1000, 'local_path': False, 'waypoint_strategy': 'local'
-    #        , 'reward_signal': [0, -1, 0, -1, -0.01, 10, 0, 0, 0], 'n_actions': 11, 'control_steps': 20
-    #        , 'display': True, 'R':6, 'track_dict':{'k':0.1, 'Lfc':0.2}
-    #        , 'lidar_dict': {'is_lidar':False, 'lidar_res':0.1, 'n_beams':10, 'max_range':20, 'fov':np.pi} } 
-    #initial_condition={'x':15, 'y':5, 'theta':0, 'goal':0}
+    env_dict = {'name':'test_agent', 'sim_conf': functions.load_config(sys.path[0], "config"), 'save_history': False, 'map_name': 'circle'
+            , 'max_steps': 1000, 'local_path': False, 'waypoint_strategy': 'local'
+            , 'reward_signal': [0, -1, 0, -1, -0.01, 10, 0, 0, 0], 'n_actions': 11, 'control_steps': 20
+            , 'display': True, 'R':6, 'track_dict':{'k':0.1, 'Lfc':0.2}
+            , 'lidar_dict': {'is_lidar':False, 'lidar_res':0.1, 'n_beams':10, 'max_range':20, 'fov':np.pi} } 
+    initial_condition={'x':15, 'y':5, 'theta':0, 'goal':0}
     
-    env_dict['R']=6
-    env_dict['track_dict'] = {'k':0.1, 'Lfc':0.2}
-    env_dict['lidar_dict'] = {'is_lidar':False, 'lidar_res':0.1, 'n_beams':10, 'max_range':20, 'fov':np.pi}
+    #env_dict['R']=6
+    #env_dict['track_dict'] = {'k':0.1, 'Lfc':0.2}
+    #env_dict['lidar_dict'] = {'is_lidar':False, 'lidar_res':0.1, 'n_beams':10, 'max_range':20, 'fov':np.pi}
 
     env = environment(env_dict, initial_condition)
 
     env.reset(save_history=True)
     done=False
     
-    #action_history = [5,5,5,5,5,5]
+    #action_history = [0,0,0,0,0,0]
+    #action_history = [4,5,4,5,4,5,5]
+
     score=0
     i=0
     while done==False:

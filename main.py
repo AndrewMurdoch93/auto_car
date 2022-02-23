@@ -43,7 +43,10 @@ class trainingLoop():
       print('Training agent: ', self.main_dict['name'])
       
       self.env_dict['name'] = self.main_dict['name']
+
       #self.env = environment(self.env_dict, start_condition={'x':15,'y':5,'theta':0,'goal':0})
+      self.env = environment(self.env_dict, start_condition=[])
+      
       self.agent_dict['name'] = self.main_dict['name']
       self.agent_dict['input_dims'] = len(self.env.observation)
       self.agent_dict['n_actions'] = self.env_dict['n_actions']
@@ -255,16 +258,16 @@ def test(agent_name, n_episodes, detect_issues):
 if __name__=='__main__':
 
    
-   agent_name = 'baseline_3'
+   agent_name = 'end_to_end'
 
-   main_dict = {'name': agent_name, 'max_episodes':7000, 'comment':''}
+   main_dict = {'name': agent_name, 'max_episodes':10000, 'comment':''}
 
-   agent_dict = {'gamma':0.99, 'epsilon':1, 'eps_end':0.01, 'eps_dec':1/2000, 'lr':0.001, 'batch_size':64, 'max_mem_size':250000, 
+   agent_dict = {'gamma':0.99, 'epsilon':1, 'eps_end':0.01, 'eps_dec':1/2000, 'lr':0.001, 'batch_size':64, 'max_mem_size':2500000, 
                   'fc1_dims': 64, 'fc2_dims': 64, 'fc3_dims':64}
 
    env_dict = {'sim_conf': functions.load_config(sys.path[0], "config"), 'save_history': False, 'map_name': 'circle'
-            , 'max_steps': 1000, 'local_path': True, 'waypoint_strategy': 'local'
-            , 'reward_signal': [0, -1, 0, -1, -0.01, 10, 0, 0, 0], 'n_actions': 11, 'control_steps': 20
+            , 'max_steps': 1000, 'local_path': False, 'waypoint_strategy': 'local'
+            , 'reward_signal': [0, -1, 0, -1, -0.005, 10, 0, 0, 0], 'n_actions': 11, 'control_steps': 20
             , 'display': False, 'R':6, 'track_dict':{'k':0.1, 'Lfc':0.2}
             , 'lidar_dict': {'is_lidar':False, 'lidar_res':0.1, 'n_beams':3, 'max_range':20, 'fov':np.pi} } 
    
@@ -329,19 +332,19 @@ if __name__=='__main__':
    #display_results.compare_learning_curves_progress(agent_names, legend, legend_title)
    #display_results.density_plot_progress(agent_names, legend, legend_title)
 
-   #agent_names = ['end_to_end']
-   #legend_title = 'end_to_end'
-   #legend = ['0']
+   #agent_names = ['progress_reward', 'baseline_2']
+   #legend_title = 'Reward signal'
+   #legend = ['absolute progress', 'current progress']
    #display_results.compare_learning_curves_progress(agent_names, legend, legend_title)
    #display_results.density_plot_progress(agent_names, legend, legend_title)
    
 
-   agent_name = 'baseline_2'
-   display_results.display_train_parameters(agent_name=agent_name)
-   #display_results.learning_curve_progress(agent_name=agent_name, show_average=True, show_median=True)
-   #display_results.agent_progress_statistics(agent_name=agent_name)
-   #display_results.density_plot_progress([agent_name], legend=[''], legend_title='')
-   #display_results.display_moving_agent(agent_name=agent_name, load_history=False)
+   agent_name = 'end_to_end'
+   #display_results.display_train_parameters(agent_name=agent_name)
+   display_results.learning_curve_progress(agent_name=agent_name, show_average=True, show_median=True)
+   display_results.agent_progress_statistics(agent_name=agent_name)
+   display_results.density_plot_progress([agent_name], legend=[''], legend_title='')
+   display_results.display_moving_agent(agent_name=agent_name, load_history=False)
    #display_results.display_path(agent_name=agent_name, load_history=False)
    
    #display_results.display_train_parameters(agent_name=agent_name)
