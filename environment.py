@@ -157,9 +157,9 @@ class environment():
                 if self.save_history==True:
                     self.waypoint_history.append(waypoint)
                 
-                delta_ref = path_tracker.pure_pursuit(self.wheelbase, waypoint, self.x, self.y, self.theta)
+                #delta_ref = path_tracker.pure_pursuit(self.wheelbase, waypoint, self.x, self.y, self.theta)
         
-                #delta_ref = math.pi/8-(math.pi/4)*(act/(self.num_actions-1))         
+                delta_ref = math.pi/4-(math.pi/2)*(act/(self.num_actions-1))         
                 
                 delta_dot, a = self.control_system(self.delta, delta_ref, self.v, v_ref)
                 self.update_kinematic_state(a, delta_dot)
@@ -400,10 +400,9 @@ class environment():
             #reward+=self.progress
             #return reward
             reward += self.current_progress * self.reward_signal[5]
-            
-            reward += self.vel_par_line * (1/self.max_v) * self.reward_signal[6]
-            reward += np.abs(self.angle_to_line) * (1/(np.pi)) * self.reward_signal[7]
-            reward += self.dist_to_line * self.reward_signal[8]
+            #reward += self.vel_par_line * (1/self.max_v) * self.reward_signal[6]
+            #reward += np.abs(self.angle_to_line) * (1/(np.pi)) * self.reward_signal[7]
+            #reward += self.dist_to_line * self.reward_signal[8]
             #reward += self.progress * self.reward_signal[5]
 
 
