@@ -21,7 +21,7 @@ from environment import environment
 import pandas as pd
 
 
-def compare_learning_curves_progress(agent_names, legend, legend_title, show_average=True, show_median=False):
+def compare_learning_curves_progress(agent_names, legend, legend_title, show_average=True, show_median=False, xaxis='episodes'):
     
     window = 300
 
@@ -31,6 +31,8 @@ def compare_learning_curves_progress(agent_names, legend, legend_title, show_ave
     percentile_25 = [[] for _ in range(len(agent_names))]
     median = [[] for _ in range(len(agent_names))]
     percentile_75 = [[] for _ in range(len(agent_names))]
+    steps = [[] for _ in range(len(agent_names))]
+    times = [[] for _ in range(len(agent_names))]
 
     for i in range(len(agent_names)):
         agent_name = agent_names[i]
@@ -38,6 +40,9 @@ def compare_learning_curves_progress(agent_names, legend, legend_title, show_ave
         infile = open(train_results_file_name, 'rb')
         _ = pickle.load(infile)
         progress[i] = pickle.load(infile)
+        times[i] = pickle.load(infile)
+        steps[i] = pickle.load(infile)
+
         infile.close()
 
         for j in range(len(progress[i])):
@@ -52,19 +57,38 @@ def compare_learning_curves_progress(agent_names, legend, legend_title, show_ave
     if show_median==True:
        
         for i in range(len(agent_names)):
-            plt.plot(median[i])
-        
+            if xaxis=='episodes':
+                plt.plot(median[i])
+                plt.xlabel('Episode')
+
+            elif xaxis=='times':
+                plt.plot(np.cumsum(np.array(times)), median[i])
+                plt.xlabel('Time')
+
+            elif xaxis=='steps':
+                plt.plot(np.cumsum(np.array(steps)), median[i])
+                plt.xlabel('Steps')
+
         plt.title('Learning curve for median progress')
-        plt.xlabel('Episode')
         plt.ylabel('Progress')
         plt.legend(legend, title=legend_title, loc='upper left')
         plt.show()
 
     if show_average==True:
         for i in range(len(agent_names)):
-            plt.plot(avg[i])
+            if xaxis=='episodes':
+                plt.plot(avg[i])
+                plt.xlabel('Episode')
+
+            elif xaxis=='times':
+                plt.plot(np.cumsum(np.array(times)), avg[i])
+                plt.xlabel('Time')
+
+            elif xaxis=='steps':
+                plt.plot(np.cumsum(np.array(steps)), avg[i])
+                plt.xlabel('Steps')
+        
         plt.title('Learning curve for average progress')
-        plt.xlabel('Episode')
         plt.ylabel('Progress')
         plt.legend(legend, title=legend_title, loc='upper left')
         plt.show()
@@ -291,6 +315,8 @@ def agent_progress_statistics(agent_name):
     infile = open(results_file_name, 'rb')
     test_score = pickle.load(infile)
     test_progress = pickle.load(infile)
+    test_collision = pickle.load(infile)
+    test_max_steps = pickle.load(infile)
     infile.close()
 
     minimum = np.min(test_progress)
@@ -300,18 +326,20 @@ def agent_progress_statistics(agent_name):
     maximum = np.max(test_progress)
     average = np.average(test_progress)
     std_dev = np.std(test_progress)
-    frac_complete = np.sum(np.array(test_progress)>=1)/len(test_progress)
+    frac_max_steps_reached = np.sum(np.array(test_max_steps))/len(test_max_steps)
+    frac_collision = np.sum(np.array(test_collision))/len(test_collision)
 
     print('\n')
     print('Agent progress statistics: \n')
-    print(f"{'Minimum':20s} {minimum:6.2f}")
-    print(f"{'25th percentile':20s} {percentile_25:6.2f}")
-    print(f"{'Median':20s} {percentile_50:6.2f}")
-    print(f"{'75th percentile':20s} {percentile_75:6.2f}")
-    print(f"{'Maximum':20s} {maximum:6.2f}")
-    print(f"{'Average':20s} {average:6.2f}")
-    print(f"{'Standard deviation':20s} {std_dev:6.2f}")
-    print(f"{'Fraction completed':20s} {frac_complete:6.2f}")
+    print(f"{'Minimum':20s} {minimum:6.3f}")
+    print(f"{'25th percentile':20s} {percentile_25:6.3f}")
+    print(f"{'Median':20s} {percentile_50:6.3f}")
+    print(f"{'75th percentile':20s} {percentile_75:6.3f}")
+    print(f"{'Maximum':20s} {maximum:6.3f}")
+    print(f"{'Average':20s} {average:6.3f}")
+    print(f"{'Standard deviation':20s} {std_dev:6.3f}")
+    print(f"{'Fraction completed':20s} {frac_max_steps_reached:6.3f}")
+    print(f"{'Fraction collided':20s}{frac_collision:6.3f}")
 
 
 def display_train_parameters(agent_name):
@@ -346,19 +374,12 @@ def display_moving_agent(agent_name, load_history=False):
     infile = open('environments/' + agent_name, 'rb')
     env_dict = pickle.load(infile)
     infile.close()
-
-    #env_dict['R']=4
-    #env_dict['track_dict'] = {'k':0.1, 'Lfc':0.2}
-    
+    env_dict['max_steps']=3000
     env = environment(env_dict, start_condition=[])
     
     infile = open('agents/' + agent_name + '_hyper_parameters', 'rb')
     agent_dict = pickle.load(infile)
     infile.close()
-
-    #agent_dict['fc1_dims']=64
-    #agent_dict['fc2_dims']=64
-    #agent_dict['fc3_dims']=64
 
     a = agent.agent(agent_dict)
     a.load_weights(agent_name)
@@ -431,22 +452,13 @@ def display_path(agent_name, load_history=False):
     infile = open('environments/' + agent_name, 'rb')
     env_dict = pickle.load(infile)
     infile.close()
-
-    #env_dict['R']=4
-    #env_dict['track_dict'] = {'k':0.1, 'Lfc':0.2}
-    
-    #env = environment(env_dict, start_condition={'x':15,'y':5,'theta':0, 'goal':0})
+    env_dict['max_steps']=3000
     env = environment(env_dict, start_condition=[])
 
     infile = open('agents/' + agent_name + '_hyper_parameters', 'rb')
     agent_dict = pickle.load(infile)
     infile.close()
 
-    #agent_dict['fc1_dims']=64
-    #agent_dict['fc2_dims']=64
-    #gent_dict['fc3_dims']=64
-
-    #agent_dict['epsilon']=0
     a = agent.agent(agent_dict)
     a.load_weights(agent_name)
 

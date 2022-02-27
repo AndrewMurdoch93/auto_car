@@ -9,6 +9,7 @@ from PIL import Image
 import path_tracker
 import pickle
 from itertools import chain
+import random
 
 class environment():
 
@@ -26,7 +27,9 @@ class environment():
         self.local_path = input_dict['local_path']
         self.waypoint_strategy = input_dict['waypoint_strategy']
         self.reward_signal = input_dict['reward_signal']
-        self.num_actions = input_dict['n_actions']
+        self.num_waypoints = input_dict['n_waypoints']
+        self.num_vel = input_dict['n_vel']
+        self.num_actions = self.num_waypoints*self.num_vel
         self.control_steps = input_dict['control_steps']
         self.display=input_dict['display']
         self.R=input_dict['R']
@@ -84,8 +87,9 @@ class environment():
             self.current_goal = self.start_condition['goal']
         else:
             self.x, self.y, self.theta, self.current_goal = functions.random_start(self.goal_x, self.goal_y, self.rx, self.ry, self.ryaw, self.rk, self.d)
-            
-        self.v = 7    
+
+        #self.v=0    
+        self.v = random.random()*7
         self.delta = 0
         self.theta_dot = 0      
         self.delta_dot = 0
@@ -145,7 +149,7 @@ class environment():
         reward = 0
         done=False
         
-        waypoint = self.convert_action_to_coord(strategy=self.waypoint_strategy, action=act)
+        waypoint, v_ref = self.convert_action_to_coord(strategy=self.waypoint_strategy, action=act)
         v_ref = 7
 
 
@@ -157,9 +161,9 @@ class environment():
                 if self.save_history==True:
                     self.waypoint_history.append(waypoint)
                 
-                #delta_ref = path_tracker.pure_pursuit(self.wheelbase, waypoint, self.x, self.y, self.theta)
+                delta_ref = path_tracker.pure_pursuit(self.wheelbase, waypoint, self.x, self.y, self.theta)
         
-                delta_ref = math.pi/16-(math.pi/8)*(act/(self.num_actions-1))         
+                #delta_ref = math.pi/16-(math.pi/8)*(act/(self.num_actions-1))         
                 
                 delta_dot, a = self.control_system(self.delta, delta_ref, self.v, v_ref)
                 self.update_kinematic_state(a, delta_dot)
@@ -285,9 +289,11 @@ class environment():
         x_norm = self.x/self.map_width
         y_norm = self.y/self.map_height
         theta_norm = (self.theta+math.pi)/(2*math.pi)
+        v_norm = self.v/self.max_v
         #lidar_norm = np.array(self.lidar_dists)/self.lidar_dict['max_range']
         #lidar_norm = np.array(self.lidar_dists)<0.5
-        self.observation = [x_norm, y_norm, theta_norm]
+        #self.observation = [x_norm, y_norm, theta_norm]
+        self.observation = [x_norm, y_norm, theta_norm, v_norm]
         
         #self.observation = []
         #for n in lidar_norm:
@@ -338,17 +344,21 @@ class environment():
 
           
     def convert_action_to_coord(self, strategy, action):
+        wpt = action%self.num_waypoints
+        #print('wpt = ', wpt)
         if strategy=='global':
             waypoint = [int((action+1)%3), int((action+1)/3)]
 
         if strategy=='local':
-            waypoint_relative_angle = self.theta+math.pi/4-(math.pi/2)*(action/(self.num_actions-1))
+            waypoint_relative_angle = self.theta+math.pi/2-(math.pi)*(wpt/(self.num_waypoints-1))
             waypoint = [self.x + self.R*math.cos(waypoint_relative_angle), self.y + self.R*math.sin(waypoint_relative_angle)]
         
         if strategy == 'waypoint':
-            waypoint = action
+            waypoint = wpt
 
-        return waypoint
+        v_ref = int(action/self.num_waypoints)*self.max_v
+        #print('v_ref = ', v_ref)
+        return waypoint, v_ref
 
     def set_flags(self):
         if (self.x>self.goals[self.current_goal][0]-self.s and self.x<self.goals[self.current_goal][0]+self.s) and (self.y>self.goals[self.current_goal][1]-self.s and self.y<self.goals[self.current_goal][1]+self.s):
@@ -559,9 +569,9 @@ def test_environment():
 
 
     env_dict = {'name':'test_agent', 'sim_conf': functions.load_config(sys.path[0], "config"), 'save_history': False, 'map_name': 'circle'
-            , 'max_steps': 1000, 'local_path': False, 'waypoint_strategy': 'local'
-            , 'reward_signal': [0, -1, 0, -1, -0.01, 10, 0, 0, 0], 'n_actions': 11, 'control_steps': 20
-            , 'display': True, 'R':6, 'track_dict':{'k':0.1, 'Lfc':0.2}
+            , 'max_steps': 1000, 'local_path': True, 'waypoint_strategy': 'local'
+            , 'reward_signal': [0, -1, 0, -1, -0.01, 10, 0, 0, 0], 'n_waypoints': 11, 'n_vel':2, 'control_steps': 20
+            , 'display': True, 'R':6, 'track_dict':{'k':0.1, 'Lfc':2}
             , 'lidar_dict': {'is_lidar':False, 'lidar_res':0.1, 'n_beams':10, 'max_range':20, 'fov':np.pi} } 
     initial_condition={'x':15, 'y':5, 'theta':0, 'goal':0}
     
@@ -575,7 +585,7 @@ def test_environment():
     done=False
     
     #action_history = [0,0,0,0,0,0]
-    #action_history = [4,5,4,5,4,5,5]
+    action_history = [16,16,16,16,16]
 
     score=0
     i=0
