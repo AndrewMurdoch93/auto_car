@@ -263,7 +263,7 @@ def test(agent_name, n_episodes, detect_issues):
              
 if __name__=='__main__':
    
-   
+   '''
    agent_name = 'no_0_vel'
    
    main_dict = {'name': agent_name, 'max_episodes':5000, 'comment': ''}
@@ -281,7 +281,8 @@ if __name__=='__main__':
    a.train()
    
    test(agent_name=agent_name, n_episodes=300, detect_issues=False)
-   
+   '''
+
    #agent_name = 'parking_penalty_2'
    #main_dict['name'] = agent_name
    #env_dict['reward_signal'] = {'goal_reached':0, 'out_of_bounds':-1, 'max_steps':0, 'collision':-1, 'backwards':-1, 'park':-0.2, 'time_step':-0.01, 'progress':10}
