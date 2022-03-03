@@ -33,8 +33,11 @@ class environment():
         self.control_steps = input_dict['control_steps']
         self.display=input_dict['display']
         self.R=input_dict['R']
+        self.wpt_arc = input_dict['wpt_arc']
         self.track_dict = input_dict['track_dict']
         self.lidar_dict = input_dict['lidar_dict']
+        
+
 
         self.start_condition = start_condition
         
@@ -127,6 +130,7 @@ class environment():
         self.goal_reached = False
         self.collision=False
         self.backwards=False
+        self.park=False
         
         #Progress indicators
         self.steps = 0
@@ -150,7 +154,7 @@ class environment():
         done=False
         
         waypoint, v_ref = self.convert_action_to_coord(strategy=self.waypoint_strategy, action=act)
-        v_ref = 7
+        #v_ref = 7
 
 
         if self.local_path==False:
@@ -170,7 +174,10 @@ class environment():
                 self.update_variables()
                 self.steps += 1
                 self.set_flags()
-                reward += self.getReward() 
+                reward += self.getReward()
+
+                #print(reward)
+
                 done = self.isEnd()
                 self.save_state()
                 
@@ -207,7 +214,7 @@ class environment():
                 self.local_path_history.append([cx, cy][:])
                 self.set_flags()
                 reward += self.getReward()
-
+                
                 self.save_state()
 
                 if self.save_history==True:
@@ -350,17 +357,22 @@ class environment():
             waypoint = [int((action+1)%3), int((action+1)/3)]
 
         if strategy=='local':
-            waypoint_relative_angle = self.theta+math.pi/2-(math.pi)*(wpt/(self.num_waypoints-1))
+            waypoint_relative_angle = self.theta + self.wpt_arc -(2*self.wpt_arc)*(wpt/(self.num_waypoints-1))
             waypoint = [self.x + self.R*math.cos(waypoint_relative_angle), self.y + self.R*math.sin(waypoint_relative_angle)]
         
         if strategy == 'waypoint':
             waypoint = wpt
 
-        v_ref = int(action/self.num_waypoints)*self.max_v
+        #v_ref = int(action/self.num_waypoints)*self.max_v
+
+        v_ref = int(action/self.num_waypoints)*(self.max_v-2)+2
+        
+
         #print('v_ref = ', v_ref)
         return waypoint, v_ref
 
     def set_flags(self):
+        
         if (self.x>self.goals[self.current_goal][0]-self.s and self.x<self.goals[self.current_goal][0]+self.s) and (self.y>self.goals[self.current_goal][1]-self.s and self.y<self.goals[self.current_goal][1]+self.s):
             self.current_goal = (self.current_goal+1)%(len(self.goals)-1)
             self.goal_reached = True
@@ -379,42 +391,45 @@ class environment():
 
         if self.goals_reached==(len(self.goals)):
             self.max_goals_reached=True
-   
+        
+        if self.steps>1 and self.v<0.1:
+            self.park=True
+        else:
+            self.park=False
+
         if functions.occupied_cell(self.x, self.y, self.occupancy_grid, self.map_res, self.map_height)==True:
             self.collision=True
             
-                
-        
         
     def getReward(self):
 
         if self.goal_reached==True:
-            return self.reward_signal[0]
+            return self.reward_signal['goal_reached']
 
         if  self.out_of_bounds==True:
-            return self.reward_signal[1]
+            return self.reward_signal['out_of_bounds']
 
         elif self.max_steps_reached==True:
-            return self.reward_signal[2]
+            return self.reward_signal['max_steps']
 
         elif self.collision==True:
-            return self.reward_signal[3]
-        
+            return self.reward_signal['collision']
+
         elif self.backwards==True:
-            return -1
+            return self.reward_signal['backwards']
+
+        elif self.park==True:
+            reward=self.reward_signal['park']
+
         else:
             reward=0
-
-            #Time penalty
-            reward+=self.reward_signal[4]
-            #reward+=self.progress
-            #return reward
-            reward += self.current_progress * self.reward_signal[5]
+            reward+=self.reward_signal['time_step']
+            reward+=self.current_progress * self.reward_signal['progress']
+            
             #reward += self.vel_par_line * (1/self.max_v) * self.reward_signal[6]
             #reward += np.abs(self.angle_to_line) * (1/(np.pi)) * self.reward_signal[7]
             #reward += self.dist_to_line * self.reward_signal[8]
             #reward += self.progress * self.reward_signal[5]
-
 
         return reward
     
@@ -425,10 +440,14 @@ class environment():
         elif self.out_of_bounds==True:       
             return True
         elif self.max_steps_reached==True:
+            #print('max steps reached')
             return True
         elif self.collision==True:
+            #print('collide')
             return True
         elif self.backwards==True:
+            return True
+        elif self.park==True:
             return True
         else:
             return False
@@ -553,7 +572,7 @@ class environment():
 
 def test_environment():
     
-    agent_name = 'end_to_end'
+    agent_name = 'v_control_5'
     replay_episode_name = 'replay_episodes/' + agent_name
     
     infile=open(replay_episode_name, 'rb')
@@ -569,8 +588,9 @@ def test_environment():
 
 
     env_dict = {'name':'test_agent', 'sim_conf': functions.load_config(sys.path[0], "config"), 'save_history': False, 'map_name': 'circle'
-            , 'max_steps': 1000, 'local_path': True, 'waypoint_strategy': 'local'
-            , 'reward_signal': [0, -1, 0, -1, -0.01, 10, 0, 0, 0], 'n_waypoints': 11, 'n_vel':2, 'control_steps': 20
+            , 'max_steps': 1000, 'local_path': True, 'waypoint_strategy': 'local', 'wpt_arc': np.pi/4
+            ,  'reward_signal': {'goal_reached':0, 'out_of_bounds':-1, 'max_steps':0, 'collision':-1, 'backwards':-1, 'park':-0.5, 'time_step':-0.01, 'progress':10}
+            , 'n_waypoints': 11, 'n_vel':2, 'control_steps': 20
             , 'display': True, 'R':6, 'track_dict':{'k':0.1, 'Lfc':2}
             , 'lidar_dict': {'is_lidar':False, 'lidar_res':0.1, 'n_beams':10, 'max_range':20, 'fov':np.pi} } 
     initial_condition={'x':15, 'y':5, 'theta':0, 'goal':0}
@@ -585,7 +605,7 @@ def test_environment():
     done=False
     
     #action_history = [0,0,0,0,0,0]
-    action_history = [16,16,16,16,16]
+    action_history = [8,8,8,8,8,9,9,9,9,9]
 
     score=0
     i=0

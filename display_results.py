@@ -62,16 +62,16 @@ def compare_learning_curves_progress(agent_names, legend, legend_title, show_ave
                 plt.xlabel('Episode')
 
             elif xaxis=='times':
-                plt.plot(np.cumsum(np.array(times)), median[i])
+                plt.plot(np.cumsum(np.array(times[i])), median[i])
                 plt.xlabel('Time')
 
             elif xaxis=='steps':
-                plt.plot(np.cumsum(np.array(steps)), median[i])
+                plt.plot(np.cumsum(np.array(steps[i])), median[i])
                 plt.xlabel('Steps')
 
         plt.title('Learning curve for median progress')
         plt.ylabel('Progress')
-        plt.legend(legend, title=legend_title, loc='upper left')
+        plt.legend(legend, title=legend_title, loc='lower right')
         plt.show()
 
     if show_average==True:
@@ -81,16 +81,16 @@ def compare_learning_curves_progress(agent_names, legend, legend_title, show_ave
                 plt.xlabel('Episode')
 
             elif xaxis=='times':
-                plt.plot(np.cumsum(np.array(times)), avg[i])
+                plt.plot(np.cumsum(np.array(times[i])), avg[i])
                 plt.xlabel('Time')
 
             elif xaxis=='steps':
-                plt.plot(np.cumsum(np.array(steps)), avg[i])
+                plt.plot(np.cumsum(np.array(steps[i])), avg[i])
                 plt.xlabel('Steps')
         
         plt.title('Learning curve for average progress')
         plt.ylabel('Progress')
-        plt.legend(legend, title=legend_title, loc='upper left')
+        plt.legend(legend, title=legend_title, loc='lower right')
         plt.show()
 
 def learning_curve_score(agent_name, show_average=False, show_median=True):
