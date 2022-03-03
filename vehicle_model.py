@@ -366,8 +366,8 @@ def run_dynamics_update(x, u, dt):
 
 
 
-#if __name__ == "__main__":
-x = np.array([0, 0, 0, 0, 0])
-u = np.array([0.4, 2])
-dt = 0.2
-run_dynamics_update(x, u, dt)
+if __name__ == "__main__":
+    x = np.array([0, 0, 0, 0, 0])
+    u = np.array([0.4, 2])
+    dt = 0.2
+    run_dynamics_update(x, u, dt)
