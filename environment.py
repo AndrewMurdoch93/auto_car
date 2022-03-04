@@ -13,8 +13,7 @@ import random
 
 class environment():
 
-    #def __init__(self, sim_conf, save_history, map_name, max_steps, local_path, waypoint_strategy, 
-    #            reward_signal, num_actions, control_steps, agent_name, display, start_condition):
+
     def __init__(self, input_dict, start_condition): 
         
         self.initial_condition_name = 'initial_conditions/' + input_dict['name']
@@ -421,6 +420,7 @@ class environment():
         elif self.park==True:
             reward=self.reward_signal['park']
 
+
         else:
             reward=0
             reward+=self.reward_signal['time_step']
@@ -605,7 +605,7 @@ def test_environment():
     done=False
     
     #action_history = [0,0,0,0,0,0]
-    action_history = [8,8,8,8,8,9,9,9,9,9]
+    #action_history = [8,8,8,8,8,9,9,9,9,9]
 
     score=0
     i=0
