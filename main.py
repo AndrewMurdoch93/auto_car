@@ -264,41 +264,41 @@ def test(agent_name, n_episodes, detect_issues):
 if __name__=='__main__':
    
    '''
-   agent_name = 'no_0_vel'
+   agent_name = 'single_track_dynamic_model_2'
    
-   main_dict = {'name': agent_name, 'max_episodes':5000, 'comment': ''}
+   main_dict = {'name': agent_name, 'max_episodes':10000, 'comment': ''}
 
-   agent_dict = {'gamma':0.99, 'epsilon':1, 'eps_end':0.01, 'eps_dec':1/1000, 'lr':0.001, 'batch_size':64, 'max_mem_size':1000000, 
+   agent_dict = {'gamma':0.99, 'epsilon':1, 'eps_end':0.01, 'eps_dec':1/2000, 'lr':0.001, 'batch_size':64, 'max_mem_size':1000000, 
                   'fc1_dims': 64, 'fc2_dims': 64, 'fc3_dims':64}
 
    env_dict = {'sim_conf': functions.load_config(sys.path[0], "config"), 'save_history': False, 'map_name': 'circle'
             , 'max_steps': 1000, 'local_path': False, 'waypoint_strategy': 'local', 'wpt_arc': np.pi/2
             , 'reward_signal': {'goal_reached':0, 'out_of_bounds':-1, 'max_steps':0, 'collision':-1, 'backwards':-1, 'park':-0.5, 'time_step':-0.01, 'progress':10}
-            , 'n_waypoints': 8, 'n_vel':2,'control_steps': 20, 'display': False, 'R':6, 'track_dict':{'k':0.1, 'Lfc':1}
+            , 'n_waypoints': 11, 'n_vel':1,'control_steps': 20, 'display': False, 'R':6, 'track_dict':{'k':0.1, 'Lfc':1}
             , 'lidar_dict': {'is_lidar':False, 'lidar_res':0.1, 'n_beams':3, 'max_range':20, 'fov':np.pi} } 
    
-   a = trainingLoop(main_dict, agent_dict, env_dict, '')
+   a = trainingLoop(main_dict, agent_dict, env_dict, 'single_track_dynamic_model_2')
    a.train()
    
    test(agent_name=agent_name, n_episodes=300, detect_issues=False)
    '''
 
-   #agent_name = 'parking_penalty_2'
+   #agent_name = 'single_track_dynamic_model_3'
    #main_dict['name'] = agent_name
-   #env_dict['reward_signal'] = {'goal_reached':0, 'out_of_bounds':-1, 'max_steps':0, 'collision':-1, 'backwards':-1, 'park':-0.2, 'time_step':-0.01, 'progress':10}
+   #env_dict['wpt_arc'] = np.pi/4
    #a = trainingLoop(main_dict, agent_dict, env_dict, '')
    #a.train()
    #test(agent_name=agent_name, n_episodes=300, detect_issues=False)
-
+   
 
    
-   #agent_name = 'parking_penalty_0'
+   agent_name = 'single_track_dynamic_model_2'
    #test(agent_name=agent_name, n_episodes=500, detect_issues=False)
    #display_results.display_train_parameters(agent_name=agent_name)
    #display_results.agent_progress_statistics(agent_name=agent_name)
    #display_results.learning_curve_progress(agent_name=agent_name, show_average=True, show_median=True)
    #display_results.density_plot_progress([agent_name], legend=[''], legend_title='')
-   #display_results.display_moving_agent(agent_name=agent_name, load_history=False)
+   display_results.display_moving_agent(agent_name=agent_name, load_history=False)
    #display_results.display_path(agent_name=agent_name, load_history=False)
    
    #display_results.compare_learning_curves_progress([agent_name], [''], [''], xaxis='times')

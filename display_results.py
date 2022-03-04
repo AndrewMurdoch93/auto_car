@@ -408,7 +408,7 @@ def display_moving_agent(agent_name, load_history=False):
     for i in range(len(env.waypoint_history)):
         plt.cla()
         plt.imshow(im, extent=(0,30,0,30))
-        sh=env.state_history[i]
+        sh=env.pose_history[i]
         plt.arrow(sh[0], sh[1], 0.5*math.cos(sh[2]), 0.5*math.sin(sh[2]), head_length=0.5, head_width=0.5, shape='full', ec='None', fc='blue')
         plt.arrow(sh[0], sh[1], 0.5*math.cos(sh[2]+sh[3]), 0.5*math.sin(sh[2]+sh[3]), head_length=0.5, head_width=0.5, shape='full',ec='None', fc='red')
         plt.plot(sh[0], sh[1], 'o')
@@ -431,7 +431,7 @@ def display_moving_agent(agent_name, load_history=False):
             for coord in lh:
                 plt.plot(coord[0], coord[1], 'xb')
         
-        plt.plot(np.array(env.state_history)[0:i,0], np.array(env.state_history)[0:i,1])
+        plt.plot(np.array(env.pose_history)[0:i,0], np.array(env.pose_history)[0:i,1])
         
         ph = env.progress_history[i]
         #plt.legend(["position", "waypoint", "goal area", "heading", "steering angle"])
@@ -483,7 +483,7 @@ def display_path(agent_name, load_history=False):
     image_path = sys.path[0] + '/maps/' + env.map_name + '.png'
     im = image.imread(image_path)
     plt.imshow(im, extent=(0,30,0,30))
-    plt.plot(np.array(env.state_history)[:,0], np.array(env.state_history)[:,1])
+    plt.plot(np.array(env.pose_history)[:,0], np.array(env.pose_history)[:,1])
     plt.plot(env.rx, env.ry)
     plt.xlabel('x coordinate')
     plt.ylabel('y coordinate')

@@ -161,7 +161,7 @@ class environment():
         done=False
         
         waypoint, v_ref = self.convert_action_to_coord(strategy=self.waypoint_strategy, action=act)
-        #v_ref = 7
+        v_ref = 7
 
 
         if self.local_path==False:
@@ -177,7 +177,7 @@ class environment():
                 #delta_ref = math.pi/16-(math.pi/8)*(act/(self.num_actions-1))         
                 
                 #delta_dot, a = self.control_system(self.delta, delta_ref, self.v, v_ref)
-                self.update_pose(v_ref, delta_ref)
+                self.update_pose(delta_ref, v_ref)
                 self.update_variables()
                 self.steps += 1
                 self.set_flags()
@@ -213,7 +213,7 @@ class environment():
                 
                 delta_ref, target_index = self.path_tracker.pure_pursuit_steer_control(self.x, self.y, self.theta, self.v, target_index)
                 #delta_dot, a = self.control_system(self.delta, delta_ref, self.v, v_ref)
-                self.update_pose(v_ref, delta_ref)
+                self.update_pose(delta_ref, v_ref)
                 self.update_variables()
 
                 self.steps += 1
@@ -306,8 +306,8 @@ class environment():
         v_norm = self.v/self.max_v
         #lidar_norm = np.array(self.lidar_dists)/self.lidar_dict['max_range']
         #lidar_norm = np.array(self.lidar_dists)<0.5
-        #self.observation = [x_norm, y_norm, theta_norm]
-        self.observation = [x_norm, y_norm, theta_norm, v_norm]
+        self.observation = [x_norm, y_norm, theta_norm]
+        #self.observation = [x_norm, y_norm, theta_norm, v_norm]
         
         #self.observation = []
         #for n in lidar_norm:
@@ -574,28 +574,7 @@ class environment():
         self.theta = self.state[4]
         self.v = self.state[3]
         self.delta = self.state[2]
-        
-    '''
-    def update_kinematic_state(self, a, delta_dot):
-
-        #Update (rear axle) position
-        self.x = self.x + self.v * np.cos(self.theta) * self.dt
-        self.y = self.y + self.v * np.sin(self.theta) * self.dt
-
-        #Update car heading angle
-        self.theta_dot = (self.v / self.wheelbase) * np.tan(self.delta)  #rate of change of heading
-        dtheta = self.theta_dot * self.dt   #change in heading angle
-        self.theta = functions.add_angles_complex(self.theta, dtheta)   #new heading angle
-
-        a = np.clip(a, -self.max_a, self.max_a) #Truncate maximum acceleration
-        delta_dot = np.clip(delta_dot, -self.max_delta_dot, self.max_delta_dot) #truncate maximum steering angle rate of change  
-
-        self.delta = self.delta + delta_dot * self.dt   #new steering angle
-        self.v = self.v + a * self.dt     #new velocity
-
-        self.delta = np.clip(self.delta, -self.max_delta, self.max_delta)    #truncate steering angle
-        self.v = np.clip(self.v, -self.max_v, self.max_v)         #truncate velocity
-        '''
+    
 
 def test_environment():
     
@@ -615,24 +594,20 @@ def test_environment():
 
 
     env_dict = {'name':'test_agent', 'sim_conf': functions.load_config(sys.path[0], "config"), 'save_history': False, 'map_name': 'circle'
-            , 'max_steps': 1000, 'local_path': False, 'waypoint_strategy': 'local', 'wpt_arc': np.pi/4
+            , 'max_steps': 1000, 'local_path': False, 'waypoint_strategy': 'local', 'wpt_arc': np.pi/2
             , 'reward_signal': {'goal_reached':0, 'out_of_bounds':-1, 'max_steps':0, 'collision':-1, 'backwards':-1, 'park':-0.5, 'time_step':-0.01, 'progress':10}
             , 'n_waypoints': 11, 'n_vel':2, 'control_steps': 20
             , 'display': True, 'R':6, 'track_dict':{'k':0.1, 'Lfc':2}
             , 'lidar_dict': {'is_lidar':False, 'lidar_res':0.1, 'n_beams':10, 'max_range':20, 'fov':np.pi} } 
     initial_condition={'x':15, 'y':5, 'theta':0, 'goal':0}
-    
-    #env_dict['R']=6
-    #env_dict['track_dict'] = {'k':0.1, 'Lfc':0.2}
-    #env_dict['lidar_dict'] = {'is_lidar':False, 'lidar_res':0.1, 'n_beams':10, 'max_range':20, 'fov':np.pi}
 
     env = environment(env_dict, initial_condition)
 
     env.reset(save_history=True)
     done=False
     
-    #action_history = [0,0,0,0,0,0]
-    action_history = [12,12,12,12,12,12,12,12,12,12]
+    action_history = np.ones(20)*4
+
 
     score=0
     i=0

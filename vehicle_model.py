@@ -292,6 +292,7 @@ class RaceCarDynamics(object):
         # state is [x, y, steer_angle, vel, yaw_angle, yaw_rate, slip_angle]
 
         # steering delay
+        
         steer = 0.
         if self.steer_buffer.shape[0] < self.steer_buffer_size:
             steer = 0.
@@ -300,7 +301,8 @@ class RaceCarDynamics(object):
             steer = self.steer_buffer[-1]
             self.steer_buffer = self.steer_buffer[:-1]
             self.steer_buffer = np.append(raw_steer, self.steer_buffer)
-
+        
+        #steer=raw_steer
         # steering angle velocity input to steering velocity acceleration input
         accl, sv = pid(vel, steer, self.state[3], self.state[2], self.params['sv_max'], self.params['a_max'], self.params['v_max'], self.params['v_min'])
         
@@ -331,7 +333,8 @@ class RaceCarDynamics(object):
 
 def run_dynamics_update(x, u, dt):
     params = {'mu': 1.0489, 'C_Sf': 4.718, 'C_Sr': 5.4562, 'lf': 0.15875, 'lr': 0.17145, 'h': 0.074, 'm': 3.74, 'I': 0.04712, 's_min': -0.4189, 's_max': 0.4189, 'sv_min': -3.2, 'sv_max': 3.2, 'v_switch': 7.319, 'a_max': 9.51, 'v_min':-5.0, 'v_max': 20.0, 'width': 0.31, 'length': 0.58}
-
+    inds = np.array([0, 1, 4, 3, 2])
+    pose_history = []
     sim_step = 0.01 
     car = RaceCarDynamics(params, sim_step)
     car.reset(x)
@@ -348,26 +351,66 @@ def run_dynamics_update(x, u, dt):
     for i in range(n_steps):
         car.update_pose(u[0], u[1])
         states.append(car.state)
+        pose_history.append(np.array(car.state[inds]))
 
-    plt.figure(1)
-    states = np.array(states)
-    plt.plot(states[:, 0], states[:, 1])
-    plt.title('Positions: official sim')
-
-    plt.show()
-    inds = np.array([0, 1, 4, 3, 2])
-
-    new_state = np.array(car.state[inds])
-
-
-    # print(f"Original state: {x} + {u}")
-    # print(f"New state: {new_state}")
-    return new_state
-
+    return np.array(pose_history), np.array(states)[:, 6]
 
 
 if __name__ == "__main__":
-    x = np.array([0, 0, 0, 0, 0])
-    u = np.array([0.4, 2])
-    dt = 0.2
-    run_dynamics_update(x, u, dt)
+    
+    x = np.array([[0, 0, 0, 1, 0], [0, 0, 0, 2, 0], [0, 0, 0, 5, 0], [0, 0, 0, 10, 0], [0, 0, 0, 15, 0], [0, 0, 0, 20, 0]])
+    u = np.array([[1, 1], [1, 2], [1, 5], [1, 10], [1, 15], [1, 20]])
+    dt = 5
+    
+    for i in range(len(x)):
+        pose_history, slip = run_dynamics_update(x[i], u[i], dt)
+        plt.plot(pose_history[:, 0], pose_history[:, 1])
+    
+    plt.title('Vehicle path')
+    plt.axis('equal')
+    plt.xlabel('x (m)')
+    plt.ylabel('y (m)')
+    plt.legend(['1', '2', '5', '10', '15', '20'], title='Velocity (m/s)')
+    plt.show()
+
+    for i in range(len(x)):
+        pose_history, slip = run_dynamics_update(x[i], u[i], dt)
+        plt.plot(np.arange(len(slip))*0.01, slip)
+    
+    plt.title('Slip angle at vehicle centres')
+    plt.xlabel('seconds')
+    plt.ylabel('slip angle (rad)')
+    plt.legend(['1', '2', '5', '10', '15', '20'], title='Velocity (m/s)')
+    plt.show()
+    
+
+    x = np.array([[0, 0, 0, 0, 0], [0, 0, 0, 0, 0], [0, 0, 0, 0, 0], [0, 0, 0, 0, 0], [0, 0, 0, 0, 0], [0, 0, 0, 0, 0]])
+    u = np.array([[0, 1], [0, 2], [0, 5], [0, 10], [0, 15], [0, 20]])
+    dt = 5
+
+    for i in range(len(x)):
+        pose_history, slip = run_dynamics_update(x[i], u[i], dt)
+        plt.plot(np.arange(len(pose_history[:, 3]))*0.01, pose_history[:, 3])
+
+    plt.title('Acceleration curves')
+    #plt.xlim([0,1])
+    #plt.ylim([0,1])
+    plt.xlabel('seconds')
+    plt.ylabel('velocity (m/s)')
+    plt.legend(['1', '2', '5', '10', '15', '20'], title='reference velocity (m/s)')
+    plt.show()
+    
+    x = np.array([[0, 0, 0, 1, 0], [0, 0, 0, 2, 0], [0, 0, 0, 5, 0], [0, 0, 0, 10, 0], [0, 0, 0, 15, 0], [0, 0, 0, 20, 0]])
+    u = np.array([[0, 0], [0, 0], [0, 0], [0, 0], [0, 0], [0, 0]])
+    dt = 5
+    
+    for i in range(len(x)):
+        pose_history, slip = run_dynamics_update(x[i], u[i], dt)
+        plt.plot(np.arange(len(pose_history[:, 3]))*0.01, pose_history[:, 3])
+
+    plt.title('Decceleration curves')
+
+    plt.xlabel('seconds')
+    plt.ylabel('velocity (m/s)')
+    plt.legend(['1', '2', '5', '10', '15', '20'], title='reference velocity (m/s)')
+    plt.show()
