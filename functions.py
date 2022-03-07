@@ -14,7 +14,10 @@ import yaml
 from PIL import Image, ImageOps, ImageDraw
 import random
 from datetime import datetime
-
+import time
+from numba import njit
+from numba import int32, int64, float32, float64,bool_    
+from numba.experimental import jitclass
 
 def load_config(path, fname):
     full_path = path + '/config/' + fname + '.yaml'
@@ -54,6 +57,7 @@ def sub_angles_complex(a1, a2):
 
     return phase
 
+@njit(cache=True)
 def distance_between_points(x1, x2, y1, y2):
     distance = math.hypot(x2-x1, y2-y1)
     
@@ -133,7 +137,7 @@ def map_generator(map_name):
     
     return occupancy_grid, map_height, map_width, res 
 
-      
+   
 def random_start(x, y, rx, ry, ryaw, rk, s):
     offset=0.5
 
@@ -149,11 +153,15 @@ def random_start(x, y, rx, ry, ryaw, rk, s):
 
 
 def find_closest_point(rx, ry, x, y):
+
     dx = [x - irx for irx in rx]
     dy = [y - iry for iry in ry]
     d = np.hypot(dx, dy)    
     ind = np.argmin(d)
+    
     return ind
+
+
 
 def find_angle_to_line(ryaw, theta):
 
@@ -162,9 +170,10 @@ def find_angle_to_line(ryaw, theta):
     return angle
 
 
+@njit(cache=True)
 def occupied_cell(x, y, occupancy_grid, res, map_height):
     
-    cell = (np.array([map_height-y, x])/res).astype(int)
+    cell = (np.array([map_height-y, x])/res).astype(np.int64)
 
     if occupancy_grid[cell[0], cell[1]] == True:
         return True
@@ -172,64 +181,57 @@ def occupied_cell(x, y, occupancy_grid, res, map_height):
         return False
 
 
-'''
-class collision_detector():
+spec = [('lidar_res', float32),
+        ('n_beams', int32),
+        ('max_range', float32),
+        ('fov', float32),
+        ('occupancy_grid', bool_[:,:]),
+        ('map_res', float32),
+        ('map_height', float32),
+        ('beam_angles', float64[:])]
 
-    def __init__(self, occupancy_grid, resolution, map_height):
-        self.occupancy_grid = occupancy_grid
-        self.resolution=resolution
-        self.map_height = map_height
 
-
-    def detect(self, x, y):
-        
-        cell = (np.array([self.map_height-y, x])/res).astype(int)
-
-        #plt.imshow(occupancy_grid)
-        #plt.show()
-
-        if occupancy_grid[cell[0], cell[1]] == True:
-            return True
-        else:
-            return False
-
-'''
-
+@jitclass(spec)
 class lidar_scan():
-    def __init__(self, lidar_dict, occupancy_grid, map_res, map_height):
-        self.lidar_res = lidar_dict['lidar_res']
-        self.n_beams  = lidar_dict['n_beams']
-        self.max_range = lidar_dict['max_range']
-        self.fov = lidar_dict['fov']
-        self.beam_angles = (self.fov/(self.n_beams-1))*np.arange(self.n_beams)
+    def __init__(self, lidar_res, n_beams, max_range, fov, occupancy_grid, map_res, map_height):
+        
+        self.lidar_res = lidar_res
+        self.n_beams  = n_beams
+        self.max_range = max_range
+        self.fov = fov
+        
+        #self.beam_angles = (self.fov/(self.n_beams-1))*np.arange(self.n_beams)
+        
+        self.beam_angles = np.zeros(self.n_beams, dtype=np.float64)
+        for n in range(self.n_beams):
+            self.beam_angles[n] = (self.fov/(self.n_beams-1))*n
+
         self.occupancy_grid = occupancy_grid
         self.map_res = map_res
         self.map_height = map_height
 
     def get_scan(self, x, y, theta):
         
-        scan = []
-        coords = []
-        for n in self.beam_angles:
+        scan = np.zeros((self.n_beams))
+        coords = np.zeros((self.n_beams, 2))
+        
+        for n in range(self.n_beams):
             i=1
             occupied=False
 
             while i<(self.max_range/self.lidar_res) and occupied==False:
-                x_beam = x + np.cos(theta+n-self.fov/2)*i*self.lidar_res
-                y_beam = y + np.sin(theta+n-self.fov/2)*i*self.lidar_res
+                x_beam = x + np.cos(theta+self.beam_angles[n]-self.fov/2)*i*self.lidar_res
+                y_beam = y + np.sin(theta+self.beam_angles[n]-self.fov/2)*i*self.lidar_res
                 occupied = occupied_cell(x_beam, y_beam, self.occupancy_grid, self.map_res, self.map_height)
                 i+=1
             
-            coords.append([np.round(x_beam,3), np.round(y_beam,3)])
-            dist = np.linalg.norm([x_beam-x, y_beam-y])
-            scan.append(np.round(dist,3))
+            coords[n,:] = [np.round(x_beam,3), np.round(y_beam,3)]
+            #dist = np.linalg.norm([x_beam-x, y_beam-y])
+            dist = math.sqrt((x_beam-x)**2 + (y_beam-y)**2)
+            
+            scan[n] = np.round(dist,3)
 
         return scan, coords
-    
-  
-
-
-
 
 
 if __name__ == 'main':

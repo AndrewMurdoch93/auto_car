@@ -1,9 +1,9 @@
 import math
 import numpy as np
 import functions
+from numba import njit
 
-
-
+@njit(cache=True)
 def pure_pursuit(wheelbase, waypoint, x, y, theta):
     '''
     A simple pure pursuit implementation for single waypoint following

@@ -120,7 +120,7 @@ def vehicle_dynamics_ks(x, u_init, mu, C_Sf, C_Sr, lf, lr, h, m, I, s_min, s_max
          x[3]/lwb*np.tan(x[2])])
     return f
 
-# @njit(cache=True)
+@njit(cache=True)
 def vehicle_dynamics_st(x, u_init, mu, C_Sf, C_Sr, lf, lr, h, m, I, s_min, s_max, sv_min, sv_max, v_switch, a_max, v_min, v_max):
     """
     Single Track Dynamic Vehicle Dynamics.
