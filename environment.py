@@ -11,6 +11,7 @@ import pickle
 from itertools import chain
 import random
 import vehicle_model
+import time
 
 class environment():
 
@@ -76,8 +77,16 @@ class environment():
         
         #Car sensors - lidar
         if self.lidar_dict['is_lidar']==True:
-            self.lidar = functions.lidar_scan(self.lidar_dict, occupancy_grid=self.occupancy_grid, map_res=self.map_res, map_height=self.map_height)
-
+            lidar_res=self.lidar_dict['lidar_res']
+            n_beams=self.lidar_dict['n_beams']
+            max_range=self.lidar_dict['max_range']
+            fov=self.lidar_dict['fov']
+            
+            #self.lidar = functions.lidar_scan(self.lidar_dict, occupancy_grid=self.occupancy_grid, map_res=self.map_res, map_height=self.map_height)
+            #self. lidar = functions.lidar_scan(occupancy_grid=self.occupancy_grid, map_res=self.map_res, map_height=self.map_height)
+            self.lidar = functions.lidar_scan(lidar_res=lidar_res, n_beams=n_beams, max_range=max_range, fov=fov
+                        , occupancy_grid=self.occupancy_grid, map_res=self.map_res, map_height=self.map_height)
+        
         self.reset(self.save_history)
 
 
@@ -145,7 +154,6 @@ class environment():
         self.progress = 0
         #self.det_prg.search_index(self.x, self.y)
         self.old_closest_point = functions.find_closest_point(self.rx, self.ry, self.x, self.y)
-
         #Initialise state and observation vector 
         self.save_pose()
 
@@ -173,7 +181,7 @@ class environment():
                     self.waypoint_history.append(waypoint)
                 
                 delta_ref = path_tracker.pure_pursuit(self.wheelbase, waypoint, self.x, self.y, self.theta)
-        
+         
                 #delta_ref = math.pi/16-(math.pi/8)*(act/(self.num_actions-1))         
                 
                 #delta_dot, a = self.control_system(self.delta, delta_ref, self.v, v_ref)
@@ -186,6 +194,10 @@ class environment():
                 #print(reward)
 
                 done = self.isEnd()
+                
+                if self.lidar_dict['is_lidar']==True:
+                    self.lidar_dists, self.lidar_coords = self.lidar.get_scan(self.x, self.y, self.theta)
+
                 self.save_pose()
                 
                 if self.save_history==True:
@@ -222,6 +234,9 @@ class environment():
                 self.set_flags()
                 reward += self.getReward()
                 
+                if self.lidar_dict['is_lidar']==True:
+                    self.lidar_dists, self.lidar_coords = self.lidar.get_scan(self.x, self.y, self.theta)
+
                 self.save_pose()
 
                 if self.save_history==True:
@@ -241,13 +256,7 @@ class environment():
                     break
    
                 i+=1
-        #print(reward)
-        
-        #reward = self.getReward()
-        
-        if self.lidar_dict['is_lidar']==True:
-            self.lidar_dists, self.lidar_coords = self.lidar.get_scan(self.x, self.y, self.theta)
-        
+
         return self.observation, reward, done
     
 
@@ -302,17 +311,19 @@ class environment():
         #self.observation = [self.x/self.map_width, self.y/self.map_height, (self.theta+math.pi)/(2*math.pi), (self.x_to_goal+0.5*self.map_width)/self.map_width, (self.y_to_goal+0.5*self.map_height)/self.map_height]
         x_norm = self.x/self.map_width
         y_norm = self.y/self.map_height
-        theta_norm = (self.theta+math.pi)/(2*math.pi)
+        theta_norm = (self.theta)/(2*math.pi)
         v_norm = self.v/self.max_v
+        
         #lidar_norm = np.array(self.lidar_dists)/self.lidar_dict['max_range']
-        #lidar_norm = np.array(self.lidar_dists)<0.5
+        lidar_norm = np.array(self.lidar_dists)<0.5
+        
         self.observation = [x_norm, y_norm, theta_norm]
         #self.observation = [x_norm, y_norm, theta_norm, v_norm]
         
         #self.observation = []
-        #for n in lidar_norm:
-        #    self.observation.append(n)
-        #pass
+        for n in lidar_norm:
+            self.observation.append(n)
+        pass
 
 
     
@@ -360,6 +371,7 @@ class environment():
     def convert_action_to_coord(self, strategy, action):
         wpt = action%self.num_waypoints
         #print('wpt = ', wpt)
+        
         if strategy=='global':
             waypoint = [int((action+1)%3), int((action+1)/3)]
 
@@ -368,14 +380,13 @@ class environment():
             waypoint = [self.x + self.R*math.cos(waypoint_relative_angle), self.y + self.R*math.sin(waypoint_relative_angle)]
         
         if strategy == 'waypoint':
-            waypoint = wpt
+            waypoint = action
 
         #v_ref = int(action/self.num_waypoints)*self.max_v
+        #v_ref = int(action/self.num_waypoints)*(self.max_v-2)+2
 
-        v_ref = int(action/self.num_waypoints)*(self.max_v-2)+2
-        
+        v_ref=7
 
-        #print('v_ref = ', v_ref)
         return waypoint, v_ref
 
     def set_flags(self):
@@ -406,6 +417,8 @@ class environment():
 
         if functions.occupied_cell(self.x, self.y, self.occupancy_grid, self.map_res, self.map_height)==True:
             self.collision=True
+   
+
             
         
     def getReward(self):
@@ -459,30 +472,6 @@ class environment():
         else:
             return False
     
-    def control_system(self, delta, delta_ref, v, v_ref):
-        '''
-        Generates acceleration and steering velocity commands to follow a reference velocity and steering angle
-        Note: the controller gains are hand tuned in the fcn
-
-        Args:
-            d_ref: reference steering to be followed
-            v_ref: the reference velocity to be followed
-    
-
-        Returns:
-            a: acceleration
-            delta_dot: the change in delta = steering velocity
-        '''
-        
-        kp_delta = 40
-        delta_dot = (delta_ref-delta)*kp_delta
-        delta_dot = np.clip(delta_dot, -self.max_delta_dot, self.max_delta_dot)
-
-        kp_a = 10
-        a = (v_ref-v)*kp_a
-        a = np.clip(a, -self.max_a, self.max_a)
-
-        return delta_dot, a
 
     def update_variables(self):
         self.x_to_goal = self.goals[self.current_goal][0] - self.x
@@ -571,10 +560,12 @@ class environment():
 
         self.x = self.state[0]
         self.y = self.state[1]
-        self.theta = self.state[4]
+        self.theta = self.state[4]%(2*np.pi)
         self.v = self.state[3]
         self.delta = self.state[2]
-    
+
+        #print(self.theta)
+        #print(self.delta)
 
 def test_environment():
     
@@ -594,12 +585,12 @@ def test_environment():
 
 
     env_dict = {'name':'test_agent', 'sim_conf': functions.load_config(sys.path[0], "config"), 'save_history': False, 'map_name': 'circle'
-            , 'max_steps': 1000, 'local_path': False, 'waypoint_strategy': 'local', 'wpt_arc': np.pi/2
+            , 'max_steps': 1000, 'local_path': False, 'waypoint_strategy': 'waypoint', 'wpt_arc': np.pi/2
             , 'reward_signal': {'goal_reached':0, 'out_of_bounds':-1, 'max_steps':0, 'collision':-1, 'backwards':-1, 'park':-0.5, 'time_step':-0.01, 'progress':10}
-            , 'n_waypoints': 11, 'n_vel':2, 'control_steps': 20
+            , 'n_waypoints': 11, 'n_vel':1, 'control_steps': 20
             , 'display': True, 'R':6, 'track_dict':{'k':0.1, 'Lfc':2}
             , 'lidar_dict': {'is_lidar':False, 'lidar_res':0.1, 'n_beams':10, 'max_range':20, 'fov':np.pi} } 
-    initial_condition={'x':15, 'y':5, 'theta':0, 'goal':0}
+    initial_condition={'x':15, 'y':5, 'theta':0, 'goal':1}
 
     env = environment(env_dict, initial_condition)
 
@@ -613,10 +604,10 @@ def test_environment():
     i=0
     while done==False:
         
-        action = action_history[i]
-        i+=1
+        #action = action_history[i]
+        #i+=1
         print('action')
-        #action = env.goals[env.current_goal]
+        action = env.goals[env.current_goal]
         state, reward, done = env.take_action(action)
         score+=reward
 
