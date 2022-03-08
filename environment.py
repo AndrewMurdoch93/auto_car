@@ -30,7 +30,8 @@ class environment():
         self.waypoint_strategy = input_dict['waypoint_strategy']
         self.reward_signal = input_dict['reward_signal']
         self.num_waypoints = input_dict['n_waypoints']
-        self.num_vel = input_dict['n_vel']
+        self.num_vel = len(input_dict['vel_select']) 
+        self.vel_select = input_dict['vel_select']
         self.num_actions = self.num_waypoints*self.num_vel
         self.control_steps = input_dict['control_steps']
         self.display=input_dict['display']
@@ -47,7 +48,7 @@ class environment():
         
         #simulation parameters
         self.dt = self.sim_conf.time_step
-        
+
         #Initialise car parameters
         self.mass = self.sim_conf.m                              
         self.max_delta = self.sim_conf.max_delta                 
@@ -98,15 +99,17 @@ class environment():
         if self.start_condition:
             self.x = self.start_condition['x']
             self.y = self.start_condition['y']
+            self.v = self.start_condition['v']
             self.theta = self.start_condition['theta']
+            self.delta = self.start_condition['delta']
             self.current_goal = self.start_condition['goal']
         else:
             self.x, self.y, self.theta, self.current_goal = functions.random_start(self.goal_x, self.goal_y, self.rx, self.ry, self.ryaw, self.rk, self.d)
-
-        #self.v=0    
-        #self.v = random.random()*7
-        self.v = 7
-        self.delta = 0
+            self.v = random.random()*self.vel_select[-1]
+            #self.v=0    
+            #self.v = 20
+            self.delta = 0
+        
         self.theta_dot = 0      
         self.delta_dot = 0
         self.slip_angle = 0
@@ -169,8 +172,6 @@ class environment():
         done=False
         
         waypoint, v_ref = self.convert_action_to_coord(strategy=self.waypoint_strategy, action=act)
-        v_ref = 7
-
 
         if self.local_path==False:
             for _ in range(self.control_steps):
@@ -314,11 +315,11 @@ class environment():
         theta_norm = (self.theta)/(2*math.pi)
         v_norm = self.v/self.max_v
         
-        #lidar_norm = np.array(self.lidar_dists)/self.lidar_dict['max_range']
-        lidar_norm = np.array(self.lidar_dists)<0.5
+        lidar_norm = np.array(self.lidar_dists)/self.lidar_dict['max_range']
+        #lidar_norm = np.array(self.lidar_dists)<0.5
         
-        self.observation = [x_norm, y_norm, theta_norm]
-        #self.observation = [x_norm, y_norm, theta_norm, v_norm]
+        #self.observation = [x_norm, y_norm, theta_norm]
+        self.observation = [x_norm, y_norm, theta_norm, v_norm]
         
         #self.observation = []
         for n in lidar_norm:
@@ -382,11 +383,12 @@ class environment():
         if strategy == 'waypoint':
             waypoint = action
 
+        
+        i = int(action/self.num_waypoints)
+        v_ref = self.vel_select[i]
+        #print('v_ref = ',  v_ref)
         #v_ref = int(action/self.num_waypoints)*self.max_v
-        #v_ref = int(action/self.num_waypoints)*(self.max_v-2)+2
-
-        v_ref=7
-
+        
         return waypoint, v_ref
 
     def set_flags(self):
@@ -569,7 +571,7 @@ class environment():
 
 def test_environment():
     
-    agent_name = 'v_control_5'
+    agent_name = 'vel_10_20'
     replay_episode_name = 'replay_episodes/' + agent_name
     
     infile=open(replay_episode_name, 'rb')
@@ -583,31 +585,30 @@ def test_environment():
     env_dict['display']=True
     
 
-
+    
     env_dict = {'name':'test_agent', 'sim_conf': functions.load_config(sys.path[0], "config"), 'save_history': False, 'map_name': 'circle'
-            , 'max_steps': 1000, 'local_path': False, 'waypoint_strategy': 'waypoint', 'wpt_arc': np.pi/2
+            , 'max_steps': 1000, 'local_path': False, 'waypoint_strategy': 'local', 'wpt_arc': np.pi/2
             , 'reward_signal': {'goal_reached':0, 'out_of_bounds':-1, 'max_steps':0, 'collision':-1, 'backwards':-1, 'park':-0.5, 'time_step':-0.01, 'progress':10}
-            , 'n_waypoints': 11, 'n_vel':1, 'control_steps': 20
+            , 'n_waypoints': 11, 'vel_select':[4,5], 'control_steps': 20
             , 'display': True, 'R':6, 'track_dict':{'k':0.1, 'Lfc':2}
-            , 'lidar_dict': {'is_lidar':False, 'lidar_res':0.1, 'n_beams':10, 'max_range':20, 'fov':np.pi} } 
-    initial_condition={'x':15, 'y':5, 'theta':0, 'goal':1}
-
+            , 'lidar_dict': {'is_lidar':True, 'lidar_res':0.1, 'n_beams':10, 'max_range':20, 'fov':np.pi} } 
+    initial_condition={'x':15, 'y':5, 'v':5, 'delta':0, 'theta':0, 'goal':1}
+    
     env = environment(env_dict, initial_condition)
 
     env.reset(save_history=True)
     done=False
     
-    action_history = np.ones(20)*4
-
+    action_history = np.ones(50)*0
 
     score=0
     i=0
     while done==False:
         
-        #action = action_history[i]
-        #i+=1
-        print('action')
-        action = env.goals[env.current_goal]
+        action = action_history[i]
+        i+=1
+        print('action = ', action)
+        #action = env.goals[env.current_goal]
         state, reward, done = env.take_action(action)
         score+=reward
 
