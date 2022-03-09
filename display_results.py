@@ -434,6 +434,11 @@ def display_moving_agent(agent_name, load_history=False):
         plt.plot(np.array(env.pose_history)[0:i,0], np.array(env.pose_history)[0:i,1])
         
         ph = env.progress_history[i]
+        ah = env.action_step_history[i]
+        
+        wpt, v_ref = env.convert_action_to_coord(strategy='local', action=ah)
+        print('v =', sh[4], 'v_ref = ', v_ref)
+
         #plt.legend(["position", "waypoint", "goal area", "heading", "steering angle"])
         plt.xlabel('x coordinate')
         plt.ylabel('y coordinate')
@@ -441,7 +446,7 @@ def display_moving_agent(agent_name, load_history=False):
         plt.ylim([0,30])
         #plt.grid(True)
         plt.title('Episode history')
-        print('Progress = ', ph)
+        #print('Progress = ', ph)
         plt.pause(0.001)
 
 def display_path(agent_name, load_history=False):

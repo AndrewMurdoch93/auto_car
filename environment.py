@@ -141,6 +141,7 @@ class environment():
         self.waypoint_history = []
         self.lidar_dist_history = []
         self.lidar_coords_history = []
+        self.action_step_history = []
 
         #Initialise flags
         self.max_goals_reached=False
@@ -180,6 +181,7 @@ class environment():
                 
                 if self.save_history==True:
                     self.waypoint_history.append(waypoint)
+                    self.action_step_history.append(act)
                 
                 delta_ref = path_tracker.pure_pursuit(self.wheelbase, waypoint, self.x, self.y, self.theta)
          
@@ -223,6 +225,7 @@ class environment():
                
                 if self.save_history==True:
                     self.waypoint_history.append(waypoint)
+                    self.action_step_history.append(act)
                 
                 delta_ref, target_index = self.path_tracker.pure_pursuit_steer_control(self.x, self.y, self.theta, self.v, target_index)
                 #delta_dot, a = self.control_system(self.delta, delta_ref, self.v, v_ref)
@@ -307,24 +310,21 @@ class environment():
         
         self.pose = [self.x, self.y, self.theta, self.delta, self.v]
         
-        #self.observation = [self.x/self.map_width, self.y/self.map_height, (self.delta+self.max_delta)/(2*self.max_delta), self.v/self.max_v, (self.theta+math.pi)/(2*math.pi), (self.x_to_goal+0.5*self.map_width)/self.map_width, (self.y_to_goal+0.5*self.map_height)/self.map_height]
-        #self.observation = [self.x/self.map_width, self.y/self.map_height,(self.theta+math.pi)/(2*math.pi)]
-        #self.observation = [self.x/self.map_width, self.y/self.map_height, (self.theta+math.pi)/(2*math.pi), (self.x_to_goal+0.5*self.map_width)/self.map_width, (self.y_to_goal+0.5*self.map_height)/self.map_height]
         x_norm = self.x/self.map_width
         y_norm = self.y/self.map_height
         theta_norm = (self.theta)/(2*math.pi)
         v_norm = self.v/self.max_v
         
-        lidar_norm = np.array(self.lidar_dists)/self.lidar_dict['max_range']
-        #lidar_norm = np.array(self.lidar_dists)<0.5
-        
         #self.observation = [x_norm, y_norm, theta_norm]
         self.observation = [x_norm, y_norm, theta_norm, v_norm]
         
         #self.observation = []
-        for n in lidar_norm:
-            self.observation.append(n)
-        pass
+        if self.lidar_dict['is_lidar']==True:
+            #lidar_norm = np.array(self.lidar_dists)<0.5
+            lidar_norm = np.array(self.lidar_dists)/self.lidar_dict['max_range']
+            for n in lidar_norm:
+                self.observation.append(n)
+            pass
 
 
     
@@ -337,6 +337,7 @@ class environment():
         pickle.dump(self.observation_history, outfile)
         pickle.dump(self.progress_history, outfile)
         pickle.dump(self.closest_point_history, outfile)
+        pickle.dump(self.action_step_history)
         if self.lidar_dict['is_lidar']==True:
             pickle.dump(self.lidar_coords_history, outfile)
         if self.local_path == True:
@@ -353,6 +354,7 @@ class environment():
         self.observation_history = pickle.load(infile)
         self.progress_history = pickle.load(infile)
         self.closest_point_history = pickle.load(infile)
+        self.action_step_history = pickle.load(infile)
         if self.lidar_dict['is_lidar']==True:
             self.lidar_coords_history = pickle.load(infile)
         if self.local_path == True:
@@ -385,8 +387,14 @@ class environment():
 
         
         i = int(action/self.num_waypoints)
-        v_ref = self.vel_select[i]
-        #print('v_ref = ',  v_ref)
+        #v_ref = self.vel_select[i]
+        if self.v >= 5:
+            v_ref = self.v + self.vel_select[i]
+        else:
+            v_ref=5.1
+        
+    
+        print('v = ', self.v, 'v_ref = ',  v_ref)
         #v_ref = int(action/self.num_waypoints)*self.max_v
         
         return waypoint, v_ref
@@ -589,7 +597,7 @@ def test_environment():
     env_dict = {'name':'test_agent', 'sim_conf': functions.load_config(sys.path[0], "config"), 'save_history': False, 'map_name': 'circle'
             , 'max_steps': 1000, 'local_path': False, 'waypoint_strategy': 'local', 'wpt_arc': np.pi/2
             , 'reward_signal': {'goal_reached':0, 'out_of_bounds':-1, 'max_steps':0, 'collision':-1, 'backwards':-1, 'park':-0.5, 'time_step':-0.01, 'progress':10}
-            , 'n_waypoints': 11, 'vel_select':[4,5], 'control_steps': 20
+            , 'n_waypoints': 11, 'vel_select':[1], 'control_steps': 20
             , 'display': True, 'R':6, 'track_dict':{'k':0.1, 'Lfc':2}
             , 'lidar_dict': {'is_lidar':True, 'lidar_res':0.1, 'n_beams':10, 'max_range':20, 'fov':np.pi} } 
     initial_condition={'x':15, 'y':5, 'v':5, 'delta':0, 'theta':0, 'goal':1}
