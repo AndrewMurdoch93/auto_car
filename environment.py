@@ -387,14 +387,14 @@ class environment():
 
         
         i = int(action/self.num_waypoints)
-        #v_ref = self.vel_select[i]
-        if self.v >= 5:
-            v_ref = self.v + self.vel_select[i]
-        else:
-            v_ref=5.1
+        v_ref = self.vel_select[i]
+        #if self.v >= 5:
+        #    v_ref = self.v + self.vel_select[i]
+        #else:
+        #    v_ref=5.1
         
     
-        print('v = ', self.v, 'v_ref = ',  v_ref)
+        #print('v = ', self.v, 'v_ref = ',  v_ref)
         #v_ref = int(action/self.num_waypoints)*self.max_v
         
         return waypoint, v_ref

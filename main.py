@@ -312,13 +312,30 @@ if __name__=='__main__':
    test(agent_name=agent_name, n_episodes=300, detect_issues=False)
    '''
    
-   agent_name = 'vel_rel_2'
+   #agent_names = ['vel_5_10', 'vel_5_15', 'vel_10_15', 'vel_10_20']
+   #legend_title = 'velocities'
+   #legend = ['[5, 10]', '[5, 15]', '[10, 15]', '[10, 20]']
+   #display_results.compare_learning_curves_progress(agent_names, legend, legend_title, show_average=True, show_median=False, xaxis='episodes')
+   #display_results.compare_learning_curves_progress(agent_names, legend, legend_title, show_average=True, show_median=False, xaxis='steps')
+   #display_results.compare_learning_curves_progress(agent_names, legend, legend_title, show_average=True, show_median=False, xaxis='times')
+   #display_results.density_plot_progress(agent_names, legend, legend_title)
+
+   #agent_names = ['vel_rel_01', 'vel_rel_02', 'vel_rel_05', 'vel_rel_1', 'vel_rel_2']
+   #legend_title = 'velocity increments'
+   #legend = ['0.1', '0.2', '0.5', '1', '2']
+   #display_results.compare_learning_curves_progress(agent_names, legend, legend_title, show_average=True, show_median=False, xaxis='episodes')
+   #display_results.compare_learning_curves_progress(agent_names, legend, legend_title, show_average=True, show_median=False, xaxis='steps')
+   #display_results.compare_learning_curves_progress(agent_names, legend, legend_title, show_average=True, show_median=False, xaxis='times')
+   #display_results.density_plot_progress(agent_names, legend, legend_title)
+
+
+   #agent_name = 'vel_5_10'
    #test(agent_name=agent_name, n_episodes=300, detect_issues=False)
    #display_results.display_train_parameters(agent_name=agent_name)
    #display_results.agent_progress_statistics(agent_name=agent_name)
    #display_results.learning_curve_progress(agent_name=agent_name, show_average=True, show_median=True)
    #display_results.density_plot_progress([agent_name], legend=[''], legend_title='')
-   display_results.display_moving_agent(agent_name=agent_name, load_history=False)
+   #display_results.display_moving_agent(agent_name=agent_name, load_history=False)
    #display_results.display_path(agent_name=agent_name, load_history=False)
    
    #display_results.compare_learning_curves_progress([agent_name], [''], [''], xaxis='times')
