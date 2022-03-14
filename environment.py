@@ -66,10 +66,12 @@ class environment():
         self.occupancy_grid, self.map_height, self.map_width, self.map_res = functions.map_generator(map_name = self.map_name)
         self.s=2
 
-        image_path = sys.path[0] + '/maps/' + 'circle' + '.png'
+        image_path = sys.path[0] + '/maps/' + 'berlin' + '.png'
         self.im = image.imread(image_path)
         
         self.goal_x, self.goal_y, self.rx, self.ry, self.ryaw, self.rk, self.d = functions.generate_circle_goals()
+        self.goal_x, self.goal_y, self.rx, self.ry, self.ryaw, self.rk, self.d = functions.generate_berlin_goals()
+        
         self.goals=[]
         self.max_goals_reached=False
 
@@ -83,8 +85,7 @@ class environment():
             max_range=self.lidar_dict['max_range']
             fov=self.lidar_dict['fov']
             
-            #self.lidar = functions.lidar_scan(self.lidar_dict, occupancy_grid=self.occupancy_grid, map_res=self.map_res, map_height=self.map_height)
-            #self. lidar = functions.lidar_scan(occupancy_grid=self.occupancy_grid, map_res=self.map_res, map_height=self.map_height)
+         
             self.lidar = functions.lidar_scan(lidar_res=lidar_res, n_beams=n_beams, max_range=max_range, fov=fov
                         , occupancy_grid=self.occupancy_grid, map_res=self.map_res, map_height=self.map_height)
         
