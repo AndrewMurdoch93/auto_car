@@ -2,6 +2,8 @@ import math
 import numpy as np
 import functions
 from numba import njit
+from numba import int32, int64, float32, float64,bool_    
+from numba.experimental import jitclass
 
 @njit(cache=True)
 def pure_pursuit(wheelbase, waypoint, x, y, theta):
@@ -20,29 +22,35 @@ def pure_pursuit(wheelbase, waypoint, x, y, theta):
     return delta_ref
 
 
+#spec = [('cx', float64[:]),
+#        ('cy', float64[:]),
+#        ('old_nearest_point_index',  int32),
+#        ('wheelbase', float64),
+#        ('k', float64),
+#        ('Lfc', float64)]
+#@jitclass(spec)
 class local_path_tracker():
     '''
     More complex pure pursuit for multiple waypoint/ path following
     '''
     
     def __init__(self, track_dict):
-        self.cx = []
-        self.cy = []
+
         self.old_nearest_point_index = None
-        self.wheelbase=track_dict['wheelbase']
+        self.wheelbase = track_dict['wheelbase']
         self.k = track_dict['k']
         self.Lfc = track_dict['Lfc']
 
     def record_waypoints(self, cx, cy):
         #Initialise waypoints for planner
-        self.cx = cx
-        self.cy = cy
+        self.cx=cx
+        self.cy=cy
         self.old_nearest_point_index = None
 
     def search_target_waypoint(self, x, y, v):
         
         #If there is no previous nearest point - at the start
-        if self.old_nearest_point_index is None:
+        if self.old_nearest_point_index == None:
             #Get distances to every point
             dx = [x - icx for icx in self.cx]
             dy = [y - icy for icy in self.cy]

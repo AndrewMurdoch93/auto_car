@@ -217,6 +217,7 @@ def test(agent_name, n_episodes, detect_issues):
    test_score = []
    test_collision = []
    test_max_steps = []
+   terminal_poses = []
 
    for episode in range(n_episodes):
 
@@ -238,11 +239,12 @@ def test(agent_name, n_episodes, detect_issues):
       test_score.append(score)
       test_collision.append(env.collision)
       test_max_steps.append(env.max_steps_reached)
+      terminal_poses.append(env.pose)
          
       if episode%50==0:
          print('Test episode', episode, '| Progress = %.2f' % env.progress, '| Score = %.2f' % score)
 
-      if detect_issues==True and (score>5):
+      if detect_issues==True and (env.progress>1):
          print('Stop condition met')
          print('Progress = ', env.progress)
          print('score = ', score)
@@ -258,58 +260,47 @@ def test(agent_name, n_episodes, detect_issues):
    pickle.dump(test_progress, outfile)
    pickle.dump(test_collision, outfile)
    pickle.dump(test_max_steps, outfile)
+   pickle.dump(terminal_poses, outfile)
    outfile.close()
 
              
 if __name__=='__main__':
    
    '''
-   agent_name = 'berlin'
+   agent_name = 'berlin_lp_8'
    
-   main_dict = {'name': agent_name, 'max_episodes':8000, 'comment': ''}
+   main_dict = {'name': agent_name, 'max_episodes':15000, 'comment': 'Further train berlin_lp_8, randomising start states completely'}
 
    agent_dict = {'gamma':0.99, 'epsilon':1, 'eps_end':0.01, 'eps_dec':1/2000, 'lr':0.001, 'batch_size':64, 'max_mem_size':1000000, 
                   'fc1_dims': 64, 'fc2_dims': 64, 'fc3_dims':64}
 
    env_dict = {'sim_conf': functions.load_config(sys.path[0], "config"), 'save_history': False, 'map_name': 'berlin'
-            , 'max_steps': 1000, 'local_path': False, 'waypoint_strategy': 'local', 'wpt_arc': np.pi/2
-            , 'reward_signal': {'goal_reached':0, 'out_of_bounds':-1, 'max_steps':0, 'collision':-1, 'backwards':-1, 'park':-0.5, 'time_step':-0.005, 'progress':10}
+            , 'max_steps': 1300, 'local_path': True, 'waypoint_strategy': 'local', 'wpt_arc': np.pi/4
+            , 'reward_signal': {'goal_reached':0, 'out_of_bounds':-1, 'max_steps':0, 'collision':-1, 'backwards':-1, 'park':-0.5, 'time_step':-0.001, 'progress':10}
             , 'n_waypoints': 11, 'vel_select':[7], 'control_steps': 20, 'display': False, 'R':6, 'track_dict':{'k':0.1, 'Lfc':1}
             , 'lidar_dict': {'is_lidar':True, 'lidar_res':0.1, 'n_beams':8, 'max_range':20, 'fov':np.pi} } 
    
-   a = trainingLoop(main_dict, agent_dict, env_dict, load_agent='')
+   a = trainingLoop(main_dict, agent_dict, env_dict, load_agent='berlin_lp_7')
    a.train()
    
    test(agent_name=agent_name, n_episodes=300, detect_issues=False)
-
-   
-   agent_name = 'vel_rel_02'
+   '''
+   '''
+   agent_name = 'berlin_lp_1'
    main_dict['name'] = agent_name
-   env_dict['vel_select'] = [-0.2,0,0.2]
+   main_dict['comment'] = 'reduce waypoint arc'
+   env_dict['wpt_arc'] = np.pi/4
    a = trainingLoop(main_dict, agent_dict, env_dict, '')
    a.train()
    test(agent_name=agent_name, n_episodes=300, detect_issues=False)
 
-   agent_name = 'vel_rel_05'
+   agent_name = 'berlin_lp_2'
    main_dict['name'] = agent_name
-   env_dict['vel_select'] = [-0.5,0,0.5]
+   main_dict['comment'] = 'futher reduce waypoint arc'
+   env_dict['wpt_arc'] = np.pi/8
    a = trainingLoop(main_dict, agent_dict, env_dict, '')
    a.train()
    test(agent_name=agent_name, n_episodes=300, detect_issues=False)   
-
-   agent_name = 'vel_rel_1'
-   main_dict['name'] = agent_name
-   env_dict['vel_select'] = [-1,0,1]
-   a = trainingLoop(main_dict, agent_dict, env_dict, '')
-   a.train()
-   test(agent_name=agent_name, n_episodes=300, detect_issues=False) 
-
-   agent_name = 'vel_rel_2'
-   main_dict['name'] = agent_name
-   env_dict['vel_select'] = [-2,0,2]
-   a = trainingLoop(main_dict, agent_dict, env_dict, '')
-   a.train()
-   test(agent_name=agent_name, n_episodes=300, detect_issues=False)
    '''
    
    #agent_names = ['vel_5_10', 'vel_5_15', 'vel_10_15', 'vel_10_20']
@@ -329,14 +320,15 @@ if __name__=='__main__':
    #display_results.density_plot_progress(agent_names, legend, legend_title)
 
 
-   agent_name = 'berlin'
-   #test(agent_name=agent_name, n_episodes=300, detect_issues=False)
+   agent_name = 'berlin_lp_8'
+   display_results.display_collision_distribution(agent_name)
+   #test(agent_name=agent_name, n_episodes=500, detect_issues=False)
    #display_results.display_train_parameters(agent_name=agent_name)
    #display_results.agent_progress_statistics(agent_name=agent_name)
    #display_results.learning_curve_progress(agent_name=agent_name, show_average=True, show_median=True)
    #display_results.density_plot_progress([agent_name], legend=[''], legend_title='')
-   #display_results.display_moving_agent(agent_name=agent_name, load_history=False)
-   display_results.display_path(agent_name=agent_name, load_history=False)
+   #display_results.display_moving_agent(agent_name=agent_name, load_history=True)
+   #display_results.display_path(agent_name=agent_name, load_history=False)
    
    #display_results.compare_learning_curves_progress([agent_name], [''], [''], xaxis='times')
    #display_results.display_train_parameters(agent_name=agent_name)

@@ -12,6 +12,10 @@ from itertools import chain
 import random
 import vehicle_model
 import time
+from numba import njit
+from numba import int32, int64, float32, float64,bool_    
+from numba.experimental import jitclass
+import numba
 
 class environment():
 
@@ -20,7 +24,7 @@ class environment():
     def __init__(self, input_dict, start_condition): 
         
         self.initial_condition_name = 'initial_conditions/' + input_dict['name']
-        self.history_file_name = 'test_history/' + input_dict['name'] 
+        self.history_file_name = 'history/' + input_dict['name'] 
 
         self.save_history = input_dict['save_history']
         self.sim_conf = input_dict['sim_conf']
@@ -55,7 +59,7 @@ class environment():
         self.max_delta_dot = self.sim_conf.max_delta_dot            
         self.max_v = self.sim_conf.max_v                         
         self.max_a = self.sim_conf.max_a
-        self.wheelbase = self.sim_conf.l_f + self.sim_conf.l_r 
+        self.wheelbase = self.params['lf'] + self.params['lr'] 
         
         self.track_dict['wheelbase'] = self.wheelbase 
 
@@ -252,15 +256,18 @@ class environment():
                 #plt.plot(self.x, self.y, 'x')
                 #plt.plot(self.rx[self.det_prg.old_nearest_point_index], self.ry[self.det_prg.old_nearest_point_index], 'x')
                 #plt.show()
-
-                done = self.isEnd()
-                
-                if done == True:
-                    if self.save_history == True:
-                        self.save_history_func()
-                    break
-   
                 i+=1
+                done = self.isEnd()
+                if done == True:
+                    break
+            
+            if done == True:
+                #print(self.steps)
+                if self.save_history == True:
+                    self.save_history_func()
+                
+   
+                
 
         return self.observation, reward, done
     
@@ -338,7 +345,7 @@ class environment():
         pickle.dump(self.observation_history, outfile)
         pickle.dump(self.progress_history, outfile)
         pickle.dump(self.closest_point_history, outfile)
-        pickle.dump(self.action_step_history)
+        pickle.dump(self.action_step_history, outfile)
         if self.lidar_dict['is_lidar']==True:
             pickle.dump(self.lidar_coords_history, outfile)
         if self.local_path == True:
@@ -516,11 +523,11 @@ class environment():
 
         elif -int(len(self.rx)/2)<point_dif<0:  #Backwards
             self.current_progress = new_closest_point-self.old_closest_point
-            self.backwards=True
+            #self.backwards=True
 
         elif point_dif>=int(len(self.rx)/2):    #Crossing start location going backwards
             self.current_progress = -(self.old_closest_point+(np.abs(len(self.rx)-new_closest_point)))
-            self.backwards=True
+            #self.backwards=True
 
         self.current_progress/=len(self.rx)
 
@@ -580,7 +587,7 @@ class environment():
 
 def test_environment():
     
-    agent_name = 'vel_10_20'
+    agent_name = 'berlin_lp_1'
     replay_episode_name = 'replay_episodes/' + agent_name
     
     infile=open(replay_episode_name, 'rb')
@@ -594,21 +601,21 @@ def test_environment():
     env_dict['display']=True
     
 
-    
-    env_dict = {'name':'test_agent', 'sim_conf': functions.load_config(sys.path[0], "config"), 'save_history': False, 'map_name': 'circle'
-            , 'max_steps': 1000, 'local_path': False, 'waypoint_strategy': 'local', 'wpt_arc': np.pi/2
+    '''
+    env_dict = {'name':'test_agent', 'sim_conf': functions.load_config(sys.path[0], "config"), 'save_history': False, 'map_name': 'berlin'
+            , 'max_steps': 1000, 'local_path': True, 'waypoint_strategy': 'local', 'wpt_arc': np.pi/2
             , 'reward_signal': {'goal_reached':0, 'out_of_bounds':-1, 'max_steps':0, 'collision':-1, 'backwards':-1, 'park':-0.5, 'time_step':-0.01, 'progress':10}
-            , 'n_waypoints': 11, 'vel_select':[1], 'control_steps': 20
+            , 'n_waypoints': 11, 'vel_select':[7], 'control_steps': 20
             , 'display': True, 'R':6, 'track_dict':{'k':0.1, 'Lfc':2}
             , 'lidar_dict': {'is_lidar':True, 'lidar_res':0.1, 'n_beams':10, 'max_range':20, 'fov':np.pi} } 
-    initial_condition={'x':15, 'y':5, 'v':5, 'delta':0, 'theta':0, 'goal':1}
-    
+    initial_condition={'x':8.18, 'y':26.24, 'v':4, 'delta':0, 'theta':np.pi, 'goal':1}
+    '''
     env = environment(env_dict, initial_condition)
 
     env.reset(save_history=True)
     done=False
     
-    action_history = np.ones(50)*0
+    #action_history = np.concatenate((np.ones(8)*0, np.ones(1)*0, np.ones(10)*10))
 
     score=0
     i=0

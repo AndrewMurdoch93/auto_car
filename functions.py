@@ -143,6 +143,7 @@ def random_start(x, y, rx, ry, ryaw, rk, s):
 
     random.seed(datetime.now())
     i = int(random.uniform(0, len(x)-2))
+    #i = int(random.uniform(10, 12))
     next_i = (i+1)%len(y)
     start_x = x[i] + (random.uniform(-1.5, 1.5))
     start_y = y[i] + (random.uniform(-1.5, 1.5))
@@ -233,7 +234,7 @@ class lidar_scan():
 
         return scan, coords
 
-
+#generate_berlin_goals()
 if __name__ == 'main':
     #def velocity_along_line(theta, velocity, ryaw, )
 
