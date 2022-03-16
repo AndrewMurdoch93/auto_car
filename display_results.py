@@ -457,8 +457,9 @@ def display_path(agent_name, load_history=False):
     
     agent_file_name = 'agents/' + agent_name
     environment_name = 'environments/' + agent_name
-    initial_condition={'x':16, 'y':28, 'v':7, 'delta':0, 'theta':np.pi, 'goal':1}
-    
+    #initial_condition={'x':16, 'y':28, 'v':7, 'delta':0, 'theta':np.pi, 'goal':1}
+    initial_condition = []
+
     infile = open('environments/' + agent_name, 'rb')
     env_dict = pickle.load(infile)
     infile.close()

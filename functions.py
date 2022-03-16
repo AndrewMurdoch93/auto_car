@@ -141,7 +141,7 @@ def map_generator(map_name):
 def random_start(x, y, rx, ry, ryaw, rk, s, episode):
     offset=0.5
     random.seed(datetime.now())
-    
+    '''
     if episode < 20000:
         if random.uniform(0,1)<0.1:
             i = int(random.uniform(0, len(x)-2))
@@ -155,7 +155,8 @@ def random_start(x, y, rx, ry, ryaw, rk, s, episode):
             i = int(random.uniform(10, 14))
 
     else:
-        i = int(random.uniform(0, len(x)-2))
+    '''
+    i = int(random.uniform(0, len(x)-2))
     
     #i = int(random.uniform(0, len(x)-2))
     #i = int(random.uniform(10, 12))
