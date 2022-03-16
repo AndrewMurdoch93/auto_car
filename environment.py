@@ -93,11 +93,13 @@ class environment():
             self.lidar = functions.lidar_scan(lidar_res=lidar_res, n_beams=n_beams, max_range=max_range, fov=fov
                         , occupancy_grid=self.occupancy_grid, map_res=self.map_res, map_height=self.map_height)
         
+        self.episode = 0
         self.reset(self.save_history)
 
 
 
     def reset(self, save_history):
+        self.episode+=1
         self.save_history=save_history
 
         #Inialise state variables
@@ -109,7 +111,7 @@ class environment():
             self.delta = self.start_condition['delta']
             self.current_goal = self.start_condition['goal']
         else:
-            self.x, self.y, self.theta, self.current_goal = functions.random_start(self.goal_x, self.goal_y, self.rx, self.ry, self.ryaw, self.rk, self.d)
+            self.x, self.y, self.theta, self.current_goal = functions.random_start(self.goal_x, self.goal_y, self.rx, self.ry, self.ryaw, self.rk, self.d, self.episode)
             self.v = random.random()*self.vel_select[-1]
             #self.v=0    
             #self.v = 20

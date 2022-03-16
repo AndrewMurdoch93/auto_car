@@ -267,11 +267,11 @@ def test(agent_name, n_episodes, detect_issues):
 if __name__=='__main__':
    
    '''
-   agent_name = 'berlin_lp_8'
+   agent_name = 'berlin_init_dist'
    
-   main_dict = {'name': agent_name, 'max_episodes':15000, 'comment': 'Further train berlin_lp_8, randomising start states completely'}
+   main_dict = {'name': agent_name, 'max_episodes':75000, 'comment': 'Further train berlin_lp_8, randomising start states completely'}
 
-   agent_dict = {'gamma':0.99, 'epsilon':1, 'eps_end':0.01, 'eps_dec':1/2000, 'lr':0.001, 'batch_size':64, 'max_mem_size':1000000, 
+   agent_dict = {'gamma':0.99, 'epsilon':1, 'eps_end':0.01, 'eps_dec':1/2000, 'lr':0.001, 'batch_size':64, 'max_mem_size':5000000, 
                   'fc1_dims': 64, 'fc2_dims': 64, 'fc3_dims':64}
 
    env_dict = {'sim_conf': functions.load_config(sys.path[0], "config"), 'save_history': False, 'map_name': 'berlin'
@@ -280,10 +280,10 @@ if __name__=='__main__':
             , 'n_waypoints': 11, 'vel_select':[7], 'control_steps': 20, 'display': False, 'R':6, 'track_dict':{'k':0.1, 'Lfc':1}
             , 'lidar_dict': {'is_lidar':True, 'lidar_res':0.1, 'n_beams':8, 'max_range':20, 'fov':np.pi} } 
    
-   a = trainingLoop(main_dict, agent_dict, env_dict, load_agent='berlin_lp_7')
+   a = trainingLoop(main_dict, agent_dict, env_dict, load_agent='')
    a.train()
    
-   test(agent_name=agent_name, n_episodes=300, detect_issues=False)
+   test(agent_name=agent_name, n_episodes=1000, detect_issues=False)
    '''
    '''
    agent_name = 'berlin_lp_1'
@@ -320,15 +320,15 @@ if __name__=='__main__':
    #display_results.density_plot_progress(agent_names, legend, legend_title)
 
 
-   agent_name = 'berlin_lp_8'
-   display_results.display_collision_distribution(agent_name)
+   agent_name = 'berlin_init_dist'
+   #display_results.display_collision_distribution(agent_name)
    #test(agent_name=agent_name, n_episodes=500, detect_issues=False)
    #display_results.display_train_parameters(agent_name=agent_name)
    #display_results.agent_progress_statistics(agent_name=agent_name)
    #display_results.learning_curve_progress(agent_name=agent_name, show_average=True, show_median=True)
    #display_results.density_plot_progress([agent_name], legend=[''], legend_title='')
    #display_results.display_moving_agent(agent_name=agent_name, load_history=True)
-   #display_results.display_path(agent_name=agent_name, load_history=False)
+   display_results.display_path(agent_name=agent_name, load_history=False)
    
    #display_results.compare_learning_curves_progress([agent_name], [''], [''], xaxis='times')
    #display_results.display_train_parameters(agent_name=agent_name)

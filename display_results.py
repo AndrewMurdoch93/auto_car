@@ -457,12 +457,13 @@ def display_path(agent_name, load_history=False):
     
     agent_file_name = 'agents/' + agent_name
     environment_name = 'environments/' + agent_name
-
+    initial_condition={'x':16, 'y':28, 'v':7, 'delta':0, 'theta':np.pi, 'goal':1}
+    
     infile = open('environments/' + agent_name, 'rb')
     env_dict = pickle.load(infile)
     infile.close()
     env_dict['max_steps']=3000
-    env = environment(env_dict, start_condition=[])
+    env = environment(env_dict, start_condition=initial_condition)
 
     infile = open('agents/' + agent_name + '_hyper_parameters', 'rb')
     agent_dict = pickle.load(infile)

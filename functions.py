@@ -138,12 +138,28 @@ def map_generator(map_name):
     return occupancy_grid, map_height, map_width, res 
 
    
-def random_start(x, y, rx, ry, ryaw, rk, s):
+def random_start(x, y, rx, ry, ryaw, rk, s, episode):
     offset=0.5
-
     random.seed(datetime.now())
-    i = int(random.uniform(0, len(x)-2))
+    
+    if episode < 20000:
+        if random.uniform(0,1)<0.1:
+            i = int(random.uniform(0, len(x)-2))
+        else:
+            i = int(random.uniform(10, 14))
+    
+    elif episode >= 20000 and episode <50000:
+        if random.uniform(0,1)<0.5:
+            i = int(random.uniform(0, len(x)-2))
+        else:
+            i = int(random.uniform(10, 14))
+
+    else:
+        i = int(random.uniform(0, len(x)-2))
+    
+    #i = int(random.uniform(0, len(x)-2))
     #i = int(random.uniform(10, 12))
+    
     next_i = (i+1)%len(y)
     start_x = x[i] + (random.uniform(-1.5, 1.5))
     start_y = y[i] + (random.uniform(-1.5, 1.5))
