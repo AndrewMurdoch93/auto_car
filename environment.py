@@ -70,11 +70,11 @@ class environment():
         self.occupancy_grid, self.map_height, self.map_width, self.map_res = functions.map_generator(map_name = self.map_name)
         self.s=2
 
-        image_path = sys.path[0] + '/maps/' + 'berlin' + '.png'
+        image_path = sys.path[0] + '/maps/' + input_dict['map_name'] + '.png'
         self.im = image.imread(image_path)
         
         self.goal_x, self.goal_y, self.rx, self.ry, self.ryaw, self.rk, self.d = functions.generate_circle_goals()
-        self.goal_x, self.goal_y, self.rx, self.ry, self.ryaw, self.rk, self.d = functions.generate_berlin_goals()
+        #self.goal_x, self.goal_y, self.rx, self.ry, self.ryaw, self.rk, self.d = functions.generate_berlin_goals()
         
         self.goals=[]
         self.max_goals_reached=False
@@ -112,7 +112,8 @@ class environment():
             self.current_goal = self.start_condition['goal']
         else:
             self.x, self.y, self.theta, self.current_goal = functions.random_start(self.goal_x, self.goal_y, self.rx, self.ry, self.ryaw, self.rk, self.d, self.episode)
-            self.v = random.random()*self.vel_select[-1]
+            #self.v = random.random()*self.vel_select[-1]
+            self.v = random.random()*7
             #self.v=0    
             #self.v = 20
             self.delta = 0
@@ -120,7 +121,7 @@ class environment():
         self.theta_dot = 0      
         self.delta_dot = 0
         self.slip_angle = 0
-
+        self.v_ref = self.v
         self.state = np.array([self.x, self.y, self.delta, self.v, self.theta, self.theta_dot, self.slip_angle])
         
         self.x_to_goal = self.goals[self.current_goal][0] - self.x
@@ -397,17 +398,22 @@ class environment():
 
         
         i = int(action/self.num_waypoints)
-        v_ref = self.vel_select[i]
-        #if self.v >= 5:
-        #    v_ref = self.v + self.vel_select[i]
-        #else:
-        #    v_ref=5.1
+        
+        #v_ref = self.vel_select[i]
+        
+        if self.v_ref>=1 and self.v_ref<=7:
+            self.v_ref += self.vel_select[i]
+        elif self.v_ref<1:
+            self.v_ref = 1
+        else:
+            self.v_ref = 7
         
     
-        #print('v = ', self.v, 'v_ref = ',  v_ref)
+        #print('v = ', self.v, 'v_ref = ',  self.v_ref)
+        
         #v_ref = int(action/self.num_waypoints)*self.max_v
         
-        return waypoint, v_ref
+        return waypoint, self.v_ref
 
     def set_flags(self):
         
@@ -589,35 +595,37 @@ class environment():
 
 def test_environment():
     
-    agent_name = 'berlin_lp_1'
+    agent_name = 'circle_v_ref_0'
     replay_episode_name = 'replay_episodes/' + agent_name
-    
+    '''
     infile=open(replay_episode_name, 'rb')
     action_history = pickle.load(infile)
     initial_condition = pickle.load(infile)
     infile.close()
-
+    
     infile = open('environments/' + agent_name, 'rb')
     env_dict = pickle.load(infile)
     infile.close()
     env_dict['display']=True
-    
-
     '''
-    env_dict = {'name':'test_agent', 'sim_conf': functions.load_config(sys.path[0], "config"), 'save_history': False, 'map_name': 'berlin'
+
+    
+    env_dict = {'name':'test_agent', 'sim_conf': functions.load_config(sys.path[0], "config"), 'save_history': False, 'map_name': 'circle'
             , 'max_steps': 1000, 'local_path': True, 'waypoint_strategy': 'local', 'wpt_arc': np.pi/2
             , 'reward_signal': {'goal_reached':0, 'out_of_bounds':-1, 'max_steps':0, 'collision':-1, 'backwards':-1, 'park':-0.5, 'time_step':-0.01, 'progress':10}
-            , 'n_waypoints': 11, 'vel_select':[7], 'control_steps': 20
+            , 'n_waypoints': 11, 'vel_select':[-0.1, 0, 0.1], 'control_steps': 20
             , 'display': True, 'R':6, 'track_dict':{'k':0.1, 'Lfc':2}
             , 'lidar_dict': {'is_lidar':True, 'lidar_res':0.1, 'n_beams':10, 'max_range':20, 'fov':np.pi} } 
-    initial_condition={'x':8.18, 'y':26.24, 'v':4, 'delta':0, 'theta':np.pi, 'goal':1}
-    '''
+    
+    #initial_condition={'x':8.18, 'y':26.24, 'v':4, 'delta':0, 'theta':np.pi, 'goal':1}
+    initial_condition = []
+
     env = environment(env_dict, initial_condition)
 
     env.reset(save_history=True)
     done=False
     
-    #action_history = np.concatenate((np.ones(8)*0, np.ones(1)*0, np.ones(10)*10))
+    action_history = np.ones(8)*22
 
     score=0
     i=0

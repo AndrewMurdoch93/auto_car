@@ -440,8 +440,8 @@ def display_moving_agent(agent_name, load_history=False):
         ph = env.progress_history[i]
         ah = env.action_step_history[i]
         
-        wpt, v_ref = env.convert_action_to_coord(strategy='local', action=ah)
-        print('v =', sh[4], 'v_ref = ', v_ref)
+        #wpt, v_ref = env.convert_action_to_coord(strategy='local', action=ah)
+        print('v =', sh[4])
 
         #plt.legend(["position", "waypoint", "goal area", "heading", "steering angle"])
         plt.xlabel('x coordinate')
@@ -451,7 +451,7 @@ def display_moving_agent(agent_name, load_history=False):
         #plt.grid(True)
         plt.title('Episode history')
         #print('Progress = ', ph)
-        plt.pause(0.1)
+        plt.pause(0.001)
 
 def display_path(agent_name, load_history=False):
     
