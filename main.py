@@ -267,7 +267,7 @@ def test(agent_name, n_episodes, detect_issues):
 if __name__=='__main__':
    
    
-   agent_name = 'circle_v_ref_0'
+   agent_name = 'v_rel_0'
    
    main_dict = {'name': agent_name, 'max_episodes':10000, 'comment': 'new v_ref strategy'}
 
@@ -286,7 +286,7 @@ if __name__=='__main__':
    #test(agent_name=agent_name, n_episodes=1000, detect_issues=False)
    
    
-   agent_name = 'circle_v_ref_1'
+   agent_name = 'v_rel_1'
    main_dict['name'] = agent_name
    main_dict['comment'] = ''
    env_dict['vel_select'] = [-0.2, 0, 0.2]
@@ -294,7 +294,7 @@ if __name__=='__main__':
    a.train()
    test(agent_name=agent_name, n_episodes=300, detect_issues=False)
 
-   agent_name = 'circle_v_ref_2'
+   agent_name = 'v_rel_2'
    main_dict['name'] = agent_name
    main_dict['comment'] = ''
    env_dict['vel_select'] = [-0.5, 0, 0.5]
@@ -302,7 +302,7 @@ if __name__=='__main__':
    a.train()
    test(agent_name=agent_name, n_episodes=300, detect_issues=False)
 
-   agent_name = 'circle_v_ref_3'
+   agent_name = 'v_rel_3'
    main_dict['name'] = agent_name
    main_dict['comment'] = ''
    env_dict['vel_select'] = [-1, 0, 1]
@@ -310,15 +310,15 @@ if __name__=='__main__':
    a.train()
    test(agent_name=agent_name, n_episodes=300, detect_issues=False)
    
-   '''
-   agent_name = 'circle_v_ref_4'
+   
+   agent_name = 'v_rel_4'
    main_dict['name'] = agent_name
    main_dict['comment'] = ''
    env_dict['vel_select'] = [-2, 0, 2]
    a = trainingLoop(main_dict, agent_dict, env_dict, '')
    a.train()
    test(agent_name=agent_name, n_episodes=300, detect_issues=False)
-   '''
+   
 
 
    #agent_names = ['vel_5_10', 'vel_5_15', 'vel_10_15', 'vel_10_20']

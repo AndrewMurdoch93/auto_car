@@ -400,14 +400,21 @@ class environment():
         i = int(action/self.num_waypoints)
         
         #v_ref = self.vel_select[i]
-        
+        '''
         if self.v_ref>=1 and self.v_ref<=7:
             self.v_ref += self.vel_select[i]
         elif self.v_ref<1:
             self.v_ref = 1
         else:
             self.v_ref = 7
-        
+        '''
+
+        if self.v_ref>=1 and self.v_ref<=7:
+            self.v_ref = self.v + self.vel_select[i]
+        elif self.v_ref<1:
+            self.v_ref = 1
+        else:
+            self.v_ref = 7
     
         #print('v = ', self.v, 'v_ref = ',  self.v_ref)
         
