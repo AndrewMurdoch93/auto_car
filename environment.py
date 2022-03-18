@@ -325,6 +325,7 @@ class environment():
         y_norm = self.y/self.map_height
         theta_norm = (self.theta)/(2*math.pi)
         v_norm = self.v/self.max_v
+        v_ref_norm = self.v_ref/self.max_v
         
         #self.observation = [x_norm, y_norm, theta_norm]
         self.observation = [x_norm, y_norm, theta_norm, v_norm]
@@ -399,7 +400,7 @@ class environment():
         
         i = int(action/self.num_waypoints)
         
-        #v_ref = self.vel_select[i]
+        self.v_ref = self.vel_select[i]
         '''
         if self.v_ref>=1 and self.v_ref<=7:
             self.v_ref += self.vel_select[i]
@@ -408,14 +409,14 @@ class environment():
         else:
             self.v_ref = 7
         '''
-
+        '''
         if self.v_ref>=1 and self.v_ref<=7:
             self.v_ref = self.v + self.vel_select[i]
         elif self.v_ref<1:
             self.v_ref = 1
         else:
             self.v_ref = 7
-    
+        '''
         #print('v = ', self.v, 'v_ref = ',  self.v_ref)
         
         #v_ref = int(action/self.num_waypoints)*self.max_v
