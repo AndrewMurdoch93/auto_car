@@ -1,6 +1,7 @@
 from audioop import avg
 import numpy as np
-import agent
+import agent_dqn
+import agent_reinforce
 from environment import environment
 import torch as T
 import torch.nn as nn
@@ -27,6 +28,7 @@ class trainingLoop():
       self.agent_dict = agent_dict
       self.env_dict = env_dict
       self.load_agent = load_agent
+      self.learning_method = main_dict['learning_method']
       
       self.agent_name = main_dict['name']
       self.max_episodes = main_dict['max_episodes']
@@ -57,7 +59,11 @@ class trainingLoop():
       self.best_ave_progress = -np.inf
       self.best_ave_score = -np.inf
 
-      self.agent = agent.agent(self.agent_dict)
+      if self.learning_method=='dqn':
+         self.agent = agent_dqn.agent(self.agent_dict)
+      if self.learning_method=='reinforce':
+         self.agent = agent_reinforce.PolicyGradientAgent(self.agent_dict)
+      
       if self.load_agent:
          self.agent.load_weights(self.load_agent)
 
@@ -83,15 +89,27 @@ class trainingLoop():
          start_time = time.time()
          
          #For every planning time step in the episode
-         while not done:
-               
-            action = self.agent.choose_action(obs)    #Select an action
-            next_obs, reward, done = self.env.take_action(action) #Environment executes action
-            score += reward 
-            self.agent.store_transition(obs, action, reward, next_obs, done)
-            self.agent.learn()  #Learn using state transition history
-            obs = next_obs  #Update the state
-      
+         
+         if self.learning_method == 'dqn':
+            while not done: 
+               action = self.agent.choose_action(obs)    #Select an action
+               next_obs, reward, done = self.env.take_action(action) #Environment executes action
+               score += reward 
+               self.agent.store_transition(obs, action, reward, next_obs, done)
+               self.agent.learn()  #Learn using state transition history
+               obs = next_obs  #Update the state
+            self.agent.decrease_epsilon()
+         
+         if self.learning_method == 'reinforce':
+            while not done:
+               action = self.agent.choose_action(obs)
+               next_obs, reward, done = self.env.take_action(action)
+               self.agent.store_rewards(reward)
+               obs = next_obs
+               score += reward
+            self.agent.learn()
+         
+         
          end_time = time.time()
          times.append(end_time-start_time)
 
@@ -102,8 +120,6 @@ class trainingLoop():
          avg_progress = np.mean(progress[-100:])
 
          steps.append(self.env.steps)
-
-         self.agent.decrease_epsilon()
 
          if episode%1000==0 and episode!=0:
 
@@ -119,8 +135,11 @@ class trainingLoop():
 
 
          if episode%10==0:
-            print(f"{'Episode':8s} {episode:5.0f} {'| Score':8s} {score:6.2f} {'| Progress':12s} {self.env.progress:3.2f} {'| Average score':15s} {avg_score:6.2f} {'| Average progress':18s} {avg_progress:3.2f} {'| Epsilon':9s} {self.agent.epsilon:.2f}")
-   
+            if self.learning_method=='dqn':
+               print(f"{'Episode':8s} {episode:5.0f} {'| Score':8s} {score:6.2f} {'| Progress':12s} {self.env.progress:3.2f} {'| Average score':15s} {avg_score:6.2f} {'| Average progress':18s} {avg_progress:3.2f} {'| Epsilon':9s} {self.agent.epsilon:.2f}")
+            if self.learning_method=='reinforce':
+               print(f"{'Episode':8s} {episode:5.0f} {'| Score':8s} {score:6.2f} {'| Progress':12s} {self.env.progress:3.2f} {'| Average score':15s} {avg_score:6.2f} {'| Average progress':18s} {avg_progress:3.2f}")
+            
       
       ave_progress = self.test_while_train(n_episodes=10)
       self.save_agent(ave_progress)
@@ -210,7 +229,7 @@ def test(agent_name, n_episodes, detect_issues):
    agent_dict = pickle.load(infile)
    infile.close()
    #agent_dict['epsilon'] = 0
-   a = agent.agent(agent_dict)
+   a = agent_dqn.agent(agent_dict)
    a.load_weights(agent_name)
 
    test_progress = []
@@ -266,25 +285,27 @@ def test(agent_name, n_episodes, detect_issues):
              
 if __name__=='__main__':
    
-   '''
-   agent_name = 'v_ref_1_4_7'
    
-   main_dict = {'name': agent_name, 'max_episodes':10000, 'comment': 'new v_ref strategy'}
+   agent_name = 'reinforce'
+   
+   main_dict = {'name': agent_name, 'max_episodes':10000, 'comment': 'new v_ref strategy', 'learning_method': 'reinforce'}
 
-   agent_dict = {'gamma':0.99, 'epsilon':1, 'eps_end':0.01, 'eps_dec':1/2000, 'lr':0.001, 'batch_size':64, 'max_mem_size':8000000, 
+   agent_dqn_dict = {'gamma':0.99, 'epsilon':1, 'eps_end':0.01, 'eps_dec':1/2000, 'lr':0.001, 'batch_size':64, 'max_mem_size':8000000, 
                   'fc1_dims': 64, 'fc2_dims': 64, 'fc3_dims':64}
+
+   agent_reinforce_dict = {'alpha':0.001, 'gamma':0.99, 'fc1_dims':256, 'fc2_dims':256}
 
    env_dict = {'sim_conf': functions.load_config(sys.path[0], "config"), 'save_history': False, 'map_name': 'circle'
             , 'max_steps': 1000, 'local_path': False, 'waypoint_strategy': 'local', 'wpt_arc': np.pi/2
             , 'reward_signal': {'goal_reached':0, 'out_of_bounds':-1, 'max_steps':0, 'collision':-1, 'backwards':-1, 'park':-0.5, 'time_step':-0.01, 'progress':10}
-            , 'n_waypoints': 11, 'vel_select':[0,4,7], 'control_steps': 20, 'display': False, 'R':6, 'track_dict':{'k':0.1, 'Lfc':1}
+            , 'n_waypoints': 11, 'vel_select':[7], 'control_steps': 20, 'display': False, 'R':6, 'track_dict':{'k':0.1, 'Lfc':1}
             , 'lidar_dict': {'is_lidar':True, 'lidar_res':0.1, 'n_beams':8, 'max_range':20, 'fov':np.pi} } 
    
-   a = trainingLoop(main_dict, agent_dict, env_dict, load_agent='')
+   a = trainingLoop(main_dict, agent_reinforce_dict, env_dict, load_agent='')
    a.train()
    
    test(agent_name=agent_name, n_episodes=1000, detect_issues=False)
-   '''
+   
    
    '''
    agent_name = 'v_ref_s_1'

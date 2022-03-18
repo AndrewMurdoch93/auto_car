@@ -1,6 +1,6 @@
 from audioop import avg
 import numpy as np
-import agent
+import agent_dqn
 #from environment import environment
 import torch as T
 import torch.nn as nn
@@ -385,7 +385,7 @@ def display_moving_agent(agent_name, load_history=False):
     agent_dict = pickle.load(infile)
     infile.close()
 
-    a = agent.agent(agent_dict)
+    a = agent_dqn.agent(agent_dict)
     a.load_weights(agent_name)
 
     if load_history==True:
@@ -470,7 +470,7 @@ def display_path(agent_name, load_history=False):
     agent_dict = pickle.load(infile)
     infile.close()
 
-    a = agent.agent(agent_dict)
+    a = agent_dqn.agent(agent_dict)
     a.load_weights(agent_name)
 
     if load_history==True:
