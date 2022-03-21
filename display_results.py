@@ -19,6 +19,7 @@ import time
 import seaborn as sns
 from environment import environment
 import pandas as pd
+import agent_reinforce
 
 #from numpy import unique
 #from numpy import where
@@ -385,7 +386,17 @@ def display_moving_agent(agent_name, load_history=False):
     agent_dict = pickle.load(infile)
     infile.close()
 
-    a = agent_dqn.agent(agent_dict)
+    infile = open('train_parameters/' + agent_name, 'rb')
+    main_dict = pickle.load(infile)
+    infile.close()
+
+    if main_dict['learning_method']=='dqn':
+        agent_dict['epsilon'] = 0
+        a = agent_dqn.agent(agent_dict)
+    
+    if main_dict['learning_method']=='reinforce':
+        a = agent_reinforce.PolicyGradientAgent(agent_dict)
+        
     a.load_weights(agent_name)
 
     if load_history==True:
@@ -470,12 +481,22 @@ def display_path(agent_name, load_history=False):
     agent_dict = pickle.load(infile)
     infile.close()
 
-    a = agent_dqn.agent(agent_dict)
-    a.load_weights(agent_name)
+    infile = open('train_parameters/' + agent_name, 'rb')
+    main_dict = pickle.load(infile)
+    infile.close()
 
+    if main_dict['learning_method']=='dqn':
+        agent_dict['epsilon'] = 0
+        a = agent_dqn.agent(agent_dict)
+    
+    if main_dict['learning_method']=='reinforce':
+        a = agent_reinforce.PolicyGradientAgent(agent_dict)
+        
+    a.load_weights(agent_name)
+    
     if load_history==True:
         env.load_history_func()
-    
+        
     else:
         env.reset(save_history=True)
         obs = env.observation

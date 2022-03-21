@@ -3,6 +3,8 @@ import torch.nn as nn
 import torch.nn.functional as F
 import torch.optim as optim
 import numpy as np
+import pickle
+
 
 class PolicyNetwork(nn.Module):
     def __init__(self, ALPHA, input_dims, fc1_dims, fc2_dims, n_actions):
@@ -28,6 +30,8 @@ class PolicyNetwork(nn.Module):
 
 class PolicyGradientAgent(object):
     def __init__(self, agent_dict):
+        self.agent_dict = agent_dict
+        self.name = agent_dict['name']
         self.gamma = agent_dict['gamma']
         self.reward_memory = []
         self.action_memory = []
@@ -71,3 +75,12 @@ class PolicyGradientAgent(object):
 
         self.action_memory = []
         self.reward_memory = []
+
+    def save_agent(self):
+        T.save(self.policy.state_dict(), 'agents/' + self.name + '_weights')
+        outfile = open('agents/' + self.name + '_hyper_parameters', 'wb')
+        pickle.dump(self.agent_dict, outfile)
+        outfile.close()
+
+    def load_weights(self, name):
+        self.policy.load_state_dict(T.load('agents/' + name + '_weights'))
