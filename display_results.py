@@ -440,8 +440,8 @@ def display_moving_agent(agent_name, load_history=False):
         ph = env.progress_history[i]
         ah = env.action_step_history[i]
         
-        wpt, v_ref = env.convert_action_to_coord(strategy='local', action=ah)
-        print('v =', sh[4], 'v_ref = ', v_ref)
+        #wpt, v_ref = env.convert_action_to_coord(strategy='local', action=ah)
+        print('v =', sh[4])
 
         #plt.legend(["position", "waypoint", "goal area", "heading", "steering angle"])
         plt.xlabel('x coordinate')
@@ -451,7 +451,7 @@ def display_moving_agent(agent_name, load_history=False):
         #plt.grid(True)
         plt.title('Episode history')
         #print('Progress = ', ph)
-        plt.pause(0.1)
+        plt.pause(0.001)
 
 def display_path(agent_name, load_history=False):
     
@@ -524,8 +524,8 @@ def display_collision_distribution(agent_name):
     image_path = sys.path[0] + '/maps/' + env_dict['map_name'] + '.png'
     im = image.imread(image_path)
     plt.imshow(im, extent=(0,30,0,30))
-    #plt.plot(np.array(terminal_poses)[:,0], np.array(terminal_poses)[:,1], 'x')
-    sns.jointplot(x=np.array(terminal_poses)[:,0],y=np.array(terminal_poses)[:,1], kind="hex", alpha=0.5)
+    plt.plot(np.array(terminal_poses)[:,0], np.array(terminal_poses)[:,1], 'x')
+    #sns.jointplot(x=np.array(terminal_poses)[:,0],y=np.array(terminal_poses)[:,1], kind="hex", alpha=0.5)
     plt.show()
 
 

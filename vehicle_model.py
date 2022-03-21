@@ -150,7 +150,7 @@ def vehicle_dynamics_st(x, u_init, mu, C_Sf, C_Sr, lf, lr, h, m, I, s_min, s_max
 
     # switch to kinematic model for small velocities
     # if abs(x[3]) < 0.1:
-    if abs(x[3]) < 10:
+    if abs(x[3]) < 1:
         # wheelbase
         lwb = lf + lr
 
