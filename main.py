@@ -52,7 +52,6 @@ class trainingLoop():
       self.agent_dict['name'] = self.main_dict['name']
       self.agent_dict['input_dims'] = len(self.env.observation)
       self.agent_dict['n_actions'] = self.env.num_actions
-      self.agent_dict['epsilon'] = 1
 
       self.old_ave_score = -np.inf
       self.old_ave_progress = -np.inf
@@ -61,6 +60,7 @@ class trainingLoop():
 
       if self.learning_method=='dqn':
          self.agent = agent_dqn.agent(self.agent_dict)
+         self.agent_dict['epsilon'] = 1
       if self.learning_method=='reinforce':
          self.agent = agent_reinforce.PolicyGradientAgent(self.agent_dict)
       
@@ -297,15 +297,15 @@ def test(agent_name, n_episodes, detect_issues):
              
 if __name__=='__main__':
    
+   '''
+   agent_name = 'reinforce'
    
-   agent_name = 'reinforce_alpha_0'
-   
-   main_dict = {'name': agent_name, 'max_episodes':5000, 'comment': 'new v_ref strategy', 'learning_method': 'reinforce'}
+   main_dict = {'name': agent_name, 'max_episodes':10000, 'learning_method': 'reinforce', 'comment': 'p'}
 
    agent_dqn_dict = {'gamma':0.99, 'epsilon':1, 'eps_end':0.01, 'eps_dec':1/2000, 'lr':0.001, 'batch_size':64, 'max_mem_size':8000000, 
-                  'fc1_dims': 64, 'fc2_dims': 64, 'fc3_dims':64}
+                  'fc1_dims': 256, 'fc2_dims': 256, 'fc3_dims':256}
 
-   agent_reinforce_dict = {'alpha':0.0001, 'gamma':0.99, 'fc1_dims':256, 'fc2_dims':256}
+   agent_reinforce_dict = {'alpha':0.001, 'gamma':0.99, 'fc1_dims':256, 'fc2_dims':256}
 
    env_dict = {'sim_conf': functions.load_config(sys.path[0], "config"), 'save_history': False, 'map_name': 'circle'
             , 'max_steps': 1000, 'local_path': False, 'waypoint_strategy': 'local', 'wpt_arc': np.pi/2
@@ -314,19 +314,19 @@ if __name__=='__main__':
             , 'lidar_dict': {'is_lidar':True, 'lidar_res':0.1, 'n_beams':8, 'max_range':20, 'fov':np.pi} } 
    
    a = trainingLoop(main_dict, agent_reinforce_dict, env_dict, load_agent='')
-   a.train()
+   #a.train()
    
    test(agent_name=agent_name, n_episodes=300, detect_issues=False)
    
    agent_name = 'reinforce_alpha_1'
-   main_dict['agent_name'] = agent_name
-   agent_reinforce_dict['alpha'] = 0.01
+   main_dict['name'] = agent_name
+   agent_reinforce_dict['alpha'] = 0.005
    a = trainingLoop(main_dict, agent_reinforce_dict, env_dict, load_agent='')
    a.train()
    test(agent_name=agent_name, n_episodes=300, detect_issues=False)
 
    agent_name = 'reinforce_gamma_0'
-   main_dict['agent_name'] = agent_name
+   main_dict['name'] = agent_name
    agent_reinforce_dict['alpha'] = 0.001
    agent_reinforce_dict['gamma'] = 0.95
    a = trainingLoop(main_dict, agent_reinforce_dict, env_dict, load_agent='')
@@ -334,24 +334,24 @@ if __name__=='__main__':
    test(agent_name=agent_name, n_episodes=300, detect_issues=False)
 
    agent_name = 'reinforce_gamma_1'
-   main_dict['agent_name'] = agent_name
-   agent_reinforce_dict['alpha'] = 0.001
+   main_dict['name'] = agent_name
    agent_reinforce_dict['gamma'] = 0.999
    a = trainingLoop(main_dict, agent_reinforce_dict, env_dict, load_agent='')
    a.train()
    test(agent_name=agent_name, n_episodes=300, detect_issues=False)
 
    agent_name = 'reinforce_fc_dims_0'
-   main_dict['agent_name'] = agent_name
+   main_dict['name'] = agent_name
    agent_reinforce_dict['gamma'] = 0.99
    agent_reinforce_dict['fc1_dims'] = 64
    agent_reinforce_dict['fc2_dims'] = 64
    a = trainingLoop(main_dict, agent_reinforce_dict, env_dict, load_agent='')
    a.train()
    test(agent_name=agent_name, n_episodes=300, detect_issues=False)
+   
 
    agent_name = 'reinforce_fc_dims_1'
-   main_dict['agent_name'] = agent_name
+   main_dict['name'] = agent_name
    agent_reinforce_dict['fc1_dims'] = 128
    agent_reinforce_dict['fc2_dims'] = 128
    a = trainingLoop(main_dict, agent_reinforce_dict, env_dict, load_agent='')
@@ -359,7 +359,7 @@ if __name__=='__main__':
    test(agent_name=agent_name, n_episodes=300, detect_issues=False)
 
    agent_name = 'reinforce_vel_1_7'
-   main_dict['agent_name'] = agent_name
+   main_dict['name'] = agent_name
    agent_reinforce_dict['fc1_dims'] = 256
    agent_reinforce_dict['fc2_dims'] = 256
    env_dict['vel_select'] = [1, 7]
@@ -368,23 +368,93 @@ if __name__=='__main__':
    test(agent_name=agent_name, n_episodes=300, detect_issues=False)
 
    agent_name = 'reinforce_lp'
-   main_dict['agent_name'] = agent_name
+   main_dict['name'] = agent_name
    env_dict['local_path'] = True
    a = trainingLoop(main_dict, agent_reinforce_dict, env_dict, load_agent='')
    a.train()
    test(agent_name=agent_name, n_episodes=300, detect_issues=False)
-   
 
-   #agent_names = ['vel_5_10', 'vel_5_15', 'vel_10_15', 'vel_10_20']
-   #legend_title = 'velocities'
-   #legend = ['[5, 10]', '[5, 15]', '[10, 15]', '[10, 20]']
-   #display_results.compare_learning_curves_progress(agent_names, legend, legend_title, show_average=True, show_median=False, xaxis='episodes')
+   agent_name = 'reinforce_vel_1_7_fc_0'
+   main_dict['name'] = agent_name
+   agent_reinforce_dict['fc1_dims'] = 64
+   agent_reinforce_dict['fc2_dims'] = 64
+   env_dict['local_path'] = False
+   env_dict['vel_select'] = [1, 7]
+   a = trainingLoop(main_dict, agent_reinforce_dict, env_dict, load_agent='')
+   a.train()
+   test(agent_name=agent_name, n_episodes=300, detect_issues=False)
+
+   agent_name = 'reinforce_lp_fc_0'
+   main_dict['name'] = agent_name
+   env_dict['local_path'] = True
+   env_dict['vel_select'] = [7]
+   a = trainingLoop(main_dict, agent_reinforce_dict, env_dict, load_agent='')
+   a.train()
+   test(agent_name=agent_name, n_episodes=300, detect_issues=False)
+   
+   agent_name = 'reinforce_lp_fc_0_wpt_arc_pi4'
+   main_dict['name'] = agent_name
+   env_dict['local_path'] = True
+   env_dict['wpt_arc'] = np.pi/4
+   a = trainingLoop(main_dict, agent_reinforce_dict, env_dict, load_agent='')
+   a.train()
+   test(agent_name=agent_name, n_episodes=300, detect_issues=False)
+   '''
+
+   '''
+   agent_names = ['reinforce_alpha_0', 'reinforce', 'reinforce_alpha_1']
+   legend_title = 'alpha'
+   legend = ['0.0002', '0.001', '0.005']
+   display_results.compare_learning_curves_progress(agent_names, legend, legend_title, show_average=True, show_median=False, xaxis='episodes')
    #display_results.compare_learning_curves_progress(agent_names, legend, legend_title, show_average=True, show_median=False, xaxis='steps')
    #display_results.compare_learning_curves_progress(agent_names, legend, legend_title, show_average=True, show_median=False, xaxis='times')
-   #display_results.density_plot_progress(agent_names, legend, legend_title)
+   display_results.density_plot_progress(agent_names, legend, legend_title)
+
+   agent_names = ['reinforce_gamma_0', 'reinforce', 'reinforce_gamma_1']
+   legend_title = 'gamma'
+   legend = ['0.95', '0.99', '0.999']
+   display_results.compare_learning_curves_progress(agent_names, legend, legend_title, show_average=True, show_median=False, xaxis='episodes')
+   #display_results.compare_learning_curves_progress(agent_names, legend, legend_title, show_average=True, show_median=False, xaxis='steps')
+   #display_results.compare_learning_curves_progress(agent_names, legend, legend_title, show_average=True, show_median=False, xaxis='times')
+   display_results.density_plot_progress(agent_names, legend, legend_title)
+   
+   agent_names = ['reinforce_fc_dims_0', 'reinforce_fc_dims_1', 'reinforce']
+   legend_title = 'fc_dims'
+   legend = ['64', '128', '256']
+   display_results.compare_learning_curves_progress(agent_names, legend, legend_title, show_average=True, show_median=False, xaxis='episodes')
+   #display_results.compare_learning_curves_progress(agent_names, legend, legend_title, show_average=True, show_median=False, xaxis='steps')
+   #display_results.compare_learning_curves_progress(agent_names, legend, legend_title, show_average=True, show_median=False, xaxis='times')
+   display_results.density_plot_progress(agent_names, legend, legend_title)
+
+
+   agent_names = ['reinforce', 'reinforce_vel_1_7', 'reinforce_vel_1_7_fc_0']
+   legend_title = 'velocity selection'
+   legend = ['[7], fc_dims=256', '[1, 7], fc_dims=256',  '[1, 7], fc_dims=64']
+   display_results.compare_learning_curves_progress(agent_names, legend, legend_title, show_average=True, show_median=False, xaxis='episodes')
+   #display_results.compare_learning_curves_progress(agent_names, legend, legend_title, show_average=True, show_median=False, xaxis='steps')
+   #display_results.compare_learning_curves_progress(agent_names, legend, legend_title, show_average=True, show_median=False, xaxis='times')
+   display_results.density_plot_progress(agent_names, legend, legend_title)
+   
+   agent_names = ['reinforce', 'reinforce_lp']
+   legend_title = 'local path'
+   legend = ['False', 'True']
+   display_results.compare_learning_curves_progress(agent_names, legend, legend_title, show_average=True, show_median=False, xaxis='episodes')
+   #display_results.compare_learning_curves_progress(agent_names, legend, legend_title, show_average=True, show_median=False, xaxis='steps')
+   #display_results.compare_learning_curves_progress(agent_names, legend, legend_title, show_average=True, show_median=False, xaxis='times')
+   display_results.density_plot_progress(agent_names, legend, legend_title)
+   
+
+   agent_names = ['reinforce', 'reinforce_lp', 'reinforce_lp_fc_0', 'reinforce_lp_fc_0_wpt_arc_pi4']
+   legend_title = 'local path'
+   legend = ['False, fc_dims=256', 'True, fc_dims=256, wpt_arc=pi/2', 'True, fc_dims=64, wpt_arc=pi/2', 'True, fc_dims=64, wpt_arc=pi/4']
+   display_results.compare_learning_curves_progress(agent_names, legend, legend_title, show_average=True, show_median=False, xaxis='episodes')
+   #display_results.compare_learning_curves_progress(agent_names, legend, legend_title, show_average=True, show_median=False, xaxis='steps')
+   #display_results.compare_learning_curves_progress(agent_names, legend, legend_title, show_average=True, show_median=False, xaxis='times')
+   display_results.density_plot_progress(agent_names, legend, legend_title)
+   '''
    
    
-   #agent_name = 'reinforce'
+   #agent_name = 'reinforce_vel_1_7_fc_0'
    #display_results.display_collision_distribution(agent_name)
    #test(agent_name=agent_name, n_episodes=500, detect_issues=False)
    #display_results.display_train_parameters(agent_name=agent_name)

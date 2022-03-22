@@ -77,6 +77,7 @@ def compare_learning_curves_progress(agent_names, legend, legend_title, show_ave
         plt.title('Learning curve for median progress')
         plt.ylabel('Progress')
         plt.legend(legend, title=legend_title, loc='lower right')
+        plt.xlim([0,5000])
         plt.show()
 
     if show_average==True:
@@ -96,6 +97,7 @@ def compare_learning_curves_progress(agent_names, legend, legend_title, show_ave
         plt.title('Learning curve for average progress')
         plt.ylabel('Progress')
         plt.legend(legend, title=legend_title, loc='lower right')
+        plt.xlim([0,5000])
         plt.show()
 
 def learning_curve_score(agent_name, show_average=False, show_median=True):
