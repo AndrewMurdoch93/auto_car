@@ -40,7 +40,6 @@ class trainingLoop():
         self.environment_name = 'environments/' + self.agent_name
         self.train_parameters_name = 'train_parameters/' + self.agent_name
 
-
     def train(self):
 
         print('Training agent: ', self.main_dict['name'])
@@ -148,7 +147,7 @@ class trainingLoop():
             if episode%10==0:
                 if self.learning_method=='dqn':
                     print(f"{'Episode':8s} {episode:5.0f} {'| Score':8s} {score:6.2f} {'| Progress':12s} {self.env.progress:3.2f} {'| Average score':15s} {avg_score:6.2f} {'| Average progress':18s} {avg_progress:3.2f} {'| Epsilon':9s} {self.agent.epsilon:.2f}")
-                if self.learning_method=='reinforce':
+                if self.learning_method=='reinforce' or self.learning_method=='actor_critic':
                     print(f"{'Episode':8s} {episode:5.0f} {'| Score':8s} {score:6.2f} {'| Progress':12s} {self.env.progress:3.2f} {'| Average score':15s} {avg_score:6.2f} {'| Average progress':18s} {avg_progress:3.2f}")
                 
         
@@ -187,8 +186,8 @@ class trainingLoop():
             test_progress.append(self.env.progress)
             test_score.append(score)
             
-            ave_progress = np.average(test_progress)
-            ave_score = np.average(test_score)
+        ave_progress = np.average(test_progress)
+        ave_score = np.average(test_score)
 
         if ave_progress >= self.old_ave_progress:
             print(f"{'Average progress increased from '}{self.old_ave_progress:.2f}{' to '}{ave_progress:.2f}")
@@ -252,7 +251,6 @@ def test(agent_name, n_episodes, detect_issues):
     if main_dict['learning_method']=='actor_critic':
         a = agent_actor_critic.actor_critic_separated(agent_dict)
     
-    
     a.load_weights(agent_name)
 
     test_progress = []
@@ -309,9 +307,9 @@ def test(agent_name, n_episodes, detect_issues):
 if __name__=='__main__':
    
    
-   agent_name = 'actor_critic'
+   agent_name = 'reinforce_3'
    
-   main_dict = {'name': agent_name, 'max_episodes':100, 'learning_method': 'actor_critic', 'comment': 'new learning method!'}
+   main_dict = {'name': agent_name, 'max_episodes':5000, 'learning_method': 'reinforce', 'comment': 'new learning method!'}
    
    agent_dqn_dict = {'gamma':0.99, 'epsilon':1, 'eps_end':0.01, 'eps_dec':1/2000, 'lr':0.001, 'batch_size':64, 'max_mem_size':8000000, 
                   'fc1_dims': 256, 'fc2_dims': 256, 'fc3_dims':256}
@@ -327,7 +325,9 @@ if __name__=='__main__':
             , 'n_waypoints': 11, 'vel_select':[7], 'control_steps': 20, 'display': False, 'R':6, 'track_dict':{'k':0.1, 'Lfc':1}
             , 'lidar_dict': {'is_lidar':True, 'lidar_res':0.1, 'n_beams':8, 'max_range':20, 'fov':np.pi} } 
    
-   a = trainingLoop(main_dict, agent_actor_critic_dict, env_dict, load_agent='')
+   #a = trainingLoop(main_dict, agent_actor_critic_dict, env_dict, load_agent='')
+   a = trainingLoop(main_dict, agent_reinforce_dict, env_dict, load_agent='')
+   
    a.train()
    
    test(agent_name=agent_name, n_episodes=300, detect_issues=True)

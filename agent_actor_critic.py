@@ -107,7 +107,7 @@ class actor_critic_separated(object):
 
     def load_weights(self, name):
         self.actor.load_state_dict(T.load('agents/' + name + '_actor_weights'))
-        self.actor.load_state_dict(T.load('agents/' + name + '_critic_weights'))
+        self.critic.load_state_dict(T.load('agents/' + name + '_critic_weights'))
 
 
 class actor_critic_combined(object):
@@ -125,7 +125,7 @@ class actor_critic_combined(object):
 
     def choose_action(self, observation):
         probabilities, _ = self.actor_critic.forward(observation)
-        probabilities = F.softmax(probabilities)
+        probabilities = F.softmax(probabilities, dim=0)
         action_probs = T.distributions.Categorical(probabilities)
         action = action_probs.sample()
         log_probs = action_probs.log_prob(action)
