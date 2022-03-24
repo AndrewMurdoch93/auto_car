@@ -65,7 +65,11 @@ class trainingLoop():
             self.agent = agent_reinforce.PolicyGradientAgent(self.agent_dict)
         if self.learning_method=='actor_critic':
             self.agent = agent_actor_critic.actor_critic_separated(self.agent_dict)
+        if self.learning_method=='actor_critic':
+            self.agent = agent_actor_critic.actor_critic_separated(self.agent_dict)
         
+
+
         if self.load_agent:
             self.agent.load_weights(self.load_agent)
 
@@ -118,7 +122,14 @@ class trainingLoop():
                     self.agent.learn(obs, reward, next_obs, done)  #Learn using state transition history
                     obs = next_obs  #Update the state
                     score+=reward
-             
+            
+            if self.learning_method == 'actor_critic':
+                while not done: 
+                    action = self.agent.choose_action(obs)    #Select an action
+                    next_obs, reward, done = self.env.take_action(action) #Environment executes action
+                    self.agent.learn(obs, reward, next_obs, done)  #Learn using state transition history
+                    obs = next_obs  #Update the state
+                    score+=reward
             
             end_time = time.time()
             times.append(end_time-start_time)
