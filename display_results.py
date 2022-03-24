@@ -1,6 +1,8 @@
 from audioop import avg
 import numpy as np
 import agent_dqn
+import agent_reinforce
+import agent_actor_critic
 #from environment import environment
 import torch as T
 import torch.nn as nn
@@ -19,7 +21,7 @@ import time
 import seaborn as sns
 from environment import environment
 import pandas as pd
-import agent_reinforce
+
 
 #from numpy import unique
 #from numpy import where
@@ -76,8 +78,8 @@ def compare_learning_curves_progress(agent_names, legend, legend_title, show_ave
 
         plt.title('Learning curve for median progress')
         plt.ylabel('Progress')
-        plt.legend(legend, title=legend_title, loc='lower right')
-        plt.xlim([0,5000])
+        plt.legend(legend, title=legend_title, loc='upper left')
+        #plt.xlim([0,6000])
         plt.show()
 
     if show_average==True:
@@ -96,8 +98,8 @@ def compare_learning_curves_progress(agent_names, legend, legend_title, show_ave
         
         plt.title('Learning curve for average progress')
         plt.ylabel('Progress')
-        plt.legend(legend, title=legend_title, loc='lower right')
-        plt.xlim([0,5000])
+        plt.legend(legend, title=legend_title, loc='upper left')
+        #plt.xlim([0,5000])
         plt.show()
 
 def learning_curve_score(agent_name, show_average=False, show_median=True):
@@ -395,9 +397,12 @@ def display_moving_agent(agent_name, load_history=False):
     if main_dict['learning_method']=='dqn':
         agent_dict['epsilon'] = 0
         a = agent_dqn.agent(agent_dict)
-    
     if main_dict['learning_method']=='reinforce':
         a = agent_reinforce.PolicyGradientAgent(agent_dict)
+    if main_dict['learning_method']=='actor_critic_sep':
+        a = agent_actor_critic.actor_critic_separated(agent_dict)
+    if  main_dict['learning_method']=='actor_critic_com':
+        a = agent_actor_critic.actor_critic_combined(agent_dict)
         
     a.load_weights(agent_name)
 
@@ -490,9 +495,12 @@ def display_path(agent_name, load_history=False):
     if main_dict['learning_method']=='dqn':
         agent_dict['epsilon'] = 0
         a = agent_dqn.agent(agent_dict)
-    
     if main_dict['learning_method']=='reinforce':
         a = agent_reinforce.PolicyGradientAgent(agent_dict)
+    if main_dict['learning_method']=='actor_critic_sep':
+        a = agent_actor_critic.actor_critic_separated(agent_dict)
+    if  main_dict['learning_method']=='actor_critic_com':
+        a = agent_actor_critic.actor_critic_combined(agent_dict)
         
     a.load_weights(agent_name)
     

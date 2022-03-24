@@ -60,15 +60,16 @@ class actor_critic_separated(object):
     def __init__(self, agent_dict):
         
         self.agent_dict=agent_dict
+        self.actor_dict=self.agent_dict['actor_dict']
+        self.critic_dict=self.agent_dict['critic_dict']
         self.name = agent_dict['name']
-        
         self.gamma = agent_dict['gamma']
         
-        self.actor = GenericNetwork(alpha=agent_dict['alpha'], input_dims=agent_dict['input_dims'], fc1_dims=agent_dict['fc1_dims'], 
-                                    fc2_dims=agent_dict['fc2_dims'], n_actions=agent_dict['n_actions'])
+        self.actor = GenericNetwork(alpha=self.actor_dict['alpha'], input_dims=self.agent_dict['input_dims'], fc1_dims=self.actor_dict['fc1_dims'], 
+                                    fc2_dims=self.actor_dict['fc2_dims'], n_actions=self.agent_dict['n_actions'])
         
-        self.critic = GenericNetwork(alpha=agent_dict['beta'], input_dims=agent_dict['input_dims'], fc1_dims=agent_dict['fc1_dims'],
-                                     fc2_dims=agent_dict['fc2_dims'], n_actions=1)
+        self.critic = GenericNetwork(alpha=self.critic_dict['alpha'], input_dims=self.agent_dict['input_dims'], fc1_dims=self.critic_dict['fc1_dims'],
+                                     fc2_dims=self.critic_dict['fc2_dims'], n_actions=1)
         self.log_probs = None
 
     def choose_action(self, observation):
@@ -107,7 +108,7 @@ class actor_critic_separated(object):
 
     def load_weights(self, name):
         self.actor.load_state_dict(T.load('agents/' + name + '_actor_weights'))
-        self.actor.load_state_dict(T.load('agents/' + name + '_critic_weights'))
+        self.critic.load_state_dict(T.load('agents/' + name + '_critic_weights'))
 
 
 class actor_critic_combined(object):
@@ -115,17 +116,21 @@ class actor_critic_combined(object):
         the lowest layers. For use with more complex environments such as
         the discrete lunar lander
     """
-    def __init__(self, alpha, input_dims, gamma=0.99,
-                 layer1_size=256, layer2_size=256, n_actions=2):
-        self.gamma = gamma
-        self.actor_critic = ActorCriticNetwork(alpha, input_dims, layer1_size,
-                                    layer2_size, n_actions=n_actions)
+    #def __init__(self, alpha, input_dims, gamma=0.99,  layer1_size=256, layer2_size=256, n_actions=2):
+
+    def __init__(self, agent_dict):
+        
+        self.agent_dict=agent_dict
+        self.name = self.agent_dict['name']
+        self.gamma = self.agent_dict['gamma']
+        self.actor_critic = ActorCriticNetwork(self.agent_dict['alpha'], self.agent_dict['input_dims'],    
+                                self.agent_dict['fc1_dims'], self.agent_dict['fc2_dims'], self.agent_dict['n_actions'])
 
         self.log_probs = None
 
     def choose_action(self, observation):
         probabilities, _ = self.actor_critic.forward(observation)
-        probabilities = F.softmax(probabilities)
+        probabilities = F.softmax(probabilities, dim=0)
         action_probs = T.distributions.Categorical(probabilities)
         action = action_probs.sample()
         log_probs = action_probs.log_prob(action)
@@ -148,3 +153,13 @@ class actor_critic_combined(object):
         (actor_loss + critic_loss).backward()
 
         self.actor_critic.optimizer.step()
+       
+    def save_agent(self):
+        T.save(self.actor_critic.state_dict(), 'agents/' + self.name + 'actor_critic_weights')
+
+        outfile = open('agents/' + self.name + '_hyper_parameters', 'wb')
+        pickle.dump(self.agent_dict, outfile)
+        outfile.close()
+
+    def load_weights(self, name):
+        self.actor_critic.load_state_dict(T.load('agents/' + name + 'actor_critic_weights'))
