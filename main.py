@@ -3,6 +3,7 @@ import numpy as np
 import agent_dqn
 import agent_reinforce
 import agent_actor_critic
+import agent_actor_critic_continuous
 from environment import environment
 import torch as T
 import torch.nn as nn
@@ -67,8 +68,9 @@ class trainingLoop():
       if self.learning_method=='actor_critic_sep':
          self.agent = agent_actor_critic.actor_critic_separated(self.agent_dict)
       if self.learning_method=='actor_critic_com':
-          self.agent = agent_actor_critic.actor_critic_combined(self.agent_dict)
-        
+         self.agent = agent_actor_critic.actor_critic_combined(self.agent_dict)
+      if self.learning_method=='actor_critic_cont':
+          self.agent = agent_actor_critic_continuous.agent_separate(self.agent_dict) 
       
       if self.load_agent:
          self.agent.load_weights(self.load_agent)
@@ -123,6 +125,14 @@ class trainingLoop():
                obs = next_obs  #Update the state
                score+=reward
          
+         if self.learning_method == 'actor_critic_cont':
+              while not done:
+                action = np.array(self.agent.choose_action(obs)).reshape((1,))
+                next_obs, reward, done = self.env.take_action(action)
+                self.agent.learn(obs, reward, next_obs, done)
+                obs = next_obs
+                score += reward
+         
          
          end_time = time.time()
          times.append(end_time-start_time)
@@ -151,7 +161,7 @@ class trainingLoop():
          if episode%10==0:
             if self.learning_method=='dqn':
                print(f"{'Episode':8s} {episode:5.0f} {'| Score':8s} {score:6.2f} {'| Progress':12s} {self.env.progress:3.2f} {'| Average score':15s} {avg_score:6.2f} {'| Average progress':18s} {avg_progress:3.2f} {'| Epsilon':9s} {self.agent.epsilon:.2f}")
-            if self.learning_method=='reinforce' or self.learning_method=='actor_critic_sep' or self.learning_method=='actor_critic_com':
+            if self.learning_method=='reinforce' or self.learning_method=='actor_critic_sep' or self.learning_method=='actor_critic_com' or self.learning_method=='actor_critic_cont':
                print(f"{'Episode':8s} {episode:5.0f} {'| Score':8s} {score:6.2f} {'| Progress':12s} {self.env.progress:3.2f} {'| Average score':15s} {avg_score:6.2f} {'| Average progress':18s} {avg_progress:3.2f}")
             
       ave_progress = self.test_while_train(n_episodes=10)
@@ -256,6 +266,8 @@ def test(agent_name, n_episodes, detect_issues):
       a = agent_actor_critic.actor_critic_separated(agent_dict)
    if main_dict['learning_method']=='actor_critic_com':
       a = agent_actor_critic.actor_critic_combined(agent_dict)
+   if main_dict['learning_method']=='actor_critic_cont':
+      a = agent_actor_critic_continuous.agent_separate(agent_dict) 
    
    a.load_weights(agent_name)
 
@@ -312,11 +324,12 @@ def test(agent_name, n_episodes, detect_issues):
              
 if __name__=='__main__':
    
-   '''
-   agent_name = 'actor_critic_sep'
    
-   main_dict = {'name': agent_name, 'max_episodes':6000, 'learning_method': 'actor_critic_sep', 'comment': 'actor critic agent'}
+   agent_name = 'actor_critic_cont'
+   
+   main_dict = {'name': agent_name, 'max_episodes':10000, 'learning_method': 'actor_critic_cont', 'comment': 'actor critic agent with continuous action space'}
 
+   
    agent_dqn_dict = {'gamma':0.99, 'epsilon':1, 'eps_end':0.01, 'eps_dec':1/2000, 'lr':0.001, 'batch_size':64, 'max_mem_size':8000000, 
                   'fc1_dims': 256, 'fc2_dims': 256, 'fc3_dims':256}
 
@@ -326,117 +339,48 @@ if __name__=='__main__':
    
    agent_actor_critic_com_dict = {'gamma':0.99, 'alpha':0.00001, 'fc1_dims':2048, 'fc2_dims':512}
    
+   agent_actor_critic_cont_dict = {'gamma':0.99, 'alpha':0.000005, 'beta':0.00001,'fc1_dims':256, 'fc2_dims':256}
 
+   
    env_dict = {'sim_conf': functions.load_config(sys.path[0], "config"), 'save_history': False, 'map_name': 'circle'
-            , 'max_steps': 1000, 'local_path': False, 'waypoint_strategy': 'local', 'wpt_arc': np.pi/2
+            , 'max_steps': 1000, 'local_path': False, 'waypoint_strategy': 'local', 'wpt_arc': np.pi/2, 'action_space': 'continuous'
             , 'reward_signal': {'goal_reached':0, 'out_of_bounds':-1, 'max_steps':0, 'collision':-1, 'backwards':-1, 'park':-0.5, 'time_step':-0.01, 'progress':10}
             , 'n_waypoints': 11, 'vel_select':[7], 'control_steps': 20, 'display': False, 'R':6, 'track_dict':{'k':0.1, 'Lfc':1}
             , 'lidar_dict': {'is_lidar':True, 'lidar_res':0.1, 'n_beams':8, 'max_range':20, 'fov':np.pi} } 
    
-   #a = trainingLoop(main_dict, agent_actor_critic_sep_dict, env_dict, load_agent='')
+   #a = trainingLoop(main_dict, agent_actor_critic_cont_dict, env_dict, load_agent='')
    #a.train()
    
+   test(agent_name=agent_name, n_episodes=300, detect_issues=False)
+   
+   
+   
+   #agent_name = 'actor_critic_sep_alpha_0'
+   #main_dict['name'] = agent_name
+   #agent_actor_critic_sep_dict['actor_dict']['alpha'] = 0.00002
+   #agent_actor_critic_sep_dict['critic_dict']['alpha'] = 0.00002
+   #a = trainingLoop(main_dict, agent_actor_critic_sep_dict, env_dict, load_agent='')
+   #a.train()
    #test(agent_name=agent_name, n_episodes=300, detect_issues=False)
    
-   agent_name = 'actor_critic_sep_alpha_0'
-   main_dict['name'] = agent_name
-   agent_actor_critic_sep_dict['actor_dict']['alpha'] = 0.00002
-   agent_actor_critic_sep_dict['critic_dict']['alpha'] = 0.00002
-   a = trainingLoop(main_dict, agent_actor_critic_sep_dict, env_dict, load_agent='')
-   a.train()
-   test(agent_name=agent_name, n_episodes=300, detect_issues=False)
 
-   agent_name = 'actor_critic_sep_alpha_1'
-   main_dict['name'] = agent_name
-   agent_actor_critic_sep_dict['actor_dict']['alpha'] = 0.000005
-   agent_actor_critic_sep_dict['critic_dict']['alpha'] = 0.000005
-   a = trainingLoop(main_dict, agent_actor_critic_sep_dict, env_dict, load_agent='')
-   a.train()
-   test(agent_name=agent_name, n_episodes=300, detect_issues=False)
-
-   agent_name = 'actor_critic_fc_dims_0'
-   main_dict['name'] = agent_name
-   agent_actor_critic_sep_dict['actor_dict']['fc1_dims'] = 128
-   agent_actor_critic_sep_dict['actor_dict']['fc2_dims'] = 128
-   agent_actor_critic_sep_dict['critic_dict']['fc1_dims'] = 128
-   agent_actor_critic_sep_dict['critic_dict']['fc2_dims'] = 128
-   a = trainingLoop(main_dict, agent_actor_critic_sep_dict, env_dict, load_agent='')
-   a.train()
-   test(agent_name=agent_name, n_episodes=300, detect_issues=False)
-   
-   agent_name = 'actor_critic_fc_dims_1'
-   main_dict['name'] = agent_name
-   agent_actor_critic_sep_dict['actor_dict']['fc1_dims'] = 256
-   agent_actor_critic_sep_dict['actor_dict']['fc2_dims'] = 256
-   agent_actor_critic_sep_dict['critic_dict']['fc1_dims'] = 256
-   agent_actor_critic_sep_dict['critic_dict']['fc2_dims'] = 256
-   a = trainingLoop(main_dict, agent_actor_critic_sep_dict, env_dict, load_agent='')
-   a.train()
-   test(agent_name=agent_name, n_episodes=300, detect_issues=False)
-
-   agent_name = 'actor_critic_fc_dims_2'
-   main_dict['name'] = agent_name
-   agent_actor_critic_sep_dict['actor_dict']['fc1_dims'] = 512
-   agent_actor_critic_sep_dict['actor_dict']['fc2_dims'] = 512
-   agent_actor_critic_sep_dict['critic_dict']['fc1_dims'] = 512
-   agent_actor_critic_sep_dict['critic_dict']['fc2_dims'] = 512
-   a = trainingLoop(main_dict, agent_actor_critic_sep_dict, env_dict, load_agent='')
-   a.train()
-   test(agent_name=agent_name, n_episodes=300, detect_issues=False)
-   
-   agent_name = 'actor_critic_fc_dims_3'
-   main_dict['name'] = agent_name
-   agent_actor_critic_sep_dict['actor_dict']['fc1_dims'] = 1028
-   agent_actor_critic_sep_dict['actor_dict']['fc2_dims'] = 1028
-   agent_actor_critic_sep_dict['critic_dict']['fc1_dims'] = 1028
-   agent_actor_critic_sep_dict['critic_dict']['fc2_dims'] = 1028
-   a = trainingLoop(main_dict, agent_actor_critic_sep_dict, env_dict, load_agent='')
-   a.train()
-   test(agent_name=agent_name, n_episodes=300, detect_issues=False)
-
-   agent_name = 'actor_critic_fc_dims_4'
-   main_dict['name'] = agent_name
-   agent_actor_critic_sep_dict['actor_dict']['fc1_dims'] = 2048
-   agent_actor_critic_sep_dict['actor_dict']['fc2_dims'] = 2048
-   agent_actor_critic_sep_dict['critic_dict']['fc1_dims'] = 2048
-   agent_actor_critic_sep_dict['critic_dict']['fc2_dims'] = 2048
-   a = trainingLoop(main_dict, agent_actor_critic_sep_dict, env_dict, load_agent='')
-   a.train()
-   test(agent_name=agent_name, n_episodes=300, detect_issues=False)
-
-
-   agent_name = 'actor_critic_fc_dims_5'
-   main_dict['name'] = agent_name
-   agent_actor_critic_sep_dict['actor_dict']['fc1_dims'] = 2048
-   agent_actor_critic_sep_dict['actor_dict']['fc2_dims'] = 512
-   agent_actor_critic_sep_dict['critic_dict']['fc1_dims'] = 256
-   agent_actor_critic_sep_dict['critic_dict']['fc2_dims'] = 256
-   a = trainingLoop(main_dict, agent_actor_critic_sep_dict, env_dict, load_agent='')
-   a.train()
-   test(agent_name=agent_name, n_episodes=300, detect_issues=False)
-   
-   '''
-   
-   agent_names = ['actor_critic_fc_dims_0', 'actor_critic_fc_dims_1', 'actor_critic_fc_dims_2', 'actor_critic_fc_dims_3', 'actor_critic_fc_dims_4', 'actor_critic_fc_dims_5', 'actor_critic_sep']
-   legend_title = 'Neural Network Layer Dimensions'
-   legend = ['all fc_dims=128', 'all fc_dims=256', 'all fc_dims=512', 'all fc_dims=1024', 'all fc_dims=2048', 'actor fc_dims=[2048, 512], critic fc_dims=256', 'all fc_dims=[2048, 512]']
-   display_results.compare_learning_curves_progress(agent_names, legend, legend_title, show_average=True, show_median=False, xaxis='episodes')
+   #agent_names = ['actor_critic_fc_dims_0', 'actor_critic_fc_dims_1', 'actor_critic_fc_dims_2', 'actor_critic_fc_dims_3', 'actor_critic_fc_dims_4', 'actor_critic_fc_dims_5', 'actor_critic_sep']
+   #legend_title = 'Neural Network Layer Dimensions'
+   #legend = ['all fc_dims=128', 'all fc_dims=256', 'all fc_dims=512', 'all fc_dims=1024', 'all fc_dims=2048', 'actor fc_dims=[2048, 512], critic fc_dims=256', 'all fc_dims=[2048, 512]']
+   #display_results.compare_learning_curves_progress(agent_names, legend, legend_title, show_average=True, show_median=False, xaxis='episodes')
    #display_results.compare_learning_curves_progress(agent_names, legend, legend_title, show_average=True, show_median=False, xaxis='steps')
    #display_results.compare_learning_curves_progress(agent_names, legend, legend_title, show_average=True, show_median=False, xaxis='times')
-   display_results.density_plot_progress(agent_names, legend, legend_title)
-
+   #display_results.density_plot_progress(agent_names, legend, legend_title)
    
-   
-   agent_name = 'actor_critic_fc_dims_0'
+   #agent_name = 'actor_critic_fc_dims_0'
    #display_results.display_collision_distribution(agent_name)
    #test(agent_name=agent_name, n_episodes=500, detect_issues=False)
    #display_results.display_train_parameters(agent_name=agent_name)
-   display_results.agent_progress_statistics(agent_name=agent_name)
+   #display_results.agent_progress_statistics(agent_name=agent_name)
    #display_results.learning_curve_progress(agent_name=agent_name, show_average=True, show_median=True)
    #display_results.density_plot_progress([agent_name], legend=[''], legend_title='')
    #display_results.display_moving_agent(agent_name=agent_name, load_history=False)
-   display_results.display_path(agent_name=agent_name, load_history=False)
-   
+   #display_results.display_path(agent_name=agent_name, load_history=False)
    
    #display_results.compare_learning_curves_progress([agent_name], [''], [''], xaxis='times')
    #display_results.display_train_parameters(agent_name=agent_name)

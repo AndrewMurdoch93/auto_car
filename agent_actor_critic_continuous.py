@@ -13,7 +13,7 @@ class GenericNetwork(nn.Module):
         self.fc1_dims = fc1_dims
         self.fc2_dims = fc2_dims
         self.n_actions = n_actions
-        self.fc1 = nn.Linear(*self.input_dims, self.fc1_dims)
+        self.fc1 = nn.Linear(self.input_dims, self.fc1_dims)
         self.fc2 = nn.Linear(self.fc1_dims, self.fc2_dims)
         self.fc3 = nn.Linear(self.fc2_dims, self.n_actions)
         self.optimizer = optim.Adam(self.parameters(), lr=alpha)
@@ -107,7 +107,7 @@ class agent_separate(object):
 
     def load_weights(self, name):
         self.actor.load_state_dict(T.load('agents/' + name + '_actor_weights'))
-        self.actor.load_state_dict(T.load('agents/' + name + '_critic_weights'))
+        self.critic.load_state_dict(T.load('agents/' + name + '_critic_weights'))
 
 
 

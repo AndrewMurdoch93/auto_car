@@ -3,7 +3,7 @@ import numpy as np
 import agent_dqn
 import agent_reinforce
 import agent_actor_critic
-#from environment import environment
+import agent_actor_critic_continuous
 import torch as T
 import torch.nn as nn
 import torch.nn.functional as F
@@ -403,6 +403,9 @@ def display_moving_agent(agent_name, load_history=False):
         a = agent_actor_critic.actor_critic_separated(agent_dict)
     if  main_dict['learning_method']=='actor_critic_com':
         a = agent_actor_critic.actor_critic_combined(agent_dict)
+    if main_dict['learning_method']=='actor_critic_cont':
+        a = agent_actor_critic_continuous.agent_separate(agent_dict) 
+   
         
     a.load_weights(agent_name)
 
@@ -501,6 +504,9 @@ def display_path(agent_name, load_history=False):
         a = agent_actor_critic.actor_critic_separated(agent_dict)
     if  main_dict['learning_method']=='actor_critic_com':
         a = agent_actor_critic.actor_critic_combined(agent_dict)
+    if main_dict['learning_method']=='actor_critic_cont':
+        a = agent_actor_critic_continuous.agent_separate(agent_dict) 
+   
         
     a.load_weights(agent_name)
     
