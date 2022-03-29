@@ -60,7 +60,6 @@ class agent():
 
         self.Q_eval = deepQNetwork(self.lr, n_actions=self.n_actions, input_dims=self.input_dims, fc1_dims=self.fc1_dims, fc2_dims=self.fc2_dims, fc3_dims=self.fc3_dims)
 
-
         self.state_memory = np.zeros((self.mem_size, self.input_dims), dtype=np.float32)
         self.next_state_memory = np.zeros((self.mem_size, self.input_dims), dtype=np.float32)
         self.action_memory = np.zeros(self.mem_size, dtype=np.int32)

@@ -4,6 +4,8 @@ import agent_dqn
 import agent_reinforce
 import agent_actor_critic
 import agent_actor_critic_continuous
+import agent_dueling_dqn
+import agent_dueling_ddqn
 import torch as T
 import torch.nn as nn
 import torch.nn.functional as F
@@ -78,7 +80,7 @@ def compare_learning_curves_progress(agent_names, legend, legend_title, show_ave
 
         plt.title('Learning curve for median progress')
         plt.ylabel('Progress')
-        plt.legend(legend, title=legend_title, loc='upper left')
+        plt.legend(legend, title=legend_title, loc='lower right')
         #plt.xlim([0,6000])
         plt.show()
 
@@ -98,7 +100,7 @@ def compare_learning_curves_progress(agent_names, legend, legend_title, show_ave
         
         plt.title('Learning curve for average progress')
         plt.ylabel('Progress')
-        plt.legend(legend, title=legend_title, loc='upper left')
+        plt.legend(legend, title=legend_title, loc='lower right')
         #plt.xlim([0,5000])
         plt.show()
 
@@ -404,9 +406,14 @@ def display_moving_agent(agent_name, load_history=False):
     if  main_dict['learning_method']=='actor_critic_com':
         a = agent_actor_critic.actor_critic_combined(agent_dict)
     if main_dict['learning_method']=='actor_critic_cont':
-        a = agent_actor_critic_continuous.agent_separate(agent_dict) 
-   
-        
+        a = agent_actor_critic_continuous.agent_separate(agent_dict)
+    if main_dict['learning_method'] == 'dueling_dqn':
+        agent_dict['epsilon'] = 0
+        a = agent_dueling_dqn.agent(agent_dict)
+    if main_dict['learning_method'] == 'dueling_ddqn':
+        agent_dict['epsilon'] = 0
+        a = agent_dueling_ddqn.agent(agent_dict)
+       
     a.load_weights(agent_name)
 
     if load_history==True:
@@ -505,7 +512,13 @@ def display_path(agent_name, load_history=False):
     if  main_dict['learning_method']=='actor_critic_com':
         a = agent_actor_critic.actor_critic_combined(agent_dict)
     if main_dict['learning_method']=='actor_critic_cont':
-        a = agent_actor_critic_continuous.agent_separate(agent_dict) 
+        a = agent_actor_critic_continuous.agent_separate(agent_dict)
+    if main_dict['learning_method'] == 'dueling_dqn':
+        agent_dict['epsilon'] = 0
+        a = agent_dueling_dqn.agent(agent_dict)
+    if main_dict['learning_method'] == 'dueling_ddqn':
+        agent_dict['epsilon'] = 0
+        a = agent_dueling_ddqn.agent(agent_dict)
    
         
     a.load_weights(agent_name)
