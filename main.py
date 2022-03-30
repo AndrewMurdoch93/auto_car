@@ -6,6 +6,7 @@ import agent_actor_critic
 import agent_actor_critic_continuous
 import agent_dueling_dqn
 import agent_dueling_ddqn
+import agent_rainbow
 from environment import environment
 import torch as T
 import torch.nn as nn
@@ -78,7 +79,12 @@ class trainingLoop():
          self.agent = agent_dueling_dqn.agent(self.agent_dict)
       if self.learning_method == 'dueling_ddqn':
          self.agent_dict['epsilon'] = 1
-         self.agent = agent_dueling_dqn.agent(self.agent_dict)
+         self.agent = agent_dueling_ddqn.agent(self.agent_dict)
+      if self.learning_method == 'rainbow':
+         self.agent_dict['epsilon'] = 1
+         self.replay_beta_0=self.agent_dict['replay_beta_0']
+         self.replay_beta=self.replay_beta_0
+         self.agent = agent_rainbow.agent(self.agent_dict)
 
       if self.load_agent:
          self.agent.load_weights(self.load_agent)
@@ -126,6 +132,16 @@ class trainingLoop():
                obs = next_obs
             self.agent.decrease_epsilon()
 
+         if self.learning_method == 'rainbow':
+            while not done:
+               action = self.agent.choose_action(obs)
+               next_obs, reward, done = self.env.take_action(action)
+               score += reward
+               self.agent.store_transition(obs, action, reward, next_obs, int(done))
+               self.agent.learn(self.replay_beta)
+               obs = next_obs
+            self.agent.decrease_epsilon()
+            self.replay_beta += (1-self.replay_beta)*(episode/self.max_episodes)
          
          if self.learning_method == 'reinforce':
             while not done:
@@ -178,7 +194,7 @@ class trainingLoop():
 
 
          if episode%10==0:
-            if self.learning_method=='dqn' or self.learning_method=='dueling_dqn':
+            if self.learning_method=='dqn' or self.learning_method=='dueling_dqn' or self.learning_method=='dueling_ddqn' or self.learning_method=='rainbow':
                print(f"{'Episode':8s} {episode:5.0f} {'| Score':8s} {score:6.2f} {'| Progress':12s} {self.env.progress:3.2f} {'| Average score':15s} {avg_score:6.2f} {'| Average progress':18s} {avg_progress:3.2f} {'| Epsilon':9s} {self.agent.epsilon:.2f}")
             if self.learning_method=='reinforce' or self.learning_method=='actor_critic_sep' or self.learning_method=='actor_critic_com' or self.learning_method=='actor_critic_cont':
                print(f"{'Episode':8s} {episode:5.0f} {'| Score':8s} {score:6.2f} {'| Progress':12s} {self.env.progress:3.2f} {'| Average score':15s} {avg_score:6.2f} {'| Average progress':18s} {avg_progress:3.2f}")
@@ -293,6 +309,10 @@ def test(agent_name, n_episodes, detect_issues):
    if main_dict['learning_method'] == 'dueling_ddqn':
       agent_dict['epsilon'] = 0
       a = agent_dueling_ddqn.agent(agent_dict)
+   if main_dict['learning_method'] == 'rainbow':
+      agent_dict['epsilon'] = 0
+      a = agent_rainbow.agent(agent_dict)
+   
    
    a.load_weights(agent_name)
 
@@ -349,12 +369,11 @@ def test(agent_name, n_episodes, detect_issues):
              
 if __name__=='__main__':
    
-   '''
-   agent_name = 'dueling_ddqn_vel_1_7'
    
-   main_dict = {'name': agent_name, 'max_episodes':6000, 'learning_method': 'dueling_dqn', 'comment': 'new learning method - improvement on dqn'}
+   agent_name = 'PER_tree_0'
+   
+   main_dict = {'name': agent_name, 'max_episodes':6000, 'learning_method': 'rainbow', 'comment': 'new learning method - improvement on dqn'}
 
-   
    agent_dqn_dict = {'gamma':0.99, 'epsilon':1, 'eps_end':0.01, 'eps_dec':1/1000, 'lr':0.001, 'batch_size':64, 'max_mem_size':500000, 
                   'fc1_dims': 256, 'fc2_dims': 256, 'fc3_dims':256}
 
@@ -364,7 +383,10 @@ if __name__=='__main__':
    agent_dueling_ddqn_dict = {'gamma':0.99, 'epsilon':1, 'eps_end':0.01, 'eps_dec':1/1000, 'alpha':0.001, 'batch_size':64, 'max_mem_size':500000, 
                            'replace':100, 'fc1_dims':64, 'fc2_dims':64}
    
-   agent_reinforce_dict = {'alpha':0.001, 'gamma':0.99, 'fc1_dims':256, 'fc2_dims':256}
+   agent_rainbow_dict = {'gamma':0.99, 'epsilon':1, 'eps_end':0.01, 'eps_dec':1/1000, 'alpha':0.001, 'batch_size':64, 'max_mem_size':500000, 
+                           'replay_alpha':0.6, 'replay_beta_0':0.7, 'replace':100, 'fc1_dims':64, 'fc2_dims':64}
+   
+   agent_reinforce_dict = {'alpha':0.001/4, 'gamma':0.99, 'fc1_dims':256, 'fc2_dims':256}
 
    agent_actor_critic_sep_dict = {'gamma':0.99, 'actor_dict': {'alpha':0.00001, 'fc1_dims':2048, 'fc2_dims':512}, 'critic_dict': {'alpha': 0.00001, 'fc1_dims':2048, 'fc2_dims':512}}
    
@@ -375,22 +397,58 @@ if __name__=='__main__':
    env_dict = {'sim_conf': functions.load_config(sys.path[0], "config"), 'save_history': False, 'map_name': 'circle'
             , 'max_steps': 1000, 'local_path': False, 'waypoint_strategy': 'local', 'wpt_arc': np.pi/2, 'action_space': 'discrete'
             , 'reward_signal': {'goal_reached':0, 'out_of_bounds':-1, 'max_steps':0, 'collision':-1, 'backwards':-1, 'park':-0.5, 'time_step':-0.01, 'progress':10}
-            , 'n_waypoints': 11, 'vel_select':[1, 7], 'control_steps': 20, 'display': False, 'R':6, 'track_dict':{'k':0.1, 'Lfc':1}
+            , 'n_waypoints': 11, 'vel_select':[7], 'control_steps': 20, 'display': False, 'R':6, 'track_dict':{'k':0.1, 'Lfc':1}
             , 'lidar_dict': {'is_lidar':True, 'lidar_res':0.1, 'n_beams':8, 'max_range':20, 'fov':np.pi} } 
    
-   a = trainingLoop(main_dict, agent_dueling_ddqn_dict, env_dict, load_agent='')
+   a = trainingLoop(main_dict, agent_rainbow_dict, env_dict, load_agent='')
    a.train()
    
    test(agent_name=agent_name, n_episodes=300, detect_issues=False)
-   '''
    
-   #agent_name = 'dueling_dqn_fc_dims_1'
-   #main_dict['name'] = agent_name
-   #agent_dueling_dqn_dict['fc1_dims'] = 128
-   #agent_dueling_dqn_dict['fc2_dims'] = 128
-   #a = trainingLoop(main_dict, agent_dueling_dqn_dict, env_dict, load_agent='')
-   #a.train()
-   #test(agent_name=agent_name, n_episodes=300, detect_issues=False)
+   agent_name = 'PER_tree_1'
+   main_dict['name'] = agent_name
+   agent_rainbow_dict['alpha'] = 0.001
+   a = trainingLoop(main_dict, agent_dueling_dqn_dict, env_dict, load_agent='')
+   a.train()
+   test(agent_name=agent_name, n_episodes=300, detect_issues=False)
+
+   agent_name = 'PER_tree_2'
+   main_dict['name'] = agent_name
+   agent_rainbow_dict['alpha'] = 0.001/4
+   agent_rainbow_dict['replay_alpha'] = 0.5
+   a = trainingLoop(main_dict, agent_dueling_dqn_dict, env_dict, load_agent='')
+   a.train()
+   test(agent_name=agent_name, n_episodes=300, detect_issues=False)
+
+   agent_name = 'PER_tree_3'
+   main_dict['name'] = agent_name
+   agent_rainbow_dict['replay_alpha'] = 0.4
+   a = trainingLoop(main_dict, agent_dueling_dqn_dict, env_dict, load_agent='')
+   a.train()
+   test(agent_name=agent_name, n_episodes=300, detect_issues=False)
+
+   agent_name = 'PER_tree_4'
+   main_dict['name'] = agent_name
+   agent_rainbow_dict['replay_beta_0'] = 0.5
+   a = trainingLoop(main_dict, agent_dueling_dqn_dict, env_dict, load_agent='')
+   a.train()
+   test(agent_name=agent_name, n_episodes=300, detect_issues=False)
+
+   agent_name = 'PER_tree_4_vel_1_7'
+   main_dict['name'] = agent_name
+   env_dict['vel_select'] = [1, 7]
+   a = trainingLoop(main_dict, agent_dueling_dqn_dict, env_dict, load_agent='')
+   a.train()
+   test(agent_name=agent_name, n_episodes=300, detect_issues=False)
+
+   agent_name = 'PER_tree_0_vel_1_7'
+   main_dict['name'] = agent_name
+   env_dict['vel_select'] = [1, 7]
+   agent_rainbow_dict['replay_alpha'] = 0.6
+   agent_rainbow_dict['replay_alpha'] = 0.7
+   a = trainingLoop(main_dict, agent_dueling_dqn_dict, env_dict, load_agent='')
+   a.train()
+   test(agent_name=agent_name, n_episodes=300, detect_issues=False)
    
 
    #agent_names = ['dueling_dqn_replace_0', 'dueling_dqn', 'dueling_dqn_replace_1', 'dueling_dqn_replace_2', 'dueling_dqn_replace_3']
@@ -401,15 +459,15 @@ if __name__=='__main__':
    #display_results.compare_learning_curves_progress(agent_names, legend, legend_title, show_average=True, show_median=False, xaxis='times')
    #display_results.density_plot_progress(agent_names, legend, legend_title)
    
-   agent_name = 'dueling_ddqn_vel_1_7'
+   #agent_name = 'PER_tree'
    #display_results.display_collision_distribution(agent_name)
    #test(agent_name=agent_name, n_episodes=500, detect_issues=False)
    #display_results.display_train_parameters(agent_name=agent_name)
-   display_results.agent_progress_statistics(agent_name=agent_name)
+   #display_results.agent_progress_statistics(agent_name=agent_name)
    #display_results.learning_curve_progress(agent_name=agent_name, show_average=True, show_median=True)
    #display_results.density_plot_progress([agent_name], legend=[''], legend_title='')
    #display_results.display_moving_agent(agent_name=agent_name, load_history=False)
-   display_results.display_path(agent_name=agent_name, load_history=False)
+   #display_results.display_path(agent_name=agent_name, load_history=False)
    
    #display_results.compare_learning_curves_progress([agent_name], [''], [''], xaxis='times')
    #display_results.display_train_parameters(agent_name=agent_name)
