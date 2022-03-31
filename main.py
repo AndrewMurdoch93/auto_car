@@ -408,7 +408,7 @@ if __name__=='__main__':
    agent_name = 'PER_tree_1'
    main_dict['name'] = agent_name
    agent_rainbow_dict['alpha'] = 0.001
-   a = trainingLoop(main_dict, agent_dueling_dqn_dict, env_dict, load_agent='')
+   a = trainingLoop(main_dict, agent_rainbow_dict, env_dict, load_agent='')
    a.train()
    test(agent_name=agent_name, n_episodes=300, detect_issues=False)
 
@@ -416,28 +416,28 @@ if __name__=='__main__':
    main_dict['name'] = agent_name
    agent_rainbow_dict['alpha'] = 0.001/4
    agent_rainbow_dict['replay_alpha'] = 0.5
-   a = trainingLoop(main_dict, agent_dueling_dqn_dict, env_dict, load_agent='')
+   a = trainingLoop(main_dict, agent_rainbow_dict, env_dict, load_agent='')
    a.train()
    test(agent_name=agent_name, n_episodes=300, detect_issues=False)
 
    agent_name = 'PER_tree_3'
    main_dict['name'] = agent_name
    agent_rainbow_dict['replay_alpha'] = 0.4
-   a = trainingLoop(main_dict, agent_dueling_dqn_dict, env_dict, load_agent='')
+   a = trainingLoop(main_dict, agent_rainbow_dict, env_dict, load_agent='')
    a.train()
    test(agent_name=agent_name, n_episodes=300, detect_issues=False)
 
    agent_name = 'PER_tree_4'
    main_dict['name'] = agent_name
    agent_rainbow_dict['replay_beta_0'] = 0.5
-   a = trainingLoop(main_dict, agent_dueling_dqn_dict, env_dict, load_agent='')
+   a = trainingLoop(main_dict, agent_rainbow_dict, env_dict, load_agent='')
    a.train()
    test(agent_name=agent_name, n_episodes=300, detect_issues=False)
 
    agent_name = 'PER_tree_4_vel_1_7'
    main_dict['name'] = agent_name
    env_dict['vel_select'] = [1, 7]
-   a = trainingLoop(main_dict, agent_dueling_dqn_dict, env_dict, load_agent='')
+   a = trainingLoop(main_dict, agent_rainbow_dict, env_dict, load_agent='')
    a.train()
    test(agent_name=agent_name, n_episodes=300, detect_issues=False)
 
@@ -445,8 +445,8 @@ if __name__=='__main__':
    main_dict['name'] = agent_name
    env_dict['vel_select'] = [1, 7]
    agent_rainbow_dict['replay_alpha'] = 0.6
-   agent_rainbow_dict['replay_alpha'] = 0.7
-   a = trainingLoop(main_dict, agent_dueling_dqn_dict, env_dict, load_agent='')
+   agent_rainbow_dict['replay_beta_0'] = 0.7
+   a = trainingLoop(main_dict, agent_rainbow_dict, env_dict, load_agent='')
    a.train()
    test(agent_name=agent_name, n_episodes=300, detect_issues=False)
    
