@@ -370,9 +370,9 @@ def test(agent_name, n_episodes, detect_issues):
 if __name__=='__main__':
    
    
-   agent_name = 'PER_tree_0'
+   agent_name = 'PER_tree_0_redo'
    
-   main_dict = {'name': agent_name, 'max_episodes':6000, 'learning_method': 'rainbow', 'comment': 'new learning method - improvement on dqn'}
+   main_dict = {'name': agent_name, 'max_episodes':3000, 'learning_method': 'rainbow', 'comment': 'new learning method - improvement on dqn'}
 
    agent_dqn_dict = {'gamma':0.99, 'epsilon':1, 'eps_end':0.01, 'eps_dec':1/1000, 'lr':0.001, 'batch_size':64, 'max_mem_size':500000, 
                   'fc1_dims': 256, 'fc2_dims': 256, 'fc3_dims':256}
@@ -383,10 +383,10 @@ if __name__=='__main__':
    agent_dueling_ddqn_dict = {'gamma':0.99, 'epsilon':1, 'eps_end':0.01, 'eps_dec':1/1000, 'alpha':0.001, 'batch_size':64, 'max_mem_size':500000, 
                            'replace':100, 'fc1_dims':64, 'fc2_dims':64}
    
-   agent_rainbow_dict = {'gamma':0.99, 'epsilon':1, 'eps_end':0.01, 'eps_dec':1/1000, 'alpha':0.001, 'batch_size':64, 'max_mem_size':500000, 
+   agent_rainbow_dict = {'gamma':0.99, 'epsilon':1, 'eps_end':0.01, 'eps_dec':1/1000, 'alpha':0.001/4, 'batch_size':64, 'max_mem_size':500000, 
                            'replay_alpha':0.6, 'replay_beta_0':0.7, 'replace':100, 'fc1_dims':64, 'fc2_dims':64}
    
-   agent_reinforce_dict = {'alpha':0.001/4, 'gamma':0.99, 'fc1_dims':256, 'fc2_dims':256}
+   agent_reinforce_dict = {'alpha':0.001, 'gamma':0.99, 'fc1_dims':256, 'fc2_dims':256}
 
    agent_actor_critic_sep_dict = {'gamma':0.99, 'actor_dict': {'alpha':0.00001, 'fc1_dims':2048, 'fc2_dims':512}, 'critic_dict': {'alpha': 0.00001, 'fc1_dims':2048, 'fc2_dims':512}}
    
@@ -400,60 +400,52 @@ if __name__=='__main__':
             , 'n_waypoints': 11, 'vel_select':[7], 'control_steps': 20, 'display': False, 'R':6, 'track_dict':{'k':0.1, 'Lfc':1}
             , 'lidar_dict': {'is_lidar':True, 'lidar_res':0.1, 'n_beams':8, 'max_range':20, 'fov':np.pi} } 
    
-   a = trainingLoop(main_dict, agent_rainbow_dict, env_dict, load_agent='')
-   a.train()
+   #a = trainingLoop(main_dict, agent_rainbow_dict, env_dict, load_agent='')
+   #a.train()
+   #test(agent_name=agent_name, n_episodes=300, detect_issues=False)
    
-   test(agent_name=agent_name, n_episodes=300, detect_issues=False)
-   
-   agent_name = 'PER_tree_1'
+   agent_name = 'reinforce_redo'
    main_dict['name'] = agent_name
-   agent_rainbow_dict['alpha'] = 0.001
-   a = trainingLoop(main_dict, agent_rainbow_dict, env_dict, load_agent='')
+   main_dict['learning_method']='reinforce'
+   main_dict['max_episodes']=5000
+   #a = trainingLoop(main_dict, agent_reinforce_dict, env_dict, load_agent='')
+   #a.train()
+   #test(agent_name=agent_name, n_episodes=300, detect_issues=False)
+
+   agent_name = 'reinforce_vel_1_7_redo'
+   main_dict['name'] = agent_name
+   env_dict['vel_select'] = [1,7]
+   #a = trainingLoop(main_dict, agent_reinforce_dict, env_dict, load_agent='')
+   #a.train()
+   #test(agent_name=agent_name, n_episodes=300, detect_issues=False)
+
+   agent_name = 'actor_critic_sep_vel_1_7'
+   main_dict['name'] = agent_name
+   main_dict['learning_method'] = 'actor_critic_sep'
+   env_dict['vel_select'] = [1,7]
+   #a = trainingLoop(main_dict, agent_actor_critic_sep_dict, env_dict, load_agent='')
+   #a.train()
+   #test(agent_name=agent_name, n_episodes=300, detect_issues=False)
+
+   agent_name = 'dqn'
+   main_dict['name'] = agent_name
+   main_dict['learning_method'] = 'dqn'
+   env_dict['vel_select'] = [7]
+   a = trainingLoop(main_dict, agent_dqn_dict, env_dict, load_agent='')
    a.train()
    test(agent_name=agent_name, n_episodes=300, detect_issues=False)
 
-   agent_name = 'PER_tree_2'
+   agent_name = 'dqn_vel_1_7'
    main_dict['name'] = agent_name
-   agent_rainbow_dict['alpha'] = 0.001/4
-   agent_rainbow_dict['replay_alpha'] = 0.5
-   a = trainingLoop(main_dict, agent_rainbow_dict, env_dict, load_agent='')
-   a.train()
-   test(agent_name=agent_name, n_episodes=300, detect_issues=False)
-
-   agent_name = 'PER_tree_3'
-   main_dict['name'] = agent_name
-   agent_rainbow_dict['replay_alpha'] = 0.4
-   a = trainingLoop(main_dict, agent_rainbow_dict, env_dict, load_agent='')
-   a.train()
-   test(agent_name=agent_name, n_episodes=300, detect_issues=False)
-
-   agent_name = 'PER_tree_4'
-   main_dict['name'] = agent_name
-   agent_rainbow_dict['replay_beta_0'] = 0.5
-   a = trainingLoop(main_dict, agent_rainbow_dict, env_dict, load_agent='')
-   a.train()
-   test(agent_name=agent_name, n_episodes=300, detect_issues=False)
-
-   agent_name = 'PER_tree_4_vel_1_7'
-   main_dict['name'] = agent_name
+   main_dict['learning_method'] = 'dqn'
    env_dict['vel_select'] = [1, 7]
-   a = trainingLoop(main_dict, agent_rainbow_dict, env_dict, load_agent='')
+   a = trainingLoop(main_dict, agent_dqn_dict, env_dict, load_agent='')
    a.train()
    test(agent_name=agent_name, n_episodes=300, detect_issues=False)
 
-   agent_name = 'PER_tree_0_vel_1_7'
-   main_dict['name'] = agent_name
-   env_dict['vel_select'] = [1, 7]
-   agent_rainbow_dict['replay_alpha'] = 0.6
-   agent_rainbow_dict['replay_beta_0'] = 0.7
-   a = trainingLoop(main_dict, agent_rainbow_dict, env_dict, load_agent='')
-   a.train()
-   test(agent_name=agent_name, n_episodes=300, detect_issues=False)
-   
-
-   #agent_names = ['dueling_dqn_replace_0', 'dueling_dqn', 'dueling_dqn_replace_1', 'dueling_dqn_replace_2', 'dueling_dqn_replace_3']
-   #legend_title = 'Period to hold target NN static [learning steps]'
-   #legend = ['50', '100', '200', '500', '1000']
+   #agent_names = ['PER_tree_0', 'dueling_ddqn', 'dueling_dqn', 'reinforce_new','actor_critic', 'actor_critic_cont']
+   #legend_title = 'Learning method'
+   #legend = ['dueling ddqn PER', 'dueling ddqn', 'dueling dqn', 'reinforce_new', 'actor critic', 'actor_critic_cont']
    #display_results.compare_learning_curves_progress(agent_names, legend, legend_title, show_average=True, show_median=False, xaxis='episodes')
    #display_results.compare_learning_curves_progress(agent_names, legend, legend_title, show_average=True, show_median=False, xaxis='steps')
    #display_results.compare_learning_curves_progress(agent_names, legend, legend_title, show_average=True, show_median=False, xaxis='times')

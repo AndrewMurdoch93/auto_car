@@ -192,16 +192,38 @@ class ReplayMemory:
         self.t = 0 if done else self.t + 1  # Start new episodes with t = 0
     
     def sample(self, replay_beta):
-        p_total=self.transitions.total()
-        samples = np.random.uniform(0, p_total,self.batch_size)
-        probs, data_idxs, tree_idxs = self.transitions.find(samples)
+        capacity = self.capacity if self.transitions.full else self.transitions.index
+        while True:
+            p_total=self.transitions.total()
+            samples = np.random.uniform(0, p_total, self.batch_size)
+            probs, data_idxs, tree_idxs = self.transitions.find(samples)
+            if np.all(data_idxs<=capacity):
+                break
+        
         data = self.transitions.get(data_idxs)
         probs = probs / p_total
-        capacity = self.capacity if self.transitions.full else self.transitions.index
-        weights = (capacity * probs) ** -replay_beta  # Compute importance-sampling weights w
-        weights = weights / weights.max()  # Normalise by max importance-sampling weight from batch
+        #weights = (capacity * probs) ** -replay_beta  # Compute importance-sampling weights w
+        #weights = weights / weights.max()  # Normalise by max importance-sampling weight from batch
+        
+        if np.any(probs==0):
+            print('Probs are 0')
+        if capacity==0:
+            print('Probs are 0')
+
+        weights = np.power(np.multiply(np.divide(1, capacity), np.divide(1, probs)), replay_beta)
+        if np.any(weights==np.inf):
+            print('weights are inf')
+        if np.any(weights==0):
+            print('weights are 0')
+        
+        norm_weights = np.divide(weights, np.max(weights))
+        if np.max(weights)==np.inf:
+            print('weights are inf')
+        if np.max(weights)==0:
+            print('weights are 0')
+
         #return tree_idxs, states, actions, returns, next_states, nonterminals, weights
-        return tree_idxs, data, weights
+        return tree_idxs, data, norm_weights
 
     def update_priorities(self, idxs, priorities):
         priorities = np.power(np.abs(priorities.cpu().detach().numpy()), self.replay_alpha)
@@ -232,6 +254,30 @@ class DuelingLinearDeepQNetwork(nn.Module):
 
         return V, A
 
+class DuelingLinearCategoricalDeepQNetwork(nn.Module):
+    def __init__(self, ALPHA, n_actions, input_dims, fc1_dims, fc2_dims, n_atoms):
+        super(DuelingLinearDeepQNetwork, self).__init__()
+        self.fc1 = nn.Linear(input_dims, fc1_dims)
+        self.fc2 = nn.Linear(fc1_dims, fc2_dims)
+        self.V = nn.Linear(fc2_dims, 1*n_atoms)
+        self.A = nn.Linear(fc2_dims, n_actions*n_atoms)
+
+        self.optimizer = optim.Adam(self.parameters(), lr=ALPHA)
+        self.loss = nn.MSELoss()
+        self.device = T.device('cuda:0' if T.cuda.is_available() else 'cpu')
+        self.to(self.device)
+        #self.checkpoint_dir = chkpt_dir
+        #self.checkpoint_file = os.path.join(self.checkpoint_dir, name+'_dqn')
+
+    def forward(self, state):
+        l1 = F.relu(self.fc1(state))
+        l2 = F.relu(self.fc2(l1))
+        V = self.V(l2)
+        A = self.A(l2)
+
+        return V, A
+
+
 
 class agent(object):
 
@@ -248,13 +294,22 @@ class agent(object):
         self.batch_size = self.agent_dict['batch_size']
         self.replace_target_cnt = self.agent_dict['replace']
 
+        self.n_atoms = 50
+        self.v_min = -10
+        self.v_max = 10
+        self.delta = (self.v_max - self.v_min)/self.n_atoms
+        self.df = self.gamma
+
+        self.atoms = T.arange(self.v_min, self.v_max, self.delta).unsqueeze(0)
+
+
         global Transition_dtype
         global blank_trans 
         Transition_dtype = np.dtype([('timestep', np.int32), ('state', np.float32, (self.agent_dict['input_dims'])), ('action', np.int64), ('reward', np.float32), ('next_state', np.float32, (self.agent_dict['input_dims'])), ('done', np.bool_)])
         blank_trans = (0, np.zeros((12), dtype=np.float32), 0, 0.0,  np.zeros(12), False)
         #self.memory = PrioritisedReplayBuffer(self.agent_dict['max_mem_size'], self.agent_dict['input_dims'], self.agent_dict['batch_size'], self.agent_dict['replay_alpha'])
         
-        self.memory = ReplayMemory(max_size=self.agent_dict['max_mem_size'], batch_size=self.agent_dict['batch_size'], replay_alpha=self.agent_dict['alpha'])
+        self.memory = ReplayMemory(max_size=self.agent_dict['max_mem_size'], batch_size=self.agent_dict['batch_size'], replay_alpha=self.agent_dict['replay_alpha'])
 
         self.q_eval = DuelingLinearDeepQNetwork(self.agent_dict['alpha'], self.agent_dict['n_actions'], input_dims=self.agent_dict['input_dims'],
                                                 fc1_dims=self.agent_dict['fc1_dims'], fc2_dims=self.agent_dict['fc2_dims'])
@@ -294,7 +349,6 @@ class agent(object):
 
         self.replace_target_network()
 
-        #state, action, reward, new_state, done, importance, memory_indices = self.memory.sample_buffer(self.batch_size, replay_beta=replay_beta)
         tree_idxs, data, weights = self.memory.sample(replay_beta)
 
         states=T.tensor(np.copy(data[:]['state'])).to(self.q_eval.device)
@@ -302,12 +356,6 @@ class agent(object):
         dones=T.tensor(np.copy(data[:]['done'])).to(self.q_eval.device)
         actions=T.tensor(np.copy(data[:]['action'])).to(self.q_eval.device)
         states_=T.tensor(np.copy(data[:]['next_state'])).to(self.q_eval.device)
-
-        #states = T.tensor(state).to(self.q_eval.device)
-        #rewards = T.tensor(reward).to(self.q_eval.device)
-        #dones = T.tensor(done).to(self.q_eval.device)
-        #actions = T.tensor(action).to(self.q_eval.device)
-        #states_ = T.tensor(new_state).to(self.q_eval.device)
 
         indices = np.arange(self.batch_size)
 
@@ -331,6 +379,71 @@ class agent(object):
         self.q_eval.optimizer.step()
         self.learn_step_counter += 1
         self.memory.update_priorities(tree_idxs, errors)
+    
+    def learn_distributional_rl(self, replay_beta):
+        if self.memory.transitions.index<=(self.batch_size+1) and self.memory.transitions.full==False:
+            return
+
+        self.q_eval.optimizer.zero_grad()
+
+        self.replace_target_network()
+
+        tree_idxs, data, weights = self.memory.sample(replay_beta)
+
+        states=T.tensor(np.copy(data[:]['state'])).to(self.q_eval.device)
+        rewards=T.tensor(np.copy(data[:]['reward'])).to(self.q_eval.device)
+        dones=T.tensor(np.copy(data[:]['done'])).to(self.q_eval.device)
+        actions=T.tensor(np.copy(data[:]['action'])).to(self.q_eval.device)
+        states_=T.tensor(np.copy(data[:]['next_state'])).to(self.q_eval.device)
+
+        indices = np.arange(self.batch_size)
+
+        V_s, A_s = self.q_eval.forward(states)
+        V_s_, A_s_ = self.q_next.forward(states_)
+
+        V_s_eval, A_s_eval = self.q_eval.forward(states_)
+
+        q_pred = F.log_softmax(T.add(V_s, (A_s - A_s.mean(dim=1, keepdim=True)))[indices, actions])
+        q_next = F.log_softmax(T.add(V_s_, (A_s_ - A_s_.mean(dim=1, keepdim=True))))
+        q_eval = F.log_softmax(T.add(V_s_eval, (A_s_eval - A_s_eval.mean(dim=1,keepdim=True))))
+        
+        max_actions = T.argmax(q_eval, dim=1)
+
+        q_next[dones] = 0.0
+        q_target = rewards + self.gamma*q_next[indices, max_actions]
+        errors = T.sub(q_target, q_pred).to(self.q_eval.device)
+        loss = self.q_eval.loss(T.multiply(errors, T.tensor(weights).to(self.q_eval.device)).float(), T.zeros(64).to(self.q_eval.device).float()).to(self.q_eval.device)
+        loss.backward()
+        self.q_eval.optimizer.step()
+        self.learn_step_counter += 1
+        self.memory.update_priorities(tree_idxs, errors)
+
+    def compute_targets(self, rewards, next_states, dones):
+        mask = np.invert(dones.astype(bool))
+        atoms = T.arange(self.v_min, self.v_max, self.delta)
+        atoms = (rewards + self.df * dones[:, None] * atoms).clamp(min=self.v_min, max=self.v_max)
+        b = (atoms - self.v_min) / self.delta
+        l = T.floor(b).long()
+        u = T.ceil(b).clamp(max=self.n_atoms - 1).long()
+        with T.no_grad():
+            v, a = self.q_next(next_states)
+            z_prime = F.log_softmax(T.add(v, (a - a.mean(dim=1, keepdim=True))))
+        target_actions = T.argmax(a, dim=1)
+        
+        z_prime = T.cat([z_prime[i, target_actions[i]] for i in range(z_prime.shape[0])])
+        z_prime = T.cat([z_prime[i, target_actions[i]] for i in range(z_prime.shape[0])])
+
+        # For elements that do not have a next state, atoms are all equal to reward and we set a
+        # uniform distribution (it will collapse to the same atom in any case)
+        probabilities = T.ones((self.batch_size, self.n_atoms)) / self.n_atoms
+        probabilities[mask] = z_prime
+        # Compute partitions of atoms
+        lower = probabilities * (u - b)
+        upper = probabilities * (b - l)
+        z_projected = T.zeros_like(probabilities)
+        z_projected.scatter_add_(1, l, lower)
+        z_projected.scatter_add_(1, u, upper)
+        return z_projected
 
     def save_agent(self):
         T.save(self.q_eval.state_dict(), 'agents/' + self.name + 'q_eval_weights')
