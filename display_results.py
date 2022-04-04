@@ -6,6 +6,7 @@ import agent_actor_critic
 import agent_actor_critic_continuous
 import agent_dueling_dqn
 import agent_dueling_ddqn
+import agent_rainbow
 import torch as T
 import torch.nn as nn
 import torch.nn.functional as F
@@ -413,6 +414,9 @@ def display_moving_agent(agent_name, load_history=False):
     if main_dict['learning_method'] == 'dueling_ddqn':
         agent_dict['epsilon'] = 0
         a = agent_dueling_ddqn.agent(agent_dict)
+    if main_dict['learning_method'] == 'rainbow':
+        agent_dict['epsilon'] = 0
+        a = agent_rainbow.agent(agent_dict)
        
     a.load_weights(agent_name)
 
@@ -519,6 +523,9 @@ def display_path(agent_name, load_history=False):
     if main_dict['learning_method'] == 'dueling_ddqn':
         agent_dict['epsilon'] = 0
         a = agent_dueling_ddqn.agent(agent_dict)
+    if main_dict['learning_method'] == 'rainbow':
+        agent_dict['epsilon'] = 0
+        a = agent_rainbow.agent(agent_dict)
    
         
     a.load_weights(agent_name)

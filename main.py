@@ -369,7 +369,7 @@ def test(agent_name, n_episodes, detect_issues):
              
 if __name__=='__main__':
    
-   
+   '''
    agent_name = 'PER_tree_0_redo'
    
    main_dict = {'name': agent_name, 'max_episodes':3000, 'learning_method': 'rainbow', 'comment': 'new learning method - improvement on dqn'}
@@ -442,16 +442,26 @@ if __name__=='__main__':
    a = trainingLoop(main_dict, agent_dqn_dict, env_dict, load_agent='')
    a.train()
    test(agent_name=agent_name, n_episodes=300, detect_issues=False)
+   '''
 
-   #agent_names = ['PER_tree_0', 'dueling_ddqn', 'dueling_dqn', 'reinforce_new','actor_critic', 'actor_critic_cont']
+   #agent_names = ['dqn', 'PER_tree_0', 'dueling_ddqn', 'dueling_dqn', 'reinforce_new', 'actor_critic', 'actor_critic_cont']
    #legend_title = 'Learning method'
-   #legend = ['dueling ddqn PER', 'dueling ddqn', 'dueling dqn', 'reinforce_new', 'actor critic', 'actor_critic_cont']
+   #legend = ['dqn', 'dueling ddqn PER', 'dueling ddqn', 'dueling dqn', 'reinforce_new', 'actor critic', 'actor_critic_cont']
+   
+   #agent_names = ['dqn', 'PER_tree_0', 'dueling_ddqn', 'dueling_dqn']
+   #legend_title = 'Learning method'
+   #legend = ['dqn', 'dueling ddqn PER', 'dueling ddqn', 'dueling dqn']
+
+   #agent_names = ['reinforce_vel_1_7_redo', 'actor_critic_sep_vel_1_7']
+   #legend_title = 'Learning method'
+   #legend = ['reinforce', 'actor critic']
+   
    #display_results.compare_learning_curves_progress(agent_names, legend, legend_title, show_average=True, show_median=False, xaxis='episodes')
    #display_results.compare_learning_curves_progress(agent_names, legend, legend_title, show_average=True, show_median=False, xaxis='steps')
    #display_results.compare_learning_curves_progress(agent_names, legend, legend_title, show_average=True, show_median=False, xaxis='times')
    #display_results.density_plot_progress(agent_names, legend, legend_title)
    
-   #agent_name = 'PER_tree'
+   #agent_name = 'actor_critic_cont'
    #display_results.display_collision_distribution(agent_name)
    #test(agent_name=agent_name, n_episodes=500, detect_issues=False)
    #display_results.display_train_parameters(agent_name=agent_name)
