@@ -24,8 +24,7 @@ class OUActionNoise(object):
         self.x_prev = self.x0 if self.x0 is not None else np.zeros_like(self.mu)
 
     def __repr__(self):
-        return 'OrnsteinUhlenbeckActionNoise(mu={}, sigma={})'.format(
-                                                            self.mu, self.sigma)
+        return 'OrnsteinUhlenbeckActionNoise(mu={}, sigma={})'.format(self.mu, self.sigma)
 
 class ReplayBuffer(object):
     def __init__(self, max_size, input_shape, n_actions):
@@ -62,6 +61,10 @@ class ReplayBuffer(object):
 class CriticNetwork(nn.Module):
     def __init__(self, beta, input_dims, fc1_dims, fc2_dims, n_actions, name):
         super(CriticNetwork, self).__init__()
+        
+        self.name = name
+        self.file_name = 'agents/' + self.name + '_weights'
+        
         self.input_dims = input_dims
         self.fc1_dims = fc1_dims
         self.fc2_dims = fc2_dims
@@ -101,10 +104,19 @@ class CriticNetwork(nn.Module):
         state_action_value = self.q(state_action_value)
 
         return state_action_value
+    
+    def save_checkpoint(self):
+        T.save(self.state_dict(), self.file_name)
+
+    def load_checkpoint(self):
+        self.load_state_dict(T.load(self.file_name))
+
 
 class ActorNetwork(nn.Module):
     def __init__(self, alpha, input_dims, fc1_dims, fc2_dims, n_actions, name):
         super(ActorNetwork, self).__init__()
+        self.name = name
+        self.file_name = 'agents/' + self.name + '_weights'
         self.input_dims = input_dims
         self.fc1_dims = fc1_dims
         self.fc2_dims = fc2_dims
@@ -143,6 +155,12 @@ class ActorNetwork(nn.Module):
 
         return x
 
+    def save_checkpoint(self):
+        T.save(self.state_dict(), self.file_name)
+
+    def load_checkpoint(self):
+        self.load_state_dict(T.load(self.file_name))
+
 
 class agent(object):
 
@@ -157,14 +175,16 @@ class agent(object):
         self.batch_size = agent_dict['batch_size']
 
         self.actor = ActorNetwork(agent_dict['alpha'], agent_dict['input_dims'], agent_dict['layer1_size'], agent_dict['layer2_size'], 
-                                    agent_dict['n_actions'], name='Actor')
+                                    agent_dict['n_actions'], name=self.name+'_actor')
+
         self.critic = CriticNetwork(agent_dict['beta'], agent_dict['input_dims'], agent_dict['layer1_size'], agent_dict['layer2_size'], 
-                                    agent_dict['n_actions'], name='Critic')
+                                    agent_dict['n_actions'], name=self.name+'_critic')
 
         self.target_actor = ActorNetwork(agent_dict['alpha'], agent_dict['input_dims'], agent_dict['layer1_size'], agent_dict['layer2_size'], 
-                                    agent_dict['n_actions'], name='TargetActor')
+                                    agent_dict['n_actions'], name=self.name+'_target_actor')
+
         self.target_critic = CriticNetwork(agent_dict['beta'], agent_dict['input_dims'], agent_dict['layer1_size'], agent_dict['layer2_size'], 
-                                    agent_dict['n_actions'], name='TargetCritic')
+                                    agent_dict['n_actions'], name=self.name+'_target_critic')
 
         self.noise = OUActionNoise(mu=np.zeros( agent_dict['n_actions']))
 
@@ -179,6 +199,14 @@ class agent(object):
         return mu_prime.cpu().detach().numpy()
 
 
+    def choose_greedy_action(self, observation):
+        self.actor.eval()
+        observation = T.tensor(observation, dtype=T.float).to(self.actor.device)
+        action = self.actor.forward(observation).to(self.actor.device)
+        self.actor.train()
+        return action.cpu().detach().numpy()
+
+    
     def store_transition(self, state, action, reward, new_state, done):
         self.memory.store_transition(state, action, reward, new_state, done)
 
@@ -264,22 +292,39 @@ class agent(object):
             print(name, T.equal(param, critic_state_dict[name]))
         input()
         """
-    
+    '''
     def save_agent(self):
-        T.save(self.actor.state_dict(), 'agents/' + self.name + 'ddpg_actor_weights')
-        T.save(self.target_actor.state_dict(), 'agents/' + self.name + 'ddpg_target_actor_weights')
-        T.save(self.critic.state_dict(), 'agents/' + self.name + 'ddpg_target_actor_weights')
-        T.save(self.target_critic.state_dict(), 'agents/' + self.name + 'ddpg_target_critic_weights')
+        T.save(self.actor.state_dict(), 'agents/' + self.name + '_actor_weights')
+        T.save(self.target_actor.state_dict(), 'agents/' + self.name + '_target_actor_weights')
+        T.save(self.critic.state_dict(), 'agents/' + self.name + '_target_actor_weights')
+        T.save(self.target_critic.state_dict(), 'agents/' + self.name + '_target_critic_weights')
         
         outfile = open('agents/' + self.name + '_hyper_parameters', 'wb')
         pickle.dump(self.agent_dict, outfile)
         outfile.close()
 
     def load_weights(self, name):
-        self.actor.load_state_dict(T.load('agents/' + name + 'ddpg_actor_weights'))
-        self.target_actor.load_state_dict(T.load('agents/' + name + 'ddpg_target_actor_weights'))
-        self.critic.load_state_dict(T.load('agents/' + name + 'ddpg_target_actor_weights'))
-        self.target_critic.load_state_dict(T.load('agents/' + name + 'ddpg_target_critic_weights'))
+        self.actor.load_state_dict(T.load('agents/' + name + '_actor_weights'))
+        self.target_actor.load_state_dict(T.load('agents/' + name + '_target_actor_weights'))
+        self.critic.load_state_dict(T.load('agents/' + name + '_target_actor_weights'))
+        self.target_critic.load_state_dict(T.load('agents/' + name + '_target_critic_weights'))
+    '''
+
+    def save_agent(self):
+        self.actor.save_checkpoint()
+        self.target_actor.save_checkpoint()
+        self.critic.save_checkpoint()
+        self.target_critic.save_checkpoint()
+
+        outfile = open('agents/' + self.name + '_hyper_parameters', 'wb')
+        pickle.dump(self.agent_dict, outfile)
+        outfile.close()
+
+    def load_weights(self, name):
+        self.actor.load_checkpoint()
+        self.target_actor.load_checkpoint()
+        self.critic.load_checkpoint()
+        self.target_critic.load_checkpoint()
     
     def check_actor_params(self):
         current_actor_params = self.actor.named_parameters()

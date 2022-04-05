@@ -7,6 +7,7 @@ import agent_actor_critic_continuous
 import agent_dueling_dqn
 import agent_dueling_ddqn
 import agent_rainbow
+import agent_ddpg
 import torch as T
 import torch.nn as nn
 import torch.nn.functional as F
@@ -387,7 +388,8 @@ def display_moving_agent(agent_name, load_history=False):
     env_dict = pickle.load(infile)
     infile.close()
     env_dict['max_steps']=3000
-    env = environment(env_dict, start_condition=[])
+    env = environment(env_dict)
+    env.reset(save_history=True, start_condition=[])
     
     infile = open('agents/' + agent_name + '_hyper_parameters', 'rb')
     agent_dict = pickle.load(infile)
@@ -417,6 +419,8 @@ def display_moving_agent(agent_name, load_history=False):
     if main_dict['learning_method'] == 'rainbow':
         agent_dict['epsilon'] = 0
         a = agent_rainbow.agent(agent_dict)
+    if main_dict['learning_method'] == 'ddpg':
+        a = agent_ddpg.agent(agent_dict)
        
     a.load_weights(agent_name)
 
@@ -424,13 +428,17 @@ def display_moving_agent(agent_name, load_history=False):
         env.load_history_func()
     
     else:
-        env.reset(save_history=True)
+        env.reset(save_history=True, start_condition=[])
         obs = env.observation
         done = False
         score=0
 
         while not done:
-            action = a.choose_action(obs)
+            if main_dict['learning_method'] !='ddpg':
+                action = a.choose_action(obs)
+            elif main_dict['learning_method'] == 'ddpg':
+                action = a.choose_greedy_action(obs)
+            
             next_obs, reward, done = env.take_action(action)
             score += reward
             obs = next_obs
@@ -496,7 +504,8 @@ def display_path(agent_name, load_history=False):
     env_dict = pickle.load(infile)
     infile.close()
     env_dict['max_steps']=3000
-    env = environment(env_dict, start_condition=initial_condition)
+    env = environment(env_dict)
+    env.reset(save_history=True, start_condition=[])
 
     infile = open('agents/' + agent_name + '_hyper_parameters', 'rb')
     agent_dict = pickle.load(infile)
@@ -526,7 +535,8 @@ def display_path(agent_name, load_history=False):
     if main_dict['learning_method'] == 'rainbow':
         agent_dict['epsilon'] = 0
         a = agent_rainbow.agent(agent_dict)
-   
+    if main_dict['learning_method'] == 'ddpg':
+        a = agent_ddpg.agent(agent_dict)
         
     a.load_weights(agent_name)
     
@@ -534,13 +544,17 @@ def display_path(agent_name, load_history=False):
         env.load_history_func()
         
     else:
-        env.reset(save_history=True)
+        env.reset(save_history=True, start_condition=[])
         obs = env.observation
         done = False
         score=0
 
         while not done:
-            action = a.choose_action(obs)
+            if main_dict['learning_method'] !='ddpg':
+                action = a.choose_action(obs)
+            elif main_dict['learning_method'] == 'ddpg':
+                action = a.choose_greedy_action(obs)
+
             next_obs, reward, done = env.take_action(action)
             score += reward
             obs = next_obs

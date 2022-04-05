@@ -21,7 +21,7 @@ class environment():
 
     #def __init__(self, sim_conf, save_history, map_name, max_steps, local_path, waypoint_strategy, 
     #            reward_signal, num_actions, control_steps, agent_name, display, start_condition):
-    def __init__(self, input_dict, start_condition): 
+    def __init__(self, input_dict): 
         
         self.initial_condition_name = 'initial_conditions/' + input_dict['name']
         self.history_file_name = 'history/' + input_dict['name'] 
@@ -49,8 +49,6 @@ class environment():
                     , 'h': 0.074, 'm': 3.74, 'I': 0.04712, 's_min': -0.4189, 's_max': 0.4189, 'sv_min': -3.2
                     , 'sv_max': 3.2, 'v_switch': 7.319, 'a_max': 9.51, 'v_min':-5.0, 'v_max': 20.0, 'width': 0.31, 'length': 0.58}
 
-        self.start_condition = start_condition
-        
         #simulation parameters
         self.dt = self.sim_conf.time_step
 
@@ -95,14 +93,15 @@ class environment():
                         , occupancy_grid=self.occupancy_grid, map_res=self.map_res, map_height=self.map_height)
         
         self.episode = 0
-        self.reset(self.save_history)
+        #self.reset(self.save_history, start_condition=)
 
 
 
-    def reset(self, save_history):
+    def reset(self, save_history, start_condition):
         self.episode+=1
         self.save_history=save_history
-
+        self.start_condition = start_condition
+        
         #Inialise state variables
         if self.start_condition:
             self.x = self.start_condition['x']
@@ -635,9 +634,8 @@ def test_environment():
     initial_condition={'x':15, 'y':5, 'v':7, 'delta':0, 'theta':0, 'goal':1}
     #initial_condition = []
 
-    env = environment(env_dict, initial_condition)
-
-    env.reset(save_history=True)
+    env = environment(env_dict)
+    env.reset(save_history=True, start_state=initial_condition)
     done=False
     
     action_history = np.ones(8)*0.1

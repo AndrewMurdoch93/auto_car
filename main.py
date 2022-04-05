@@ -53,7 +53,8 @@ class trainingLoop():
       self.env_dict['name'] = self.main_dict['name']
 
       #self.env = environment(self.env_dict, start_condition={'x':15,'y':5,'theta':0,'goal':0})
-      self.env = environment(self.env_dict, start_condition=[])
+      self.env = environment(self.env_dict)
+      self.env.reset(save_history=False, start_condition=[])
       
       self.agent_dict['name'] = self.main_dict['name']
       self.agent_dict['input_dims'] = len(self.env.observation)
@@ -107,7 +108,7 @@ class trainingLoop():
 
       for episode in range(self.max_episodes):
          
-         self.env.reset(save_history=True)  #Reset the environment every episode
+         self.env.reset(save_history=True, start_condition=[])  #Reset the environment every episode
          obs = self.env.observation      #Records starting state
          done = False
          score = 0                       #Initialise score counter for every episode
@@ -176,8 +177,8 @@ class trainingLoop():
             while not done: 
                action = self.agent.choose_action(obs)    #Select an action
                next_obs, reward, done = self.env.take_action(action) #Environment executes action
-               agent.store_transition(obs, act, reward, new_state, int(done))
-               self.agent.learn(obs, reward, next_obs, int(done))  #Learn using state transition history
+               self.agent.store_transition(obs, action, reward, next_obs, int(done))
+               self.agent.learn()  #Learn using state transition history
                obs = next_obs  #Update the state
                score+=reward
          
@@ -193,7 +194,7 @@ class trainingLoop():
 
          steps.append(self.env.steps)
 
-         if episode%1000==0 and episode!=0:
+         if episode%500==0 and episode!=0:
 
             ave_progress = self.test_while_train(n_episodes=10)
             self.save_agent(ave_progress)
@@ -233,7 +234,7 @@ class trainingLoop():
       test_score = []
       
       for episode in range(n_episodes):
-         self.env.reset(save_history=True)
+         self.env.reset(save_history=True, start_condition=[])
          obs = self.env.observation
          done = False
          score=0
@@ -292,7 +293,8 @@ def test(agent_name, n_episodes, detect_issues):
    env_dict['max_steps'] = 3000
 
    #env = environment(env_dict, start_condition={'x':15,'y':5,'theta':0,'goal':0})
-   env = environment(env_dict, start_condition=[])
+   env = environment(env_dict)
+   env.reset(save_history=False, start_condition=[])
    
    action_history = []
    
@@ -328,7 +330,6 @@ def test(agent_name, n_episodes, detect_issues):
    if main_dict['learning_method'] == 'ddpg':
       a = agent_ddpg.agent(agent_dict)
    
-
    a.load_weights(agent_name)
 
    test_progress = []
@@ -339,14 +340,18 @@ def test(agent_name, n_episodes, detect_issues):
 
    for episode in range(n_episodes):
 
-      env.reset(save_history=True)
+      env.reset(save_history=True, start_condition=[])
       action_history = []
       obs = env.observation
       done = False
       score = 0
 
       while not done:
-         action = a.choose_action(obs)
+         if main_dict['learning_method'] !='ddpg':
+            action = a.choose_action(obs)
+         elif main_dict['learning_method'] == 'ddpg':
+            action = a.choose_greedy_action(obs)
+         
          action_history.append(action)
          
          next_obs, reward, done = env.take_action(action)
@@ -384,10 +389,10 @@ def test(agent_name, n_episodes, detect_issues):
              
 if __name__=='__main__':
    
-   
+   '''
    agent_name = 'ddpg'
    
-   main_dict = {'name': agent_name, 'max_episodes':3000, 'learning_method': 'ddpg', 'comment': 'new learning method - improvement on dqn'}
+   main_dict = {'name': agent_name, 'max_episodes':1000, 'learning_method': 'ddpg', 'comment': 'new learning method - improvement on dqn'}
 
    agent_dqn_dict = {'gamma':0.99, 'epsilon':1, 'eps_end':0.01, 'eps_dec':1/1000, 'lr':0.001, 'batch_size':64, 'max_mem_size':500000, 
                   'fc1_dims': 256, 'fc2_dims': 256, 'fc3_dims':256}
@@ -411,16 +416,21 @@ if __name__=='__main__':
    
    agent_ddpg_dict = {'alpha':0.000025, 'beta':0.00025, 'tau':0.001, 'gamma':0.99, 'max_size':1000000, 'layer1_size':400, 'layer2_size':300, 'batch_size':64}
    
+   action_space_dict = {'action_space': 'continuous'}
+   
+   action_space_dict = {'action_space': 'discrete', 'n_waypoints': 1, 'vel_select':[7]}
+
    env_dict = {'sim_conf': functions.load_config(sys.path[0], "config"), 'save_history': False, 'map_name': 'circle'
             , 'max_steps': 1000, 'local_path': False, 'waypoint_strategy': 'local', 'wpt_arc': np.pi/2, 'action_space': 'continuous'
             , 'reward_signal': {'goal_reached':0, 'out_of_bounds':-1, 'max_steps':0, 'collision':-1, 'backwards':-1, 'park':-0.5, 'time_step':-0.01, 'progress':10}
-            , 'n_waypoints': 11, 'vel_select':[7], 'control_steps': 20, 'display': False, 'R':6, 'track_dict':{'k':0.1, 'Lfc':1}
+            , 'n_waypoints': 1, 'vel_select':[7], 'control_steps': 20, 'display': False, 'R':6, 'track_dict':{'k':0.1, 'Lfc':1}
             , 'lidar_dict': {'is_lidar':True, 'lidar_res':0.1, 'n_beams':8, 'max_range':20, 'fov':np.pi} } 
    
    a = trainingLoop(main_dict, agent_ddpg_dict, env_dict, load_agent='')
    a.train()
    test(agent_name=agent_name, n_episodes=300, detect_issues=False)
-  
+   '''
+
    '''
    agent_name = 'reinforce_redo'
    main_dict['name'] = agent_name
@@ -470,16 +480,16 @@ if __name__=='__main__':
    #legend_title = 'Learning method'
    #legend = ['dqn', 'dueling ddqn PER', 'dueling ddqn', 'dueling dqn']
 
-   #agent_names = ['reinforce_vel_1_7_redo', 'actor_critic_sep_vel_1_7']
+   #agent_names = ['ddpg']
    #legend_title = 'Learning method'
-   #legend = ['reinforce', 'actor critic']
+   #legend = ['a']
    
    #display_results.compare_learning_curves_progress(agent_names, legend, legend_title, show_average=True, show_median=False, xaxis='episodes')
    #display_results.compare_learning_curves_progress(agent_names, legend, legend_title, show_average=True, show_median=False, xaxis='steps')
    #display_results.compare_learning_curves_progress(agent_names, legend, legend_title, show_average=True, show_median=False, xaxis='times')
    #display_results.density_plot_progress(agent_names, legend, legend_title)
    
-   #agent_name = 'actor_critic_cont'
+   #agent_name = 'ddpg'
    #display_results.display_collision_distribution(agent_name)
    #test(agent_name=agent_name, n_episodes=500, detect_issues=False)
    #display_results.display_train_parameters(agent_name=agent_name)
