@@ -400,8 +400,8 @@ class environment():
             if strategy == 'waypoint':
                 waypoint = action
 
-        i = int(action/self.num_waypoints)
-        self.v_ref = self.vel_select[i]
+            i = int(action/self.num_waypoints)
+            self.v_ref = self.vel_select[i]
         '''
         if self.v_ref>=1 and self.v_ref<=7:
             self.v_ref += self.vel_select[i]

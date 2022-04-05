@@ -7,6 +7,7 @@ import agent_actor_critic_continuous
 import agent_dueling_dqn
 import agent_dueling_ddqn
 import agent_rainbow
+import agent_ddpg
 from environment import environment
 import torch as T
 import torch.nn as nn
@@ -85,6 +86,8 @@ class trainingLoop():
          self.replay_beta_0=self.agent_dict['replay_beta_0']
          self.replay_beta=self.replay_beta_0
          self.agent = agent_rainbow.agent(self.agent_dict)
+      if self.learning_method == 'ddpg':
+         self.agent = agent_ddpg.agent(self.agent_dict)
 
       if self.load_agent:
          self.agent.load_weights(self.load_agent)
@@ -168,6 +171,16 @@ class trainingLoop():
                 obs = next_obs
                 score += reward
          
+              
+         if self.learning_method == 'ddpg':
+            while not done: 
+               action = self.agent.choose_action(obs)    #Select an action
+               next_obs, reward, done = self.env.take_action(action) #Environment executes action
+               agent.store_transition(obs, act, reward, new_state, int(done))
+               self.agent.learn(obs, reward, next_obs, int(done))  #Learn using state transition history
+               obs = next_obs  #Update the state
+               score+=reward
+         
          
          end_time = time.time()
          times.append(end_time-start_time)
@@ -196,7 +209,7 @@ class trainingLoop():
          if episode%10==0:
             if self.learning_method=='dqn' or self.learning_method=='dueling_dqn' or self.learning_method=='dueling_ddqn' or self.learning_method=='rainbow':
                print(f"{'Episode':8s} {episode:5.0f} {'| Score':8s} {score:6.2f} {'| Progress':12s} {self.env.progress:3.2f} {'| Average score':15s} {avg_score:6.2f} {'| Average progress':18s} {avg_progress:3.2f} {'| Epsilon':9s} {self.agent.epsilon:.2f}")
-            if self.learning_method=='reinforce' or self.learning_method=='actor_critic_sep' or self.learning_method=='actor_critic_com' or self.learning_method=='actor_critic_cont':
+            if self.learning_method=='reinforce' or self.learning_method=='actor_critic_sep' or self.learning_method=='actor_critic_com' or self.learning_method=='actor_critic_cont' or self.learning_method=='ddpg':
                print(f"{'Episode':8s} {episode:5.0f} {'| Score':8s} {score:6.2f} {'| Progress':12s} {self.env.progress:3.2f} {'| Average score':15s} {avg_score:6.2f} {'| Average progress':18s} {avg_progress:3.2f}")
             
       ave_progress = self.test_while_train(n_episodes=10)
@@ -312,8 +325,10 @@ def test(agent_name, n_episodes, detect_issues):
    if main_dict['learning_method'] == 'rainbow':
       agent_dict['epsilon'] = 0
       a = agent_rainbow.agent(agent_dict)
+   if main_dict['learning_method'] == 'ddpg':
+      a = agent_ddpg.agent(agent_dict)
    
-   
+
    a.load_weights(agent_name)
 
    test_progress = []
@@ -369,10 +384,10 @@ def test(agent_name, n_episodes, detect_issues):
              
 if __name__=='__main__':
    
-   '''
-   agent_name = 'PER_tree_0_redo'
    
-   main_dict = {'name': agent_name, 'max_episodes':3000, 'learning_method': 'rainbow', 'comment': 'new learning method - improvement on dqn'}
+   agent_name = 'ddpg'
+   
+   main_dict = {'name': agent_name, 'max_episodes':3000, 'learning_method': 'ddpg', 'comment': 'new learning method - improvement on dqn'}
 
    agent_dqn_dict = {'gamma':0.99, 'epsilon':1, 'eps_end':0.01, 'eps_dec':1/1000, 'lr':0.001, 'batch_size':64, 'max_mem_size':500000, 
                   'fc1_dims': 256, 'fc2_dims': 256, 'fc3_dims':256}
@@ -392,18 +407,21 @@ if __name__=='__main__':
    
    agent_actor_critic_com_dict = {'gamma':0.99, 'alpha':0.00001, 'fc1_dims':2048, 'fc2_dims':512}
    
-   agent_actor_critic_cont_dict = {'gamma':0.99, 'alpha':0.000005, 'beta':0.00001,'fc1_dims':256, 'fc2_dims':256}
+   agent_actor_critic_cont_dict = {'gamma':0.99, 'alpha':0.000005, 'beta':0.00001, 'fc1_dims':256, 'fc2_dims':256}
+   
+   agent_ddpg_dict = {'alpha':0.000025, 'beta':0.00025, 'tau':0.001, 'gamma':0.99, 'max_size':1000000, 'layer1_size':400, 'layer2_size':300, 'batch_size':64}
    
    env_dict = {'sim_conf': functions.load_config(sys.path[0], "config"), 'save_history': False, 'map_name': 'circle'
-            , 'max_steps': 1000, 'local_path': False, 'waypoint_strategy': 'local', 'wpt_arc': np.pi/2, 'action_space': 'discrete'
+            , 'max_steps': 1000, 'local_path': False, 'waypoint_strategy': 'local', 'wpt_arc': np.pi/2, 'action_space': 'continuous'
             , 'reward_signal': {'goal_reached':0, 'out_of_bounds':-1, 'max_steps':0, 'collision':-1, 'backwards':-1, 'park':-0.5, 'time_step':-0.01, 'progress':10}
             , 'n_waypoints': 11, 'vel_select':[7], 'control_steps': 20, 'display': False, 'R':6, 'track_dict':{'k':0.1, 'Lfc':1}
             , 'lidar_dict': {'is_lidar':True, 'lidar_res':0.1, 'n_beams':8, 'max_range':20, 'fov':np.pi} } 
    
-   #a = trainingLoop(main_dict, agent_rainbow_dict, env_dict, load_agent='')
-   #a.train()
-   #test(agent_name=agent_name, n_episodes=300, detect_issues=False)
-   
+   a = trainingLoop(main_dict, agent_ddpg_dict, env_dict, load_agent='')
+   a.train()
+   test(agent_name=agent_name, n_episodes=300, detect_issues=False)
+  
+   '''
    agent_name = 'reinforce_redo'
    main_dict['name'] = agent_name
    main_dict['learning_method']='reinforce'
