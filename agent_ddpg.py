@@ -213,8 +213,7 @@ class agent(object):
     def learn(self):
         if self.memory.mem_cntr < self.batch_size:
             return
-        state, action, reward, new_state, done = \
-                                      self.memory.sample_buffer(self.batch_size)
+        state, action, reward, new_state, done = self.memory.sample_buffer(self.batch_size)
 
         reward = T.tensor(reward, dtype=T.float).to(self.critic.device)
         done = T.tensor(done).to(self.critic.device)
@@ -234,6 +233,8 @@ class agent(object):
             target.append(reward[j] + self.gamma*critic_value_[j]*done[j])
         target = T.tensor(target).to(self.critic.device)
         target = target.view(self.batch_size, 1)
+
+        #target = (reward+self.gamma*critic_value.squeeze()*done).view(self.batch_size, 1)
 
         self.critic.train()
         self.critic.optimizer.zero_grad()

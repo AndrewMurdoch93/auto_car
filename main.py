@@ -440,7 +440,7 @@ if __name__=='__main__':
    
    a = trainingLoop(main_dict, agent_ddpg_dict, env_dict, load_agent='')
    a.train()
-   test(agent_name=agent_name, n_episodes=300, detect_issues=False)
+   test(agent_name=agent_name, n_episodes=300, detect_issues=False, initial_conditions=True)
    
 
    '''
@@ -501,7 +501,7 @@ if __name__=='__main__':
    #display_results.compare_learning_curves_progress(agent_names, legend, legend_title, show_average=True, show_median=False, xaxis='times')
    #display_results.density_plot_progress(agent_names, legend, legend_title)
    
-   agent_name = 'ddpg_3'
+   #gent_name = 'ddpg_3'
    #display_results.display_collision_distribution(agent_name)
    #test(agent_name=agent_name, n_episodes=500, detect_issues=False, intial_conditions=True)
    #display_results.display_train_parameters(agent_name=agent_name)
