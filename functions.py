@@ -251,6 +251,26 @@ class lidar_scan():
 
         return scan, coords
 
+def generate_initial_condition(name, episodes):
+   file_name = 'test_initial_condition/' + name
+   
+   initial_conditions = []
+   
+   goal_x, goal_y, rx, ry, ryaw, rk, d = generate_circle_goals()
+   
+   for eps in range(episodes):
+      x, y, theta, current_goal = random_start(goal_x, goal_y, rx, ry, ryaw, rk, d, episode=0)
+      v = random.random()*7
+      delta = 0
+      i = {'x':x, 'y':y, 'v':v, 'delta':delta, 'theta':theta, 'goal':current_goal}
+      initial_conditions.append(i)
+
+   #initial_conditions = [ [] for _ in range(episodes)]
+   
+   outfile=open(file_name, 'wb')
+   pickle.dump(initial_conditions, outfile)
+   outfile.close()
+
 #generate_berlin_goals()
 if __name__ == 'main':
     #def velocity_along_line(theta, velocity, ryaw, )

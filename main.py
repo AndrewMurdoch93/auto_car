@@ -25,7 +25,7 @@ from PIL import Image
 import time
 import seaborn as sns
 import display_results
-
+import random
 
 class trainingLoop():
    def __init__(self, main_dict, agent_dict, env_dict, load_agent):
@@ -281,13 +281,23 @@ class trainingLoop():
          print("Agent was not saved")
 
    
-def test(agent_name, n_episodes, detect_issues):
+def test(agent_name, n_episodes, detect_issues, intial_conditions):
 
    results_file_name = 'test_results/' + agent_name 
-   replay_episode_name = 'replay_episodes/' + agent_name 
+   replay_episode_name = 'replay_episodes/' + agent_name
+
    
    infile = open('environments/' + agent_name, 'rb')
    env_dict = pickle.load(infile)
+   infile.close()
+
+   if intial_conditions==True:
+      start_condition_file_name = 'test_initial_condition/' + env_dict['map_name']
+   else:
+      start_condition_file_name = 'test_initial_condition/none' 
+   
+   infile = open(start_condition_file_name, 'rb')
+   start_conditions = pickle.load(infile)
    infile.close()
 
    env_dict['max_steps'] = 3000
@@ -340,7 +350,7 @@ def test(agent_name, n_episodes, detect_issues):
 
    for episode in range(n_episodes):
 
-      env.reset(save_history=True, start_condition=[])
+      env.reset(save_history=True, start_condition=start_conditions[episode])
       action_history = []
       obs = env.observation
       done = False
@@ -364,7 +374,7 @@ def test(agent_name, n_episodes, detect_issues):
       test_max_steps.append(env.max_steps_reached)
       terminal_poses.append(env.pose)
          
-      if episode%50==0:
+      if episode%10==0:
          print('Test episode', episode, '| Progress = %.2f' % env.progress, '| Score = %.2f' % score)
 
       if detect_issues==True and (env.progress>1):
@@ -386,11 +396,13 @@ def test(agent_name, n_episodes, detect_issues):
    pickle.dump(terminal_poses, outfile)
    outfile.close()
 
-             
+
+
+
 if __name__=='__main__':
+
    
-   '''
-   agent_name = 'ddpg'
+   agent_name = 'ddpg_3'
    
    main_dict = {'name': agent_name, 'max_episodes':1000, 'learning_method': 'ddpg', 'comment': 'new learning method - improvement on dqn'}
 
@@ -429,7 +441,7 @@ if __name__=='__main__':
    a = trainingLoop(main_dict, agent_ddpg_dict, env_dict, load_agent='')
    a.train()
    test(agent_name=agent_name, n_episodes=300, detect_issues=False)
-   '''
+   
 
    '''
    agent_name = 'reinforce_redo'
@@ -489,9 +501,9 @@ if __name__=='__main__':
    #display_results.compare_learning_curves_progress(agent_names, legend, legend_title, show_average=True, show_median=False, xaxis='times')
    #display_results.density_plot_progress(agent_names, legend, legend_title)
    
-   #agent_name = 'ddpg'
+   agent_name = 'ddpg_3'
    #display_results.display_collision_distribution(agent_name)
-   #test(agent_name=agent_name, n_episodes=500, detect_issues=False)
+   #test(agent_name=agent_name, n_episodes=500, detect_issues=False, intial_conditions=True)
    #display_results.display_train_parameters(agent_name=agent_name)
    #display_results.agent_progress_statistics(agent_name=agent_name)
    #display_results.learning_curve_progress(agent_name=agent_name, show_average=True, show_median=True)
