@@ -281,7 +281,7 @@ class trainingLoop():
          print("Agent was not saved")
 
    
-def test(agent_name, n_episodes, detect_issues, intial_conditions):
+def test(agent_name, n_episodes, detect_issues, initial_conditions):
 
    results_file_name = 'test_results/' + agent_name 
    replay_episode_name = 'replay_episodes/' + agent_name
@@ -291,7 +291,7 @@ def test(agent_name, n_episodes, detect_issues, intial_conditions):
    env_dict = pickle.load(infile)
    infile.close()
 
-   if intial_conditions==True:
+   if initial_conditions==True:
       start_condition_file_name = 'test_initial_condition/' + env_dict['map_name']
    else:
       start_condition_file_name = 'test_initial_condition/none' 
@@ -402,9 +402,9 @@ def test(agent_name, n_episodes, detect_issues, intial_conditions):
 if __name__=='__main__':
 
    
-   agent_name = 'ddpg_3'
+   agent_name = 'ddpg'
    
-   main_dict = {'name': agent_name, 'max_episodes':1000, 'learning_method': 'ddpg', 'comment': 'new learning method - improvement on dqn'}
+   main_dict = {'name': agent_name, 'max_episodes':2000, 'learning_method': 'ddpg', 'comment': 'vary layer sizes'}
 
    agent_dqn_dict = {'gamma':0.99, 'epsilon':1, 'eps_end':0.01, 'eps_dec':1/1000, 'lr':0.001, 'batch_size':64, 'max_mem_size':500000, 
                   'fc1_dims': 256, 'fc2_dims': 256, 'fc3_dims':256}
@@ -430,7 +430,7 @@ if __name__=='__main__':
    
    action_space_dict = {'action_space': 'continuous'}
    
-   action_space_dict = {'action_space': 'discrete', 'n_waypoints': 1, 'vel_select':[7]}
+   action_space_dict = {'action_space': 'discrete', 'n_waypoints': 10, 'vel_select':[7]}
 
    env_dict = {'sim_conf': functions.load_config(sys.path[0], "config"), 'save_history': False, 'map_name': 'circle'
             , 'max_steps': 1000, 'local_path': False, 'waypoint_strategy': 'local', 'wpt_arc': np.pi/2, 'action_space': 'continuous'
@@ -442,6 +442,96 @@ if __name__=='__main__':
    a.train()
    test(agent_name=agent_name, n_episodes=300, detect_issues=False, initial_conditions=True)
    
+   agent_name = 'ddpg_fc_0'
+   main_dict['name'] = agent_name
+   agent_ddpg_dict['layer1_size']=25
+   agent_ddpg_dict['layer2_size']=25
+   a = trainingLoop(main_dict, agent_ddpg_dict, env_dict, load_agent='')
+   a.train()
+   test(agent_name=agent_name, n_episodes=300, detect_issues=False, initial_conditions=True)
+
+   agent_name = 'ddpg_fc_1'
+   main_dict['name'] = agent_name
+   agent_ddpg_dict['layer1_size']=50
+   agent_ddpg_dict['layer2_size']=50
+   a = trainingLoop(main_dict, agent_ddpg_dict, env_dict, load_agent='')
+   a.train()
+   test(agent_name=agent_name, n_episodes=300, detect_issues=False, initial_conditions=True)
+
+   
+   agent_name = 'ddpg_fc_2'
+   main_dict['name'] = agent_name
+   agent_ddpg_dict['layer1_size']=100
+   agent_ddpg_dict['layer2_size']=100
+   a = trainingLoop(main_dict, agent_ddpg_dict, env_dict, load_agent='')
+   a.train()
+   test(agent_name=agent_name, n_episodes=300, detect_issues=False, initial_conditions=True)
+
+      
+   agent_name = 'ddpg_fc_3'
+   main_dict['name'] = agent_name
+   agent_ddpg_dict['layer1_size']=200
+   agent_ddpg_dict['layer2_size']=200
+   a = trainingLoop(main_dict, agent_ddpg_dict, env_dict, load_agent='')
+   a.train()
+   test(agent_name=agent_name, n_episodes=300, detect_issues=False, initial_conditions=True)
+
+   agent_name = 'ddpg_fc_4'
+   main_dict['name'] = agent_name
+   agent_ddpg_dict['layer1_size']=400
+   agent_ddpg_dict['layer2_size']=400
+   a = trainingLoop(main_dict, agent_ddpg_dict, env_dict, load_agent='')
+   a.train()
+   test(agent_name=agent_name, n_episodes=300, detect_issues=False, initial_conditions=True)
+
+   agent_name = 'rainbow_fc_0'
+   main_dict['name'] = agent_name
+   agent_rainbow_dict['fc1_dims']=25
+   agent_rainbow_dict['fc2_dims']=25
+   env_dict['action_space'] = 'discrete'
+   env_dict['n_waypoints'] = 10
+   a = trainingLoop(main_dict, agent_ddpg_dict, env_dict, load_agent='')
+   a.train()
+   test(agent_name=agent_name, n_episodes=300, detect_issues=False, initial_conditions=True)
+
+   agent_name = 'rainbow_fc_1'
+   main_dict['name'] = agent_name
+   agent_rainbow_dict['fc1_dims']=50
+   agent_rainbow_dict['fc2_dims']=50
+   a = trainingLoop(main_dict, agent_rainbow_dict, env_dict, load_agent='')
+   a.train()
+   test(agent_name=agent_name, n_episodes=300, detect_issues=False, initial_conditions=True)
+
+   agent_name = 'rainbow_fc_2'
+   main_dict['name'] = agent_name
+   agent_rainbow_dict['fc1_dims']=100
+   agent_rainbow_dict['fc2_dims']=100
+   a = trainingLoop(main_dict, agent_rainbow_dict, env_dict, load_agent='')
+   a.train()
+   test(agent_name=agent_name, n_episodes=300, detect_issues=False, initial_conditions=True)
+
+   agent_name = 'rainbow_fc_3'
+   main_dict['name'] = agent_name
+   agent_rainbow_dict['fc1_dims']=200
+   agent_rainbow_dict['fc2_dims']=200
+   a = trainingLoop(main_dict, agent_rainbow_dict, env_dict, load_agent='')
+   a.train()
+   test(agent_name=agent_name, n_episodes=300, detect_issues=False, initial_conditions=True)
+
+   
+   agent_name = 'rainbow_fc_4'
+   main_dict['name'] = agent_name
+   agent_rainbow_dict['fc1_dims']=400
+   agent_rainbow_dict['fc2_dims']=400
+   a = trainingLoop(main_dict, agent_rainbow_dict, env_dict, load_agent='')
+   a.train()
+   test(agent_name=agent_name, n_episodes=300, detect_issues=False, initial_conditions=True)
+
+
+
+
+
+
 
    '''
    agent_name = 'reinforce_redo'
