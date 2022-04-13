@@ -7,7 +7,7 @@ import numpy as np
 import pickle
 from collections import deque
 import random
-
+import time
 
 #Transition_dtype = np.dtype([('timestep', np.int32), ('state', np.float32, (state_shape)), ('action', np.int64), ('reward', np.float32), ('next_state', np.float32, (state_shape)), ('done', np.bool_)])
 blank_trans = (0, np.zeros((12), dtype=np.float32), 0, 0.0,  np.zeros(12), False)
@@ -323,9 +323,14 @@ class agent(object):
 
     def choose_action(self, observation):
         if np.random.random() > self.epsilon:
+            
+            #start = time.time()
             state = T.tensor(observation, dtype=T.float32).to(self.q_eval.device)
             _, advantage = self.q_eval.forward(state)
             action = T.argmax(advantage).item()
+            #end = time.time()
+            #print(end-start)
+        
         else:
             action = np.random.choice(self.action_space)
 

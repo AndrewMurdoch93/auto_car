@@ -25,6 +25,7 @@ import time
 import seaborn as sns
 from environment import environment
 import pandas as pd
+import time
 
 
 #from numpy import unique
@@ -202,6 +203,55 @@ def learning_curve_progress(agent_name, show_average=False, show_median=True):
         plt.legend(['Average progress', 'Standard deviation from mean'])
         plt.show()
 
+def durations(agent_name, show_average=False, show_median=True):
+    window=100
+
+    file_name = 'action_durations/' + agent_name + '_train'
+    
+    infile = open(file_name, 'rb')
+    durations = pickle.load(infile)
+    infile.close()
+
+    avg_scores = []
+    std_dev = []
+    percentile_25 = []
+    median = []
+    percentile_75 = []
+
+    for i in range(len(durations)):
+        if i <= window:
+            x = 0
+        else:
+            x = i-window 
+        
+        avg_scores.append(np.mean(durations[x:i+1]))
+        std_dev.append(np.std(durations[x:i+1]))
+        percentile_25.append(np.percentile(durations[x:i+1], 25))
+        median.append(np.percentile(durations[x:i+1], 50))
+        percentile_75.append( np.percentile(durations[x:i+1], 75))
+    
+    if show_median==True:
+        #plt.plot(progress)
+        plt.plot(median, color='black')
+        plt.fill_between(np.arange(len(durations)), percentile_25, percentile_75, color='lightblue')
+        plt.title('Learning curve')
+        plt.xlabel('Episode')
+        plt.ylabel('Action')
+        plt.legend(['Median Progress', '25th to 75th percentile'])
+        plt.ylim([0, 0.03])
+        plt.show()
+
+    if show_average==True:
+        #plt.plot(progress)
+        plt.plot(avg_scores, color='black')
+        plt.fill_between(np.arange(len(durations)), np.add(avg_scores,std_dev), np.subtract(avg_scores,std_dev), color='lightblue')
+        plt.title('Learning curve')
+        plt.xlabel('Episode')
+        plt.ylabel('Progress')
+        plt.ylim([0, 0.03])
+        plt.legend(['Average progress', 'Standard deviation from mean'])
+        plt.show()
+
 
 def histogram_score(agent_name):
 
@@ -289,6 +339,31 @@ def density_plot_progress(agent_names, legend, legend_title):
     plt.legend(leg, title=legend_title, loc='upper left')
     plt.title('Agent progress distribution in testing')
     plt.xlabel('Progress')
+    plt.ylabel('Density probability')
+    #plt.xlim([0.8, 1.4])
+    plt.show()
+
+def density_plot_action_duration(agent_names, legend, legend_title):
+    
+    durations = []
+    for a in agent_names:
+        results_file_name = 'action_durations/' + a + 'debug'
+        infile = open(results_file_name, 'rb')
+        durations.append(pickle.load(infile))
+        infile.close()
+    
+    for d, a in zip(durations, agent_names):
+        print('agent name = ', a)
+        print('Average duration without zeros: ', np.average(np.array(d)[np.nonzero(np.array(d))][1:-1])) 
+        print('Average duration with zeros: ', np.average(np.array(d)[1:-1]))
+        print('Number of non-zero actions: ', len(np.nonzero(np.array(d))[0]), '\n')
+    
+    sns.displot(durations,legend=False, kind="kde")
+    leg=legend.copy()
+    leg.reverse()
+    plt.legend(leg, title=legend_title, loc='upper left')
+    plt.title('Agent action duration')
+    plt.xlabel('Action duration')
     plt.ylabel('Density probability')
     #plt.xlim([0.8, 1.4])
     plt.show()
@@ -384,6 +459,8 @@ def display_train_parameters(agent_name):
 
 def display_moving_agent(agent_name, load_history=False):
 
+    durations = []
+
     infile = open('environments/' + agent_name, 'rb')
     env_dict = pickle.load(infile)
     infile.close()
@@ -434,11 +511,19 @@ def display_moving_agent(agent_name, load_history=False):
         score=0
 
         while not done:
+            
+            start_action = time.time()
+            
             if main_dict['learning_method'] !='ddpg':
                 action = a.choose_action(obs)
             elif main_dict['learning_method'] == 'ddpg':
                 action = a.choose_greedy_action(obs)
             
+            end_action = time.time()
+            
+            action_duration = end_action - start_action
+            durations.append(action_duration)
+
             next_obs, reward, done = env.take_action(action)
             score += reward
             obs = next_obs
@@ -448,6 +533,13 @@ def display_moving_agent(agent_name, load_history=False):
     image_path = sys.path[0] + '/maps/' + env.map_name + '.png'
     im = image.imread(image_path)
     plt.imshow(im, extent=(0,30,0,30))
+    
+    outfile=open('action_durations/' + agent_name + 'debug', 'wb')
+    pickle.dump(durations, outfile)
+    outfile.close()
+    
+    print(np.average(np.array(durations)[np.nonzero(np.array(durations))][1:-1]))  #duration without zeros and first action
+    print(np.average(np.array(durations)[1:-1]))
     
     for i in range(len(env.waypoint_history)):
         plt.cla()
@@ -481,7 +573,7 @@ def display_moving_agent(agent_name, load_history=False):
         ah = env.action_step_history[i]
         
         #wpt, v_ref = env.convert_action_to_coord(strategy='local', action=ah)
-        print('v =', sh[4])
+        #print('v =', sh[4])
 
         #plt.legend(["position", "waypoint", "goal area", "heading", "steering angle"])
         plt.xlabel('x coordinate')
