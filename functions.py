@@ -5,8 +5,6 @@ import math
 import cmath
 import yaml
 from argparse import Namespace
-import math
-import numpy as np
 import bisect
 import sys
 import cubic_spline_planner
@@ -18,6 +16,7 @@ import time
 from numba import njit
 from numba import int32, int64, float32, float64,bool_    
 from numba.experimental import jitclass
+import pickle
 
 def load_config(path, fname):
     full_path = path + '/config/' + fname + '.yaml'
@@ -27,7 +26,6 @@ def load_config(path, fname):
     conf = Namespace(**conf_dict)
 
     return conf
-
 
 def add_angles(a1, a2):
     angle = (a1+a2)%(2*np.pi)
@@ -56,6 +54,72 @@ def sub_angles_complex(a1, a2):
     phase = cmath.phase(cpx)
 
     return phase
+
+def add_locations(x1=[0, 0], x2=[0, 0], dx=1):
+    # dx is a scaling factor
+    ret = [0.0, 0.0]
+    for i in range(2):
+        ret[i] = x1[i] + x2[i] * dx
+    return ret
+
+
+def get_distance(x1=[0, 0], x2=[0, 0]):
+    d = [0.0, 0.0]
+    for i in range(2):
+        d[i] = x1[i] - x2[i]
+    return np.linalg.norm(d)
+     
+def sub_locations(x1=[0, 0], x2=[0, 0], dx=1):
+    # dx is a scaling factor
+    ret = [0.0, 0.0]
+    for i in range(2):
+        ret[i] = x1[i] - x2[i] * dx
+    return ret
+
+
+
+def get_gradient(x1=[0, 0], x2=[0, 0]):
+    t = (x1[1] - x2[1])
+    b = (x1[0] - x2[0])
+    if b != 0:
+        return t / b
+    return 1000000 # near infinite gradient. 
+
+def transform_coords(x=[0, 0], theta=np.pi):
+    # i want this function to transform coords from one coord system to another
+    new_x = x[0] * np.cos(theta) - x[1] * np.sin(theta)
+    new_y = x[0] * np.sin(theta) + x[1] * np.cos(theta)
+
+    return np.array([new_x, new_y])
+
+def normalise_coords(x=[0, 0]):
+    r = x[0]/x[1]
+    y = np.sqrt(1/(1+r**2)) * abs(x[1]) / x[1] # carries the sign
+    x = y * r
+    return [x, y]
+
+def get_bearing(x1=[0, 0], x2=[0, 0]):
+    grad = get_gradient(x1, x2)
+    dx = x2[0] - x1[0]
+    th_start_end = np.arctan(grad)
+    if dx == 0:
+        if x2[1] - x1[1] > 0:
+            th_start_end = 0
+        else:
+            th_start_end = np.pi
+    elif th_start_end > 0:
+        if dx > 0:
+            th_start_end = np.pi / 2 - th_start_end
+        else:
+            th_start_end = -np.pi/2 - th_start_end
+    else:
+        if dx > 0:
+            th_start_end = np.pi / 2 - th_start_end
+        else:
+            th_start_end = - np.pi/2 - th_start_end
+
+    return th_start_end
+
 
 @njit(cache=True)
 def distance_between_points(x1, x2, y1, y2):

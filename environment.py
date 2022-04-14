@@ -16,6 +16,7 @@ from numba import njit
 from numba import int32, int64, float32, float64,bool_    
 from numba.experimental import jitclass
 import numba
+import mapping
 
 class environment():
 
@@ -66,15 +67,27 @@ class environment():
             self.path_tracker = path_tracker.local_path_tracker(self.track_dict)
         
         #Initialise map and goal settings
-        self.occupancy_grid, self.map_height, self.map_width, self.map_res = functions.map_generator(map_name = self.map_name)
+        self.occupancy_grid, self.map_height, c, self.map_res = functions.map_generator(map_name = self.map_name)
+        
+        map = mapping.map(self.map_name)
+        self.occupancy_grid = map.occupancy_grid
+        self.map_height = map.map_height
+        self.map_width = map.map_width
+        self.map_res = map.resolution
+
         self.s=2
 
         image_path = sys.path[0] + '/maps/' + input_dict['map_name'] + '.png'
         self.im = image.imread(image_path)
         
-        self.goal_x, self.goal_y, self.rx, self.ry, self.ryaw, self.rk, self.d = functions.generate_circle_goals()
+        #self.goal_x, self.goal_y, self.rx, self.ry, self.ryaw, self.rk, self.d = functions.generate_circle_goals()
         #self.goal_x, self.goal_y, self.rx, self.ry, self.ryaw, self.rk, self.d = functions.generate_berlin_goals()
         
+        map.find_centerline()
+        self.goal_x = map.centerline[:,0]
+        self.goal_y = map.centerline[:,1]
+        
+
         self.goals=[]
         self.max_goals_reached=False
 
@@ -191,11 +204,11 @@ class environment():
                     self.waypoint_history.append(waypoint)
                     self.action_step_history.append(act)
                 
-                #delta_ref = path_tracker.pure_pursuit(self.wheelbase, waypoint, self.x, self.y, self.theta)
-                if self.action_space=='discrete':
-                    delta_ref = math.pi/16-(math.pi/8)*(act/(self.num_actions-1))         
-                else:
-                    delta_ref = (math.pi/16)*act[0]       
+                delta_ref = path_tracker.pure_pursuit(self.wheelbase, waypoint, self.x, self.y, self.theta)
+                #if self.action_space=='discrete':
+                #    delta_ref = math.pi/16-(math.pi/8)*(act/(self.num_actions-1))         
+                #else:
+                #    delta_ref = (math.pi/16)*act[0]       
 
                 #delta_dot, a = self.control_system(self.delta, delta_ref, self.v, v_ref)
                 self.update_pose(delta_ref, v_ref)

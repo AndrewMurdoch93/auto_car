@@ -417,7 +417,7 @@ def test(agent_name, n_episodes, detect_issues, initial_conditions):
 
 if __name__=='__main__':
 
-   
+   '''
    agent_name = 'rainbow_end_to_end_0'
    
    main_dict = {'name': agent_name, 'max_episodes':5000, 'learning_method': 'rainbow', 'comment': 'vary layer sizes'}
@@ -467,7 +467,7 @@ if __name__=='__main__':
    a = trainingLoop(main_dict, agent_ddpg_dict, env_dict, load_agent='')
    a.train()
    #test(agent_name=agent_name, n_episodes=300, detect_issues=False, initial_conditions=True)
-   
+   '''
    
    '''
    agent_name = 'ddpg_fc_0'
@@ -631,10 +631,10 @@ if __name__=='__main__':
    #display_results.density_plot_progress(agent_names, legend, legend_title)
    
 
-   agent_name = 'rainbow_durations'
-   display_results.durations(agent_name, show_average=True, show_median=True)
+   #agent_name = 'ddpg_fc_2'
+   #display_results.durations(agent_name, show_average=True, show_median=True)
    #display_results.display_collision_distribution(agent_name)
-   #test(agent_name=agent_name, n_episodes=500, detect_issues=False, intial_conditions=True)
+   #test(agent_name=agent_name, n_episodes=300, detect_issues=False, initial_conditions=True)
    #display_results.display_train_parameters(agent_name=agent_name)
    #display_results.agent_progress_statistics(agent_name=agent_name)
    #display_results.learning_curve_progress(agent_name=agent_name, show_average=True, show_median=True)

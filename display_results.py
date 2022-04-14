@@ -534,9 +534,9 @@ def display_moving_agent(agent_name, load_history=False):
     im = image.imread(image_path)
     plt.imshow(im, extent=(0,30,0,30))
     
-    outfile=open('action_durations/' + agent_name + 'debug', 'wb')
-    pickle.dump(durations, outfile)
-    outfile.close()
+    #outfile=open('action_durations/' + agent_name + 'debug', 'wb')
+    #pickle.dump(durations, outfile)
+    #outfile.close()
     
     print(np.average(np.array(durations)[np.nonzero(np.array(durations))][1:-1]))  #duration without zeros and first action
     print(np.average(np.array(durations)[1:-1]))
