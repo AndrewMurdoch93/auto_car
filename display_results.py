@@ -690,7 +690,3 @@ def display_collision_distribution(agent_name):
     plt.plot(np.array(terminal_poses)[:,0], np.array(terminal_poses)[:,1], 'x')
     #sns.jointplot(x=np.array(terminal_poses)[:,0],y=np.array(terminal_poses)[:,1], kind="hex", alpha=0.5)
     plt.show()
-
-
-
-

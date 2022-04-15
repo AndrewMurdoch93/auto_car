@@ -316,7 +316,7 @@ def test(agent_name, n_episodes, detect_issues, initial_conditions):
    start_conditions = pickle.load(infile)
    infile.close()
 
-   env_dict['max_steps'] = 3000
+   env_dict['max_steps'] = 1000
 
    #env = environment(env_dict, start_condition={'x':15,'y':5,'theta':0,'goal':0})
    env = environment(env_dict)
@@ -351,7 +351,7 @@ def test(agent_name, n_episodes, detect_issues, initial_conditions):
       agent_dict['epsilon'] = 0
       a = agent_dueling_ddqn.agent(agent_dict)
    if main_dict['learning_method'] == 'rainbow':
-      agent_dict['epsilon'] = 0
+      agent_dict['epsilon'] = 0.01
       a = agent_rainbow.agent(agent_dict)
    if main_dict['learning_method'] == 'ddpg':
       a = agent_ddpg.agent(agent_dict)
@@ -393,7 +393,7 @@ def test(agent_name, n_episodes, detect_issues, initial_conditions):
       if episode%10==0:
          print('Test episode', episode, '| Progress = %.2f' % env.progress, '| Score = %.2f' % score)
 
-      if detect_issues==True and (env.progress>1):
+      if detect_issues==True and (score<-10):
          print('Stop condition met')
          print('Progress = ', env.progress)
          print('score = ', score)
@@ -413,14 +413,12 @@ def test(agent_name, n_episodes, detect_issues, initial_conditions):
    outfile.close()
 
 
-
-
 if __name__=='__main__':
 
-   '''
-   agent_name = 'rainbow_end_to_end_0'
    
-   main_dict = {'name': agent_name, 'max_episodes':5000, 'learning_method': 'rainbow', 'comment': 'vary layer sizes'}
+   agent_name = 'rainbow_end_to_end_circle_2'
+   
+   main_dict = {'name': agent_name, 'max_episodes':1000, 'learning_method': 'rainbow', 'comment': 'new map'}
 
    agent_dqn_dict = {'gamma':0.99, 'epsilon':1, 'eps_end':0.01, 'eps_dec':1/1000, 'lr':0.001, 'batch_size':64, 'max_mem_size':500000, 
                   'fc1_dims': 64, 'fc2_dims': 64, 'fc3_dims':64}
@@ -450,24 +448,24 @@ if __name__=='__main__':
 
    env_dict = {'sim_conf': functions.load_config(sys.path[0], "config"), 'save_history': False, 'map_name': 'circle'
             , 'max_steps': 1000, 'local_path': False, 'waypoint_strategy': 'local', 'wpt_arc': np.pi/2, 'action_space': 'discrete'
-            , 'reward_signal': {'goal_reached':0, 'out_of_bounds':-1, 'max_steps':0, 'collision':-1, 'backwards':-1, 'park':-0.5, 'time_step':-0.005, 'progress':10}
+            , 'reward_signal': {'goal_reached':0, 'out_of_bounds':-1, 'max_steps':0, 'collision':-1, 'backwards':-1, 'park':-0.5, 'time_step':-0.01, 'progress':10}
             , 'n_waypoints': 10, 'vel_select':[7], 'control_steps': 20, 'display': False, 'R':6, 'track_dict':{'k':0.1, 'Lfc':1}
             , 'lidar_dict': {'is_lidar':True, 'lidar_res':0.1, 'n_beams':8, 'max_range':20, 'fov':np.pi} } 
    
    a = trainingLoop(main_dict, agent_rainbow_dict, env_dict, load_agent='')
    a.train()
-   #test(agent_name=agent_name, n_episodes=300, detect_issues=False, initial_conditions=True)
+   test(agent_name=agent_name, n_episodes=500, detect_issues=True, initial_conditions=True)
    
-   agent_name = 'ddpg_end_to_end'
-   main_dict['name'] = agent_name
-   main_dict['learning_method'] = 'ddpg'
-   main_dict['max_episodes'] = 2000
-   env_dict['action_space'] = 'continuous'
-   env_dict['n_waypoints'] = 1
-   a = trainingLoop(main_dict, agent_ddpg_dict, env_dict, load_agent='')
-   a.train()
+   
+   #agent_name = 'ddpg_end_to_end'
+   #main_dict['name'] = agent_name
+   #main_dict['learning_method'] = 'ddpg'
+   #main_dict['max_episodes'] = 2000
+   #env_dict['action_space'] = 'continuous'
+   #env_dict['n_waypoints'] = 1
+   #a = trainingLoop(main_dict, agent_ddpg_dict, env_dict, load_agent='')
+   #a.train()
    #test(agent_name=agent_name, n_episodes=300, detect_issues=False, initial_conditions=True)
-   '''
    
    '''
    agent_name = 'ddpg_fc_0'
@@ -631,7 +629,7 @@ if __name__=='__main__':
    #display_results.density_plot_progress(agent_names, legend, legend_title)
    
 
-   #agent_name = 'ddpg_fc_2'
+   #agent_name = 'rainbow_end_to_end_circle'
    #display_results.durations(agent_name, show_average=True, show_median=True)
    #display_results.display_collision_distribution(agent_name)
    #test(agent_name=agent_name, n_episodes=300, detect_issues=False, initial_conditions=True)

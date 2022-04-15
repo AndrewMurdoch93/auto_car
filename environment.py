@@ -70,20 +70,20 @@ class environment():
         #Initialise map and goal settings
         #self.occupancy_grid, self.map_height, c, self.map_res = functions.map_generator(map_name = self.map_name)
         
-        map = mapping.map(self.map_name)
-        self.occupancy_grid = map.occupancy_grid
-        self.map_height = map.map_height
-        self.map_width = map.map_width
-        self.map_res = map.resolution
+        track = mapping.map(self.map_name)
+        self.occupancy_grid = track.occupancy_grid
+        self.map_height = track.map_height
+        self.map_width = track.map_width
+        self.map_res = track.resolution
 
         self.s=2
 
         image_path = sys.path[0] + '/maps/' + input_dict['map_name'] + '.png'
         self.im = image.imread(image_path)
         
-        map.find_centerline()
-        self.goal_x = map.centerline[:,0]
-        self.goal_y = map.centerline[:,1]
+        track.find_centerline()
+        self.goal_x = track.centerline[:,0]
+        self.goal_y = track.centerline[:,1]
         self.goals=[]
         self.max_goals_reached=False
         for x,y in zip(self.goal_x, self.goal_y):
@@ -205,12 +205,14 @@ class environment():
                     self.action_step_history.append(act)
                 
                 delta_ref = path_tracker.pure_pursuit(self.wheelbase, waypoint, self.x, self.y, self.theta)
+                
                 #if self.action_space=='discrete':
                 #    delta_ref = math.pi/16-(math.pi/8)*(act/(self.num_actions-1))         
                 #else:
                 #    delta_ref = (math.pi/16)*act[0]       
 
                 #delta_dot, a = self.control_system(self.delta, delta_ref, self.v, v_ref)
+                
                 self.update_pose(delta_ref, v_ref)
                 self.update_variables()
                 self.steps += 1
@@ -274,6 +276,7 @@ class environment():
                 #plt.plot(self.x, self.y, 'x')
                 #plt.plot(self.rx[self.det_prg.old_nearest_point_index], self.ry[self.det_prg.old_nearest_point_index], 'x')
                 #plt.show()
+                
                 i+=1
                 done = self.isEnd()
                 if done == True:
@@ -284,9 +287,6 @@ class environment():
                 if self.save_history == True:
                     self.save_history_func()
                 
-   
-                
-
         return self.observation, reward, done
     
 
@@ -295,7 +295,7 @@ class environment():
         current_goal = self.goals[self.current_goal]
         plt.cla()
         plt.gcf().canvas.mpl_connect('key_release_event', lambda event: [exit(0) if event.key == 'escape' else None])
-        plt.imshow(self.im, extent=(0,30,0,30))
+        plt.imshow(self.im, extent=(0,self.map_width,0,self.map_height))
         
         if self.local_path==True:
             plt.plot(self.path_tracker.cx, self.path_tracker.cy)
@@ -320,8 +320,8 @@ class environment():
         plt.plot(self.rx[self.old_closest_point], self.ry[self.old_closest_point], 'x')
         plt.xlabel('x coordinate')
         plt.ylabel('y coordinate')
-        plt.xlim([0,30])
-        plt.ylim([0,30])
+        plt.xlim([0,self.map_width])
+        plt.ylim([0,self.map_height])
         plt.title('Episode history')
         plt.pause(0.001)
 
@@ -623,10 +623,10 @@ class environment():
 
 def test_environment():
     
-    agent_name = 'circle_v_ref_0'
+    agent_name = 'rainbow_end_to_end_circle_1'
     replay_episode_name = 'replay_episodes/' + agent_name
     
-    '''
+    
     infile=open(replay_episode_name, 'rb')
     action_history = pickle.load(infile)
     initial_condition = pickle.load(infile)
@@ -636,26 +636,25 @@ def test_environment():
     env_dict = pickle.load(infile)
     infile.close()
     env_dict['display']=True
-    '''
+    
 
     
-    env_dict = {'name':'test_agent', 'sim_conf': functions.load_config(sys.path[0], "config"), 'save_history': False, 'map_name': 'circle'
-            , 'max_steps': 1000, 'local_path': True, 'waypoint_strategy': 'local', 'wpt_arc': np.pi/2, 'action_space': 'continuous'
-            , 'reward_signal': {'goal_reached':0, 'out_of_bounds':-1, 'max_steps':0, 'collision':-1, 'backwards':-1, 'park':-0.5, 'time_step':-0.01, 'progress':10}
-            , 'n_waypoints': 11, 'vel_select':[7], 'control_steps': 20
-            , 'display': True, 'R':6, 'track_dict':{'k':0.1, 'Lfc':2}
-            , 'lidar_dict': {'is_lidar':True, 'lidar_res':0.1, 'n_beams':10, 'max_range':20, 'fov':np.pi} } 
+    #env_dict = {'sim_conf': functions.load_config(sys.path[0], "config"), 'save_history': False, 'map_name': 'circle'
+    #        , 'max_steps': 1000, 'local_path': False, 'waypoint_strategy': 'local', 'wpt_arc': np.pi/2, 'action_space': 'discrete'
+    #        , 'reward_signal': {'goal_reached':0, 'out_of_bounds':-1, 'max_steps':0, 'collision':-1, 'backwards':-1, 'park':-0.5, 'time_step':-0.01, 'progress':10}
+    #        , 'n_waypoints': 10, 'vel_select':[7], 'control_steps': 20, 'display': False, 'R':6, 'track_dict':{'k':0.1, 'Lfc':1}
+    #        , 'lidar_dict': {'is_lidar':True, 'lidar_res':0.1, 'n_beams':8, 'max_range':20, 'fov':np.pi} } 
     
     #initial_condition={'x':8.18, 'y':26.24, 'v':4, 'delta':0, 'theta':np.pi, 'goal':1}
-    initial_condition={'x':15, 'y':5, 'v':7, 'delta':0, 'theta':0, 'goal':1}
+    #initial_condition={'x':15, 'y':5, 'v':7, 'delta':0, 'theta':0, 'goal':1}
     #initial_condition = []
 
     env = environment(env_dict)
-    #env.reset(save_history=True, start_condition=initial_condition)
+    env.reset(save_history=True, start_condition=initial_condition)
     
     done=False
     
-    action_history = np.ones(8)*0.1
+    #action_history = np.ones(8)*0.1
 
     score=0
     i=0
