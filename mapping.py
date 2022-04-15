@@ -102,9 +102,9 @@ class map:
         
         self.centerline = self.centerline[1:-1,:] 
         
-        plt.imshow(self.gray_im, extent=(0,self.map_width,0,self.map_height))
-        plt.plot(self.centerline[:,0], self.centerline[:,1], 'x')
-        plt.show()
+        #plt.imshow(self.gray_im, extent=(0,self.map_width,0,self.map_height))
+        #plt.plot(self.centerline[:,0], self.centerline[:,1], 'x')
+        #plt.show()
 
     def plot_raceline_finding(self, wait=False):
         plt.figure(1)
@@ -140,8 +140,14 @@ class map:
 
 
 m = map('columbia')
-m.find_centerline()
+m.find_centerline(True)
+
+
+c = np.reshape(np.append(m.centerline, m.centerline[0,:]), (int(len(np.append(m.centerline, m.centerline[0,:]))/2), 2))
+rx, ry, ryaw, rk, d = cubic_spline_planner.calc_spline_course(c[:,0], c[:,1])
 
 plt.imshow(m.gray_im, extent=(0,m.map_width,0,m.map_height))
+
+plt.plot(rx, ry)
 plt.plot(m.centerline[:,0], m.centerline[:,1], 'x')
 plt.show()

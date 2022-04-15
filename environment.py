@@ -17,6 +17,7 @@ from numba import int32, int64, float32, float64,bool_
 from numba.experimental import jitclass
 import numba
 import mapping
+import cubic_spline_planner
 
 class environment():
 
@@ -67,7 +68,7 @@ class environment():
             self.path_tracker = path_tracker.local_path_tracker(self.track_dict)
         
         #Initialise map and goal settings
-        self.occupancy_grid, self.map_height, c, self.map_res = functions.map_generator(map_name = self.map_name)
+        #self.occupancy_grid, self.map_height, c, self.map_res = functions.map_generator(map_name = self.map_name)
         
         map = mapping.map(self.map_name)
         self.occupancy_grid = map.occupancy_grid
@@ -80,20 +81,19 @@ class environment():
         image_path = sys.path[0] + '/maps/' + input_dict['map_name'] + '.png'
         self.im = image.imread(image_path)
         
-        #self.goal_x, self.goal_y, self.rx, self.ry, self.ryaw, self.rk, self.d = functions.generate_circle_goals()
-        #self.goal_x, self.goal_y, self.rx, self.ry, self.ryaw, self.rk, self.d = functions.generate_berlin_goals()
-        
         map.find_centerline()
         self.goal_x = map.centerline[:,0]
         self.goal_y = map.centerline[:,1]
-        
-
         self.goals=[]
         self.max_goals_reached=False
-
         for x,y in zip(self.goal_x, self.goal_y):
             self.goals.append([x, y])
+
+        #self.goal_x, self.goal_y, self.rx, self.ry, self.ryaw, self.rk, self.d = functions.generate_circle_goals()
+        #self.goal_x, self.goal_y, self.rx, self.ry, self.ryaw, self.rk, self.d = functions.generate_berlin_goals()
         
+        self.rx, self.ry, self.ryaw, self.rk, self.d = cubic_spline_planner.calc_spline_course(self.goal_x, self.goal_y)
+
         #Car sensors - lidar
         if self.lidar_dict['is_lidar']==True:
             lidar_res=self.lidar_dict['lidar_res']
