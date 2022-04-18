@@ -316,7 +316,7 @@ def test(agent_name, n_episodes, detect_issues, initial_conditions):
    start_conditions = pickle.load(infile)
    infile.close()
 
-   env_dict['max_steps'] = 3000
+   env_dict['max_steps'] = 1000
 
    #env = environment(env_dict, start_condition={'x':15,'y':5,'theta':0,'goal':0})
    env = environment(env_dict)
@@ -415,8 +415,8 @@ def test(agent_name, n_episodes, detect_issues, initial_conditions):
 
 if __name__=='__main__':
 
-   
-   agent_name = 'rb_col_standard'
+   '''
+   agent_name = 'rb_col_new'
    
    main_dict = {'name': agent_name, 'max_episodes':5000, 'learning_method': 'rainbow', 'comment': ''}
 
@@ -430,7 +430,7 @@ if __name__=='__main__':
                            'replace':100, 'fc1_dims':64, 'fc2_dims':64}
    
    agent_rainbow_dict = {'gamma':0.99, 'epsilon':1, 'eps_end':0.01, 'eps_dec':1/1000, 'alpha':0.001/4, 'batch_size':64, 'max_mem_size':500000, 
-                           'replay_alpha':0.6, 'replay_beta_0':0.7, 'replace':100, 'fc1_dims':64, 'fc2_dims':64}
+                           'replay_alpha':0.6, 'replay_beta_0':0.7, 'replace':100, 'fc1_dims':100, 'fc2_dims':100}
    
    agent_reinforce_dict = {'alpha':0.001, 'gamma':0.99, 'fc1_dims':256, 'fc2_dims':256}
 
@@ -448,15 +448,15 @@ if __name__=='__main__':
 
    env_dict = {'sim_conf': functions.load_config(sys.path[0], "config"), 'save_history': False, 'map_name': 'columbia_1'
             , 'max_steps': 1000, 'local_path': False, 'waypoint_strategy': 'local', 'wpt_arc': np.pi/2, 'action_space': 'discrete'
-            , 'reward_signal': {'goal_reached':0, 'out_of_bounds':-1, 'max_steps':0, 'collision':-1, 'backwards':-1, 'park':-0.5, 'time_step':-0.005, 'progress':0, 'distance':0.158}
-            , 'n_waypoints': 10, 'vel_select':[7], 'control_steps': 20, 'display': False, 'R':3, 'track_dict':{'k':0.1, 'Lfc':1}
+            , 'reward_signal': {'goal_reached':0, 'out_of_bounds':-1, 'max_steps':0, 'collision':-1, 'backwards':-1, 'park':-0.5, 'time_step':-0.005, 'progress':0, 'distance':0.3}
+            , 'n_waypoints': 10, 'vel_select':[7], 'control_steps': 15, 'display': False, 'R':3, 'track_dict':{'k':0.1, 'Lfc':1}
             , 'lidar_dict': {'is_lidar':True, 'lidar_res':0.1, 'n_beams':8, 'max_range':20, 'fov':np.pi} } 
    
    a = trainingLoop(main_dict, agent_rainbow_dict, env_dict, load_agent='')
    a.train()
    test(agent_name=agent_name, n_episodes=300, detect_issues=False, initial_conditions=False)
-
-
+   '''
+   '''
    agent_name = 'rb_col_fc_1'
    main_dict['name'] = agent_name
    agent_rainbow_dict['fc1_dims'] = 100
@@ -559,6 +559,7 @@ if __name__=='__main__':
    a.train()
    test(agent_name=agent_name, n_episodes=300, detect_issues=False, initial_conditions=False)
 
+   '''
 
    #agent_name = 'ddpg_end_to_end'
    #main_dict['name'] = agent_name
@@ -571,176 +572,52 @@ if __name__=='__main__':
    #test(agent_name=agent_name, n_episodes=300, detect_issues=False, initial_conditions=True)
    
    
-   
-   
-   '''
-   agent_name = 'ddpg_fc_0'
-   main_dict['name'] = agent_name
-   agent_ddpg_dict['layer1_size']=25
-   agent_ddpg_dict['layer2_size']=25
-   a = trainingLoop(main_dict, agent_ddpg_dict, env_dict, load_agent='')
-   a.train()
-   test(agent_name=agent_name, n_episodes=300, detect_issues=False, initial_conditions=True)
-
-   agent_name = 'ddpg_fc_1'
-   main_dict['name'] = agent_name
-   agent_ddpg_dict['layer1_size']=50
-   agent_ddpg_dict['layer2_size']=50
-   a = trainingLoop(main_dict, agent_ddpg_dict, env_dict, load_agent='')
-   a.train()
-   test(agent_name=agent_name, n_episodes=300, detect_issues=False, initial_conditions=True)
-
-   
-   agent_name = 'ddpg_fc_2'
-   main_dict['name'] = agent_name
-   agent_ddpg_dict['layer1_size']=100
-   agent_ddpg_dict['layer2_size']=100
-   a = trainingLoop(main_dict, agent_ddpg_dict, env_dict, load_agent='')
-   a.train()
-   test(agent_name=agent_name, n_episodes=300, detect_issues=False, initial_conditions=True)
-
-      
-   agent_name = 'ddpg_fc_3'
-   main_dict['name'] = agent_name
-   agent_ddpg_dict['layer1_size']=200
-   agent_ddpg_dict['layer2_size']=200
-   a = trainingLoop(main_dict, agent_ddpg_dict, env_dict, load_agent='')
-   a.train()
-   test(agent_name=agent_name, n_episodes=300, detect_issues=False, initial_conditions=True)
-
-   agent_name = 'ddpg_fc_4'
-   main_dict['name'] = agent_name
-   agent_ddpg_dict['layer1_size']=400
-   agent_ddpg_dict['layer2_size']=400
-   a = trainingLoop(main_dict, agent_ddpg_dict, env_dict, load_agent='')
-   a.train()
-   test(agent_name=agent_name, n_episodes=300, detect_issues=False, initial_conditions=True)
-   
-   agent_name = 'rainbow_fc_0'
-   main_dict['name'] = agent_name
-   main_dict['learning_method'] = 'rainbow'
-   agent_rainbow_dict['fc1_dims']=25
-   agent_rainbow_dict['fc2_dims']=25
-   env_dict['action_space'] = 'discrete'
-   env_dict['n_waypoints'] = 10
-   a = trainingLoop(main_dict, agent_rainbow_dict, env_dict, load_agent='')
-   a.train()
-   test(agent_name=agent_name, n_episodes=300, detect_issues=False, initial_conditions=True)
-
-   agent_name = 'rainbow_fc_1'
-   main_dict['name'] = agent_name
-   agent_rainbow_dict['fc1_dims']=50
-   agent_rainbow_dict['fc2_dims']=50
-   a = trainingLoop(main_dict, agent_rainbow_dict, env_dict, load_agent='')
-   a.train()
-   test(agent_name=agent_name, n_episodes=300, detect_issues=False, initial_conditions=True)
-
-   agent_name = 'rainbow_fc_2'
-   main_dict['name'] = agent_name
-   agent_rainbow_dict['fc1_dims']=100
-   agent_rainbow_dict['fc2_dims']=100
-   a = trainingLoop(main_dict, agent_rainbow_dict, env_dict, load_agent='')
-   a.train()
-   test(agent_name=agent_name, n_episodes=300, detect_issues=False, initial_conditions=True)
-
-   agent_name = 'rainbow_fc_3'
-   main_dict['name'] = agent_name
-   agent_rainbow_dict['fc1_dims']=200
-   agent_rainbow_dict['fc2_dims']=200
-   a = trainingLoop(main_dict, agent_rainbow_dict, env_dict, load_agent='')
-   a.train()
-   test(agent_name=agent_name, n_episodes=300, detect_issues=False, initial_conditions=True)
-
-   
-   agent_name = 'rainbow_fc_4'
-   main_dict['name'] = agent_name
-   agent_rainbow_dict['fc1_dims']=400
-   agent_rainbow_dict['fc2_dims']=400
-   a = trainingLoop(main_dict, agent_rainbow_dict, env_dict, load_agent='')
-   a.train()
-   test(agent_name=agent_name, n_episodes=300, detect_issues=False, initial_conditions=True)
-   '''
-
-   '''
-   agent_name = 'reinforce_redo'
-   main_dict['name'] = agent_name
-   main_dict['learning_method']='reinforce'
-   main_dict['max_episodes']=5000
-   #a = trainingLoop(main_dict, agent_reinforce_dict, env_dict, load_agent='')
-   #a.train()
-   #test(agent_name=agent_name, n_episodes=300, detect_issues=False)
-
-   agent_name = 'reinforce_vel_1_7_redo'
-   main_dict['name'] = agent_name
-   env_dict['vel_select'] = [1,7]
-   #a = trainingLoop(main_dict, agent_reinforce_dict, env_dict, load_agent='')
-   #a.train()
-   #test(agent_name=agent_name, n_episodes=300, detect_issues=False)
-
-   agent_name = 'actor_critic_sep_vel_1_7'
-   main_dict['name'] = agent_name
-   main_dict['learning_method'] = 'actor_critic_sep'
-   env_dict['vel_select'] = [1,7]
-   #a = trainingLoop(main_dict, agent_actor_critic_sep_dict, env_dict, load_agent='')
-   #a.train()
-   #test(agent_name=agent_name, n_episodes=300, detect_issues=False)
-
-   agent_name = 'dqn'
-   main_dict['name'] = agent_name
-   main_dict['learning_method'] = 'dqn'
-   env_dict['vel_select'] = [7]
-   a = trainingLoop(main_dict, agent_dqn_dict, env_dict, load_agent='')
-   a.train()
-   test(agent_name=agent_name, n_episodes=300, detect_issues=False)
-
-   agent_name = 'dqn_vel_1_7'
-   main_dict['name'] = agent_name
-   main_dict['learning_method'] = 'dqn'
-   env_dict['vel_select'] = [1, 7]
-   a = trainingLoop(main_dict, agent_dqn_dict, env_dict, load_agent='')
-   a.train()
-   test(agent_name=agent_name, n_episodes=300, detect_issues=False)
-   '''
-
-   #agent_names = ['dqn', 'PER_tree_0', 'dueling_ddqn', 'dueling_dqn', 'reinforce_new', 'actor_critic', 'actor_critic_cont']
-   #legend_title = 'Learning method'
-   #legend = ['dqn', 'dueling ddqn PER', 'dueling ddqn', 'dueling dqn', 'reinforce_new', 'actor critic', 'actor_critic_cont']
-   
-   #agent_names = ['dqn', 'PER_tree_0', 'dueling_ddqn', 'dueling_dqn']
-   #legend_title = 'Learning method'
-   #legend = ['dqn', 'dueling ddqn PER', 'dueling ddqn', 'dueling dqn']
-
-   #agent_names = ['rainbow_fc_0', 'rainbow_fc_1', 'rainbow_fc_2', 'rainbow_fc_3', 'rainbow_fc_4']
+   #agent_names = ['rb_col_standard', 'rb_col_fc_1', 'rb_col_fc_2']
    #legend_title = 'agent'
-   #legend = ['rainbow_fc_0', 'rainbow_fc_1', 'rainbow_fc_2', 'rainbow_fc_3', 'rainbow_fc_4']
-   #display_results.compare_learning_curves_progress(agent_names, legend, legend_title, show_average=True, show_median=False, xaxis='episodes')
-   #display_results.compare_learning_curves_progress(agent_names, legend, legend_title, show_average=True, show_median=False, xaxis='steps')
-   #display_results.compare_learning_curves_progress(agent_names, legend, legend_title, show_average=True, show_median=False, xaxis='times')
-   #display_results.density_plot_progress(agent_names, legend, legend_title)
-   
-   #agent_names = ['ddpg_fc_0', 'ddpg_fc_1', 'ddpg_fc_2', 'ddpg_fc_3', 'ddpg_fc_4']
-   #legend_title = 'agent'
-   #legend = ['ddpg_fc_0', 'ddpg_fc_1', 'ddpg_fc_2', 'ddpg_fc_3', 'ddpg_fc_4']
+   #legend = ['rb_col_standard',  'rb_col_fc_1', 'rb_col_fc_2']
    #display_results.compare_learning_curves_progress(agent_names, legend, legend_title, show_average=True, show_median=False, xaxis='episodes')
    #display_results.compare_learning_curves_progress(agent_names, legend, legend_title, show_average=True, show_median=False, xaxis='steps')
    #display_results.compare_learning_curves_progress(agent_names, legend, legend_title, show_average=True, show_median=False, xaxis='times')
    #display_results.density_plot_progress(agent_names, legend, legend_title)
 
-   #agent_names = ['ddpg_fc_0', 'rainbow_fc_0']
+   #agent_names = [ 'rb_col_R_0', 'rb_col_standard',  'rb_col_R_1',  'rb_col_R_2',  'rb_col_R_3']
    #legend_title = 'agent'
-   #legend = ['ddpg_fc_0', 'rainbow_fc_0']
+   #legend = [ 'rb_col_R_0', 'rb_col_standard',  'rb_col_R_1',  'rb_col_R_2',  'rb_col_R_3']
+   #display_results.compare_learning_curves_progress(agent_names, legend, legend_title, show_average=True, show_median=False, xaxis='episodes')
+   #display_results.compare_learning_curves_progress(agent_names, legend, legend_title, show_average=True, show_median=False, xaxis='steps')
+   #display_results.compare_learning_curves_progress(agent_names, legend, legend_title, show_average=True, show_median=False, xaxis='times')
+   #display_results.density_plot_progress(agent_names, legend, legend_title)
+
+   #agent_names = [ 'rb_col_cs_0', 'rb_col_cs_1', 'rb_col_standard',  'rb_col_cs_2']
+   #legend_title = 'agent'
+   #legend = ['rb_col_cs_0', 'rb_col_cs_1', 'rb_col_standard',  'rb_col_cs_2']
+   #display_results.compare_learning_curves_progress(agent_names, legend, legend_title, show_average=True, show_median=False, xaxis='episodes')
+   #display_results.compare_learning_curves_progress(agent_names, legend, legend_title, show_average=True, show_median=False, xaxis='steps')
+   #display_results.compare_learning_curves_progress(agent_names, legend, legend_title, show_average=True, show_median=False, xaxis='times')
+   #display_results.density_plot_progress(agent_names, legend, legend_title)
+
+   #agent_names = [ 'rb_col_cs_0', 'rb_col_cs_1', 'rb_col_standard',  'rb_col_cs_2']
+   #legend_title = 'agent'
+   #legend = ['rb_col_cs_0', 'rb_col_cs_1', 'rb_col_standard',  'rb_col_cs_2']
    #display_results.compare_learning_curves_progress(agent_names, legend, legend_title, show_average=True, show_median=False, xaxis='episodes')
    #display_results.compare_learning_curves_progress(agent_names, legend, legend_title, show_average=True, show_median=False, xaxis='steps')
    #display_results.compare_learning_curves_progress(agent_names, legend, legend_title, show_average=True, show_median=False, xaxis='times')
    #display_results.density_plot_progress(agent_names, legend, legend_title)
    
+   #agent_names = ['rb_col_standard', 'rb_col_rs_0', 'rb_col_rs_1', 'rb_col_rs_2',  'rb_col_rs_3']
+   #legend_title = 'agent'
+   #legend = ['rb_col_standard', 'rb_col_rs_0', 'rb_col_rs_1', 'rb_col_rs_2',  'rb_col_rs_3']
+   #display_results.compare_learning_curves_progress(agent_names, legend, legend_title, show_average=True, show_median=False, xaxis='episodes')
+   #display_results.compare_learning_curves_progress(agent_names, legend, legend_title, show_average=True, show_median=False, xaxis='steps')
+   #display_results.compare_learning_curves_progress(agent_names, legend, legend_title, show_average=True, show_median=False, xaxis='times')
+   #display_results.density_plot_progress(agent_names, legend, legend_title)
 
-   #agent_name = 'rainbow_end_to_end_col'
+   agent_name = 'rb_col_new'
    #display_results.durations(agent_name, show_average=True, show_median=True)
    #display_results.display_collision_distribution(agent_name)
-   #test(agent_name=agent_name, n_episodes=300, detect_issues=False, initial_conditions=False)
+   test(agent_name=agent_name, n_episodes=300, detect_issues=False, initial_conditions=False)
    #display_results.display_train_parameters(agent_name=agent_name)
-   #display_results.agent_progress_statistics(agent_name=agent_name)
+   display_results.agent_progress_statistics(agent_name=agent_name)
    #display_results.learning_curve_progress(agent_name=agent_name, show_average=True, show_median=True)
    #display_results.density_plot_progress([agent_name], legend=[''], legend_title='')
    #display_results.display_moving_agent(agent_name=agent_name, load_history=False)
@@ -751,12 +628,10 @@ if __name__=='__main__':
    #legend_title = 'agent name'
    #display_results.density_plot_action_duration(agent_names, legend, legend_title)
 
-    
    #agent_names = ['ddpg_fc_0', 'ddpg_fc_1', 'ddpg_fc_2', 'ddpg_fc_3', 'ddpg_fc_4']
    #legend = ['fc_0', 'fc_1',  'fc_2',  'fc_3',  'fc_4']
    #legend_title = 'agent name'
    #display_results.density_plot_action_duration(agent_names, legend, legend_title)
-
 
    #display_results.compare_learning_curves_progress([agent_name], [''], [''], xaxis='times')
    #display_results.display_train_parameters(agent_name=agent_name)
