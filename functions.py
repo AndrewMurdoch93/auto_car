@@ -204,7 +204,7 @@ def map_generator(map_name):
    
 def random_start(x, y, rx, ry, ryaw, rk, s, episode):
     
-    offset=1
+    offset=0.3
     random.seed(datetime.now())
     '''
     if episode < 20000:
@@ -230,7 +230,7 @@ def random_start(x, y, rx, ry, ryaw, rk, s, episode):
     start_x = x[i] + (random.uniform(-offset, offset))
     start_y = y[i] + (random.uniform(-offset, offset))
     
-    start_theta = math.atan2(y[next_i]-start_y, x[next_i]-start_x) + (random.uniform(-math.pi/5, math.pi/5))
+    start_theta = math.atan2(y[next_i]-y[i], x[next_i]-x[i]) + (random.uniform(-math.pi/6, math.pi/6))
     next_goal = (i+1)%len(x)
 
     return start_x, start_y, start_theta, next_i

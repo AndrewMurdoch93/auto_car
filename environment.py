@@ -177,6 +177,7 @@ class environment():
         self.steps = 0
         self.goals_reached = 0
         self.progress = 0
+        self.current_distance = 0
         #self.det_prg.search_index(self.x, self.y)
         self.old_closest_point = functions.find_closest_point(self.rx, self.ry, self.x, self.y)
         #Initialise state and observation vector 
@@ -499,7 +500,7 @@ class environment():
             reward=0
             reward+=self.reward_signal['time_step']
             reward+=self.current_progress * self.reward_signal['progress']
-            
+            reward+=self.current_distance *  self.reward_signal['distance']
             #reward += self.vel_par_line * (1/self.max_v) * self.reward_signal[6]
             #reward += np.abs(self.angle_to_line) * (1/(np.pi)) * self.reward_signal[7]
             #reward += self.dist_to_line * self.reward_signal[8]
@@ -569,6 +570,9 @@ class environment():
 
         self.progress += self.current_progress
         
+        self.current_distance = self.current_progress*self.d[-1]
+        
+
         '''
         print('old point = ', self.old_closest_point)
         print('new point = ', new_closest_point)
@@ -623,7 +627,7 @@ class environment():
 
 def test_environment():
     
-    agent_name = 'rainbow_end_to_end_circle_1'
+    agent_name = 'rainbow_distance'
     replay_episode_name = 'replay_episodes/' + agent_name
     
     

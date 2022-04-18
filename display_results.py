@@ -543,7 +543,7 @@ def display_moving_agent(agent_name, load_history=False):
     
     for i in range(len(env.waypoint_history)):
         plt.cla()
-        plt.imshow(im, extent=(0,30,0,30))
+        plt.imshow(im, extent=(0,env.map_width,0,env.map_height))
         sh=env.pose_history[i]
         plt.arrow(sh[0], sh[1], 0.5*math.cos(sh[2]), 0.5*math.sin(sh[2]), head_length=0.5, head_width=0.5, shape='full', ec='None', fc='blue')
         plt.arrow(sh[0], sh[1], 0.5*math.cos(sh[2]+sh[3]), 0.5*math.sin(sh[2]+sh[3]), head_length=0.5, head_width=0.5, shape='full',ec='None', fc='red')
@@ -578,8 +578,8 @@ def display_moving_agent(agent_name, load_history=False):
         #plt.legend(["position", "waypoint", "goal area", "heading", "steering angle"])
         plt.xlabel('x coordinate')
         plt.ylabel('y coordinate')
-        plt.xlim([0,30])
-        plt.ylim([0,30])
+        plt.xlim([0,env.map_width])
+        plt.ylim([0,env.map_height])
         #plt.grid(True)
         plt.title('Episode history')
         #print('Progress = ', ph)
@@ -656,13 +656,13 @@ def display_path(agent_name, load_history=False):
 
     image_path = sys.path[0] + '/maps/' + env.map_name + '.png'
     im = image.imread(image_path)
-    plt.imshow(im, extent=(0,30,0,30))
+    plt.imshow(im, extent=(0,env.map_width,0,env.map_height))
     plt.plot(np.array(env.pose_history)[:,0], np.array(env.pose_history)[:,1])
     plt.plot(env.rx, env.ry)
     plt.xlabel('x coordinate')
     plt.ylabel('y coordinate')
-    plt.xlim([0,30])
-    plt.ylim([0,30])
+    plt.xlim([0,env.map_width])
+    plt.ylim([0,env.map_height])
     #plt.grid(True)
     plt.title('Agent path')
     plt.show()
@@ -686,7 +686,7 @@ def display_collision_distribution(agent_name):
 
     image_path = sys.path[0] + '/maps/' + env_dict['map_name'] + '.png'
     im = image.imread(image_path)
-    plt.imshow(im, extent=(0,30,0,30))
+    plt.imshow(im)
     plt.plot(np.array(terminal_poses)[:,0], np.array(terminal_poses)[:,1], 'x')
     #sns.jointplot(x=np.array(terminal_poses)[:,0],y=np.array(terminal_poses)[:,1], kind="hex", alpha=0.5)
     plt.show()
