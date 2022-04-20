@@ -205,12 +205,12 @@ class environment():
                     self.waypoint_history.append(waypoint)
                     self.action_step_history.append(act)
                 
-                delta_ref = path_tracker.pure_pursuit(self.wheelbase, waypoint, self.x, self.y, self.theta)
+                #delta_ref = path_tracker.pure_pursuit(self.wheelbase, waypoint, self.x, self.y, self.theta)
                 
-                #if self.action_space=='discrete':
-                #    delta_ref = math.pi/16-(math.pi/8)*(act/(self.num_actions-1))         
-                #else:
-                #    delta_ref = (math.pi/16)*act[0]       
+                if self.action_space=='discrete':
+                    delta_ref = math.pi/16-(math.pi/8)*(act/(self.num_actions-1))         
+                else:
+                    delta_ref = (math.pi/16)*act[0]       
 
                 #delta_dot, a = self.control_system(self.delta, delta_ref, self.v, v_ref)
                 
