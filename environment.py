@@ -46,6 +46,7 @@ class environment():
         self.track_dict = input_dict['track_dict']
         self.lidar_dict = input_dict['lidar_dict']
         self.action_space = input_dict['action_space']
+        self.path_strategy = 'circle'
 
         self.params = {'mu': 1.0489, 'C_Sf': 4.718, 'C_Sr': 5.4562, 'lf': 0.15875, 'lr': 0.17145
                     , 'h': 0.074, 'm': 3.74, 'I': 0.04712, 's_min': -0.4189, 's_max': 0.4189, 'sv_min': -3.2
@@ -194,7 +195,7 @@ class environment():
         reward = 0
         done=False
         
-        waypoint, v_ref = self.convert_action_to_coord(strategy=self.waypoint_strategy, action=act)
+        waypoint, wpt_angle, v_ref = self.convert_action_to_coord(strategy=self.waypoint_strategy, action=act)
 
         if self.local_path==False:
             for _ in range(self.control_steps):
@@ -238,8 +239,8 @@ class environment():
             #self.save_state(waypoint, reward)
            
         else:
-            cx = (((np.arange(0.1, 1, 0.01))*(waypoint[0] - self.x)) + self.x).tolist()
-            cy = ((np.arange(0.1, 1, 0.01))*(waypoint[1] - self.y) + self.y)
+            
+            cx, cy = self.define_path(waypoint, wpt_angle)
             self.path_tracker.record_waypoints(cx, cy)
             target_index, _ = self.path_tracker.search_target_waypoint(self.x, self.y, self.v)
 
@@ -290,6 +291,45 @@ class environment():
                 
         return self.observation, reward, done
     
+    def define_path(self, waypoint,  wpt_angle):
+        if self.path_strategy == 'linear':
+            cx = (((np.arange(0.1, 1, 0.01))*(waypoint[0] - self.x)) + self.x).tolist()
+            cy = ((np.arange(0.1, 1, 0.01))*(waypoint[1] - self.y) + self.y)
+
+        if self.path_strategy == 'circle':
+            R=self.R*np.sin(wpt_angle)/np.sin(np.pi-2*wpt_angle)
+
+            '''
+            a_1 = self.theta - np.pi/2
+            x_1 = self.x + R*np.cos(a_1)
+            y_1 = self.y + R*np.sin(a_1)
+
+            angles = np.linspace(np.pi, np.pi-2*wpt_angle)
+
+            cx_1 = np.cos(angles)
+            cy_1 = np.sin(angles)
+
+            #Convert coordinates to absolute reference frame:
+            cx = x_1 + cx_1*(np.cos(-a_1) - np.sin(-a_1))
+            cy = y_ 1 + cy_1*(np.sin(-a_1) + np.cos(-a_1))
+            '''
+            a = self.theta-np.pi/2
+            
+            angles = np.linspace(0,np.pi-2*wpt_angle)
+            x_car = R*(1 - np.cos(angles))
+            y_car = R*np.sin(angles)
+
+            cx = x_car*np.cos(-a) - y_car*np.sin(-a)
+            cy = x_car*np.sin(-a) + y_car*np.sin(-a)
+
+            plt.plot(x_car, y_car, 'x')
+            plt.plot(cx, cy)
+            plt.axis('equal')
+            plt.show()
+
+        return cx, cy
+
+
 
     def visualise(self, waypoint):
         
@@ -409,7 +449,7 @@ class environment():
                 waypoint = [int((action+1)%3), int((action+1)/3)]
 
             if strategy=='local':
-                waypoint_relative_angle = self.theta + self.wpt_arc -(2*self.wpt_arc)*(wpt/(self.num_waypoints-1))
+                waypoint_relative_angle = self.theta - self.wpt_arc +(2*self.wpt_arc)*(wpt/(self.num_waypoints-1))
                 waypoint = [self.x + self.R*math.cos(waypoint_relative_angle), self.y + self.R*math.sin(waypoint_relative_angle)]
             
             if strategy == 'waypoint':
@@ -442,7 +482,9 @@ class environment():
             waypoint = [self.x + self.R*math.cos(waypoint_relative_angle), self.y + self.R*math.sin(waypoint_relative_angle)]
             self.v_ref=self.vel_select[-1]
 
-        return waypoint, self.v_ref
+        wpt_angle =  waypoint_relative_angle-(self.theta-np.pi/2) #angle in cars reference frame
+
+        return waypoint,  wpt_angle, self.v_ref
 
     def set_flags(self):
         
@@ -630,7 +672,6 @@ def test_environment():
     agent_name = 'rainbow_distance'
     replay_episode_name = 'replay_episodes/' + agent_name
     
-    
     infile=open(replay_episode_name, 'rb')
     action_history = pickle.load(infile)
     initial_condition = pickle.load(infile)
@@ -643,22 +684,26 @@ def test_environment():
     
 
     
-    #env_dict = {'sim_conf': functions.load_config(sys.path[0], "config"), 'save_history': False, 'map_name': 'circle'
-    #        , 'max_steps': 1000, 'local_path': False, 'waypoint_strategy': 'local', 'wpt_arc': np.pi/2, 'action_space': 'discrete'
-    #        , 'reward_signal': {'goal_reached':0, 'out_of_bounds':-1, 'max_steps':0, 'collision':-1, 'backwards':-1, 'park':-0.5, 'time_step':-0.01, 'progress':10}
-    #        , 'n_waypoints': 10, 'vel_select':[7], 'control_steps': 20, 'display': False, 'R':6, 'track_dict':{'k':0.1, 'Lfc':1}
-    #        , 'lidar_dict': {'is_lidar':True, 'lidar_res':0.1, 'n_beams':8, 'max_range':20, 'fov':np.pi} } 
+    env_dict = {'sim_conf': functions.load_config(sys.path[0], "config"), 'save_history': False, 'map_name': 'columbia_1'
+            , 'max_steps': 500, 'local_path': True, 'waypoint_strategy': 'local', 'wpt_arc': np.pi/2, 'action_space': 'discrete'
+            , 'reward_signal': {'goal_reached':0, 'out_of_bounds':-1, 'max_steps':0, 'collision':-1, 'backwards':-1, 'park':-0.5, 'time_step':-0.005, 'progress':0, 'distance':0.3}
+            , 'n_waypoints': 10, 'vel_select':[7], 'control_steps': 15, 'display': True, 'R':3, 'track_dict':{'k':0.1, 'Lfc':1}
+            , 'lidar_dict': {'is_lidar':True, 'lidar_res':0.1, 'n_beams':8, 'max_range':20, 'fov':np.pi} } 
     
-    #initial_condition={'x':8.18, 'y':26.24, 'v':4, 'delta':0, 'theta':np.pi, 'goal':1}
-    #initial_condition={'x':15, 'y':5, 'v':7, 'delta':0, 'theta':0, 'goal':1}
+    env_dict['name'] = 'test'
+    #initial_condition = {'x':8.18, 'y':26.24, 'v':4, 'delta':0, 'theta':np.pi, 'goal':1}
+    #initial_condition = {'x':15, 'y':5, 'v':7, 'delta':0, 'theta':0, 'goal':1}
+    initial_condition = {'x':8, 'y':3, 'v':7, 'delta':0, 'theta':np.pi, 'goal':1}
     #initial_condition = []
+
+
 
     env = environment(env_dict)
     env.reset(save_history=True, start_condition=initial_condition)
     
     done=False
     
-    #action_history = np.ones(8)*0.1
+    action_history = np.ones(20)*1
 
     score=0
     i=0
