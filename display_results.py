@@ -206,7 +206,7 @@ def learning_curve_progress(agent_name, show_average=False, show_median=True):
 def durations(agent_name, show_average=False, show_median=True):
     window=100
 
-    file_name = 'action_durations/' + agent_name + '_train'
+    file_name = 'action_durations/' + agent_name
     
     infile = open(file_name, 'rb')
     durations = pickle.load(infile)
@@ -347,7 +347,7 @@ def density_plot_action_duration(agent_names, legend, legend_title):
     
     durations = []
     for a in agent_names:
-        results_file_name = 'action_durations/' + a + 'debug'
+        results_file_name = 'action_durations/' + a
         infile = open(results_file_name, 'rb')
         durations.append(pickle.load(infile))
         infile.close()
