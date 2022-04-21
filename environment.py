@@ -297,35 +297,31 @@ class environment():
             cy = ((np.arange(0.1, 1, 0.01))*(waypoint[1] - self.y) + self.y)
 
         if self.path_strategy == 'circle':
-            R=self.R*np.sin(wpt_angle)/np.sin(np.pi-2*wpt_angle)
+            if wpt_angle == np.pi:
+                cx = (((np.arange(0.1, 1, 0.01))*(waypoint[0] - self.x)) + self.x).tolist()
+                cy = ((np.arange(0.1, 1, 0.01))*(waypoint[1] - self.y) + self.y)
+            else:
+                R=self.R*np.sin(wpt_angle)/np.sin(np.pi-2*wpt_angle)
+                a = self.theta-np.pi/2
+                angles = np.linspace(0,np.pi-2*wpt_angle)
+                x_arc = R*(1 - np.cos(angles))
+                y_arc = R*np.sin(angles)
+                d_arc = np.sqrt(np.power(x_arc[1:-1], 2) + np.power(y_arc[1:-1], 2))
+                if wpt_angle<np.pi/2:
 
-            '''
-            a_1 = self.theta - np.pi/2
-            x_1 = self.x + R*np.cos(a_1)
-            y_1 = self.y + R*np.sin(a_1)
+                    a_arc = np.arctan(np.true_divide(y_arc[1:-1], x_arc[1:-1]))
+                   
+                if wpt_angle>np.pi/2:
+                    a_arc = np.arctan(np.true_divide(y_arc[1:-1], x_arc[1:-1]))+np.pi
+   
+                
+                cx = d_arc*np.cos(a_arc+a) + self.x
+                cy = d_arc*np.sin(a_arc+a) + self.y
 
-            angles = np.linspace(np.pi, np.pi-2*wpt_angle)
-
-            cx_1 = np.cos(angles)
-            cy_1 = np.sin(angles)
-
-            #Convert coordinates to absolute reference frame:
-            cx = x_1 + cx_1*(np.cos(-a_1) - np.sin(-a_1))
-            cy = y_ 1 + cy_1*(np.sin(-a_1) + np.cos(-a_1))
-            '''
-            a = self.theta-np.pi/2
-            
-            angles = np.linspace(0,np.pi-2*wpt_angle)
-            x_car = R*(1 - np.cos(angles))
-            y_car = R*np.sin(angles)
-
-            cx = x_car*np.cos(-a) - y_car*np.sin(-a)
-            cy = x_car*np.sin(-a) + y_car*np.sin(-a)
-
-            plt.plot(x_car, y_car, 'x')
-            plt.plot(cx, cy)
-            plt.axis('equal')
-            plt.show()
+            #plt.plot(x_arc, y_arc, 'x')
+            #plt.plot(cx, cy, 'o')
+            #plt.axis('equal')
+            #plt.show()
 
         return cx, cy
 
@@ -684,7 +680,7 @@ def test_environment():
     
 
     
-    env_dict = {'sim_conf': functions.load_config(sys.path[0], "config"), 'save_history': False, 'map_name': 'columbia_1'
+    env_dict = {'sim_conf': functions.load_config(sys.path[0], "config"), 'save_history': False, 'map_name': 'circle'
             , 'max_steps': 500, 'local_path': True, 'waypoint_strategy': 'local', 'wpt_arc': np.pi/2, 'action_space': 'discrete'
             , 'reward_signal': {'goal_reached':0, 'out_of_bounds':-1, 'max_steps':0, 'collision':-1, 'backwards':-1, 'park':-0.5, 'time_step':-0.005, 'progress':0, 'distance':0.3}
             , 'n_waypoints': 10, 'vel_select':[7], 'control_steps': 15, 'display': True, 'R':3, 'track_dict':{'k':0.1, 'Lfc':1}
@@ -692,8 +688,8 @@ def test_environment():
     
     env_dict['name'] = 'test'
     #initial_condition = {'x':8.18, 'y':26.24, 'v':4, 'delta':0, 'theta':np.pi, 'goal':1}
-    #initial_condition = {'x':15, 'y':5, 'v':7, 'delta':0, 'theta':0, 'goal':1}
-    initial_condition = {'x':8, 'y':3, 'v':7, 'delta':0, 'theta':np.pi, 'goal':1}
+    initial_condition = {'x':15, 'y':5, 'v':7, 'delta':0, 'theta':0, 'goal':1}
+    #initial_condition = {'x':8, 'y':3, 'v':7, 'delta':0, 'theta':np.pi, 'goal':1}
     #initial_condition = []
 
 
@@ -703,7 +699,7 @@ def test_environment():
     
     done=False
     
-    action_history = np.ones(20)*1
+    action_history = np.ones(20)*8
 
     score=0
     i=0
