@@ -28,29 +28,39 @@ class environment():
         self.initial_condition_name = 'initial_conditions/' + input_dict['name']
         self.history_file_name = 'history/' + input_dict['name'] 
 
+        self.input_dict = input_dict
+
         self.save_history = input_dict['save_history']
         self.sim_conf = input_dict['sim_conf']
         self.map_name = input_dict['map_name']
         self.max_steps = input_dict['max_steps']
-        self.local_path = input_dict['local_path']
-        self.waypoint_strategy = input_dict['waypoint_strategy']
-        self.reward_signal = input_dict['reward_signal']
-        self.num_waypoints = input_dict['n_waypoints']
-        self.num_vel = len(input_dict['vel_select']) 
-        self.vel_select = input_dict['vel_select']
-        self.num_actions = self.num_waypoints*self.num_vel
         self.control_steps = input_dict['control_steps']
-        self.display=input_dict['display']
-        self.R=input_dict['R']
-        self.wpt_arc = input_dict['wpt_arc']
-        self.track_dict = input_dict['track_dict']
+        self.display = input_dict['display']
+        
+        self.params = input_dict['car_params']
+        self.reward_signal = input_dict['reward_signal']
         self.lidar_dict = input_dict['lidar_dict']
-        self.action_space = input_dict['action_space']
-        self.path_strategy = 'circle'
+        self.action_space_dict = input_dict['action_space_dict']
+        self.path_dict = input_dict['path_dict']
+        
+        self.local_path = self.path_dict['local_path']
+        self.waypoint_strategy = self.path_dict['waypoint_strategy']
+        self.wpt_arc = self.path_dict['wpt_arc']
+        
+        if self.local_path==True:
+            self.path_strategy = self.path_dict['path_strategy']
+            self.track_dict = self.path_dict['track_dict']
 
-        self.params = {'mu': 1.0489, 'C_Sf': 4.718, 'C_Sr': 5.4562, 'lf': 0.15875, 'lr': 0.17145
-                    , 'h': 0.074, 'm': 3.74, 'I': 0.04712, 's_min': -0.4189, 's_max': 0.4189, 'sv_min': -3.2
-                    , 'sv_max': 3.2, 'v_switch': 7.319, 'a_max': 9.51, 'v_min':-5.0, 'v_max': 20.0, 'width': 0.31, 'length': 0.58}
+        self.vel_select = self.action_space_dict['vel_select']
+        self.R_range = self.action_space_dict['R_range']
+        self.action_space = self.action_space_dict['action_space']
+        if self.action_space == 'discrete':
+            self.num_waypoints = self.action_space_dict['n_waypoints']
+            self.num_vel = len(self.action_space_dict['vel_select'])
+            self.num_R = len(self.action_space_dict['R_range']) 
+            self.num_actions = self.num_waypoints*self.num_vel*self.num_R
+        if self.action_space == 'continuous':
+            self.num_actions = 1 + int(len(self.action_space_dict['vel_select'])>1) + int(len(self.action_space_dict['R_range'])>1)
 
         #simulation parameters
         self.dt = self.sim_conf.time_step
@@ -126,8 +136,8 @@ class environment():
             self.current_goal = self.start_condition['goal']
         else:
             self.x, self.y, self.theta, self.current_goal = functions.random_start(self.goal_x, self.goal_y, self.rx, self.ry, self.ryaw, self.rk, self.d, self.episode)
-            #self.v = random.random()*self.vel_select[-1]
-            self.v = random.random()*7
+            self.v = random.random()*self.vel_select[-1]
+            #self.v = random.random()*7
             #self.v=0    
             #self.v = 20
             self.delta = 0
@@ -195,7 +205,7 @@ class environment():
         reward = 0
         done=False
         
-        waypoint, wpt_angle, v_ref = self.convert_action_to_coord(strategy=self.waypoint_strategy, action=act)
+        waypoint, wpt_angle, R, v_ref = self.convert_action_to_coord(strategy=self.waypoint_strategy, action=act)
 
         if self.local_path==False:
             for _ in range(self.control_steps):
@@ -240,7 +250,7 @@ class environment():
            
         else:
             
-            cx, cy = self.define_path(waypoint, wpt_angle)
+            cx, cy = self.define_path(waypoint, wpt_angle, R)
             self.path_tracker.record_waypoints(cx, cy)
             target_index, _ = self.path_tracker.search_target_waypoint(self.x, self.y, self.v)
 
@@ -291,7 +301,7 @@ class environment():
                 
         return self.observation, reward, done
     
-    def define_path(self, waypoint,  wpt_angle):
+    def define_path(self, waypoint,  wpt_angle , R):
         if self.path_strategy == 'linear':
             cx = (((np.arange(0.1, 1, 0.01))*(waypoint[0] - self.x)) + self.x).tolist()
             cy = ((np.arange(0.1, 1, 0.01))*(waypoint[1] - self.y) + self.y)
@@ -302,11 +312,11 @@ class environment():
                 cy = ((np.arange(0.1, 1, 0.01))*(waypoint[1] - self.y) + self.y)
             
             elif 0.01<wpt_angle<np.pi-0.01:
-                R=self.R*np.sin(wpt_angle)/np.sin(np.pi-2*wpt_angle)
+                L=R*np.sin(wpt_angle)/np.sin(np.pi-2*wpt_angle)
                 a = self.theta-np.pi/2
                 angles = np.linspace(0,np.pi-2*wpt_angle)
-                x_arc = R*(1 - np.cos(angles))
-                y_arc = R*np.sin(angles)
+                x_arc = L*(1 - np.cos(angles))
+                y_arc = L*np.sin(angles)
                 d_arc = np.sqrt(np.power(x_arc[1:-1], 2) + np.power(y_arc[1:-1], 2))
                 if wpt_angle<np.pi/2:
                     a_arc = np.arctan(np.true_divide(y_arc[1:-1], x_arc[1:-1]))
@@ -316,7 +326,7 @@ class environment():
                 cy = d_arc*np.sin(a_arc+a) + self.y
             
             else:
-                R=self.R/2
+                L=R/2
                 a = self.theta-np.pi/2
                 angles = np.linspace(0,np.pi-2*wpt_angle)
                 x_arc = R*(1 - np.cos(angles))
@@ -455,19 +465,20 @@ class environment():
         
         if self.action_space=='discrete':
             wpt = action%self.num_waypoints
+            R=self.R_range[-1]
             if strategy=='global':
                 waypoint = [int((action+1)%3), int((action+1)/3)]
 
             if strategy=='local':
                 waypoint_relative_angle = self.theta - self.wpt_arc +(2*self.wpt_arc)*(wpt/(self.num_waypoints-1))
-                waypoint = [self.x + self.R*math.cos(waypoint_relative_angle), self.y + self.R*math.sin(waypoint_relative_angle)]
+                waypoint = [self.x + R*math.cos(waypoint_relative_angle), self.y + R*math.sin(waypoint_relative_angle)]
             
             if strategy == 'waypoint':
                 waypoint = action
 
             i = int(action/self.num_waypoints)
             self.v_ref = self.vel_select[i]
-        
+
         '''
         if self.v_ref>=1 and self.v_ref<=7:
             self.v_ref += self.vel_select[i]
@@ -488,13 +499,21 @@ class environment():
         #v_ref = int(action/self.num_waypoints)*self.max_v
 
         if self.action_space=='continuous':
-            waypoint_relative_angle = self.theta + self.wpt_arc*(action)
-            waypoint = [self.x + self.R*math.cos(waypoint_relative_angle), self.y + self.R*math.sin(waypoint_relative_angle)]
+            #wpt_action = action[0]
+            #vel_action = action[1]
+            #R_action = action[2]
+            
+            wpt_action=action
+            R = self.R_range[-1]
+
+
+            waypoint_relative_angle = self.theta + self.wpt_arc*(wpt_action)
+            waypoint = [self.x + R*math.cos(waypoint_relative_angle), self.y + R*math.sin(waypoint_relative_angle)]
             self.v_ref=self.vel_select[-1]
 
         wpt_angle =  waypoint_relative_angle-(self.theta-np.pi/2) #angle in cars reference frame
 
-        return waypoint,  wpt_angle, self.v_ref
+        return waypoint,  wpt_angle, R, self.v_ref
 
     def set_flags(self):
         
@@ -694,15 +713,45 @@ def test_environment():
     
 
     
-    env_dict = {'sim_conf': functions.load_config(sys.path[0], "config"), 'save_history': False, 'map_name': 'circle'
-            , 'max_steps': 500, 'local_path': True, 'waypoint_strategy': 'local', 'wpt_arc': np.pi/2, 'action_space': 'discrete'
-            , 'reward_signal': {'goal_reached':0, 'out_of_bounds':-1, 'max_steps':0, 'collision':-1, 'backwards':-1, 'park':-0.5, 'time_step':-0.005, 'progress':0, 'distance':0.3}
-            , 'n_waypoints': 11, 'vel_select':[7], 'control_steps': 15, 'display': True, 'R':3, 'track_dict':{'k':0.1, 'Lfc':1}
-            , 'lidar_dict': {'is_lidar':True, 'lidar_res':0.1, 'n_beams':8, 'max_range':20, 'fov':np.pi} } 
+    #env_dict = {'sim_conf': functions.load_config(sys.path[0], "config"), 'save_history': False, 'map_name': 'circle'
+    #        , 'max_steps': 500, 'local_path': True, 'waypoint_strategy': 'local', 'wpt_arc': np.pi/2, 'action_space': 'discrete'
+    #        , 'reward_signal': {'goal_reached':0, 'out_of_bounds':-1, 'max_steps':0, 'collision':-1, 'backwards':-1, 'park':-0.5, 'time_step':-0.005, 'progress':0, 'distance':0.3}
+    #        , 'n_waypoints': 11, 'vel_select':[7], 'control_steps': 15, 'display': True, 'R':3, 'track_dict':{'k':0.1, 'Lfc':1}
+    #        , 'lidar_dict': {'is_lidar':True, 'lidar_res':0.1, 'n_beams':8, 'max_range':20, 'fov':np.pi} } 
     
-    #env_dict['name'] = 'test'
+    car_params =   {'mu': 1.0489, 'C_Sf': 4.718, 'C_Sr': 5.4562, 'lf': 0.15875, 'lr': 0.17145
+                , 'h': 0.074, 'm': 3.74, 'I': 0.04712, 's_min': -0.4189, 's_max': 0.4189, 'sv_min': -3.2
+                , 'sv_max': 3.2, 'v_switch': 7.319, 'a_max': 9.51, 'v_min':-5.0, 'v_max': 20.0, 'width': 0.31, 'length': 0.58}
+    
+    reward_signal = {'goal_reached':0, 'out_of_bounds':-1, 'max_steps':0, 'collision':-1, 'backwards':-1, 'park':-0.5, 'time_step':-0.005, 'progress':0, 'distance':0.3}    
+    
+    action_space_dict = {'action_space': 'continuous', 'vel_select':[7], 'R_range':[6]}
+    #action_space_dict = {'action_space': 'discrete', 'n_waypoints': 10, 'vel_select':[7], 'R_range':[3]}
+    
+    path_dict = {'local_path':True, 'waypoint_strategy':'local', 'wpt_arc':np.pi/2}
+    if path_dict['local_path'] == True: #True or false
+        path_dict['path_strategy'] = 'circle' #circle or linear
+        path_dict['track_dict'] = {'k':0.1, 'Lfc':1}
+    
+    lidar_dict = {'is_lidar':True, 'lidar_res':0.1, 'n_beams':8, 'max_range':20, 'fov':np.pi}
+    
+    env_dict = {'sim_conf': functions.load_config(sys.path[0], "config")
+        , 'save_history': False
+        , 'map_name': 'circle'
+        , 'max_steps': 500
+        , 'control_steps': 15
+        , 'display': True
+        , 'car_params':car_params
+        , 'reward_signal':reward_signal
+        , 'lidar_dict':lidar_dict
+        , 'action_space_dict':action_space_dict
+        , 'path_dict': path_dict
+        } 
+
+
+    env_dict['name'] = 'test'
     #initial_condition = {'x':8.18, 'y':26.24, 'v':4, 'delta':0, 'theta':np.pi, 'goal':1}
-    #initial_condition = {'x':15, 'y':5, 'v':7, 'delta':0, 'theta':0, 'goal':1}
+    initial_condition = {'x':15, 'y':5, 'v':7, 'delta':0, 'theta':0, 'goal':1}
     #initial_condition = {'x':8, 'y':3, 'v':7, 'delta':0, 'theta':np.pi, 'goal':1}
     #initial_condition = []
 
@@ -713,7 +762,7 @@ def test_environment():
     
     done=False
     
-    action_history = np.ones(20)*7
+    action_history = np.ones(20)*0.1
 
     score=0
     i=0

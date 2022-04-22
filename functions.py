@@ -121,7 +121,7 @@ def get_bearing(x1=[0, 0], x2=[0, 0]):
     return th_start_end
 
 
-@njit(cache=True)
+#@njit(cache=True)
 def distance_between_points(x1, x2, y1, y2):
     distance = math.hypot(x2-x1, y2-y1)
     
