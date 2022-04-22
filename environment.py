@@ -297,10 +297,11 @@ class environment():
             cy = ((np.arange(0.1, 1, 0.01))*(waypoint[1] - self.y) + self.y)
 
         if self.path_strategy == 'circle':
-            if wpt_angle == np.pi:
+            if np.pi/2-0.01 < wpt_angle < np.pi/2+0.01:
                 cx = (((np.arange(0.1, 1, 0.01))*(waypoint[0] - self.x)) + self.x).tolist()
                 cy = ((np.arange(0.1, 1, 0.01))*(waypoint[1] - self.y) + self.y)
-            else:
+            
+            elif 0.01<wpt_angle<np.pi-0.01:
                 R=self.R*np.sin(wpt_angle)/np.sin(np.pi-2*wpt_angle)
                 a = self.theta-np.pi/2
                 angles = np.linspace(0,np.pi-2*wpt_angle)
@@ -308,15 +309,28 @@ class environment():
                 y_arc = R*np.sin(angles)
                 d_arc = np.sqrt(np.power(x_arc[1:-1], 2) + np.power(y_arc[1:-1], 2))
                 if wpt_angle<np.pi/2:
-
                     a_arc = np.arctan(np.true_divide(y_arc[1:-1], x_arc[1:-1]))
-                   
                 if wpt_angle>np.pi/2:
                     a_arc = np.arctan(np.true_divide(y_arc[1:-1], x_arc[1:-1]))+np.pi
-   
-                
                 cx = d_arc*np.cos(a_arc+a) + self.x
                 cy = d_arc*np.sin(a_arc+a) + self.y
+            
+            else:
+                R=self.R/2
+                a = self.theta-np.pi/2
+                angles = np.linspace(0,np.pi-2*wpt_angle)
+                x_arc = R*(1 - np.cos(angles))
+                y_arc = R*np.sin(angles)
+                d_arc = np.sqrt(np.power(x_arc[1:-1], 2) + np.power(y_arc[1:-1], 2))
+                if wpt_angle<np.pi/2:
+                    a_arc = np.arctan(np.true_divide(y_arc[1:-1], x_arc[1:-1]))
+                if wpt_angle>np.pi/2:
+                    a_arc = np.arctan(np.true_divide(y_arc[1:-1], x_arc[1:-1]))+np.pi
+                cx = d_arc*np.cos(a_arc+a) + self.x
+                cy = d_arc*np.sin(a_arc+a) + self.y
+
+
+
 
             #plt.plot(x_arc, y_arc, 'x')
             #plt.plot(cx, cy, 'o')
@@ -683,12 +697,12 @@ def test_environment():
     env_dict = {'sim_conf': functions.load_config(sys.path[0], "config"), 'save_history': False, 'map_name': 'circle'
             , 'max_steps': 500, 'local_path': True, 'waypoint_strategy': 'local', 'wpt_arc': np.pi/2, 'action_space': 'discrete'
             , 'reward_signal': {'goal_reached':0, 'out_of_bounds':-1, 'max_steps':0, 'collision':-1, 'backwards':-1, 'park':-0.5, 'time_step':-0.005, 'progress':0, 'distance':0.3}
-            , 'n_waypoints': 10, 'vel_select':[7], 'control_steps': 15, 'display': True, 'R':3, 'track_dict':{'k':0.1, 'Lfc':1}
+            , 'n_waypoints': 11, 'vel_select':[7], 'control_steps': 15, 'display': True, 'R':3, 'track_dict':{'k':0.1, 'Lfc':1}
             , 'lidar_dict': {'is_lidar':True, 'lidar_res':0.1, 'n_beams':8, 'max_range':20, 'fov':np.pi} } 
     
-    env_dict['name'] = 'test'
+    #env_dict['name'] = 'test'
     #initial_condition = {'x':8.18, 'y':26.24, 'v':4, 'delta':0, 'theta':np.pi, 'goal':1}
-    initial_condition = {'x':15, 'y':5, 'v':7, 'delta':0, 'theta':0, 'goal':1}
+    #initial_condition = {'x':15, 'y':5, 'v':7, 'delta':0, 'theta':0, 'goal':1}
     #initial_condition = {'x':8, 'y':3, 'v':7, 'delta':0, 'theta':np.pi, 'goal':1}
     #initial_condition = []
 
@@ -699,7 +713,7 @@ def test_environment():
     
     done=False
     
-    action_history = np.ones(20)*8
+    action_history = np.ones(20)*7
 
     score=0
     i=0

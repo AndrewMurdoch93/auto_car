@@ -442,16 +442,41 @@ if __name__=='__main__':
    
    agent_ddpg_dict = {'alpha':0.000025, 'beta':0.00025, 'tau':0.001, 'gamma':0.99, 'max_size':1000000, 'layer1_size':400, 'layer2_size':300, 'batch_size':64}
    
-   action_space_dict = {'action_space': 'continuous'}
    
-   action_space_dict = {'action_space': 'discrete', 'n_waypoints': 10, 'vel_select':[7]}
+   
+   
+   
+   reward_signal = {'goal_reached':0, 'out_of_bounds':-1, 'max_steps':0, 'collision':-1, 'backwards':-1, 'park':-0.5, 'time_step':-0.005, 'progress':0, 'distance':0.3}    
+   
+   action_space_dict = {'action_space': 'continuous', 'vel_select':[1,7], 'R':[3]}
+   
+   action_space_dict = {'action_space': 'discrete', 'n_waypoints': 10, 'vel_select':[7], 'R':[3]}
 
-   env_dict = {'sim_conf': functions.load_config(sys.path[0], "config"), 'save_history': False, 'map_name': 'columbia_1'
-            , 'max_steps': 500, 'local_path': False, 'waypoint_strategy': 'local', 'wpt_arc': np.pi/2, 'action_space': 'discrete'
-            , 'reward_signal': {'goal_reached':0, 'out_of_bounds':-1, 'max_steps':0, 'collision':-1, 'backwards':-1, 'park':-0.5, 'time_step':-0.005, 'progress':0, 'distance':0.3}
-            , 'n_waypoints': 10, 'vel_select':[7], 'control_steps': 15, 'display': False, 'R':3, 'track_dict':{'k':0.1, 'Lfc':1}
-            , 'lidar_dict': {'is_lidar':True, 'lidar_res':0.1, 'n_beams':8, 'max_range':20, 'fov':np.pi} } 
+   path_dict = {'local_path':True, 'waypoint_strategy':'local', 'wpt_arc':np.pi/2}
+
+   if path_dict['local_path'] == True:
+      path_dict['path_strategy'] = 'circle' #circle or linear
+      path_dict['track_dict'] = {'k':0.1, 'Lfc':1}
    
+   lidar_dict = {'is_lidar':True, 'lidar_res':0.1, 'n_beams':8, 'max_range':20, 'fov':np.pi}
+
+   #env_dict = {'sim_conf': functions.load_config(sys.path[0], "config"), 'save_history': False, 'map_name': 'columbia_1'
+   #         , 'max_steps': 500, 'local_path': False, 'waypoint_strategy': 'local', 'wpt_arc': np.pi/2, 'action_space': 'discrete'
+   #         , 'reward_signal': {'goal_reached':0, 'out_of_bounds':-1, 'max_steps':0, 'collision':-1, 'backwards':-1, 'park':-0.5, 'time_step':-0.005, 'progress':0, 'distance':0.3}
+   #         , 'n_waypoints': 10, 'vel_select':[7], 'control_steps': 15, 'display': False, 'R':3, 'track_dict':{'k':0.1, 'Lfc':1}
+   #         , 'lidar_dict': {'is_lidar':True, 'lidar_res':0.1, 'n_beams':8, 'max_range':20, 'fov':np.pi} } 
+   
+   env_dict = {'sim_conf': functions.load_config(sys.path[0], "config"), 'save_history': False, 'map_name': 'columbia_1'
+            , 'max_steps': 500
+            , 'control_steps': 15
+            , 'display': False
+            , 'reward_signal':reward_signal
+            , 'lidar_dict':lidar_dict
+            , 'action_space_dict':  action_space_dict
+            , 'path_dict': path_dict
+            } 
+
+
    a = trainingLoop(main_dict, agent_rainbow_dict, env_dict, load_agent='')
    a.train()
    test(agent_name=agent_name, n_episodes=300, detect_issues=False, initial_conditions=False)
