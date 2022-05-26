@@ -89,9 +89,6 @@ class environment():
         self.max_goals_reached=False
         for x,y in zip(self.goal_x, self.goal_y):
             self.goals.append([x, y])
-
-        #self.goal_x, self.goal_y, self.rx, self.ry, self.ryaw, self.rk, self.d = functions.generate_circle_goals()
-        #self.goal_x, self.goal_y, self.rx, self.ry, self.ryaw, self.rk, self.d = functions.generate_berlin_goals()
         
         self.rx, self.ry, self.ryaw, self.rk, self.d = cubic_spline_planner.calc_spline_course(self.goal_x, self.goal_y)
 
@@ -547,6 +544,7 @@ class environment():
 
         elif self.park==True:
             reward=self.reward_signal['park']
+
 
         else:
             reward=0

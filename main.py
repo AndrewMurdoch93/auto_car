@@ -483,7 +483,6 @@ if __name__=='__main__':
    
    
    
-   
    '''
    agent_name = 'rb_col_fc_1'
    main_dict['name'] = agent_name
