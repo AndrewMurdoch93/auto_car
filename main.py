@@ -418,7 +418,7 @@ if __name__=='__main__':
    
    agent_name = 'ddpg_local_path'
    
-   main_dict = {'name': agent_name, 'max_episodes':5000, 'learning_method': 'ddpg', 'comment': ''}
+   main_dict = {'name': agent_name, 'max_episodes':1000, 'learning_method': 'ddpg', 'comment': ''}
 
    agent_dqn_dict = {'gamma':0.99, 'epsilon':1, 'eps_end':0.01, 'eps_dec':1/1000, 'lr':0.001, 'batch_size':64, 'max_mem_size':500000, 
                   'fc1_dims': 64, 'fc2_dims': 64, 'fc3_dims':64}
@@ -442,17 +442,15 @@ if __name__=='__main__':
    
    agent_ddpg_dict = {'alpha':0.000025, 'beta':0.00025, 'tau':0.001, 'gamma':0.99, 'max_size':1000000, 'layer1_size':400, 'layer2_size':300, 'batch_size':64}
    
-   
-
-
    car_params =   {'mu': 1.0489, 'C_Sf': 4.718, 'C_Sr': 5.4562, 'lf': 0.15875, 'lr': 0.17145
                   , 'h': 0.074, 'm': 3.74, 'I': 0.04712, 's_min': -0.4189, 's_max': 0.4189, 'sv_min': -3.2
                   , 'sv_max': 3.2, 'v_switch': 7.319, 'a_max': 9.51, 'v_min':-5.0, 'v_max': 20.0, 'width': 0.31, 'length': 0.58}
    
-   reward_signal = {'goal_reached':0, 'out_of_bounds':-1, 'max_steps':0, 'collision':-1, 'backwards':-1, 'park':-0.5, 'time_step':-0.005, 'progress':0, 'distance':0.15}    
+   reward_signal = {'goal_reached':0, 'out_of_bounds':-1, 'max_steps':0, 'collision':-1, 'backwards':-1, 'park':-0.5, 'time_step':-0.005, 'progress':0, 'distance':0.3}    
    
-   action_space_dict = {'action_space': 'continuous', 'vel_select':[7], 'R_range':[3]}
-   #action_space_dict = {'action_space': 'discrete', 'n_waypoints': 10, 'vel_select':[7], 'R_range':[3]}
+   action_space_dict = {'action_space': 'continuous', 'vel_select':[1,7], 'R':[3]}
+   
+   #action_space_dict = {'action_space': 'discrete', 'n_waypoints': 10, 'vel_select':[7], 'R':[3]}
 
    path_dict = {'local_path':True, 'waypoint_strategy':'local', 'wpt_arc':np.pi/2}
    if path_dict['local_path'] == True: #True or false
@@ -460,8 +458,6 @@ if __name__=='__main__':
       path_dict['track_dict'] = {'k':0.1, 'Lfc':1}
    
    lidar_dict = {'is_lidar':True, 'lidar_res':0.1, 'n_beams':8, 'max_range':20, 'fov':np.pi}
-
- 
    
    env_dict = {'sim_conf': functions.load_config(sys.path[0], "config")
             , 'save_history': False
@@ -476,9 +472,9 @@ if __name__=='__main__':
             , 'path_dict': path_dict
             } 
 
-   #a = trainingLoop(main_dict, agent_ddpg_dict, env_dict, load_agent='')
-   #a.train()
-   #test(agent_name=agent_name, n_episodes=300, detect_issues=False, initial_conditions=False)
+   a = trainingLoop(main_dict, agent_ddpg_dict, env_dict, load_agent='')
+   a.train()
+   test(agent_name=agent_name, n_episodes=300, detect_issues=False, initial_conditions=False)
    
 
    '''
@@ -489,160 +485,15 @@ if __name__=='__main__':
    a = trainingLoop(main_dict, agent_rainbow_dict, env_dict, load_agent='')
    a.train()
    test(agent_name=agent_name, n_episodes=300, detect_issues=False, initial_conditions=False)
-
-   agent_name = 'rb_col_fc_2'
-   main_dict['name'] = agent_name
-   agent_rainbow_dict['fc1_dims'] = 200
-   agent_rainbow_dict['fc2_dims'] = 200
-   a = trainingLoop(main_dict, agent_rainbow_dict, env_dict, load_agent='')
-   a.train()
-   test(agent_name=agent_name, n_episodes=300, detect_issues=False, initial_conditions=False)
-   
-   agent_name = 'rb_col_R_0'
-   main_dict['name'] = agent_name
-   agent_rainbow_dict['fc1_dims'] = 64
-   agent_rainbow_dict['fc2_dims'] = 64
-   env_dict['R'] = 2
-   a = trainingLoop(main_dict, agent_rainbow_dict, env_dict, load_agent='')
-   a.train()
-   test(agent_name=agent_name, n_episodes=300, detect_issues=False, initial_conditions=False)
-
-   agent_name = 'rb_col_R_1'
-   main_dict['name'] = agent_name
-   env_dict['R'] = 5
-   a = trainingLoop(main_dict, agent_rainbow_dict, env_dict, load_agent='')
-   a.train()
-   test(agent_name=agent_name, n_episodes=300, detect_issues=False, initial_conditions=False)
-
-   agent_name = 'rb_col_R_2'
-   main_dict['name'] = agent_name
-   env_dict['R'] = 6
-   a = trainingLoop(main_dict, agent_rainbow_dict, env_dict, load_agent='')
-   a.train()
-   test(agent_name=agent_name, n_episodes=300, detect_issues=False, initial_conditions=False)
-
-   agent_name = 'rb_col_R_3'
-   main_dict['name'] = agent_name
-   env_dict['R'] = 6
-   a = trainingLoop(main_dict, agent_rainbow_dict, env_dict, load_agent='')
-   a.train()
-   test(agent_name=agent_name, n_episodes=300, detect_issues=False, initial_conditions=False)
-   
-   agent_name = 'rb_col_cs_0'
-   main_dict['name'] = agent_name
-   env_dict['R'] = 3
-   env_dict['control_steps'] = 10
-   a = trainingLoop(main_dict, agent_rainbow_dict, env_dict, load_agent='')
-   a.train()
-   test(agent_name=agent_name, n_episodes=300, detect_issues=False, initial_conditions=False)
-
-   agent_name = 'rb_col_cs_1'
-   main_dict['name'] = agent_name
-   env_dict['control_steps'] = 15
-   a = trainingLoop(main_dict, agent_rainbow_dict, env_dict, load_agent='')
-   a.train()
-   test(agent_name=agent_name, n_episodes=300, detect_issues=False, initial_conditions=False)
-
-   
-   agent_name = 'rb_col_cs_2'
-   main_dict['name'] = agent_name
-   env_dict['control_steps'] = 25
-   a = trainingLoop(main_dict, agent_rainbow_dict, env_dict, load_agent='')
-   a.train()
-   test(agent_name=agent_name, n_episodes=300, detect_issues=False, initial_conditions=False)
-
-   agent_name = 'rb_col_rs_0'
-   main_dict['name'] = agent_name
-   env_dict['control_steps'] = 20
-   env_dict['reward_signal']['distance'] = 0.05
-   a = trainingLoop(main_dict, agent_rainbow_dict, env_dict, load_agent='')
-   a.train()
-   test(agent_name=agent_name, n_episodes=300, detect_issues=False, initial_conditions=False)
-
-
-   agent_name = 'rb_col_rs_1'
-   main_dict['name'] = agent_name
-   env_dict['control_steps'] = 20
-   env_dict['reward_signal']['distance'] = 0.1
-   a = trainingLoop(main_dict, agent_rainbow_dict, env_dict, load_agent='')
-   a.train()
-   test(agent_name=agent_name, n_episodes=300, detect_issues=False, initial_conditions=False)
-
-   agent_name = 'rb_col_rs_2'
-   main_dict['name'] = agent_name
-   env_dict['control_steps'] = 20
-   env_dict['reward_signal']['distance'] = 0.3
-   a = trainingLoop(main_dict, agent_rainbow_dict, env_dict, load_agent='')
-   a.train()
-   test(agent_name=agent_name, n_episodes=300, detect_issues=False, initial_conditions=False)
-
-   agent_name = 'rb_col_rs_3'
-   main_dict['name'] = agent_name
-   env_dict['control_steps'] = 20
-   env_dict['reward_signal']['distance'] = 0.5
-   a = trainingLoop(main_dict, agent_rainbow_dict, env_dict, load_agent='')
-   a.train()
-   test(agent_name=agent_name, n_episodes=300, detect_issues=False, initial_conditions=False)
-
    '''
 
-   #agent_name = 'ddpg_end_to_end'
-   #main_dict['name'] = agent_name
-   #main_dict['learning_method'] = 'ddpg'
-   #main_dict['max_episodes'] = 2000
-   #env_dict['action_space'] = 'continuous'
-   #env_dict['n_waypoints'] = 1
-   #a = trainingLoop(main_dict, agent_ddpg_dict, env_dict, load_agent='')
-   #a.train()
-   #test(agent_name=agent_name, n_episodes=300, detect_issues=False, initial_conditions=True)
-   
-   
-   #agent_names = ['rb_col_standard', 'rb_col_fc_1', 'rb_col_fc_2']
-   #legend_title = 'agent'
-   #legend = ['rb_col_standard',  'rb_col_fc_1', 'rb_col_fc_2']
-   #display_results.compare_learning_curves_progress(agent_names, legend, legend_title, show_average=True, show_median=False, xaxis='episodes')
-   #display_results.compare_learning_curves_progress(agent_names, legend, legend_title, show_average=True, show_median=False, xaxis='steps')
-   #display_results.compare_learning_curves_progress(agent_names, legend, legend_title, show_average=True, show_median=False, xaxis='times')
-   #display_results.density_plot_progress(agent_names, legend, legend_title)
 
-   #agent_names = [ 'rb_col_R_0', 'rb_col_standard',  'rb_col_R_1',  'rb_col_R_2',  'rb_col_R_3']
-   #legend_title = 'agent'
-   #legend = [ 'rb_col_R_0', 'rb_col_standard',  'rb_col_R_1',  'rb_col_R_2',  'rb_col_R_3']
-   #display_results.compare_learning_curves_progress(agent_names, legend, legend_title, show_average=True, show_median=False, xaxis='episodes')
-   #display_results.compare_learning_curves_progress(agent_names, legend, legend_title, show_average=True, show_median=False, xaxis='steps')
-   #display_results.compare_learning_curves_progress(agent_names, legend, legend_title, show_average=True, show_median=False, xaxis='times')
-   #display_results.density_plot_progress(agent_names, legend, legend_title)
-
-   #agent_names = [ 'rb_col_cs_0', 'rb_col_cs_1', 'rb_col_standard',  'rb_col_cs_2']
-   #legend_title = 'agent'
-   #legend = ['rb_col_cs_0', 'rb_col_cs_1', 'rb_col_standard',  'rb_col_cs_2']
-   #display_results.compare_learning_curves_progress(agent_names, legend, legend_title, show_average=True, show_median=False, xaxis='episodes')
-   #display_results.compare_learning_curves_progress(agent_names, legend, legend_title, show_average=True, show_median=False, xaxis='steps')
-   #display_results.compare_learning_curves_progress(agent_names, legend, legend_title, show_average=True, show_median=False, xaxis='times')
-   #display_results.density_plot_progress(agent_names, legend, legend_title)
-
-   #agent_names = [ 'rb_col_cs_0', 'rb_col_cs_1', 'rb_col_standard',  'rb_col_cs_2']
-   #legend_title = 'agent'
-   #legend = ['rb_col_cs_0', 'rb_col_cs_1', 'rb_col_standard',  'rb_col_cs_2']
-   #display_results.compare_learning_curves_progress(agent_names, legend, legend_title, show_average=True, show_median=False, xaxis='episodes')
-   #display_results.compare_learning_curves_progress(agent_names, legend, legend_title, show_average=True, show_median=False, xaxis='steps')
-   #display_results.compare_learning_curves_progress(agent_names, legend, legend_title, show_average=True, show_median=False, xaxis='times')
-   #display_results.density_plot_progress(agent_names, legend, legend_title)
-   
-   #agent_names = ['rb_col_standard', 'rb_col_rs_0', 'rb_col_rs_1', 'rb_col_rs_2',  'rb_col_rs_3']
-   #legend_title = 'agent'
-   #legend = ['rb_col_standard', 'rb_col_rs_0', 'rb_col_rs_1', 'rb_col_rs_2',  'rb_col_rs_3']
-   #display_results.compare_learning_curves_progress(agent_names, legend, legend_title, show_average=True, show_median=False, xaxis='episodes')
-   #display_results.compare_learning_curves_progress(agent_names, legend, legend_title, show_average=True, show_median=False, xaxis='steps')
-   #display_results.compare_learning_curves_progress(agent_names, legend, legend_title, show_average=True, show_median=False, xaxis='times')
-   #display_results.density_plot_progress(agent_names, legend, legend_title)
-
-   agent_name = 'ddpg_local_path'
+   #agent_name = 'ddpg_local_path'
    #display_results.durations(agent_name, show_average=True, show_median=True)
    #display_results.display_collision_distribution(agent_name)
    #test(agent_name=agent_name, n_episodes=300, detect_issues=False, initial_conditions=False)
    #display_results.display_train_parameters(agent_name=agent_name)
-   display_results.agent_progress_statistics(agent_name=agent_name)
+   #display_results.agent_progress_statistics(agent_name=agent_name)
    #display_results.learning_curve_progress(agent_name=agent_name, show_average=True, show_median=True)
    #display_results.density_plot_progress([agent_name], legend=[''], legend_title='')
    #display_results.display_moving_agent(agent_name=agent_name, load_history=False)
