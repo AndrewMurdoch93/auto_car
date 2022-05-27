@@ -168,9 +168,9 @@ class agent(object):
         
         self.agent_dict = agent_dict
         self.name = agent_dict['name']
-
         self.gamma = agent_dict['gamma']
         self.tau = agent_dict['tau']
+        self.noise_constant = 1
         self.memory = ReplayBuffer(agent_dict['max_size'], agent_dict['input_dims'], agent_dict['n_actions'])
         self.batch_size = agent_dict['batch_size']
 
@@ -194,7 +194,7 @@ class agent(object):
         self.actor.eval()
         observation = T.tensor(observation, dtype=T.float).to(self.actor.device)
         mu = self.actor.forward(observation).to(self.actor.device)
-        mu_prime = mu + T.tensor(self.noise(), dtype=T.float).to(self.actor.device)
+        mu_prime = mu + T.tensor(self.noise(), dtype=T.float).to(self.actor.device)*self.noise_constant
         self.actor.train()
         return mu_prime.cpu().detach().numpy()
 
@@ -206,9 +206,10 @@ class agent(object):
         self.actor.train()
         return action.cpu().detach().numpy()
 
-    
+
     def store_transition(self, state, action, reward, new_state, done):
         self.memory.store_transition(state, action, reward, new_state, done)
+
 
     def learn(self):
         if self.memory.mem_cntr < self.batch_size:
@@ -342,3 +343,6 @@ class agent(object):
         for param in current_critic_dict:
             print(param, T.equal(original_critic_dict[param], current_critic_dict[param]))
         input()
+
+    def decrease_noise_factor(self):
+        self.noise_constant *= 0.995

@@ -17,6 +17,8 @@ from numba import njit
 from numba import int32, int64, float32, float64,bool_    
 from numba.experimental import jitclass
 import pickle
+import mapping
+
 
 def load_config(path, fname):
     full_path = path + '/config/' + fname + '.yaml'
@@ -202,7 +204,7 @@ def map_generator(map_name):
     return occupancy_grid, map_height, map_width, res 
 
    
-def random_start(x, y, rx, ry, ryaw, rk, s, episode):
+def random_start(x, y, rx, ry, ryaw, rk, s):
     
     offset=0.3
     random.seed(datetime.now())
@@ -318,27 +320,33 @@ class lidar_scan():
         return scan, coords
 
 def generate_initial_condition(name, episodes):
-   file_name = 'test_initial_condition/' + name
+    file_name = 'test_initial_condition/' + name
    
-   initial_conditions = []
+    initial_conditions = []
    
-   goal_x, goal_y, rx, ry, ryaw, rk, d = generate_circle_goals()
+    track = mapping.map(name)
+    track.find_centerline()
+    goal_x = track.centerline[:,0]
+    goal_y = track.centerline[:,1]
+    rx, ry, ryaw, rk, d = cubic_spline_planner.calc_spline_course(goal_x, goal_y)
    
-   for eps in range(episodes):
-      x, y, theta, current_goal = random_start(goal_x, goal_y, rx, ry, ryaw, rk, d, episode=0)
-      v = random.random()*7
-      delta = 0
-      i = {'x':x, 'y':y, 'v':v, 'delta':delta, 'theta':theta, 'goal':current_goal}
-      initial_conditions.append(i)
+    for eps in range(episodes):
+        x, y, theta, current_goal = random_start(goal_x, goal_y, rx, ry, ryaw, rk, d)
+        v = random.random()*7
+        delta = 0
+        i = {'x':x, 'y':y, 'v':v, 'delta':delta, 'theta':theta, 'goal':current_goal}
+        initial_conditions.append(i)
 
    #initial_conditions = [ [] for _ in range(episodes)]
    
-   outfile=open(file_name, 'wb')
-   pickle.dump(initial_conditions, outfile)
-   outfile.close()
+    outfile=open(file_name, 'wb')
+    pickle.dump(initial_conditions, outfile)
+    outfile.close()
 
 #generate_berlin_goals()
-if __name__ == 'main':
+#generate_initial_condition(name='columbia', episodes=2000)
+if __name__ == '__main__':
+    generate_initial_condition(name='columbia_1', episodes=2000)
     #def velocity_along_line(theta, velocity, ryaw, )
 
     #generate_berlin_goals()
@@ -359,5 +367,5 @@ if __name__ == 'main':
     #plt.plot(x, y, 's')
     #plt.plot(x[next_goal], y[next_goal], 'o')
     #plt.show()
-    pass
+    
 

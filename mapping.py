@@ -14,7 +14,6 @@ from scipy import ndimage
 import cubic_spline_planner
 
 class map:
-    
     def __init__(self, map_name):
         self.map_name = map_name
         self.read_yaml_file()

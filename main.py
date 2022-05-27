@@ -55,7 +55,7 @@ class trainingLoop():
 
       #self.env = environment(self.env_dict, start_condition={'x':15,'y':5,'theta':0,'goal':0})
       self.env = environment(self.env_dict)
-      self.env.reset(save_history=False, start_condition=[])
+      self.env.reset(save_history=False, start_condition=[], get_lap_time=False)
       
       self.agent_dict['name'] = self.main_dict['name']
       self.agent_dict['input_dims'] = len(self.env.observation)
@@ -110,7 +110,7 @@ class trainingLoop():
 
       for episode in range(self.max_episodes):
          
-         self.env.reset(save_history=True, start_condition=[])  #Reset the environment every episode
+         self.env.reset(save_history=True, start_condition=[], get_lap_time=False)  #Reset the environment every episode
          obs = self.env.observation      #Records starting state
          done = False
          score = 0                       #Initialise score counter for every episode
@@ -192,7 +192,7 @@ class trainingLoop():
                self.agent.learn()  #Learn using state transition history
                obs = next_obs  #Update the state
                score+=reward
-
+               self.agent.decrease_noise_factor()
                end = time.time()
                durations.append(end-start)
          
@@ -250,7 +250,7 @@ class trainingLoop():
       test_score = []
       
       for episode in range(n_episodes):
-         self.env.reset(save_history=True, start_condition=[])
+         self.env.reset(save_history=True, start_condition=[], get_lap_time=False)
          obs = self.env.observation
          done = False
          score=0
@@ -320,7 +320,7 @@ def test(agent_name, n_episodes, detect_issues, initial_conditions):
 
    #env = environment(env_dict, start_condition={'x':15,'y':5,'theta':0,'goal':0})
    env = environment(env_dict)
-   env.reset(save_history=False, start_condition=[])
+   env.reset(save_history=False, start_condition=[], get_lap_time=False)
    
    action_history = []
    
@@ -366,7 +366,7 @@ def test(agent_name, n_episodes, detect_issues, initial_conditions):
 
    for episode in range(n_episodes):
 
-      env.reset(save_history=True, start_condition=start_conditions[episode])
+      env.reset(save_history=True, start_condition=start_conditions[episode], get_lap_time=False)
       action_history = []
       obs = env.observation
       done = False
@@ -413,10 +413,103 @@ def test(agent_name, n_episodes, detect_issues, initial_conditions):
    outfile.close()
 
 
+def lap_time_test(agent_name, n_episodes, detect_issues, initial_conditions):
+
+   results_file_name = 'lap_results/' + agent_name 
+
+   infile = open('environments/' + agent_name, 'rb')
+   env_dict = pickle.load(infile)
+   infile.close()
+
+   if initial_conditions==True:
+      start_condition_file_name = 'test_initial_condition/' + env_dict['map_name']
+   else:
+      start_condition_file_name = 'test_initial_condition/none' 
+   
+   infile = open(start_condition_file_name, 'rb')
+   start_conditions = pickle.load(infile)
+   infile.close()
+
+   env_dict['max_steps'] = 2000
+
+   #env = environment(env_dict, start_condition={'x':15,'y':5,'theta':0,'goal':0})
+   env = environment(env_dict)
+   env.reset(save_history=False, start_condition=[], get_lap_time=True)
+   
+   action_history = []
+   
+   infile = open('agents/' + agent_name + '_hyper_parameters', 'rb')
+   agent_dict = pickle.load(infile)
+   infile.close()
+   
+   infile = open('train_parameters/' + agent_name, 'rb')
+   main_dict = pickle.load(infile)
+   infile.close()
+
+
+   if main_dict['learning_method']=='dqn':
+      agent_dict['epsilon'] = 0
+      a = agent_dqn.agent(agent_dict)
+   if main_dict['learning_method']=='reinforce':
+      a = agent_reinforce.PolicyGradientAgent(agent_dict)
+   if main_dict['learning_method']=='actor_critic_sep':
+      a = agent_actor_critic.actor_critic_separated(agent_dict)
+   if main_dict['learning_method']=='actor_critic_com':
+      a = agent_actor_critic.actor_critic_combined(agent_dict)
+   if main_dict['learning_method']=='actor_critic_cont':
+      a = agent_actor_critic_continuous.agent_separate(agent_dict) 
+   if main_dict['learning_method'] == 'dueling_dqn':
+      agent_dict['epsilon'] = 0
+      a = agent_dueling_dqn.agent(agent_dict)
+   if main_dict['learning_method'] == 'dueling_ddqn':
+      agent_dict['epsilon'] = 0
+      a = agent_dueling_ddqn.agent(agent_dict)
+   if main_dict['learning_method'] == 'rainbow':
+      agent_dict['epsilon'] = 0
+      a = agent_rainbow.agent(agent_dict)
+   if main_dict['learning_method'] == 'ddpg':
+      a = agent_ddpg.agent(agent_dict)
+   
+   a.load_weights(agent_name)
+
+   times = []
+   collisions = []
+
+   for episode in range(n_episodes):
+
+      env.reset(save_history=True, start_condition=start_conditions[episode], get_lap_time=True)
+      action_history = []
+      obs = env.observation
+      done = False
+      score = 0
+
+      while not done:
+         if main_dict['learning_method'] !='ddpg':
+            action = a.choose_action(obs)
+         elif main_dict['learning_method'] == 'ddpg':
+            action = a.choose_greedy_action(obs)
+         
+         action_history.append(action)
+         
+         next_obs, reward, done = env.take_action(action)
+         score += reward
+         obs = next_obs
+         
+      times.append(env.steps*0.01)
+      collisions.append(env.collision)
+         
+      if episode%10==0:
+         print('Test episode', episode, '| Progress = %.2f' % env.progress, '| Score = %.2f' % score)
+
+   outfile=open(results_file_name, 'wb')
+   pickle.dump(times, outfile)
+   pickle.dump(collisions, outfile)
+   outfile.close()
+
 if __name__=='__main__':
 
    
-   agent_name = 'ddpg_local_path'
+   agent_name = 'ddpg_end_to_end_3'
    
    main_dict = {'name': agent_name, 'max_episodes':1000, 'learning_method': 'ddpg', 'comment': ''}
 
@@ -448,11 +541,12 @@ if __name__=='__main__':
    
    reward_signal = {'goal_reached':0, 'out_of_bounds':-1, 'max_steps':0, 'collision':-1, 'backwards':-1, 'park':-0.5, 'time_step':-0.005, 'progress':0, 'distance':0.3}    
    
-   action_space_dict = {'action_space': 'continuous', 'vel_select':[1,7], 'R':[3]}
+   action_space_dict = {'action_space': 'continuous', 'vel_select':[7], 'R_range':[3]}
    
    #action_space_dict = {'action_space': 'discrete', 'n_waypoints': 10, 'vel_select':[7], 'R':[3]}
 
-   path_dict = {'local_path':True, 'waypoint_strategy':'local', 'wpt_arc':np.pi/2}
+   path_dict = {'local_path':False, 'waypoint_strategy':'local', 'wpt_arc':np.pi/2}
+   
    if path_dict['local_path'] == True: #True or false
       path_dict['path_strategy'] = 'circle' #circle or linear
       path_dict['track_dict'] = {'k':0.1, 'Lfc':1}
@@ -472,10 +566,10 @@ if __name__=='__main__':
             , 'path_dict': path_dict
             } 
 
-   a = trainingLoop(main_dict, agent_ddpg_dict, env_dict, load_agent='')
-   a.train()
-   test(agent_name=agent_name, n_episodes=300, detect_issues=False, initial_conditions=False)
-   
+   #a = trainingLoop(main_dict, agent_ddpg_dict, env_dict, load_agent='')
+   #a.train()
+   #test(agent_name=agent_name, n_episodes=300, detect_issues=False, initial_conditions=True)
+   #lap_time_test(agent_name=agent_name, n_episodes=300, detect_issues=False, initial_conditions=True)
 
    '''
    agent_name = 'rb_col_fc_1'
@@ -488,7 +582,7 @@ if __name__=='__main__':
    '''
 
 
-   #agent_name = 'ddpg_local_path'
+   agent_name = 'ddpg_end_to_end_3'
    #display_results.durations(agent_name, show_average=True, show_median=True)
    #display_results.display_collision_distribution(agent_name)
    #test(agent_name=agent_name, n_episodes=300, detect_issues=False, initial_conditions=False)
@@ -498,11 +592,16 @@ if __name__=='__main__':
    #display_results.density_plot_progress([agent_name], legend=[''], legend_title='')
    #display_results.display_moving_agent(agent_name=agent_name, load_history=False)
    #display_results.display_path(agent_name=agent_name, load_history=False)
+   display_results.display_lap_results(agent_name=agent_name)
    
-   #agent_names = ['rainbow_fc_0', 'rainbow_fc_1', 'rainbow_fc_2', 'rainbow_fc_3', 'rainbow_fc_4']
-   #legend = ['fc_0', 'fc_1',  'fc_2',  'fc_3',  'fc_4']
-   #legend_title = 'agent name'
-   #display_results.density_plot_action_duration(agent_names, legend, legend_title)
+   
+   #agent_names = ['ddpg_local_path', 'ddpg_end_to_end']
+   #legend = ['partial end-to-end', 'end-to-end']
+   #legend_title = 'agent'
+   #display_results.density_plot_progress(agent_names, legend, legend_title)
+   #display_results.compare_learning_curves_progress(agent_names, legend, legend_title, xaxis='times')
+   #display_results.compare_learning_curves_progress(agent_names, legend, legend_title, xaxis='episodes')
+   #display_results.compare_learning_curves_progress(agent_names, legend, legend_title, xaxis='steps')
 
    #agent_names = ['ddpg_fc_0', 'ddpg_fc_1', 'ddpg_fc_2', 'ddpg_fc_3', 'ddpg_fc_4']
    #legend = ['fc_0', 'fc_1',  'fc_2',  'fc_3',  'fc_4']

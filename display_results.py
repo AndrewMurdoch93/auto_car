@@ -456,6 +456,18 @@ def display_train_parameters(agent_name):
     for key in agent_dict:
         print(key, ': ', agent_dict[key])
 
+def display_lap_results(agent_name):
+
+    infile = open('lap_results/' + agent_name, 'rb')
+    times = pickle.load(infile)
+    collisions = pickle.load(infile)
+    infile.close() 
+    ave_times = np.average(np.array(times).flatten()[np.logical_not(np.array(collisions))])
+    collisions = np.average(np.logical_not(np.array(collisions)))
+
+    print('\nLap results:')
+    print('Average lap time: ', ave_times)
+    print('Percentage successful laps', collisions)
 
 def display_moving_agent(agent_name, load_history=False):
 

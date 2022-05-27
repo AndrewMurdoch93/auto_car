@@ -47,9 +47,21 @@ class environment():
         self.waypoint_strategy = self.path_dict['waypoint_strategy']
         self.wpt_arc = self.path_dict['wpt_arc']
         
+        
+        #Initialise car parameters
+        self.mass = self.params['m']                         
+        self.max_delta = self.params['s_max']               
+        self.max_delta_dot = self.params['sv_max']          
+        self.max_v = self.params['v_max']                        
+        self.max_a = self.params['a_max']
+        self.wheelbase = self.params['lf'] + self.params['lr'] 
+        
+        
         if self.local_path==True:
             self.path_strategy = self.path_dict['path_strategy']
             self.track_dict = self.path_dict['track_dict']
+            self.track_dict['wheelbase'] = self.wheelbase 
+            self.path_tracker = path_tracker.local_path_tracker(self.track_dict)
 
         self.vel_select = self.action_space_dict['vel_select']
         self.R_range = self.action_space_dict['R_range']
@@ -66,17 +78,12 @@ class environment():
         self.dt = self.sim_conf.time_step
 
         #Initialise car parameters
-        self.mass = self.sim_conf.m                              
-        self.max_delta = self.sim_conf.max_delta                 
-        self.max_delta_dot = self.sim_conf.max_delta_dot            
-        self.max_v = self.sim_conf.max_v                         
-        self.max_a = self.sim_conf.max_a
+        self.mass = self.params['m']                         
+        self.max_delta = self.params['s_max']               
+        self.max_delta_dot = self.params['sv_max']          
+        self.max_v = self.params['v_max']                        
+        self.max_a = self.params['a_max']
         self.wheelbase = self.params['lf'] + self.params['lr'] 
-        
-        self.track_dict['wheelbase'] = self.wheelbase 
-
-        if self.local_path == True:
-            self.path_tracker = path_tracker.local_path_tracker(self.track_dict)
         
         #Initialise map and goal settings
         #self.occupancy_grid, self.map_height, c, self.map_res = functions.map_generator(map_name = self.map_name)
@@ -121,10 +128,11 @@ class environment():
 
 
 
-    def reset(self, save_history, start_condition):
+    def reset(self, save_history, start_condition, get_lap_time=False):
         self.episode+=1
         self.save_history=save_history
         self.start_condition = start_condition
+        self.get_lap_time = get_lap_time
         
         #Inialise state variables
         if self.start_condition:
@@ -135,7 +143,7 @@ class environment():
             self.delta = self.start_condition['delta']
             self.current_goal = self.start_condition['goal']
         else:
-            self.x, self.y, self.theta, self.current_goal = functions.random_start(self.goal_x, self.goal_y, self.rx, self.ry, self.ryaw, self.rk, self.d, self.episode)
+            self.x, self.y, self.theta, self.current_goal = functions.random_start(self.goal_x, self.goal_y, self.rx, self.ry, self.ryaw, self.rk, self.d)
             self.v = random.random()*self.vel_select[-1]
             #self.v = random.random()*7
             #self.v=0    
@@ -221,7 +229,7 @@ class environment():
                 if self.action_space=='discrete':
                     delta_ref = math.pi/16-(math.pi/8)*(act/(self.num_actions-1))         
                 else:
-                    delta_ref = (math.pi/16)*act[0]       
+                    delta_ref = (self.max_delta)*act[0]       
 
                 #delta_dot, a = self.control_system(self.delta, delta_ref, self.v, v_ref)
                 
@@ -338,8 +346,6 @@ class environment():
                     a_arc = np.arctan(np.true_divide(y_arc[1:-1], x_arc[1:-1]))+np.pi
                 cx = d_arc*np.cos(a_arc+a) + self.x
                 cy = d_arc*np.sin(a_arc+a) + self.y
-
-
 
 
             #plt.plot(x_arc, y_arc, 'x')
@@ -506,7 +512,6 @@ class environment():
             wpt_action=action
             R = self.R_range[-1]
 
-
             waypoint_relative_angle = self.theta + self.wpt_arc*(wpt_action)
             waypoint = [self.x + R*math.cos(waypoint_relative_angle), self.y + R*math.sin(waypoint_relative_angle)]
             self.v_ref=self.vel_select[-1]
@@ -594,6 +599,8 @@ class environment():
         elif self.backwards==True:
             return True
         elif self.park==True:
+            return True
+        elif self.get_lap_time==True and self.progress>=1:
             return True
         else:
             return False
@@ -725,7 +732,7 @@ def test_environment():
     
     reward_signal = {'goal_reached':0, 'out_of_bounds':-1, 'max_steps':0, 'collision':-1, 'backwards':-1, 'park':-0.5, 'time_step':-0.005, 'progress':0, 'distance':0.3}    
     
-    action_space_dict = {'action_space': 'continuous', 'vel_select':[7], 'R_range':[6]}
+    action_space_dict = {'action_space': 'continuous', 'vel_select':[7], 'R_range':[3]}
     #action_space_dict = {'action_space': 'discrete', 'n_waypoints': 10, 'vel_select':[7], 'R_range':[3]}
     
     path_dict = {'local_path':True, 'waypoint_strategy':'local', 'wpt_arc':np.pi/2}
@@ -758,7 +765,7 @@ def test_environment():
 
 
     env = environment(env_dict)
-    env.reset(save_history=True, start_condition=initial_condition)
+    env.reset(save_history=True, start_condition=initial_condition, get_lap_time=False)
     
     done=False
     
