@@ -391,7 +391,7 @@ def test(agent_name, n_episodes, detect_issues, initial_conditions):
       terminal_poses.append(env.pose)
          
       if episode%10==0:
-         print('Test episode', episode, '| Progress = %.2f' % env.progress, '| Score = %.2f' % score)
+         print('Progress test episode', episode, '| Progress = %.2f' % env.progress, '| Score = %.2f' % score)
 
       if detect_issues==True and (score<1):
          print('Stop condition met')
@@ -499,7 +499,7 @@ def lap_time_test(agent_name, n_episodes, detect_issues, initial_conditions):
       collisions.append(env.collision)
          
       if episode%10==0:
-         print('Test episode', episode, '| Progress = %.2f' % env.progress, '| Score = %.2f' % score)
+         print('Lap test episode', episode, '| Lap time = %.2f' % times[-1], '| Score = %.2f' % score)
 
    outfile=open(results_file_name, 'wb')
    pickle.dump(times, outfile)
@@ -509,7 +509,7 @@ def lap_time_test(agent_name, n_episodes, detect_issues, initial_conditions):
 if __name__=='__main__':
 
    
-   agent_name = 'ddpg_end_to_end_3'
+   agent_name = 'pure_pursuit'
    
    main_dict = {'name': agent_name, 'max_episodes':1000, 'learning_method': 'ddpg', 'comment': ''}
 
@@ -545,11 +545,16 @@ if __name__=='__main__':
    
    #action_space_dict = {'action_space': 'discrete', 'n_waypoints': 10, 'vel_select':[7], 'R':[3]}
 
-   path_dict = {'local_path':False, 'waypoint_strategy':'local', 'wpt_arc':np.pi/2}
+   path_dict = {'local_path':True, 'waypoint_strategy':'local', 'wpt_arc':np.pi/2}
    
    if path_dict['local_path'] == True: #True or false
-      path_dict['path_strategy'] = 'circle' #circle or linear
-      path_dict['track_dict'] = {'k':0.1, 'Lfc':1}
+        path_dict['path_strategy'] = 'circle' #circle or linear
+        path_dict['control_strategy'] = 'pure_pursuit' #pure_pursuit or stanley
+        
+        if path_dict['control_strategy'] == 'pure_pursuit':
+            path_dict['track_dict'] = {'k':0.1, 'Lfc':1}
+        if path_dict['control_strategy'] == 'stanley':
+            path_dict['track_dict'] = {'l_front': car_params['lf'], 'k':2, 'max_steer':car_params['s_max']}
    
    lidar_dict = {'is_lidar':True, 'lidar_res':0.1, 'n_beams':8, 'max_range':20, 'fov':np.pi}
    
@@ -582,7 +587,7 @@ if __name__=='__main__':
    '''
 
 
-   agent_name = 'ddpg_end_to_end_3'
+   agent_name = 'pure_pursuit'
    #display_results.durations(agent_name, show_average=True, show_median=True)
    #display_results.display_collision_distribution(agent_name)
    #test(agent_name=agent_name, n_episodes=300, detect_issues=False, initial_conditions=False)
@@ -592,7 +597,7 @@ if __name__=='__main__':
    #display_results.density_plot_progress([agent_name], legend=[''], legend_title='')
    #display_results.display_moving_agent(agent_name=agent_name, load_history=False)
    #display_results.display_path(agent_name=agent_name, load_history=False)
-   display_results.display_lap_results(agent_name=agent_name)
+   #display_results.display_lap_results(agent_name=agent_name)
    
    
    #agent_names = ['ddpg_local_path', 'ddpg_end_to_end']

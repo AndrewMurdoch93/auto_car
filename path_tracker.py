@@ -1,4 +1,5 @@
 import math
+from re import X
 import numpy as np
 import functions
 from numba import njit
@@ -29,7 +30,7 @@ def pure_pursuit(wheelbase, waypoint, x, y, theta):
 #        ('k', float64),
 #        ('Lfc', float64)]
 #@jitclass(spec)
-class local_path_tracker():
+class pure_pursuit_path():
     '''
     More complex pure pursuit for multiple waypoint/ path following
     '''
@@ -41,10 +42,11 @@ class local_path_tracker():
         self.k = track_dict['k']
         self.Lfc = track_dict['Lfc']
 
-    def record_waypoints(self, cx, cy):
+    def record_waypoints(self, cx, cy, cyaw):
         #Initialise waypoints for planner
         self.cx=cx
         self.cy=cy
+        self.cyaw = cyaw
         self.old_nearest_point_index = None
 
     def search_target_waypoint(self, x, y, v):
@@ -107,3 +109,94 @@ class local_path_tracker():
             delta = math.atan2(2.0 * self.wheelbase * math.sin(alpha) / Lf, 1.0)
 
             return delta, ind
+
+
+class stanley():
+    def __init__(self, track_dict):
+
+        self.k = track_dict['k']
+        self.max_steer = track_dict['max_steer']
+        self.l_front = track_dict['l_front'] 
+    
+    def record_waypoints(self, cx, cy, cyaw):
+        #Initialise waypoints for planner
+        self.cx=cx
+        self.cy=cy
+        self.cyaw = cyaw
+            
+    def stanley_control(self, state, last_target_idx):
+        """
+        Stanley steering control.
+
+        :param state: (State object)
+        :param cx: ([float])
+        :param cy: ([float])
+        :param cyaw: ([float])
+        :param last_target_idx: (int)
+        :return: (float, int)
+        """
+
+        x=state[0]
+        y=state[1]
+        v=state[3]
+        yaw=state[4]
+
+        current_target_idx, error_front_axle = self.calc_target_index(state)
+
+        if last_target_idx >= current_target_idx:
+            current_target_idx = last_target_idx
+
+        # theta_e corrects the heading error
+        theta_e = self.normalize_angle(self.cyaw[current_target_idx] - yaw)
+        # theta_d corrects the cross track error
+        theta_d = np.arctan2(self.k * error_front_axle, v)
+        # Steering control
+        delta = theta_e + theta_d
+
+        return delta, current_target_idx
+
+
+    def normalize_angle(self, angle):
+        """
+        Normalize an angle to [-pi, pi].
+
+        :param angle: (float)
+        :return: (float) Angle in radian in [-pi, pi]
+        """
+        while angle > np.pi:
+            angle -= 2.0 * np.pi
+
+        while angle < -np.pi:
+            angle += 2.0 * np.pi
+
+        return angle
+
+
+    def calc_target_index(self, state):
+        """
+        Compute index in the trajectory list of the target.
+
+        :param state: (State object)
+        :param cx: [float]
+        :param cy: [float]
+        :return: (int, float)
+        """
+        x=state[0]
+        y=state[1]
+        yaw=state[4]
+
+        # Calc front axle position
+        fx = x + self.l_front * np.cos(yaw)
+        fy = y + self.l_front * np.sin(yaw)
+
+        # Search nearest point index
+        dx = [fx - icx for icx in self.cx]
+        dy = [fy - icy for icy in self.cy]
+        d = np.hypot(dx, dy)
+        target_idx = np.argmin(d)
+
+        # Project RMS error onto front axle vector
+        front_axle_vec = [-np.cos(yaw + np.pi / 2), -np.sin(yaw + np.pi / 2)]
+        error_front_axle = np.dot([dx[target_idx], dy[target_idx]], front_axle_vec)
+
+        return target_idx, error_front_axle

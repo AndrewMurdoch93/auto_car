@@ -60,9 +60,16 @@ class environment():
         if self.local_path==True:
             self.path_strategy = self.path_dict['path_strategy']
             self.track_dict = self.path_dict['track_dict']
-            self.track_dict['wheelbase'] = self.wheelbase 
-            self.path_tracker = path_tracker.local_path_tracker(self.track_dict)
+            
+            if self.path_dict['control_strategy'] == 'pure_pursuit':
+                self.track_dict['wheelbase'] = self.wheelbase 
+                self.path_tracker = path_tracker.pure_pursuit_path(self.track_dict)
 
+            if self.path_dict['control_strategy'] == 'stanley':
+                self.path_tracker = path_tracker.stanley(self.track_dict)
+
+        
+        
         self.vel_select = self.action_space_dict['vel_select']
         self.R_range = self.action_space_dict['R_range']
         self.action_space = self.action_space_dict['action_space']
@@ -258,9 +265,13 @@ class environment():
            
         else:
             
-            cx, cy = self.define_path(waypoint, wpt_angle, R)
-            self.path_tracker.record_waypoints(cx, cy)
-            target_index, _ = self.path_tracker.search_target_waypoint(self.x, self.y, self.v)
+            cx, cy, cyaw = self.define_path(waypoint, wpt_angle, R)
+            self.path_tracker.record_waypoints(cx, cy, cyaw)
+            
+            if self.path_dict['control_strategy'] == 'pure_pursuit':
+                target_index, _ = self.path_tracker.search_target_waypoint(self.x, self.y, self.v)
+            elif self.path_dict['control_strategy'] == 'stanley':
+                target_index, _ = self.path_tracker.calc_target_index(self.state)
 
             lastIndex = len(cx)-1
             i=0
@@ -272,7 +283,11 @@ class environment():
                     self.waypoint_history.append(waypoint)
                     self.action_step_history.append(act)
                 
-                delta_ref, target_index = self.path_tracker.pure_pursuit_steer_control(self.x, self.y, self.theta, self.v, target_index)
+                if self.path_dict['control_strategy'] == 'pure_pursuit':
+                    delta_ref, target_index = self.path_tracker.pure_pursuit_steer_control(self.x, self.y, self.theta, self.v, target_index)
+                if self.path_dict['control_strategy'] == 'stanley':
+                    delta_ref, target_idx = self.path_tracker.stanley_control(self.state, target_index)
+                
                 #delta_dot, a = self.control_system(self.delta, delta_ref, self.v, v_ref)
                 self.update_pose(delta_ref, v_ref)
                 self.update_variables()
@@ -332,6 +347,9 @@ class environment():
                     a_arc = np.arctan(np.true_divide(y_arc[1:-1], x_arc[1:-1]))+np.pi
                 cx = d_arc*np.cos(a_arc+a) + self.x
                 cy = d_arc*np.sin(a_arc+a) + self.y
+
+                cx = cx.flatten().tolist()
+                cy = cy.flatten()
             
             else:
                 L=R/2
@@ -347,13 +365,19 @@ class environment():
                 cx = d_arc*np.cos(a_arc+a) + self.x
                 cy = d_arc*np.sin(a_arc+a) + self.y
 
+                cx = cx.flatten().tolist()
+                cy = cy.flatten()
 
+            
+
+            cx, cy, cyaw, ck, s = cubic_spline_planner.calc_spline_course(cx, cy)
+            
             #plt.plot(x_arc, y_arc, 'x')
             #plt.plot(cx, cy, 'o')
             #plt.axis('equal')
             #plt.show()
 
-        return cx, cy
+        return np.array(cx), np.array(cy), np.array(cyaw)
 
 
 
@@ -736,9 +760,15 @@ def test_environment():
     #action_space_dict = {'action_space': 'discrete', 'n_waypoints': 10, 'vel_select':[7], 'R_range':[3]}
     
     path_dict = {'local_path':True, 'waypoint_strategy':'local', 'wpt_arc':np.pi/2}
+     
     if path_dict['local_path'] == True: #True or false
         path_dict['path_strategy'] = 'circle' #circle or linear
-        path_dict['track_dict'] = {'k':0.1, 'Lfc':1}
+        path_dict['control_strategy'] = 'stanley' #pure_pursuit or stanley
+        
+        if path_dict['control_strategy'] == 'pure_pursuit':
+            path_dict['track_dict'] = {'k':0.1, 'Lfc':1}
+        if path_dict['control_strategy'] == 'stanley':
+            path_dict['track_dict'] = {'l_front': car_params['lf'], 'k':1, 'max_steer':car_params['s_max']}
     
     lidar_dict = {'is_lidar':True, 'lidar_res':0.1, 'n_beams':8, 'max_range':20, 'fov':np.pi}
     
@@ -769,7 +799,7 @@ def test_environment():
     
     done=False
     
-    action_history = np.ones(20)*0.1
+    action_history = np.ones(20)*-1
 
     score=0
     i=0
