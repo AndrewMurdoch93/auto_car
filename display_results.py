@@ -462,12 +462,13 @@ def display_lap_results(agent_name):
     times = pickle.load(infile)
     collisions = pickle.load(infile)
     infile.close() 
+    
     ave_times = np.average(np.array(times).flatten()[np.logical_not(np.array(collisions))])
-    collisions = np.average(np.logical_not(np.array(collisions)))
+    perc_collisions = np.sum(np.logical_not(np.array(collisions)))/len(np.logical_not(np.array(collisions)))
 
     print('\nLap results:')
     print('Average lap time: ', ave_times)
-    print('Percentage successful laps', collisions)
+    print('Fraction successful laps: ', perc_collisions)
 
 def display_moving_agent(agent_name, load_history=False):
 

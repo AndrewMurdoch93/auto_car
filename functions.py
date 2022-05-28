@@ -332,7 +332,7 @@ def generate_initial_condition(name, episodes):
    
     for eps in range(episodes):
         x, y, theta, current_goal = random_start(goal_x, goal_y, rx, ry, ryaw, rk, d)
-        v = random.random()*7
+        v = random.random()*1
         delta = 0
         i = {'x':x, 'y':y, 'v':v, 'delta':delta, 'theta':theta, 'goal':current_goal}
         initial_conditions.append(i)

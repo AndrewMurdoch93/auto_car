@@ -192,7 +192,7 @@ class trainingLoop():
                self.agent.learn()  #Learn using state transition history
                obs = next_obs  #Update the state
                score+=reward
-               self.agent.decrease_noise_factor()
+               #self.agent.decrease_noise_factor()
                end = time.time()
                durations.append(end-start)
          
@@ -431,6 +431,10 @@ def lap_time_test(agent_name, n_episodes, detect_issues, initial_conditions):
    infile.close()
 
    env_dict['max_steps'] = 2000
+   #env_dict['car_params'] =   
+   #{'mu': 1.0489, 'C_Sf': 4.718, 'C_Sr': 5.4562, 'lf': 0.15875, 'lr': 0.17145
+   #               , 'h': 0.074, 'm': 3.74, 'I': 0.04712, 's_min': -0.4189, 's_max': 0.4189, 'sv_min': -3.2
+   #               , 'sv_max': 3.2, 'v_switch': 7.319, 'a_max': 9.51, 'v_min':-5.0, 'v_max': 20.0, 'width': 0.31, 'length': 0.58}
 
    #env = environment(env_dict, start_condition={'x':15,'y':5,'theta':0,'goal':0})
    env = environment(env_dict)
@@ -509,9 +513,9 @@ def lap_time_test(agent_name, n_episodes, detect_issues, initial_conditions):
 if __name__=='__main__':
 
    
-   agent_name = 'pure_pursuit'
+   agent_name = 'stanley_dynamic_model_v_4'
    
-   main_dict = {'name': agent_name, 'max_episodes':1000, 'learning_method': 'ddpg', 'comment': ''}
+   main_dict = {'name': agent_name, 'max_episodes':2000, 'learning_method': 'ddpg', 'comment': ''}
 
    agent_dqn_dict = {'gamma':0.99, 'epsilon':1, 'eps_end':0.01, 'eps_dec':1/1000, 'lr':0.001, 'batch_size':64, 'max_mem_size':500000, 
                   'fc1_dims': 64, 'fc2_dims': 64, 'fc3_dims':64}
@@ -549,12 +553,12 @@ if __name__=='__main__':
    
    if path_dict['local_path'] == True: #True or false
         path_dict['path_strategy'] = 'circle' #circle or linear
-        path_dict['control_strategy'] = 'pure_pursuit' #pure_pursuit or stanley
+        path_dict['control_strategy'] = 'stanley' #pure_pursuit or stanley
         
         if path_dict['control_strategy'] == 'pure_pursuit':
             path_dict['track_dict'] = {'k':0.1, 'Lfc':1}
         if path_dict['control_strategy'] == 'stanley':
-            path_dict['track_dict'] = {'l_front': car_params['lf'], 'k':2, 'max_steer':car_params['s_max']}
+            path_dict['track_dict'] = {'l_front': car_params['lf'], 'k':5, 'max_steer':car_params['s_max']}
    
    lidar_dict = {'is_lidar':True, 'lidar_res':0.1, 'n_beams':8, 'max_range':20, 'fov':np.pi}
    
@@ -573,21 +577,78 @@ if __name__=='__main__':
 
    #a = trainingLoop(main_dict, agent_ddpg_dict, env_dict, load_agent='')
    #a.train()
-   #test(agent_name=agent_name, n_episodes=300, detect_issues=False, initial_conditions=True)
-   #lap_time_test(agent_name=agent_name, n_episodes=300, detect_issues=False, initial_conditions=True)
-
+   #test(agent_name=agent_name, n_episodes=100, detect_issues=False, initial_conditions=True)
+   #lap_time_test(agent_name=agent_name, n_episodes=100, detect_issues=False, initial_conditions=True)
    '''
-   agent_name = 'rb_col_fc_1'
+   agent_name = 'stanley_dynamic_model_v_5'
    main_dict['name'] = agent_name
-   agent_rainbow_dict['fc1_dims'] = 100
-   agent_rainbow_dict['fc2_dims'] = 100
-   a = trainingLoop(main_dict, agent_rainbow_dict, env_dict, load_agent='')
+   action_space_dict['vel_select']=[5]
+   env_dict['action_space_dict']=action_space_dict
+   a = trainingLoop(main_dict, agent_ddpg_dict, env_dict, load_agent='')
    a.train()
-   test(agent_name=agent_name, n_episodes=300, detect_issues=False, initial_conditions=False)
+   test(agent_name=agent_name, n_episodes=100, detect_issues=False, initial_conditions=True)
+   lap_time_test(agent_name=agent_name, n_episodes=100, detect_issues=False, initial_conditions=True)
+
+   agent_name = 'stanley_dynamic_model_v_6'
+   main_dict['name'] = agent_name
+   action_space_dict['vel_select']=[6]
+   env_dict['action_space_dict']=action_space_dict
+   a = trainingLoop(main_dict, agent_ddpg_dict, env_dict, load_agent='')
+   a.train()
+   test(agent_name=agent_name, n_episodes=100, detect_issues=False, initial_conditions=True)
+   lap_time_test(agent_name=agent_name, n_episodes=100, detect_issues=False, initial_conditions=True)
+
+   agent_name = 'stanley_dynamic_model_v_7'
+   main_dict['name'] = agent_name
+   action_space_dict['vel_select']=[7]
+   env_dict['action_space_dict']=action_space_dict
+   a = trainingLoop(main_dict, agent_ddpg_dict, env_dict, load_agent='')
+   a.train()
+   test(agent_name=agent_name, n_episodes=100, detect_issues=False, initial_conditions=True)
+   lap_time_test(agent_name=agent_name, n_episodes=100, detect_issues=False, initial_conditions=True)
+
+   agent_name = 'end_to_end_dynamic_model_v_4'
+   main_dict['name'] = agent_name
+   action_space_dict['vel_select']=[4]
+   env_dict['action_space_dict']=action_space_dict
+   env_dict['path_dict']['local_path'] = False
+   a = trainingLoop(main_dict, agent_ddpg_dict, env_dict, load_agent='')
+   a.train()
+   test(agent_name=agent_name, n_episodes=100, detect_issues=False, initial_conditions=True)
+   lap_time_test(agent_name=agent_name, n_episodes=100, detect_issues=False, initial_conditions=True)
+
+   agent_name = 'end_to_end_dynamic_model_v_5'
+   main_dict['name'] = agent_name
+   action_space_dict['vel_select']=[5]
+   env_dict['action_space_dict']=action_space_dict
+   env_dict['path_dict']['local_path'] = False
+   a = trainingLoop(main_dict, agent_ddpg_dict, env_dict, load_agent='')
+   a.train()
+   test(agent_name=agent_name, n_episodes=100, detect_issues=False, initial_conditions=True)
+   lap_time_test(agent_name=agent_name, n_episodes=100, detect_issues=False, initial_conditions=True)
+
+   agent_name = 'end_to_end_dynamic_model_v_6'
+   main_dict['name'] = agent_name
+   action_space_dict['vel_select']=[5]
+   env_dict['action_space_dict']=action_space_dict
+   env_dict['path_dict']['local_path'] = False
+   a = trainingLoop(main_dict, agent_ddpg_dict, env_dict, load_agent='')
+   a.train()
+   test(agent_name=agent_name, n_episodes=100, detect_issues=False, initial_conditions=True)
+   lap_time_test(agent_name=agent_name, n_episodes=100, detect_issues=False, initial_conditions=True)
+
+   agent_name = 'end_to_end_dynamic_model_v_7'
+   main_dict['name'] = agent_name
+   action_space_dict['vel_select']=[7]
+   env_dict['action_space_dict']=action_space_dict
+   env_dict['path_dict']['local_path'] = False
+   a = trainingLoop(main_dict, agent_ddpg_dict, env_dict, load_agent='')
+   a.train()
+   test(agent_name=agent_name, n_episodes=100, detect_issues=False, initial_conditions=True)
+   lap_time_test(agent_name=agent_name, n_episodes=100, detect_issues=False, initial_conditions=True)
    '''
 
-
-   agent_name = 'pure_pursuit'
+   #agent_name = 'end_to_end_dynamic_model_v_7'
    #display_results.durations(agent_name, show_average=True, show_median=True)
    #display_results.display_collision_distribution(agent_name)
    #test(agent_name=agent_name, n_episodes=300, detect_issues=False, initial_conditions=False)
@@ -599,6 +660,9 @@ if __name__=='__main__':
    #display_results.display_path(agent_name=agent_name, load_history=False)
    #display_results.display_lap_results(agent_name=agent_name)
    
+   #display_results.agent_progress_statistics(agent_name=agent_name)
+   #display_results.display_lap_results(agent_name=agent_name)
+   #display_results.display_moving_agent(agent_name=agent_name, load_history=False)
    
    #agent_names = ['ddpg_local_path', 'ddpg_end_to_end']
    #legend = ['partial end-to-end', 'end-to-end']
