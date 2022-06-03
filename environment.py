@@ -722,7 +722,7 @@ class environment():
 
         # update state
         self.state = self.state + f * self.dt
-
+        
         self.x = self.state[0]
         self.y = self.state[1]
         self.theta = self.state[4]%(2*np.pi)
