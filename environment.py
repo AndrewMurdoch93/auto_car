@@ -532,17 +532,22 @@ class environment():
             #wpt_action = action[0]
             #vel_action = action[1]
             #R_action = action[2]
+       
+            wpt_action=action[0]
             
-            wpt_action=action
             R = self.R_range[-1]
 
             waypoint_relative_angle = self.theta + self.wpt_arc*(wpt_action)
             waypoint = [self.x + R*math.cos(waypoint_relative_angle), self.y + R*math.sin(waypoint_relative_angle)]
-            self.v_ref=self.vel_select[-1]
+            
+            if len(self.vel_select)>1:
+                self.v_ref = action[1]*(self.vel_select[1]-self.vel_select[0]) + self.vel_select[0] + (self.vel_select[1]-self.vel_select[0])/2
+            else:
+                self.v_ref=self.vel_select[-1]
 
         wpt_angle =  waypoint_relative_angle-(self.theta-np.pi/2) #angle in cars reference frame
 
-        return waypoint,  wpt_angle, R, self.v_ref
+        return waypoint, wpt_angle, R, self.v_ref
 
     def set_flags(self):
         
@@ -756,7 +761,7 @@ def test_environment():
     
     reward_signal = {'goal_reached':0, 'out_of_bounds':-1, 'max_steps':0, 'collision':-1, 'backwards':-1, 'park':-0.5, 'time_step':-0.005, 'progress':0, 'distance':0.3}    
     
-    action_space_dict = {'action_space': 'continuous', 'vel_select':[7], 'R_range':[3]}
+    action_space_dict = {'action_space': 'continuous', 'vel_select':[3, 6], 'R_range':[3]}
     #action_space_dict = {'action_space': 'discrete', 'n_waypoints': 10, 'vel_select':[7], 'R_range':[3]}
     
     path_dict = {'local_path':True, 'waypoint_strategy':'local', 'wpt_arc':np.pi/2}

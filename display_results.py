@@ -563,8 +563,8 @@ def display_moving_agent(agent_name, load_history=False):
         plt.plot(sh[0], sh[1], 'o')
         wh = env.waypoint_history[i]
         plt.plot(wh[0], wh[1], 'x')
-        gh = env.goal_history[i]
-        plt.plot([gh[0]-env.s, gh[0]+env.s, gh[0]+env.s, gh[0]-env.s, gh[0]-env.s], [gh[1]-env.s, gh[1]-env.s, gh[1]+env.s, gh[1]+env.s, gh[1]-env.s], 'r')
+        #gh = env.goal_history[i]
+        #plt.plot([gh[0]-env.s, gh[0]+env.s, gh[0]+env.s, gh[0]-env.s, gh[0]-env.s], [gh[1]-env.s, gh[1]-env.s, gh[1]+env.s, gh[1]+env.s, gh[1]-env.s], 'r')
         
         if env.local_path==True:
             lph = env.local_path_history[i]
