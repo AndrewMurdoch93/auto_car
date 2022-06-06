@@ -8,6 +8,7 @@ import agent_dueling_dqn
 import agent_dueling_ddqn
 import agent_rainbow
 import agent_ddpg
+import agent_td3
 from environment import environment
 import torch as T
 import torch.nn as nn
@@ -26,6 +27,7 @@ import time
 import seaborn as sns
 import display_results
 import random
+
 
 class trainingLoop():
    def __init__(self, main_dict, agent_dict, env_dict, load_agent):
@@ -90,7 +92,8 @@ class trainingLoop():
          self.agent = agent_rainbow.agent(self.agent_dict)
       if self.learning_method == 'ddpg':
          self.agent = agent_ddpg.agent(self.agent_dict)
-      
+      if self.learning_method == 'td3':
+         self.agent = agent_td3.agent(self.agent_dict)
       if self.load_agent:
          self.agent.load_weights(self.load_agent)
 
@@ -181,7 +184,7 @@ class trainingLoop():
                 score += reward
          
               
-         if self.learning_method == 'ddpg':
+         if self.learning_method == 'ddpg' or self.learning_method == 'td3':
             while not done: 
                
                start = time.time()
@@ -355,6 +358,8 @@ def test(agent_name, n_episodes, detect_issues, initial_conditions):
       a = agent_rainbow.agent(agent_dict)
    if main_dict['learning_method'] == 'ddpg':
       a = agent_ddpg.agent(agent_dict)
+   if main_dict['learning_method'] == 'td3':
+      a = agent_td3.agent(agent_dict)
    
    a.load_weights(agent_name)
 
@@ -375,8 +380,9 @@ def test(agent_name, n_episodes, detect_issues, initial_conditions):
       while not done:
          if main_dict['learning_method'] !='ddpg':
             action = a.choose_action(obs)
-         elif main_dict['learning_method'] == 'ddpg':
+         elif main_dict['learning_method'] == 'ddpg' or main_dict['learning_method'] == 'td3':
             action = a.choose_greedy_action(obs)
+         
          
          action_history.append(action)
          
@@ -473,6 +479,8 @@ def lap_time_test(agent_name, n_episodes, detect_issues, initial_conditions):
       a = agent_rainbow.agent(agent_dict)
    if main_dict['learning_method'] == 'ddpg':
       a = agent_ddpg.agent(agent_dict)
+   if main_dict['learning_method'] == 'td3':
+      a = agent_td3.agent(agent_dict)
    
    a.load_weights(agent_name)
 
@@ -490,7 +498,7 @@ def lap_time_test(agent_name, n_episodes, detect_issues, initial_conditions):
       while not done:
          if main_dict['learning_method'] !='ddpg':
             action = a.choose_action(obs)
-         elif main_dict['learning_method'] == 'ddpg':
+         elif main_dict['learning_method'] == 'ddpg' or main_dict['learning_method'] == 'td3':
             action = a.choose_greedy_action(obs)
          
          action_history.append(action)
@@ -513,7 +521,7 @@ def lap_time_test(agent_name, n_episodes, detect_issues, initial_conditions):
 if __name__=='__main__':
 
    
-   agent_name = 'pure_pursuit_circle_v_c_1'
+   agent_name = 'td3'
    
    main_dict = {'name': agent_name, 'max_episodes':1000, 'learning_method': 'ddpg', 'comment': ''}
 
@@ -538,6 +546,9 @@ if __name__=='__main__':
    agent_actor_critic_cont_dict = {'gamma':0.99, 'alpha':0.000005, 'beta':0.00001, 'fc1_dims':256, 'fc2_dims':256}
    
    agent_ddpg_dict = {'alpha':0.000025, 'beta':0.00025, 'tau':0.001, 'gamma':0.99, 'max_size':1000000, 'layer1_size':400, 'layer2_size':300, 'batch_size':64}
+   
+   agent_td3_dict = {'alpha':0.001, 'beta':0.001, 'tau':0.005, 'gamma':0.99, 'update_actor_interval':2, 'warmup':100, 
+                        'max_size':1000000, 'layer1_size':400, 'layer2_size':300, 'batch_size':100, 'noise':0.1}
    
    car_params =   {'mu': 1.0489, 'C_Sf': 4.718, 'C_Sr': 5.4562, 'lf': 0.15875, 'lr': 0.17145
                   , 'h': 0.074, 'm': 3.74, 'I': 0.04712, 's_min': -0.4189, 's_max': 0.4189, 'sv_min': -3.2
@@ -564,7 +575,7 @@ if __name__=='__main__':
    
    env_dict = {'sim_conf': functions.load_config(sys.path[0], "config")
             , 'save_history': False
-            , 'map_name': 'circle'
+            , 'map_name': 'columbia_1'
             , 'max_steps': 1000
             , 'control_steps': 20
             , 'display': False
@@ -575,13 +586,13 @@ if __name__=='__main__':
             , 'path_dict': path_dict
             } 
    
+   
+   #a = trainingLoop(main_dict, agent_td3_dict, env_dict, load_agent='')
+   #a.train()
+   #test(agent_name=agent_name, n_episodes=100, detect_issues=False, initial_conditions=True)
+   #lap_time_test(agent_name=agent_name, n_episodes=100, detect_issues=False, initial_conditions=True)
+  
    '''
-   a = trainingLoop(main_dict, agent_ddpg_dict, env_dict, load_agent='')
-   a.train()
-   test(agent_name=agent_name, n_episodes=100, detect_issues=False, initial_conditions=True)
-   lap_time_test(agent_name=agent_name, n_episodes=100, detect_issues=False, initial_conditions=True)
-   
-   
    agent_name = 'pure_pursuit_circle_v_c_2'
    main_dict['name'] = agent_name
    a = trainingLoop(main_dict, agent_ddpg_dict, env_dict, load_agent='')
@@ -619,15 +630,15 @@ if __name__=='__main__':
    #agent_name = 'pure_pursuit_circle_v_c_1'
    #agent_name = 'pure_pursuit_circle_v_c_2'
    #agent_name = 'pure_pursuit_circle_v_c_3'
-   agent_name = 'pure_pursuit_circle_v_c_4'
-   
+   #agent_name = 'pure_pursuit_circle_v_c_4'
+   #agent_name = 'td3'
    #test(agent_name=agent_name, n_episodes=100, detect_issues=False, initial_conditions=True)
    #lap_time_test(agent_name=agent_name, n_episodes=100, detect_issues=False, initial_conditions=True)
    
    #display_results.display_train_parameters(agent_name=agent_name)
    display_results.agent_progress_statistics(agent_name=agent_name)
    display_results.display_lap_results(agent_name=agent_name)
-   #display_results.display_moving_agent(agent_name=agent_name, load_history=False)
+   display_results.display_moving_agent(agent_name=agent_name, load_history=False)
 
 
    '''

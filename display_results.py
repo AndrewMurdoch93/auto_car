@@ -8,6 +8,7 @@ import agent_dueling_dqn
 import agent_dueling_ddqn
 import agent_rainbow
 import agent_ddpg
+import agent_td3
 import torch as T
 import torch.nn as nn
 import torch.nn.functional as F
@@ -26,6 +27,7 @@ import seaborn as sns
 from environment import environment
 import pandas as pd
 import time
+
 
 
 #from numpy import unique
@@ -511,6 +513,8 @@ def display_moving_agent(agent_name, load_history=False):
         a = agent_rainbow.agent(agent_dict)
     if main_dict['learning_method'] == 'ddpg':
         a = agent_ddpg.agent(agent_dict)
+    if main_dict['learning_method'] == 'td3':
+        a = agent_td3.agent(agent_dict)
        
     a.load_weights(agent_name)
 
@@ -529,7 +533,7 @@ def display_moving_agent(agent_name, load_history=False):
             
             if main_dict['learning_method'] !='ddpg':
                 action = a.choose_action(obs)
-            elif main_dict['learning_method'] == 'ddpg':
+            elif main_dict['learning_method'] == 'ddpg' or main_dict['learning_method'] == 'td3':
                 action = a.choose_greedy_action(obs)
             
             end_action = time.time()
@@ -642,6 +646,8 @@ def display_path(agent_name, load_history=False):
         a = agent_rainbow.agent(agent_dict)
     if main_dict['learning_method'] == 'ddpg':
         a = agent_ddpg.agent(agent_dict)
+    if main_dict['learning_method'] == 'td3':
+        a = agent_td3.agent(agent_dict)
         
     a.load_weights(agent_name)
     

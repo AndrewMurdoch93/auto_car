@@ -109,43 +109,49 @@ class ActorNetwork(nn.Module):
         return mu
 
     def save_checkpoint(self):
-        print('... saving checkpoint ...')
         T.save(self.state_dict(), self.checkpoint_file)
 
     def load_checkpoint(self):
-        print('... loading checkpoint ...')
         self.load_state_dict(T.load(self.checkpoint_file))
 
 
-class Agent():
-    def __init__(self, alpha, beta, input_dims, tau, env, gamma=0.99, update_actor_interval=2, warmup=1000,
-            n_actions=2, max_size=1000000, layer1_size=400, layer2_size=300, batch_size=100, noise=0.1):
-        
-        self.gamma = gamma
-        self.tau = tau
-        self.max_action = env.action_space.high
-        self.min_action = env.action_space.low
-        self.memory = ReplayBuffer(max_size, input_dims, n_actions)
-        self.batch_size = batch_size
+class agent():
+    
+    def __init__(self, agent_dict):
+        self.name = agent_dict["name"]
+        self.gamma = agent_dict["gamma"]
+        self.tau = agent_dict["tau"]
+        self.max_action = 1
+        self.min_action = -1
+        self.memory = ReplayBuffer(agent_dict["max_size"], agent_dict["input_dims"], agent_dict["n_actions"])
+        self.batch_size = agent_dict["batch_size"]
         self.learn_step_cntr = 0
         self.time_step = 0
-        self.warmup = warmup
-        self.n_actions = n_actions
-        self.update_actor_iter = update_actor_interval
+        self.warmup = agent_dict["warmup"]
+        self.n_actions = agent_dict[ "n_actions"]
+        self.update_actor_iter = agent_dict["update_actor_interval"]
 
-        self.actor = ActorNetwork(alpha, input_dims, layer1_size, layer2_size, n_actions=n_actions, name='actor')
+        alpha = agent_dict["alpha"]
+        beta = agent_dict["beta"]
+        input_dims = agent_dict["input_dims"]
+        layer1_size = agent_dict["layer1_size"]
+        layer2_size = agent_dict["layer2_size"]
+        n_actions = agent_dict["n_actions"]
 
-        self.critic_1 = CriticNetwork(beta, input_dims, layer1_size, layer2_size, n_actions=n_actions, name='critic_1')
+        self.actor = ActorNetwork(alpha, input_dims, layer1_size, layer2_size, n_actions=n_actions, name=self.name+'_actor')
 
-        self.critic_2 = CriticNetwork(beta, input_dims, layer1_size, layer2_size, n_actions=n_actions, name='critic_2')
+        self.critic_1 = CriticNetwork(beta, input_dims, layer1_size, layer2_size, n_actions=n_actions, name=self.name+'_critic_1')
 
-        self.target_actor = ActorNetwork(alpha, input_dims, layer1_size, layer2_size, n_actions=n_actions, name='target_actor')
+        self.critic_2 = CriticNetwork(beta, input_dims, layer1_size, layer2_size, n_actions=n_actions, name=self.name+'_critic_2')
 
-        self.target_critic_1 = CriticNetwork(beta, input_dims, layer1_size, layer2_size, n_actions=n_actions, name='target_critic_1')
+        self.target_actor = ActorNetwork(alpha, input_dims, layer1_size, layer2_size, n_actions=n_actions, name=self.name+'_target_actor')
 
-        self.target_critic_2 = CriticNetwork(beta, input_dims, layer1_size, layer2_size, n_actions=n_actions, name='target_critic_2')
+        self.target_critic_1 = CriticNetwork(beta, input_dims, layer1_size, layer2_size, n_actions=n_actions, name=self.name+'_target_critic_1')
 
-        self.noise = noise
+        self.target_critic_2 = CriticNetwork(beta, input_dims, layer1_size, layer2_size, n_actions=n_actions, name=self.name+'_target_critic_2')
+
+        self.noise = agent_dict["noise"]
+
         self.update_network_parameters(tau=1)
 
     def choose_action(self, observation):
@@ -162,7 +168,15 @@ class Agent():
 
         return mu_prime.cpu().detach().numpy()
 
-    def remember(self, state, action, reward, new_state, done):
+    def choose_greedy_action(self, observation):
+        state = T.tensor(observation, dtype=T.float).to(self.actor.device)
+        mu = self.actor.forward(state).to(self.actor.device)
+        mu_prime = T.clamp(mu_prime, self.min_action[0], self.max_action[0])
+        self.time_step += 1
+        
+        return mu_prime.cpu().detach().numpy()
+    
+    def store_transition(self, state, action, reward, new_state, done):
         self.memory.store_transition(state, action, reward, new_state, done)
 
     def learn(self):
@@ -240,22 +254,19 @@ class Agent():
         target_critic_2 = dict(target_critic_2_params)
 
         for name in critic_1:
-            critic_1[name] = tau*critic_1[name].clone() + \
-                    (1-tau)*target_critic_1[name].clone()
+            critic_1[name] = tau*critic_1[name].clone() + (1-tau)*target_critic_1[name].clone()
 
         for name in critic_2:
-            critic_2[name] = tau*critic_2[name].clone() + \
-                    (1-tau)*target_critic_2[name].clone()
+            critic_2[name] = tau*critic_2[name].clone() + (1-tau)*target_critic_2[name].clone()
 
         for name in actor:
-            actor[name] = tau*actor[name].clone() + \
-                    (1-tau)*target_actor[name].clone()
+            actor[name] = tau*actor[name].clone() + (1-tau)*target_actor[name].clone()
 
         self.target_critic_1.load_state_dict(critic_1)
         self.target_critic_2.load_state_dict(critic_2)
         self.target_actor.load_state_dict(actor)
 
-    def save_models(self):
+    def save_agent(self):
         self.actor.save_checkpoint()
         self.target_actor.save_checkpoint()
         self.critic_1.save_checkpoint()
@@ -263,7 +274,7 @@ class Agent():
         self.target_critic_1.save_checkpoint()
         self.target_critic_2.save_checkpoint()
 
-    def load_models(self):
+    def load_weights(self):
         self.actor.load_checkpoint()
         self.target_actor.load_checkpoint()
         self.critic_1.load_checkpoint()
