@@ -8,6 +8,7 @@ import agent_dueling_dqn
 import agent_dueling_ddqn
 import agent_rainbow
 import agent_ddpg
+import agent_ddpg_PER
 import torch as T
 import torch.nn as nn
 import torch.nn.functional as F
@@ -511,7 +512,9 @@ def display_moving_agent(agent_name, load_history=False):
         a = agent_rainbow.agent(agent_dict)
     if main_dict['learning_method'] == 'ddpg':
         a = agent_ddpg.agent(agent_dict)
-       
+    if main_dict['learning_method'] == 'ddpg_PER':
+        a = agent_ddpg_PER.agent(agent_dict)
+
     a.load_weights(agent_name)
 
     if load_history==True:
@@ -527,11 +530,12 @@ def display_moving_agent(agent_name, load_history=False):
             
             start_action = time.time()
             
-            if main_dict['learning_method'] !='ddpg':
-                action = a.choose_action(obs)
-            elif main_dict['learning_method'] == 'ddpg':
+            if main_dict['learning_method'] == 'ddpg' or main_dict['learning_method'] == 'ddpg_PER':
                 action = a.choose_greedy_action(obs)
-            
+                print(action)
+            else:
+                action = a.choose_action(obs)
+
             end_action = time.time()
             
             action_duration = end_action - start_action
@@ -642,6 +646,8 @@ def display_path(agent_name, load_history=False):
         a = agent_rainbow.agent(agent_dict)
     if main_dict['learning_method'] == 'ddpg':
         a = agent_ddpg.agent(agent_dict)
+    if main_dict['learning_method'] == 'ddpg_PER':
+        a = agent_ddpg_PER.agent(agent_dict)
         
     a.load_weights(agent_name)
     
@@ -655,11 +661,13 @@ def display_path(agent_name, load_history=False):
         score=0
 
         while not done:
-            if main_dict['learning_method'] !='ddpg':
-                action = a.choose_action(obs)
-            elif main_dict['learning_method'] == 'ddpg':
+             
+            if main_dict['learning_method'] == 'ddpg' or main_dict['learning_method'] == 'ddpg_PER':
                 action = a.choose_greedy_action(obs)
-
+                #print(action)
+            else:
+                action = a.choose_action(obs)
+                
             next_obs, reward, done = env.take_action(action)
             score += reward
             obs = next_obs

@@ -6,6 +6,8 @@ import torch.optim as optim
 import numpy as np
 import pickle
 
+#blank_trans = (0, np.zeros((12), dtype=np.float32), 0.0, 0.0,  np.zeros(12), False)
+
 class OUActionNoise(object):
     def __init__(self, mu, sigma=0.15, theta=.2, dt=1e-2, x0=None):
         self.theta = theta
@@ -57,6 +59,129 @@ class ReplayBuffer(object):
         terminal = self.terminal_memory[batch]
 
         return states, actions, rewards, states_, terminal
+
+class SegmentTree():
+    def __init__(self, size):
+        self.index = 0
+        self.size = size
+        self.full = False  # Used to track actual capacity
+        self.tree_start = 2**(size-1).bit_length()-1  # Put all used node leaves on last tree level
+        self.sum_tree = np.zeros((self.tree_start + self.size,), dtype=np.float32)
+        self.data = np.array([blank_trans] * size, dtype=Transition_dtype)
+        self.max = 1  # Initial max value to return (1 = 1^ω)
+
+    def _update_nodes(self, indices):
+        children_indices = indices * 2 + np.expand_dims([1, 2], axis=1)
+        self.sum_tree[indices] = np.sum(self.sum_tree[children_indices], axis=0)
+
+    def _propagate(self, indices):
+        parents = (indices - 1) // 2
+        unique_parents = np.unique(parents)
+        self._update_nodes(unique_parents)
+        if parents[0] != 0:
+            self._propagate(parents)
+
+    def _propagate_index(self, index):
+        parent = (index - 1) // 2
+        left, right = 2 * parent + 1, 2 * parent + 2
+        self.sum_tree[parent] = self.sum_tree[left] + self.sum_tree[right]
+        if parent != 0:
+            self._propagate_index(parent)
+    
+    def update(self, indices, values):
+        self.sum_tree[indices] = values  # Set new values
+        self._propagate(indices)  # Propagate values
+        current_max_value = np.max(values)
+        self.max = max(current_max_value, self.max)
+    
+    def _update_index(self, index, value):
+        self.sum_tree[index] = value  # Set new value
+        self._propagate_index(index)  # Propagate value
+        self.max = max(value, self.max)
+    
+    def append(self, data, value):
+        self.data[self.index] = data  # Store data in underlying data structure
+        self._update_index(self.index + self.tree_start, value)  # Update tree
+        self.index = (self.index + 1) % self.size  # Update index
+        self.full = self.full or self.index == 0  # Save when capacity reached
+        self.max = max(value, self.max)
+
+    def _retrieve(self, indices, values):
+        children_indices = (indices * 2 + np.expand_dims([1, 2], axis=1)) # Make matrix of children indices
+        # If indices correspond to leaf nodes, return them
+        if children_indices[0, 0] >= self.sum_tree.shape[0]:
+            return indices
+        # If children indices correspond to leaf nodes, bound rare outliers in case total slightly overshoots
+        elif children_indices[0, 0] >= self.tree_start:
+            children_indices = np.minimum(children_indices, self.sum_tree.shape[0] - 1)
+        left_children_values = self.sum_tree[children_indices[0]]
+        successor_choices = np.greater(values, left_children_values).astype(np.int32)  # Classify which values are in left or right branches
+        successor_indices = children_indices[successor_choices, np.arange(indices.size)] # Use classification to index into the indices matrix
+        successor_values = values - successor_choices * left_children_values  # Subtract the left branch values when searching in the right branch
+        return self._retrieve(successor_indices, successor_values)
+    
+    # Searches for values in sum tree and returns values, data indices and tree indices
+    def find(self, values):
+        indices = self._retrieve(np.zeros(values.shape, dtype=np.int32), values)
+        data_index = indices - self.tree_start
+        return (self.sum_tree[indices], data_index, indices)  # Return values, data indices, tree indices
+
+    # Returns data given a data index
+    def get(self, data_index):
+        return self.data[data_index % self.size]
+
+    def total(self):
+        return self.sum_tree[0]
+    
+class ReplayMemory:
+    def __init__(self, max_size, batch_size, replay_alpha):
+        self.batch_size=batch_size
+        self.capacity = max_size
+        self.replay_alpha = replay_alpha
+        self.transitions = SegmentTree(self.capacity)
+        self.t = 0
+
+    def store_transition(self, state, action, reward, next_state, done):
+        self.transitions.append((self.t, state, action, reward, next_state, done), self.transitions.max)  # Store new transition with maximum priority
+        self.t = 0 if done else self.t + 1  # Start new episodes with t = 0
+    
+    def sample(self, replay_beta):
+        capacity = self.capacity if self.transitions.full else self.transitions.index
+        while True:
+            p_total=self.transitions.total()
+            samples = np.random.uniform(0, p_total, self.batch_size)
+            probs, data_idxs, tree_idxs = self.transitions.find(samples)
+            if np.all(data_idxs<=capacity):
+                break
+        
+        data = self.transitions.get(data_idxs)
+        probs = probs / p_total
+        #weights = (capacity * probs) ** -replay_beta  # Compute importance-sampling weights w
+        #weights = weights / weights.max()  # Normalise by max importance-sampling weight from batch
+        
+        if np.any(probs==0):
+            print('Probs are 0')
+        if capacity==0:
+            print('Probs are 0')
+
+        weights = np.power(np.multiply(np.divide(1, capacity), np.divide(1, probs)), replay_beta)
+        if np.any(weights==np.inf):
+            print('weights are inf')
+        if np.any(weights==0):
+            print('weights are 0')
+        
+        norm_weights = np.divide(weights, np.max(weights))
+        if np.max(weights)==np.inf:
+            print('weights are inf')
+        if np.max(weights)==0:
+            print('weights are 0')
+
+        #return tree_idxs, states, actions, returns, next_states, nonterminals, weights
+        return tree_idxs, data, norm_weights
+
+    def update_priorities(self, idxs, priorities):
+        priorities = np.power(np.abs(priorities.cpu().detach().numpy()), self.replay_alpha)
+        self.transitions.update(idxs, priorities)
 
 
 class CriticNetwork(nn.Module):
@@ -168,12 +293,20 @@ class agent(object):
     def __init__(self, agent_dict):
         
         self.agent_dict = agent_dict
+
+        global Transition_dtype
+        global blank_trans 
+        Transition_dtype = np.dtype([('timestep', np.int32), ('state', np.float32, (self.agent_dict['input_dims'])), ('action', np.float32), ('reward', np.float32), ('next_state', np.float32, (self.agent_dict['input_dims'])), ('done', np.bool_)])
+        blank_trans = (0, np.zeros((agent_dict['input_dims']), dtype=np.float32), 0.0, 0.0,  np.zeros((agent_dict['input_dims']), dtype=np.float32), False)
+        
         self.name = agent_dict['name']
         self.gamma = agent_dict['gamma']
         self.tau = agent_dict['tau']
         self.noise_constant = 1
-        self.memory = ReplayBuffer(agent_dict['max_size'], agent_dict['input_dims'], agent_dict['n_actions'])
+        self.learn_step_counter = 0
         self.batch_size = agent_dict['batch_size']
+        #self.memory = ReplayBuffer(agent_dict['max_size'], agent_dict['input_dims'], agent_dict['n_actions'])
+        self.memory = ReplayMemory(max_size=self.agent_dict['max_mem_size'], batch_size=self.agent_dict['batch_size'], replay_alpha=self.agent_dict['replay_alpha'])
 
         self.actor = ActorNetwork(agent_dict['alpha'], agent_dict['input_dims'], agent_dict['layer1_size'], agent_dict['layer2_size'], 
                                     agent_dict['n_actions'], name=self.name+'_actor')
@@ -212,27 +345,39 @@ class agent(object):
         self.memory.store_transition(state, action, reward, new_state, done)
 
 
-    def learn(self):
-        if self.memory.mem_cntr < self.batch_size:
+    def learn(self, replay_beta):
+        if self.memory.transitions.index<self.batch_size and self.memory.transitions.full==False:
             return
-        state, action, reward, new_state, done = self.memory.sample_buffer(self.batch_size)
+        
+        
+        #state, action, reward, new_state, done = self.memory.sample_buffer(self.batch_size)
 
-        reward = T.tensor(reward, dtype=T.float).to(self.critic.device)
-        done = T.tensor(done).to(self.critic.device)
-        new_state = T.tensor(new_state, dtype=T.float).to(self.critic.device)
-        action = T.tensor(action, dtype=T.float).to(self.critic.device)
-        state = T.tensor(state, dtype=T.float).to(self.critic.device)
+        #reward = T.tensor(reward, dtype=T.float).to(self.critic.device)
+        #done = T.tensor(done).to(self.critic.device)
+        #new_state = T.tensor(new_state, dtype=T.float).to(self.critic.device)
+        #action = T.tensor(action, dtype=T.float).to(self.critic.device)
+        #state = T.tensor(state, dtype=T.float).to(self.critic.device)
 
+        tree_idxs, data, weights = self.memory.sample(replay_beta)
+
+        state = T.tensor(np.copy(data[:]['state'])).to(self.critic.device)
+        reward = T.tensor(np.copy(data[:]['reward'])).to(self.critic.device)
+        done = T.tensor(np.copy(data[:]['done'])).to(self.critic.device)
+        action = T.tensor(np.copy(data[:]['action'])).to(self.critic.device).view(self.batch_size, 1)
+        new_state = T.tensor(np.copy(data[:]['next_state'])).to(self.critic.device)
+
+        indices = np.arange(self.batch_size)
+        
         self.target_actor.eval()
         self.target_critic.eval()
         self.critic.eval()
         target_actions = self.target_actor.forward(new_state)
         critic_value_ = self.target_critic.forward(new_state, target_actions)
-        critic_value = self.critic.forward(state, action)
+        critic_value = self.critic.forward(state, action.view(self.batch_size, 1).type(T.float))
 
         target = []
         for j in range(self.batch_size):
-            target.append(reward[j] + self.gamma*critic_value_[j]*done[j])
+            target.append(reward[j] + self.gamma*critic_value_[j]*~done[j])
         target = T.tensor(target).to(self.critic.device)
         target = target.view(self.batch_size, 1)
 
@@ -240,7 +385,14 @@ class agent(object):
 
         self.critic.train()
         self.critic.optimizer.zero_grad()
-        critic_loss = F.mse_loss(target, critic_value)
+        errors = T.sub(target, critic_value).to(self.critic.device)
+
+        self.learn_step_counter += 1
+        self.memory.update_priorities(tree_idxs, abs(errors).view(self.batch_size)+1e-6)
+
+        critic_loss = T.mean(T.multiply(T.square(errors.view(self.batch_size)).to(self.critic.device), T.tensor(weights).to(self.critic.device)))
+        #critic_loss = T.mean(T.multiply(errors.view(self.batch_size).to(self.critic.device), T.tensor(weights).to(self.critic.device)))
+        
         critic_loss.backward()
         self.critic.optimizer.step()
 
@@ -254,6 +406,9 @@ class agent(object):
         self.actor.optimizer.step()
 
         self.update_network_parameters()
+
+        #self.learn_step_counter += 1
+        #self.memory.update_priorities(tree_idxs, abs(errors))
 
     def update_network_parameters(self, tau=None):
         if tau is None:
