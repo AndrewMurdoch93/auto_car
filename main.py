@@ -37,7 +37,7 @@ class trainingLoop():
       self.env_dict = env_dict
       self.load_agent = load_agent
       self.learning_method = main_dict['learning_method']
-      
+      self.runs = main_dict['runs']
       self.agent_name = main_dict['name']
       self.max_episodes = main_dict['max_episodes']
       self.comment = main_dict['comment']
@@ -111,127 +111,128 @@ class trainingLoop():
       steps = []
       durations = []
 
-      for episode in range(self.max_episodes):
-         
-         self.env.reset(save_history=True, start_condition=[], get_lap_time=False)  #Reset the environment every episode
-         obs = self.env.observation      #Records starting state
-         done = False
-         score = 0                       #Initialise score counter for every episode
-         start_time = time.time()
-         
-         #For every planning time step in the episode
-         
-         if self.learning_method == 'dqn':
-            while not done: 
-               action = self.agent.choose_action(obs)    #Select an action
-               next_obs, reward, done = self.env.take_action(action) #Environment executes action
-               score += reward 
-               self.agent.store_transition(obs, action, reward, next_obs, done)
-               self.agent.learn()  #Learn using state transition history
-               obs = next_obs  #Update the state
-            self.agent.decrease_epsilon()
+      for n in range(self.runs):
+         for episode in range(self.max_episodes):
+            
+            self.env.reset(save_history=True, start_condition=[], get_lap_time=False)  #Reset the environment every episode
+            obs = self.env.observation      #Records starting state
+            done = False
+            score = 0                       #Initialise score counter for every episode
+            start_time = time.time()
+            
+            #For every planning time step in the episode
+            
+            if self.learning_method == 'dqn':
+               while not done: 
+                  action = self.agent.choose_action(obs)    #Select an action
+                  next_obs, reward, done = self.env.take_action(action) #Environment executes action
+                  score += reward 
+                  self.agent.store_transition(obs, action, reward, next_obs, done)
+                  self.agent.learn()  #Learn using state transition history
+                  obs = next_obs  #Update the state
+               self.agent.decrease_epsilon()
 
-         if self.learning_method == 'dueling_dqn' or self.learning_method == 'dueling_ddqn':
-            while not done:
-               action = self.agent.choose_action(obs)
-               next_obs, reward, done = self.env.take_action(action)
-               score += reward
-               self.agent.store_transition(obs, action, reward, next_obs, int(done))
+            if self.learning_method == 'dueling_dqn' or self.learning_method == 'dueling_ddqn':
+               while not done:
+                  action = self.agent.choose_action(obs)
+                  next_obs, reward, done = self.env.take_action(action)
+                  score += reward
+                  self.agent.store_transition(obs, action, reward, next_obs, int(done))
+                  self.agent.learn()
+                  obs = next_obs
+               self.agent.decrease_epsilon()
+
+            if self.learning_method == 'rainbow':
+               while not done:
+                  
+                  start = time.time()
+                  action = self.agent.choose_action(obs)
+
+                  next_obs, reward, done = self.env.take_action(action)
+                  score += reward
+                  self.agent.store_transition(obs, action, reward, next_obs, int(done))
+                  self.agent.learn(self.replay_beta)
+                  obs = next_obs
+                  end = time.time()
+                  durations.append(end-start)
+               
+               self.agent.decrease_epsilon()
+               self.replay_beta += (1-self.replay_beta)*(episode/self.max_episodes)
+            
+            if self.learning_method == 'reinforce':
+               while not done:
+                  action = self.agent.choose_action(obs)
+                  next_obs, reward, done = self.env.take_action(action)
+                  self.agent.store_rewards(reward)
+                  obs = next_obs
+                  score += reward
                self.agent.learn()
-               obs = next_obs
-            self.agent.decrease_epsilon()
-
-         if self.learning_method == 'rainbow':
-            while not done:
-               
-               start = time.time()
-               action = self.agent.choose_action(obs)
-
-               next_obs, reward, done = self.env.take_action(action)
-               score += reward
-               self.agent.store_transition(obs, action, reward, next_obs, int(done))
-               self.agent.learn(self.replay_beta)
-               obs = next_obs
-               end = time.time()
-               durations.append(end-start)
             
-            self.agent.decrease_epsilon()
-            self.replay_beta += (1-self.replay_beta)*(episode/self.max_episodes)
-         
-         if self.learning_method == 'reinforce':
-            while not done:
-               action = self.agent.choose_action(obs)
-               next_obs, reward, done = self.env.take_action(action)
-               self.agent.store_rewards(reward)
-               obs = next_obs
-               score += reward
-            self.agent.learn()
-         
-         if self.learning_method == 'actor_critic_sep' or self.learning_method == 'actor_critic_com':
-            while not done: 
-               action = self.agent.choose_action(obs)    #Select an action
-               next_obs, reward, done = self.env.take_action(action) #Environment executes action
-               self.agent.learn(obs, reward, next_obs, done)  #Learn using state transition history
-               obs = next_obs  #Update the state
-               score+=reward
-         
-         if self.learning_method == 'actor_critic_cont':
-              while not done:
-                action = np.array(self.agent.choose_action(obs)).reshape((1,))
-                next_obs, reward, done = self.env.take_action(action)
-                self.agent.learn(obs, reward, next_obs, done)
-                obs = next_obs
-                score += reward
-         
-              
-         if self.learning_method == 'ddpg' or self.learning_method == 'td3':
-            while not done: 
-               
-               start = time.time()
-
-               action = self.agent.choose_action(obs)    #Select an action
-               next_obs, reward, done = self.env.take_action(action) #Environment executes action
-               self.agent.store_transition(obs, action, reward, next_obs, int(done))
-               self.agent.learn()  #Learn using state transition history
-               obs = next_obs  #Update the state
-               score+=reward
-               #self.agent.decrease_noise_factor()
-               end = time.time()
-               durations.append(end-start)
-         
-         
-         end_time = time.time()
-         times.append(end_time-start_time)
-
-         scores.append(score)
-         avg_score = np.mean(scores[-100:])
-
-         progress.append(self.env.progress)
-         avg_progress = np.mean(progress[-100:])
-
-         steps.append(self.env.steps)
-
-         if episode%500==0 and episode!=0:
-
-            ave_progress = self.test_while_train(n_episodes=10)
-            self.save_agent(ave_progress)
-
-            outfile=open(self.train_results_file_name, 'wb')
-            pickle.dump(scores, outfile)
-            pickle.dump(progress, outfile)
-            pickle.dump(times, outfile)
-            pickle.dump(steps, outfile)
-            outfile.close()
-
-
-         if episode%10==0:
-            if self.learning_method=='dqn' or self.learning_method=='dueling_dqn' or self.learning_method=='dueling_ddqn' or self.learning_method=='rainbow':
-               print(f"{'Episode':8s} {episode:5.0f} {'| Score':8s} {score:6.2f} {'| Progress':12s} {self.env.progress:3.2f} {'| Average score':15s} {avg_score:6.2f} {'| Average progress':18s} {avg_progress:3.2f} {'| Epsilon':9s} {self.agent.epsilon:.2f}")
-            if self.learning_method=='reinforce' or self.learning_method=='actor_critic_sep' or self.learning_method=='actor_critic_com' or self.learning_method=='actor_critic_cont' or self.learning_method=='ddpg':
-               print(f"{'Episode':8s} {episode:5.0f} {'| Score':8s} {score:6.2f} {'| Progress':12s} {self.env.progress:3.2f} {'| Average score':15s} {avg_score:6.2f} {'| Average progress':18s} {avg_progress:3.2f}")
+            if self.learning_method == 'actor_critic_sep' or self.learning_method == 'actor_critic_com':
+               while not done: 
+                  action = self.agent.choose_action(obs)    #Select an action
+                  next_obs, reward, done = self.env.take_action(action) #Environment executes action
+                  self.agent.learn(obs, reward, next_obs, done)  #Learn using state transition history
+                  obs = next_obs  #Update the state
+                  score+=reward
             
-      ave_progress = self.test_while_train(n_episodes=10)
-      self.save_agent(ave_progress)
+            if self.learning_method == 'actor_critic_cont':
+               while not done:
+                  action = np.array(self.agent.choose_action(obs)).reshape((1,))
+                  next_obs, reward, done = self.env.take_action(action)
+                  self.agent.learn(obs, reward, next_obs, done)
+                  obs = next_obs
+                  score += reward
+            
+               
+            if self.learning_method == 'ddpg' or self.learning_method == 'td3':
+               while not done: 
+                  
+                  start = time.time()
+
+                  action = self.agent.choose_action(obs)    #Select an action
+                  next_obs, reward, done = self.env.take_action(action) #Environment executes action
+                  self.agent.store_transition(obs, action, reward, next_obs, int(done))
+                  self.agent.learn()  #Learn using state transition history
+                  obs = next_obs  #Update the state
+                  score+=reward
+                  #self.agent.decrease_noise_factor()
+                  end = time.time()
+                  durations.append(end-start)
+            
+            
+            end_time = time.time()
+            times.append(end_time-start_time)
+
+            scores.append(score)
+            avg_score = np.mean(scores[-100:])
+
+            progress.append(self.env.progress)
+            avg_progress = np.mean(progress[-100:])
+
+            steps.append(self.env.steps)
+
+            if episode%500==0 and episode!=0:
+
+               ave_progress = self.test_while_train(n_episodes=10)
+               self.save_agent(ave_progress)
+
+               outfile=open(self.train_results_file_name, 'wb')
+               pickle.dump(scores, outfile)
+               pickle.dump(progress, outfile)
+               pickle.dump(times, outfile)
+               pickle.dump(steps, outfile)
+               outfile.close()
+
+
+            if episode%10==0:
+               if self.learning_method=='dqn' or self.learning_method=='dueling_dqn' or self.learning_method=='dueling_ddqn' or self.learning_method=='rainbow':
+                  print(f"{'Episode':8s} {episode:5.0f} {'| Score':8s} {score:6.2f} {'| Progress':12s} {self.env.progress:3.2f} {'| Average score':15s} {avg_score:6.2f} {'| Average progress':18s} {avg_progress:3.2f} {'| Epsilon':9s} {self.agent.epsilon:.2f}")
+               if self.learning_method=='reinforce' or self.learning_method=='actor_critic_sep' or self.learning_method=='actor_critic_com' or self.learning_method=='actor_critic_cont' or self.learning_method=='ddpg' or self.learning_method=='td3':
+                  print(f"{'Episode':8s} {episode:5.0f} {'| Score':8s} {score:6.2f} {'| Progress':12s} {self.env.progress:3.2f} {'| Average score':15s} {avg_score:6.2f} {'| Average progress':18s} {avg_progress:3.2f}")
+               
+         ave_progress = self.test_while_train(n_episodes=10)
+         self.save_agent(ave_progress)
 
       outfile=open(self.train_results_file_name, 'wb')
       pickle.dump(scores, outfile)
@@ -523,7 +524,7 @@ if __name__=='__main__':
    
    agent_name = 'td3'
    
-   main_dict = {'name': agent_name, 'max_episodes':1000, 'learning_method': 'ddpg', 'comment': ''}
+   main_dict = {'name':agent_name, 'max_episodes':1000, 'learning_method':'td3', 'runs':1, 'comment':''}
 
    agent_dqn_dict = {'gamma':0.99, 'epsilon':1, 'eps_end':0.01, 'eps_dec':1/1000, 'lr':0.001, 'batch_size':64, 'max_mem_size':500000, 
                   'fc1_dims': 64, 'fc2_dims': 64, 'fc3_dims':64}
@@ -630,14 +631,14 @@ if __name__=='__main__':
    #agent_name = 'pure_pursuit_circle_v_c_2'
    #agent_name = 'pure_pursuit_circle_v_c_3'
    #agent_name = 'pure_pursuit_circle_v_c_4'
-   #agent_name = 'td3'
+   agent_name = 'td3'
    #test(agent_name=agent_name, n_episodes=100, detect_issues=False, initial_conditions=True)
    #lap_time_test(agent_name=agent_name, n_episodes=100, detect_issues=False, initial_conditions=True)
    
    #display_results.display_train_parameters(agent_name=agent_name)
    #display_results.agent_progress_statistics(agent_name=agent_name)
-   #display_results.display_lap_results(agent_name=agent_name)
-   #display_results.display_moving_agent(agent_name=agent_name, load_history=False)
+   display_results.display_lap_results(agent_name=agent_name)
+   display_results.display_moving_agent(agent_name=agent_name, load_history=False)
 
 
    '''

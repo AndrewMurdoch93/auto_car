@@ -11,8 +11,8 @@ class ReplayBuffer():
     def __init__(self, max_size, input_shape, n_actions):
         self.mem_size = max_size
         self.mem_cntr = 0
-        self.state_memory = np.zeros((self.mem_size, *input_shape))
-        self.new_state_memory = np.zeros((self.mem_size, *input_shape))
+        self.state_memory = np.zeros((self.mem_size, input_shape))
+        self.new_state_memory = np.zeros((self.mem_size, input_shape))
         self.action_memory = np.zeros((self.mem_size, n_actions))
         self.reward_memory = np.zeros(self.mem_size)
         self.terminal_memory = np.zeros(self.mem_size, dtype=np.bool)
@@ -41,17 +41,16 @@ class ReplayBuffer():
         return states, actions, rewards, states_, dones
 
 class CriticNetwork(nn.Module):
-    def __init__(self, beta, input_dims, fc1_dims, fc2_dims, n_actions, name, chkpt_dir='tmp/td3'):
+    def __init__(self, beta, input_dims, fc1_dims, fc2_dims, n_actions, name):
         super(CriticNetwork, self).__init__()
         self.input_dims = input_dims
         self.fc1_dims = fc1_dims
         self.fc2_dims = fc2_dims
         self.n_actions = n_actions
         self.name = name
-        self.checkpoint_dir = chkpt_dir
-        self.checkpoint_file = os.path.join(self.checkpoint_dir, name+'_td3')
+        self.file_name = 'agents/' + self.name + '_weights'
 
-        self.fc1 = nn.Linear(self.input_dims[0] + n_actions, self.fc1_dims)
+        self.fc1 = nn.Linear(self.input_dims + n_actions, self.fc1_dims)
         self.fc2 = nn.Linear(self.fc1_dims, self.fc2_dims)
         self.q1 = nn.Linear(self.fc2_dims, 1)
 
@@ -70,12 +69,10 @@ class CriticNetwork(nn.Module):
         return q1
 
     def save_checkpoint(self):
-        print('... saving checkpoint ...')
-        T.save(self.state_dict(), self.checkpoint_file)
+        T.save(self.state_dict(), self.file_name)
 
     def load_checkpoint(self):
-        print('... loading checkpoint ...')
-        self.load_state_dict(T.load(self.checkpoint_file))
+        self.load_state_dict(T.load(self.file_name))
 
 class ActorNetwork(nn.Module):
     def __init__(self, alpha, input_dims, fc1_dims, fc2_dims,
@@ -86,10 +83,9 @@ class ActorNetwork(nn.Module):
         self.fc2_dims = fc2_dims
         self.n_actions = n_actions
         self.name = name
-        self.checkpoint_dir = chkpt_dir
-        self.checkpoint_file = os.path.join(self.checkpoint_dir, name+'_td3')
+        self.file_name = 'agents/' + self.name + '_weights'
 
-        self.fc1 = nn.Linear(*self.input_dims, self.fc1_dims)
+        self.fc1 = nn.Linear(self.input_dims, self.fc1_dims)
         self.fc2 = nn.Linear(self.fc1_dims, self.fc2_dims)
         self.mu = nn.Linear(self.fc2_dims, self.n_actions)
 
@@ -109,10 +105,10 @@ class ActorNetwork(nn.Module):
         return mu
 
     def save_checkpoint(self):
-        T.save(self.state_dict(), self.checkpoint_file)
+        T.save(self.state_dict(), self.file_name)
 
     def load_checkpoint(self):
-        self.load_state_dict(T.load(self.checkpoint_file))
+        self.load_state_dict(T.load(self.file_name))
 
 
 class agent():
@@ -161,9 +157,9 @@ class agent():
             state = T.tensor(observation, dtype=T.float).to(self.actor.device)
             mu = self.actor.forward(state).to(self.actor.device)
         
-        mu_prime = mu + T.tensor(np.random.normal(scale=self.noise), dtype=T.float).to(self.actor.device)
+        mu_prime = mu.to(self.actor.device) + T.tensor(np.random.normal(scale=self.noise), dtype=T.float).to(self.actor.device)
 
-        mu_prime = T.clamp(mu_prime, self.min_action[0], self.max_action[0])
+        mu_prime = T.clamp(mu_prime, -1, 1)
         self.time_step += 1
 
         return mu_prime.cpu().detach().numpy()
@@ -171,10 +167,10 @@ class agent():
     def choose_greedy_action(self, observation):
         state = T.tensor(observation, dtype=T.float).to(self.actor.device)
         mu = self.actor.forward(state).to(self.actor.device)
-        mu_prime = T.clamp(mu_prime, self.min_action[0], self.max_action[0])
+        mu = T.clamp(mu, -1, 1)
         self.time_step += 1
         
-        return mu_prime.cpu().detach().numpy()
+        return mu.cpu().detach().numpy()
     
     def store_transition(self, state, action, reward, new_state, done):
         self.memory.store_transition(state, action, reward, new_state, done)
@@ -193,7 +189,7 @@ class agent():
         
         target_actions = self.target_actor.forward(state_)
         target_actions = target_actions + T.clamp(T.tensor(np.random.normal(scale=0.2)), -0.5, 0.5)
-        target_actions = T.clamp(target_actions, self.min_action[0], self.max_action[0])
+        target_actions = T.clamp(target_actions, -1, 1)
         
         q1_ = self.target_critic_1.forward(state_, target_actions)
         q2_ = self.target_critic_2.forward(state_, target_actions)
@@ -274,7 +270,7 @@ class agent():
         self.target_critic_1.save_checkpoint()
         self.target_critic_2.save_checkpoint()
 
-    def load_weights(self):
+    def load_weights(self, name):
         self.actor.load_checkpoint()
         self.target_actor.load_checkpoint()
         self.critic_1.load_checkpoint()
