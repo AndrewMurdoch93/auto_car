@@ -378,10 +378,10 @@ def test(agent_name, n_episodes, detect_issues, initial_conditions):
       score = 0
 
       while not done:
-         if main_dict['learning_method'] !='ddpg':
-            action = a.choose_action(obs)
-         elif main_dict['learning_method'] == 'ddpg' or main_dict['learning_method'] == 'td3':
+         if main_dict['learning_method']=='ddpg' or main_dict['learning_method']=='td3':
             action = a.choose_greedy_action(obs)
+         else:
+            action = a.choose_action(obs)
          
          
          action_history.append(action)
@@ -496,11 +496,11 @@ def lap_time_test(agent_name, n_episodes, detect_issues, initial_conditions):
       score = 0
 
       while not done:
-         if main_dict['learning_method'] !='ddpg':
-            action = a.choose_action(obs)
-         elif main_dict['learning_method'] == 'ddpg' or main_dict['learning_method'] == 'td3':
+         if main_dict['learning_method']=='ddpg' or main_dict['learning_method']=='td3':
             action = a.choose_greedy_action(obs)
-         
+         else:
+            action = a.choose_action(obs)
+
          action_history.append(action)
          
          next_obs, reward, done = env.take_action(action)
@@ -635,9 +635,9 @@ if __name__=='__main__':
    #lap_time_test(agent_name=agent_name, n_episodes=100, detect_issues=False, initial_conditions=True)
    
    #display_results.display_train_parameters(agent_name=agent_name)
-   display_results.agent_progress_statistics(agent_name=agent_name)
-   display_results.display_lap_results(agent_name=agent_name)
-   display_results.display_moving_agent(agent_name=agent_name, load_history=False)
+   #display_results.agent_progress_statistics(agent_name=agent_name)
+   #display_results.display_lap_results(agent_name=agent_name)
+   #display_results.display_moving_agent(agent_name=agent_name, load_history=False)
 
 
    '''

@@ -531,10 +531,10 @@ def display_moving_agent(agent_name, load_history=False):
             
             start_action = time.time()
             
-            if main_dict['learning_method'] !='ddpg':
-                action = a.choose_action(obs)
-            elif main_dict['learning_method'] == 'ddpg' or main_dict['learning_method'] == 'td3':
+            if main_dict['learning_method']=='ddpg' or main_dict['learning_method']=='td3':
                 action = a.choose_greedy_action(obs)
+            else:
+                action = a.choose_action(obs)
             
             end_action = time.time()
             
@@ -661,10 +661,10 @@ def display_path(agent_name, load_history=False):
         score=0
 
         while not done:
-            if main_dict['learning_method'] !='ddpg':
-                action = a.choose_action(obs)
-            elif main_dict['learning_method'] == 'ddpg':
+            if main_dict['learning_method']=='ddpg' or main_dict['learning_method']=='td3':
                 action = a.choose_greedy_action(obs)
+            else:
+                action = a.choose_action(obs)
 
             next_obs, reward, done = env.take_action(action)
             score += reward
