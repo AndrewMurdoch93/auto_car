@@ -248,9 +248,9 @@ class trainingLoop():
 
             if episode%10==0:
                if self.learning_method=='dqn' or self.learning_method=='dueling_dqn' or self.learning_method=='dueling_ddqn' or self.learning_method=='rainbow':
-                  print(f"{'Run':5s} {n:3.0f} {'| Episode':8s} {episode:5.0f} {'| Score':8s} {score:6.2f} {'| Progress':12s} {self.env.progress:3.2f} {'| Average score':15s} {avg_score:6.2f} {'| Average progress':18s} {avg_progress:3.2f} {'| Epsilon':9s} {self.agent.epsilon:.2f}")
+                  print(f"{'Run':3s} {n:2.0f} {'| Episode':8s} {episode:5.0f} {'| Score':8s} {score:6.2f} {'| Progress':12s} {self.env.progress:3.2f} {'| Average score':15s} {avg_score:6.2f} {'| Average progress':18s} {avg_progress:3.2f} {'| Epsilon':9s} {self.agent.epsilon:.2f}")
                if self.learning_method=='reinforce' or self.learning_method=='actor_critic_sep' or self.learning_method=='actor_critic_com' or self.learning_method=='actor_critic_cont' or self.learning_method=='ddpg' or self.learning_method=='td3':
-                  print(f"{'Run':5s} {n:3.0f} {'Episode':8s} {episode:5.0f} {'| Score':8s} {score:6.2f} {'| Progress':12s} {self.env.progress:3.2f} {'| Average score':15s} {avg_score:6.2f} {'| Average progress':18s} {avg_progress:3.2f}")
+                  print(f"{'Run':3s} {n:2.0f} {'| Episode':8s} {episode:5.0f} {'| Score':8s} {score:6.2f} {'| Progress':12s} {self.env.progress:3.2f} {'| Average score':15s} {avg_score:6.2f} {'| Average progress':18s} {avg_progress:3.2f}")
                
          
          self.save_agent(n)
@@ -337,7 +337,7 @@ def test(agent_name, n_episodes, detect_issues, initial_conditions):
    infile.close()
 
    env_dict['max_steps'] = 1000
-   
+
    #env = environment(env_dict, start_condition={'x':15,'y':5,'theta':0,'goal':0})
    env = environment(env_dict)
    env.reset(save_history=False, start_condition=[], get_lap_time=False)
@@ -352,6 +352,7 @@ def test(agent_name, n_episodes, detect_issues, initial_conditions):
    main_dict = pickle.load(infile)
    infile.close()
 
+   runs = main_dict['runs']
 
    if main_dict['learning_method']=='dqn':
       agent_dict['epsilon'] = 0
@@ -379,13 +380,17 @@ def test(agent_name, n_episodes, detect_issues, initial_conditions):
       a = agent_td3.agent(agent_dict)
    
 
-   test_progress = []
-   test_score = []
-   test_collision = []
-   test_max_steps = []
-   terminal_poses = []
+   test_progress = np.zeros([runs, n_episodes])
+   test_score = np.zeros([runs, n_episodes])
+   test_collision = np.zeros([runs, n_episodes])
+   test_max_steps = np.zeros([runs, n_episodes])
+   terminal_poses = np.zeros([runs, n_episodes])
 
-   for n in runs:
+   for n in range(runs):
+      
+      a = agent_td3.agent(agent_dict)
+      a.load_weights(agent_name, n)
+      
       for episode in range(n_episodes):
          
          env.reset(save_history=True, start_condition=start_conditions[episode], get_lap_time=False)
@@ -407,11 +412,11 @@ def test(agent_name, n_episodes, detect_issues, initial_conditions):
             score += reward
             obs = next_obs
             
-         test_progress.append(env.progress)
-         test_score.append(score)
-         test_collision.append(env.collision)
-         test_max_steps.append(env.max_steps_reached)
-         terminal_poses.append(env.pose)
+         test_progress[n, episode] = env.progress
+         test_score[n, episode] = score
+         test_collision[n, episode] = env.collision
+         test_max_steps[n, episode] = env.max_steps_reached
+         #terminal_poses[n, episode] = env.pose
             
          if episode%10==0:
             print('Progress test episode', episode, '| Progress = %.2f' % env.progress, '| Score = %.2f' % score)
@@ -432,7 +437,7 @@ def test(agent_name, n_episodes, detect_issues, initial_conditions):
    pickle.dump(test_progress, outfile)
    pickle.dump(test_collision, outfile)
    pickle.dump(test_max_steps, outfile)
-   pickle.dump(terminal_poses, outfile)
+   #pickle.dump(terminal_poses, outfile)
    outfile.close()
 
 
