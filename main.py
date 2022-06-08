@@ -631,14 +631,14 @@ if __name__=='__main__':
    #agent_name = 'pure_pursuit_circle_v_c_2'
    #agent_name = 'pure_pursuit_circle_v_c_3'
    #agent_name = 'pure_pursuit_circle_v_c_4'
-   agent_name = 'td3'
+   #agent_name = 'td3'
    #test(agent_name=agent_name, n_episodes=100, detect_issues=False, initial_conditions=True)
    #lap_time_test(agent_name=agent_name, n_episodes=100, detect_issues=False, initial_conditions=True)
    
    #display_results.display_train_parameters(agent_name=agent_name)
    #display_results.agent_progress_statistics(agent_name=agent_name)
-   display_results.display_lap_results(agent_name=agent_name)
-   display_results.display_moving_agent(agent_name=agent_name, load_history=False)
+   #display_results.display_lap_results(agent_name=agent_name)
+   #display_results.display_moving_agent(agent_name=agent_name, load_history=False)
 
 
    '''
