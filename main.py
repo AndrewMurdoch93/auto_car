@@ -615,7 +615,6 @@ if __name__=='__main__':
    lap_time_test(agent_name=agent_name, n_episodes=100, detect_issues=False, initial_conditions=True)
    '''
 
-   
    #agent_name = 'pure_pursuit_dynamic_model_v_c_3'
    #agent_name = 'pure_pursuit_dynamic_model_v_c_4'
    #agent_name = 'pure_pursuit_dynamic_model_v_c_5'
