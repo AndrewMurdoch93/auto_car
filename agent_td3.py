@@ -41,14 +41,14 @@ class ReplayBuffer():
         return states, actions, rewards, states_, dones
 
 class CriticNetwork(nn.Module):
-    def __init__(self, beta, input_dims, fc1_dims, fc2_dims, n_actions, name):
+    def __init__(self, beta, input_dims, fc1_dims, fc2_dims, n_actions, filename):
         super(CriticNetwork, self).__init__()
+        self.filename = 'agents/' + filename + '/'
         self.input_dims = input_dims
         self.fc1_dims = fc1_dims
         self.fc2_dims = fc2_dims
         self.n_actions = n_actions
-        self.name = name
-        self.file_name = 'agents/' + self.name + '_weights'
+
 
         self.fc1 = nn.Linear(self.input_dims + n_actions, self.fc1_dims)
         self.fc2 = nn.Linear(self.fc1_dims, self.fc2_dims)
@@ -68,22 +68,20 @@ class CriticNetwork(nn.Module):
 
         return q1
 
-    def save_checkpoint(self):
-        T.save(self.state_dict(), self.file_name)
+    def save_checkpoint(self, name):
+        T.save(self.state_dict(), self.filename+name)
 
-    def load_checkpoint(self):
-        self.load_state_dict(T.load(self.file_name))
+    def load_checkpoint(self, name):
+        self.load_state_dict(T.load(self.filename+name))
 
 class ActorNetwork(nn.Module):
-    def __init__(self, alpha, input_dims, fc1_dims, fc2_dims,
-            n_actions, name, chkpt_dir='tmp/td3'):
+    def __init__(self, alpha, input_dims, fc1_dims, fc2_dims, n_actions, filename):
         super(ActorNetwork, self).__init__()
+        self.filename = 'agents/' + filename + '/'
         self.input_dims = input_dims
         self.fc1_dims = fc1_dims
         self.fc2_dims = fc2_dims
         self.n_actions = n_actions
-        self.name = name
-        self.file_name = 'agents/' + self.name + '_weights'
 
         self.fc1 = nn.Linear(self.input_dims, self.fc1_dims)
         self.fc2 = nn.Linear(self.fc1_dims, self.fc2_dims)
@@ -104,11 +102,11 @@ class ActorNetwork(nn.Module):
 
         return mu
 
-    def save_checkpoint(self):
-        T.save(self.state_dict(), self.file_name)
+    def save_checkpoint(self, name):
+        T.save(self.state_dict(), self.filename+name)
 
-    def load_checkpoint(self):
-        self.load_state_dict(T.load(self.file_name))
+    def load_checkpoint(self, name):
+        self.load_state_dict(T.load(self.filename+name))
 
 
 class agent():
@@ -134,17 +132,17 @@ class agent():
         layer2_size = agent_dict["layer2_size"]
         n_actions = agent_dict["n_actions"]
 
-        self.actor = ActorNetwork(alpha, input_dims, layer1_size, layer2_size, n_actions=n_actions, name=self.name+'_actor')
+        self.actor = ActorNetwork(alpha, input_dims, layer1_size, layer2_size, n_actions=n_actions, filename=self.name)
 
-        self.critic_1 = CriticNetwork(beta, input_dims, layer1_size, layer2_size, n_actions=n_actions, name=self.name+'_critic_1')
+        self.critic_1 = CriticNetwork(beta, input_dims, layer1_size, layer2_size, n_actions=n_actions, filename=self.name)
 
-        self.critic_2 = CriticNetwork(beta, input_dims, layer1_size, layer2_size, n_actions=n_actions, name=self.name+'_critic_2')
+        self.critic_2 = CriticNetwork(beta, input_dims, layer1_size, layer2_size, n_actions=n_actions, filename=self.name)
 
-        self.target_actor = ActorNetwork(alpha, input_dims, layer1_size, layer2_size, n_actions=n_actions, name=self.name+'_target_actor')
+        self.target_actor = ActorNetwork(alpha, input_dims, layer1_size, layer2_size, n_actions=n_actions, filename=self.name)
 
-        self.target_critic_1 = CriticNetwork(beta, input_dims, layer1_size, layer2_size, n_actions=n_actions, name=self.name+'_target_critic_1')
+        self.target_critic_1 = CriticNetwork(beta, input_dims, layer1_size, layer2_size, n_actions=n_actions, filename=self.name)
 
-        self.target_critic_2 = CriticNetwork(beta, input_dims, layer1_size, layer2_size, n_actions=n_actions, name=self.name+'_target_critic_2')
+        self.target_critic_2 = CriticNetwork(beta, input_dims, layer1_size, layer2_size, n_actions=n_actions, filename=self.name)
 
         self.noise = agent_dict["noise"]
 
@@ -262,19 +260,19 @@ class agent():
         self.target_critic_2.load_state_dict(critic_2)
         self.target_actor.load_state_dict(actor)
 
-    def save_agent(self):
-        self.actor.save_checkpoint()
-        self.target_actor.save_checkpoint()
-        self.critic_1.save_checkpoint()
-        self.critic_2.save_checkpoint()
-        self.target_critic_1.save_checkpoint()
-        self.target_critic_2.save_checkpoint()
+    def save_agent(self, name, run):
+        self.actor.save_checkpoint(name + '_actor_n_' + str(run))
+        self.target_actor.save_checkpoint(name + '_target_actor_n_' + str(run))
+        self.critic_1.save_checkpoint(name + '_critic_1_n_' + str(run))
+        self.critic_2.save_checkpoint(name + '_critic_2_n_' + str(run))
+        self.target_critic_1.save_checkpoint(name + '_target_critic_1_n_' + str(run))
+        self.target_critic_2.save_checkpoint(name + '_target_critic_2_n_' + str(run))
 
-    def load_weights(self, name):
-        self.actor.load_checkpoint()
-        self.target_actor.load_checkpoint()
-        self.critic_1.load_checkpoint()
-        self.critic_2.load_checkpoint()
-        self.target_critic_1.load_checkpoint()
-        self.target_critic_2.load_checkpoint()
+    def load_weights(self, name, run):
+        self.actor.load_checkpoint(name + '_actor_n_' + str(run))
+        self.target_actor.load_checkpoint(name + '_target_actor_n_' + str(run))
+        self.critic_1.load_checkpoint(name + '_critic_1_n_' + str(run))
+        self.critic_2.load_checkpoint(name + '_critic_2_n_' + str(run))
+        self.target_critic_1.load_checkpoint(name + '_target_critic_1_n_' + str(run))
+        self.target_critic_2.load_checkpoint(name + '_target_critic_2_n_' + str(run))
 

@@ -28,7 +28,7 @@ import seaborn as sns
 import display_results
 import random
 import os
-from pathlib import Path
+
 
 class trainingLoop():
    def __init__(self, main_dict, agent_dict, env_dict, load_agent):
@@ -47,19 +47,19 @@ class trainingLoop():
       self.train_results_file_name = 'train_results/' + self.agent_name
       self.environment_name = 'environments/' + self.agent_name
       self.train_parameters_name = 'train_parameters/' + self.agent_name
-      self.agent_save_file_name = 'agents/' + self.agent_name + '/'
       self.action_durations_name = 'action_durations/' + self.agent_name + '_train'
-      
+
       self.parent_dir = os.path.dirname(os.path.abspath(__file__))
-      self.agent_dir = self.parent_dir + '/agents/' + self.agent_name
-      
-      self.agent_params_file = self.agent_dir + self.agent_name + '_params'
+      self.agent_dir = self.parent_dir + '/agents/' + self.main_dict['name']
+
+      self.agent_params_file = self.agent_dir + '/' + self.agent_name + '_params'
 
       try:
          os.mkdir(self.agent_dir)
       except OSError as error:
          print(error)
          print("Warning: Files will be overwritten")
+
 
    def train(self):
 
@@ -121,14 +121,16 @@ class trainingLoop():
       pickle.dump(self.agent_dict, outfile)
       outfile.close()
 
-      scores = []
-      progress = []
-      times = []
-      steps = []
-      durations = []
+
+      scores = np.zeros([self.runs, self.max_episodes])
+      progress = np.zeros([self.runs, self.max_episodes])
+      times = np.zeros([self.runs, self.max_episodes])
+      steps = np.zeros([self.runs, self.max_episodes])
+      #durations = []
 
       for n in range(self.runs):
          
+         self.agent = agent_td3.agent(self.agent_dict)
          
          for episode in range(self.max_episodes):
             
@@ -163,7 +165,7 @@ class trainingLoop():
             if self.learning_method == 'rainbow':
                while not done:
                   
-                  start = time.time()
+                  #start = time.time()
                   action = self.agent.choose_action(obs)
 
                   next_obs, reward, done = self.env.take_action(action)
@@ -171,8 +173,8 @@ class trainingLoop():
                   self.agent.store_transition(obs, action, reward, next_obs, int(done))
                   self.agent.learn(self.replay_beta)
                   obs = next_obs
-                  end = time.time()
-                  durations.append(end-start)
+                  #end = time.time()
+                  #durations.append(end-start)
                
                self.agent.decrease_epsilon()
                self.replay_beta += (1-self.replay_beta)*(episode/self.max_episodes)
@@ -206,7 +208,7 @@ class trainingLoop():
             if self.learning_method == 'ddpg' or self.learning_method == 'td3':
                while not done: 
                   
-                  start = time.time()
+                
 
                   action = self.agent.choose_action(obs)    #Select an action
                   next_obs, reward, done = self.env.take_action(action) #Environment executes action
@@ -215,25 +217,26 @@ class trainingLoop():
                   obs = next_obs  #Update the state
                   score+=reward
                   #self.agent.decrease_noise_factor()
-                  end = time.time()
-                  durations.append(end-start)
+             
             
             
             end_time = time.time()
-            times.append(end_time-start_time)
+            
+            times[n, episode] = end_time-start_time
 
-            scores.append(score)
-            avg_score = np.mean(scores[-100:])
+            scores[n, episode] = score
+            #scores.append(score)
+            avg_score = np.mean(scores[n, -100:])
 
-            progress.append(self.env.progress)
-            avg_progress = np.mean(progress[-100:])
+            progress[n, episode] = self.env.progress
+            #progress.append(self.env.progress)
+            avg_progress = np.mean(progress[n, -100:])
 
-            steps.append(self.env.steps)
+            steps[n, episode] = self.env.steps
 
             if episode%500==0 and episode!=0:
 
-               ave_progress = self.test_while_train(n_episodes=10)
-               self.save_agent(ave_progress)
+               self.save_agent(n)
 
                outfile=open(self.train_results_file_name, 'wb')
                pickle.dump(scores, outfile)
@@ -245,12 +248,12 @@ class trainingLoop():
 
             if episode%10==0:
                if self.learning_method=='dqn' or self.learning_method=='dueling_dqn' or self.learning_method=='dueling_ddqn' or self.learning_method=='rainbow':
-                  print(f"{'Episode':8s} {episode:5.0f} {'| Score':8s} {score:6.2f} {'| Progress':12s} {self.env.progress:3.2f} {'| Average score':15s} {avg_score:6.2f} {'| Average progress':18s} {avg_progress:3.2f} {'| Epsilon':9s} {self.agent.epsilon:.2f}")
+                  print(f"{'Run':5s} {n:3.0f} {'| Episode':8s} {episode:5.0f} {'| Score':8s} {score:6.2f} {'| Progress':12s} {self.env.progress:3.2f} {'| Average score':15s} {avg_score:6.2f} {'| Average progress':18s} {avg_progress:3.2f} {'| Epsilon':9s} {self.agent.epsilon:.2f}")
                if self.learning_method=='reinforce' or self.learning_method=='actor_critic_sep' or self.learning_method=='actor_critic_com' or self.learning_method=='actor_critic_cont' or self.learning_method=='ddpg' or self.learning_method=='td3':
-                  print(f"{'Episode':8s} {episode:5.0f} {'| Score':8s} {score:6.2f} {'| Progress':12s} {self.env.progress:3.2f} {'| Average score':15s} {avg_score:6.2f} {'| Average progress':18s} {avg_progress:3.2f}")
+                  print(f"{'Run':5s} {n:3.0f} {'Episode':8s} {episode:5.0f} {'| Score':8s} {score:6.2f} {'| Progress':12s} {self.env.progress:3.2f} {'| Average score':15s} {avg_score:6.2f} {'| Average progress':18s} {avg_progress:3.2f}")
                
-         ave_progress = self.test_while_train(n_episodes=10)
-         self.save_agent(ave_progress)
+         
+         self.save_agent(n)
 
       outfile=open(self.train_results_file_name, 'wb')
       pickle.dump(scores, outfile)
@@ -259,9 +262,9 @@ class trainingLoop():
       pickle.dump(steps, outfile)
       outfile.close()
 
-      outfile=open(self.action_durations_name, 'wb')
-      pickle.dump(durations, outfile)
-      outfile.close()
+      #outfile=open(self.action_durations_name, 'wb')
+      #pickle.dump(durations, outfile)
+      #outfile.close()
 
    def test_while_train(self, n_episodes):
       
@@ -305,10 +308,9 @@ class trainingLoop():
       return test_score
       
 
-   def save_agent(self, name):
-      self.agent.save_agent(name)
-      print("Agent was saved")
-
+   def save_agent(self, n):
+      self.agent.save_agent(self.main_dict['name'], n)
+      print("Agent n = " + str(n) + "was saved")
 
    
 def test(agent_name, n_episodes, detect_issues, initial_conditions):
@@ -316,7 +318,11 @@ def test(agent_name, n_episodes, detect_issues, initial_conditions):
    results_file_name = 'test_results/' + agent_name 
    replay_episode_name = 'replay_episodes/' + agent_name
 
-   
+   parent_dir = os.path.dirname(os.path.abspath(__file__))
+   agent_dir = parent_dir + '/agents/' + agent_name
+   agent_params_file = agent_dir + '/' + agent_name + '_params'
+
+
    infile = open('environments/' + agent_name, 'rb')
    env_dict = pickle.load(infile)
    infile.close()
@@ -331,14 +337,14 @@ def test(agent_name, n_episodes, detect_issues, initial_conditions):
    infile.close()
 
    env_dict['max_steps'] = 1000
-
+   
    #env = environment(env_dict, start_condition={'x':15,'y':5,'theta':0,'goal':0})
    env = environment(env_dict)
    env.reset(save_history=False, start_condition=[], get_lap_time=False)
    
    action_history = []
    
-   infile = open('agents/' + agent_name + '_hyper_parameters', 'rb')
+   infile = open(agent_params_file, 'rb')
    agent_dict = pickle.load(infile)
    infile.close()
    
@@ -372,7 +378,6 @@ def test(agent_name, n_episodes, detect_issues, initial_conditions):
    if main_dict['learning_method'] == 'td3':
       a = agent_td3.agent(agent_dict)
    
-   a.load_weights(agent_name)
 
    test_progress = []
    test_score = []
@@ -380,47 +385,48 @@ def test(agent_name, n_episodes, detect_issues, initial_conditions):
    test_max_steps = []
    terminal_poses = []
 
-   for episode in range(n_episodes):
+   for n in runs:
+      for episode in range(n_episodes):
+         
+         env.reset(save_history=True, start_condition=start_conditions[episode], get_lap_time=False)
+         action_history = []
+         obs = env.observation
+         done = False
+         score = 0
 
-      env.reset(save_history=True, start_condition=start_conditions[episode], get_lap_time=False)
-      action_history = []
-      obs = env.observation
-      done = False
-      score = 0
+         while not done:
+            if main_dict['learning_method']=='ddpg' or main_dict['learning_method']=='td3':
+               action = a.choose_greedy_action(obs)
+            else:
+               action = a.choose_action(obs)
+            
+            
+            action_history.append(action)
+            
+            next_obs, reward, done = env.take_action(action)
+            score += reward
+            obs = next_obs
+            
+         test_progress.append(env.progress)
+         test_score.append(score)
+         test_collision.append(env.collision)
+         test_max_steps.append(env.max_steps_reached)
+         terminal_poses.append(env.pose)
+            
+         if episode%10==0:
+            print('Progress test episode', episode, '| Progress = %.2f' % env.progress, '| Score = %.2f' % score)
 
-      while not done:
-         if main_dict['learning_method']=='ddpg' or main_dict['learning_method']=='td3':
-            action = a.choose_greedy_action(obs)
-         else:
-            action = a.choose_action(obs)
-         
-         
-         action_history.append(action)
-         
-         next_obs, reward, done = env.take_action(action)
-         score += reward
-         obs = next_obs
-         
-      test_progress.append(env.progress)
-      test_score.append(score)
-      test_collision.append(env.collision)
-      test_max_steps.append(env.max_steps_reached)
-      terminal_poses.append(env.pose)
-         
-      if episode%10==0:
-         print('Progress test episode', episode, '| Progress = %.2f' % env.progress, '| Score = %.2f' % score)
+         if detect_issues==True and (score<1):
+            print('Stop condition met')
+            print('Progress = ', env.progress)
+            print('score = ', score)
 
-      if detect_issues==True and (score<1):
-         print('Stop condition met')
-         print('Progress = ', env.progress)
-         print('score = ', score)
-
-         outfile = open(replay_episode_name, 'wb')
-         pickle.dump(action_history, outfile)
-         pickle.dump(env.initial_condition_dict, outfile)
-         outfile.close()
-         break
-      
+            outfile = open(replay_episode_name, 'wb')
+            pickle.dump(action_history, outfile)
+            pickle.dump(env.initial_condition_dict, outfile)
+            outfile.close()
+            break
+         
    outfile=open(results_file_name, 'wb')
    pickle.dump(test_score, outfile)
    pickle.dump(test_progress, outfile)
@@ -432,11 +438,15 @@ def test(agent_name, n_episodes, detect_issues, initial_conditions):
 
 def lap_time_test(agent_name, n_episodes, detect_issues, initial_conditions):
 
-   results_file_name = 'lap_results/' + agent_name 
+   results_file_name = 'lap_results/' + agent_name
+   parent_dir = os.path.dirname(os.path.abspath(__file__))
+   agent_dir = parent_dir + '/agents/' + agent_name
+   agent_params_file = agent_dir + '/' + agent_name + '_params'
 
    infile = open('environments/' + agent_name, 'rb')
    env_dict = pickle.load(infile)
    infile.close()
+   
 
    if initial_conditions==True:
       start_condition_file_name = 'test_initial_condition/' + env_dict['map_name']
@@ -459,7 +469,7 @@ def lap_time_test(agent_name, n_episodes, detect_issues, initial_conditions):
    
    action_history = []
    
-   infile = open('agents/' + agent_name + '_hyper_parameters', 'rb')
+   infile = open(agent_params_file, 'rb')
    agent_dict = pickle.load(infile)
    infile.close()
    
@@ -534,7 +544,7 @@ if __name__=='__main__':
    
    agent_name = 'td3'
    
-   main_dict = {'name':agent_name, 'max_episodes':1000, 'learning_method':'td3', 'runs':1, 'comment':''}
+   main_dict = {'name':agent_name, 'max_episodes':50, 'learning_method':'td3', 'runs':1, 'comment':''}
 
    agent_dqn_dict = {'gamma':0.99, 'epsilon':1, 'eps_end':0.01, 'eps_dec':1/1000, 'lr':0.001, 'batch_size':64, 'max_mem_size':500000, 
                   'fc1_dims': 64, 'fc2_dims': 64, 'fc3_dims':64}
@@ -602,7 +612,7 @@ if __name__=='__main__':
    a.train()
    test(agent_name=agent_name, n_episodes=100, detect_issues=False, initial_conditions=True)
    lap_time_test(agent_name=agent_name, n_episodes=100, detect_issues=False, initial_conditions=True)
-  
+
    '''
    agent_name = 'pure_pursuit_circle_v_c_2'
    main_dict['name'] = agent_name
