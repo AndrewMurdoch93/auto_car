@@ -28,6 +28,7 @@ import seaborn as sns
 import display_results
 import random
 import os
+import display_results_multiple
 
 
 class trainingLoop():
@@ -310,7 +311,7 @@ class trainingLoop():
 
    def save_agent(self, n):
       self.agent.save_agent(self.main_dict['name'], n)
-      print("Agent n = " + str(n) + "was saved")
+      print("Agent n = " + str(n) + " was saved")
 
    
 def test(agent_name, n_episodes, detect_issues, initial_conditions):
@@ -391,6 +392,8 @@ def test(agent_name, n_episodes, detect_issues, initial_conditions):
       a = agent_td3.agent(agent_dict)
       a.load_weights(agent_name, n)
       
+      print("Testing agent " + agent_name + ", n = " + str(n))
+
       for episode in range(n_episodes):
          
          env.reset(save_history=True, start_condition=start_conditions[episode], get_lap_time=False)
@@ -482,6 +485,7 @@ def lap_time_test(agent_name, n_episodes, detect_issues, initial_conditions):
    main_dict = pickle.load(infile)
    infile.close()
 
+   runs = main_dict['runs']
 
    if main_dict['learning_method']=='dqn':
       agent_dict['epsilon'] = 0
@@ -508,36 +512,43 @@ def lap_time_test(agent_name, n_episodes, detect_issues, initial_conditions):
    if main_dict['learning_method'] == 'td3':
       a = agent_td3.agent(agent_dict)
    
-   a.load_weights(agent_name)
+   times = np.zeros([runs, n_episodes])
+   collisions = np.zeros([runs, n_episodes])
 
-   times = []
-   collisions = []
+   for n in range(runs):
 
-   for episode in range(n_episodes):
+      a = agent_td3.agent(agent_dict)
+      a.load_weights(agent_name, n)
+      print("Testing agent " + agent_name + ", n = " + str(n))
 
-      env.reset(save_history=True, start_condition=start_conditions[episode], get_lap_time=True)
-      action_history = []
-      obs = env.observation
-      done = False
-      score = 0
+      for episode in range(n_episodes):
 
-      while not done:
-         if main_dict['learning_method']=='ddpg' or main_dict['learning_method']=='td3':
-            action = a.choose_greedy_action(obs)
-         else:
-            action = a.choose_action(obs)
+         env.reset(save_history=True, start_condition=start_conditions[episode], get_lap_time=True)
+         action_history = []
+         obs = env.observation
+         done = False
+         score = 0
 
-         action_history.append(action)
-         
-         next_obs, reward, done = env.take_action(action)
-         score += reward
-         obs = next_obs
-         
-      times.append(env.steps*0.01)
-      collisions.append(env.collision)
-         
-      if episode%10==0:
-         print('Lap test episode', episode, '| Lap time = %.2f' % times[-1], '| Score = %.2f' % score)
+         while not done:
+            if main_dict['learning_method']=='ddpg' or main_dict['learning_method']=='td3':
+               action = a.choose_greedy_action(obs)
+            else:
+               action = a.choose_action(obs)
+
+            action_history.append(action)
+            
+            next_obs, reward, done = env.take_action(action)
+            score += reward
+            obs = next_obs
+            
+         time = env.steps*0.01
+         collision = env.collision
+
+         times[n, episode] = time
+         collisions[n, episode] = collision
+            
+         if episode%10==0:
+            print('Lap test episode', episode, '| Lap time = %.2f' % time, '| Score = %.2f' % score)
 
    outfile=open(results_file_name, 'wb')
    pickle.dump(times, outfile)
@@ -547,9 +558,9 @@ def lap_time_test(agent_name, n_episodes, detect_issues, initial_conditions):
 if __name__=='__main__':
 
    
-   agent_name = 'td3'
+   agent_name = 'td3_1'
    
-   main_dict = {'name':agent_name, 'max_episodes':50, 'learning_method':'td3', 'runs':1, 'comment':''}
+   main_dict = {'name':agent_name, 'max_episodes':20, 'learning_method':'td3', 'runs':5, 'comment':''}
 
    agent_dqn_dict = {'gamma':0.99, 'epsilon':1, 'eps_end':0.01, 'eps_dec':1/1000, 'lr':0.001, 'batch_size':64, 'max_mem_size':500000, 
                   'fc1_dims': 64, 'fc2_dims': 64, 'fc3_dims':64}
@@ -613,33 +624,10 @@ if __name__=='__main__':
             } 
    
    
-   a = trainingLoop(main_dict, agent_td3_dict, env_dict, load_agent='')
-   a.train()
-   test(agent_name=agent_name, n_episodes=100, detect_issues=False, initial_conditions=True)
-   lap_time_test(agent_name=agent_name, n_episodes=100, detect_issues=False, initial_conditions=True)
-
-   '''
-   agent_name = 'pure_pursuit_circle_v_c_2'
-   main_dict['name'] = agent_name
-   a = trainingLoop(main_dict, agent_ddpg_dict, env_dict, load_agent='')
-   a.train()
-   test(agent_name=agent_name, n_episodes=100, detect_issues=False, initial_conditions=True)
-   lap_time_test(agent_name=agent_name, n_episodes=100, detect_issues=False, initial_conditions=True)
-
-   agent_name = 'pure_pursuit_circle_v_c_3'
-   main_dict['name'] = agent_name
-   a = trainingLoop(main_dict, agent_ddpg_dict, env_dict, load_agent='')
-   a.train()
-   test(agent_name=agent_name, n_episodes=100, detect_issues=False, initial_conditions=True)
-   lap_time_test(agent_name=agent_name, n_episodes=100, detect_issues=False, initial_conditions=True)
-
-   agent_name = 'pure_pursuit_circle_v_c_4'
-   main_dict['name'] = agent_name
-   a = trainingLoop(main_dict, agent_ddpg_dict, env_dict, load_agent='')
-   a.train()
-   test(agent_name=agent_name, n_episodes=100, detect_issues=False, initial_conditions=True)
-   lap_time_test(agent_name=agent_name, n_episodes=100, detect_issues=False, initial_conditions=True)
-   '''
+   #a = trainingLoop(main_dict, agent_td3_dict, env_dict, load_agent='')
+   #a.train()
+   #test(agent_name=agent_name, n_episodes=100, detect_issues=False, initial_conditions=True)
+   #lap_time_test(agent_name=agent_name, n_episodes=100, detect_issues=False, initial_conditions=True)
 
    #agent_name = 'pure_pursuit_dynamic_model_v_c_3'
    #agent_name = 'pure_pursuit_dynamic_model_v_c_4'
@@ -675,133 +663,33 @@ if __name__=='__main__':
    a.train()
    test(agent_name=agent_name, n_episodes=100, detect_issues=False, initial_conditions=True)
    lap_time_test(agent_name=agent_name, n_episodes=100, detect_issues=False, initial_conditions=True)
-
-   agent_name = 'end_to_end_dynamic_model_v_2'
-   main_dict['name'] = agent_name
-   env_dict['path_dict']['local_path'] = False
-   a = trainingLoop(main_dict, agent_ddpg_dict, env_dict, load_agent='')
-   a.train()
-   test(agent_name=agent_name, n_episodes=100, detect_issues=False, initial_conditions=True)
-   lap_time_test(agent_name=agent_name, n_episodes=100, detect_issues=False, initial_conditions=True)
-   
-   
-   agent_name = 'pure_pursuit_dynamic_model_v_c_2'
-   main_dict['name'] = agent_name
-   env_dict['path_dict']['local_path'] = True
-   env_dict['path_dict']['control_strategy'] = 'pure_pursuit'
-   env_dict['path_dict']['track_dict'] = {'k':0.1, 'Lfc':1}
-   env_dict['action_space_dict']['vel_select'] = [3, 5]
-   env_dict['reward_signal']['time_step'] = -0.005
-   a = trainingLoop(main_dict, agent_ddpg_dict, env_dict, load_agent='')
-   a.train()
-   test(agent_name=agent_name, n_episodes=100, detect_issues=False, initial_conditions=True)
-   lap_time_test(agent_name=agent_name, n_episodes=100, detect_issues=False, initial_conditions=True)
-
-   agent_name = 'stanley_dynamic_model_v_c_2'
-   main_dict['name'] = agent_name
-   #env_dict['path_dict']['local_path'] = False
-   env_dict['path_dict']['control_strategy'] = 'stanley'
-   env_dict['path_dict']['track_dict'] = {'l_front': car_params['lf'], 'k':5, 'max_steer':car_params['s_max']}
-   env_dict['action_space_dict']['vel_select'] = [3, 5]
-   a = trainingLoop(main_dict, agent_ddpg_dict, env_dict, load_agent='')
-   a.train()
-   test(agent_name=agent_name, n_episodes=100, detect_issues=False, initial_conditions=True)
-   lap_time_test(agent_name=agent_name, n_episodes=100, detect_issues=False, initial_conditions=True)
-
-   agent_name = 'end_to_end_dynamic_model_v_c_2'
-   main_dict['name'] = agent_name
-   env_dict['path_dict']['local_path'] = False
-   env_dict['path_dict']['control_strategy'] = 'stanley'
-   env_dict['path_dict']['track_dict'] = {'l_front': car_params['lf'], 'k':5, 'max_steer':car_params['s_max']}
-   env_dict['action_space_dict']['vel_select'] = [3, 5]
-   a = trainingLoop(main_dict, agent_ddpg_dict, env_dict, load_agent='')
-   a.train()
-   test(agent_name=agent_name, n_episodes=100, detect_issues=False, initial_conditions=True)
-   lap_time_test(agent_name=agent_name, n_episodes=100, detect_issues=False, initial_conditions=True)
-
-   agent_name = 'end_to_end_dynamic_model_v_c_2'
-   main_dict['name'] = agent_name
-   env_dict['path_dict']['local_path'] = False
-   env_dict['path_dict']['control_strategy'] = 'stanley'
-   env_dict['path_dict']['track_dict'] = {'l_front': car_params['lf'], 'k':5, 'max_steer':car_params['s_max']}
-   env_dict['action_space_dict']['vel_select'] = [3, 5]
-   a = trainingLoop(main_dict, agent_ddpg_dict, env_dict, load_agent='')
-   a.train()
-   test(agent_name=agent_name, n_episodes=100, detect_issues=False, initial_conditions=True)
-   lap_time_test(agent_name=agent_name, n_episodes=100, detect_issues=False, initial_conditions=True)
-   
    '''
    
    
-   
-  
-   #agent_name = 'pure_pursuit_dynamic_model_v_c_6'
+   agent_name = 'td3'
    #display_results.durations(agent_name, show_average=True, show_median=True)
    #display_results.display_collision_distribution(agent_name)
    #test(agent_name=agent_name, n_episodes=300, detect_issues=False, initial_conditions=False)
    #display_results.display_train_parameters(agent_name=agent_name)
-   #display_results.agent_progress_statistics(agent_name=agent_name)
+   #display_results_multiple.agent_progress_statistics(agent_name=agent_name)
    #display_results.learning_curve_progress(agent_name=agent_name, show_average=True, show_median=True)
    #display_results.density_plot_progress([agent_name], legend=[''], legend_title='')
    #display_results.display_moving_agent(agent_name=agent_name, load_history=False)
    #display_results.display_path(agent_name=agent_name, load_history=False)
-   #display_results.display_lap_results(agent_name=agent_name)
+   display_results_multiple.display_lap_results(agent_name=agent_name)
    #agent_name = 'pure_pursuit_dynamic_model_v_c_1'
    #display_results.agent_progress_statistics(agent_name=agent_name)
    #display_results.display_lap_results(agent_name=agent_name)
    #display_results.display_moving_agent(agent_name=agent_name, load_history=False)
    
-   #agent_name = 'pure_pursuit_dynamic_model_v_2'
-   #display_results.agent_progress_statistics(agent_name=agent_name)
-   #display_results.display_lap_results(agent_name=agent_name)
 
-   #agent_name = 'stanley_dynamic_model_v_2'
-   #display_results.agent_progress_statistics(agent_name=agent_name)
-   #display_results.display_lap_results(agent_name=agent_name)
-
-   #agent_name = 'end_to_end_dynamic_model_v_2'
-   #display_results.agent_progress_statistics(agent_name=agent_name)
-   #display_results.display_lap_results(agent_name=agent_name)
-   
-   #agent_name = 'pure_pursuit_dynamic_model_v_c_2'
-   #display_results.agent_progress_statistics(agent_name=agent_name)
-   #display_results.display_lap_results(agent_name=agent_name)
-   #display_results.display_moving_agent(agent_name=agent_name, load_history=False)
-
-   #agent_name = 'stanley_dynamic_model_v_c_2'
-   #display_results.agent_progress_statistics(agent_name=agent_name)
-   #display_results.display_lap_results(agent_name=agent_name)
-
-   #agent_name = 'end_to_end_dynamic_model_v_c_2'
-   #display_results.agent_progress_statistics(agent_name=agent_name)
-   #display_results.display_lap_results(agent_name=agent_name)
-   #display_results.display_moving_agent(agent_name=agent_name, load_history=False)
-   
-   #agent_name = 'stanley_dynamic_model_v_c_1'
-   #display_results.agent_progress_statistics(agent_name=agent_name)
-   #display_results.display_lap_results(agent_name=agent_name)
-
-   #agent_name = 'end_to_end_dynamic_model_v_c_1'
-   #display_results.agent_progress_statistics(agent_name=agent_name)
-   #display_results.display_lap_results(agent_name=agent_name)
-
-   #agent_name = 'end_to_end_dynamic_model_v_7'
-   #display_results.agent_progress_statistics(agent_name=agent_name)
-   #display_results.display_lap_results(agent_name=agent_name)
-   #display_results.display_moving_agent(agent_name=agent_name, load_history=False)
-
-   #agent_names = ['ddpg_local_path', 'ddpg_end_to_end']
-   #legend = ['partial end-to-end', 'end-to-end']
+   #agent_names = ['td3', 'td3_1']
+   #legend = ['td3', 'td3_1']
    #legend_title = 'agent'
    #display_results.density_plot_progress(agent_names, legend, legend_title)
-   #display_results.compare_learning_curves_progress(agent_names, legend, legend_title, xaxis='times')
+   #display_results_multiple.compare_learning_curves_progress(agent_names, legend, legend_title, xaxis='episodes')
    #display_results.compare_learning_curves_progress(agent_names, legend, legend_title, xaxis='episodes')
    #display_results.compare_learning_curves_progress(agent_names, legend, legend_title, xaxis='steps')
-
-   #agent_names = ['ddpg_fc_0', 'ddpg_fc_1', 'ddpg_fc_2', 'ddpg_fc_3', 'ddpg_fc_4']
-   #legend = ['fc_0', 'fc_1',  'fc_2',  'fc_3',  'fc_4']
-   #legend_title = 'agent name'
-   #display_results.density_plot_action_duration(agent_names, legend, legend_title)
 
    #display_results.compare_learning_curves_progress([agent_name], [''], [''], xaxis='times')
    #display_results.display_train_parameters(agent_name=agent_name)
