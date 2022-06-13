@@ -109,8 +109,6 @@ def compare_learning_curves_progress(agent_names, legend, legend_title, show_ave
         
 
 def learning_curve_progress(agent_name, show_average=False, show_median=True):
-    window=100
-
     train_results_file_name = 'train_results/' + agent_name
     infile = open(train_results_file_name, 'rb')
     scores = pickle.load(infile)
@@ -127,7 +125,7 @@ def learning_curve_progress(agent_name, show_average=False, show_median=True):
     if show_median==True:
         #plt.plot(progress)
         plt.plot(median, color='black')
-        plt.fill_between(np.arange(len(progress)), percentile_25, percentile_75, color='lightblue')
+        plt.fill_between(np.arange(len(progress[0])), percentile_25, percentile_75, color='lightblue')
         plt.title('Learning curve')
         plt.xlabel('Episode')
         plt.ylabel('Progress')
@@ -137,7 +135,7 @@ def learning_curve_progress(agent_name, show_average=False, show_median=True):
     if show_average==True:
         #plt.plot(progress)
         plt.plot(avg, color='black')
-        plt.fill_between(np.arange(len(progress)), np.add(avg,std_dev*0.5), np.subtract(avg,std_dev*0.5), color='lightblue')
+        plt.fill_between(np.arange(len(progress[0])), np.add(avg,std_dev*0.5), np.subtract(avg,std_dev*0.5), color='lightblue')
         plt.title('Learning curve')
         plt.xlabel('Episode')
         plt.ylabel('Progress')
@@ -354,7 +352,7 @@ def display_train_parameters(agent_name):
     for key in env_dict:
         print(key, ': ', env_dict[key])
 
-    infile = open('agents/' + agent_name + '_hyper_parameters', 'rb')
+    infile = open('agents/' + agent_name + '/' + agent_name + '_params', 'rb')
     agent_dict = pickle.load(infile)
     infile.close()
     
@@ -369,17 +367,32 @@ def display_lap_results(agent_name):
     collisions = pickle.load(infile)
     infile.close() 
     
-    ave_times = np.average(np.array(times).flatten()[np.logical_not(np.array(collisions))])
-    perc_collisions = np.sum(np.logical_not(np.array(collisions)))/len(np.logical_not(np.array(collisions)))
+    ave_times = np.average(times[np.logical_not(np.array(collisions))])
+    perc_success = np.sum(np.logical_not(np.array(collisions)))/len(np.array(collisions).flatten())
 
     print('\nLap results over all n:')
     print('Average lap time: ', ave_times)
-    print('Fraction successful laps: ', perc_collisions)
+    print('Fraction successful laps: ', perc_success)
     
-    print("Agent lap statistics for individual runs: \n")
+    print("\nAgent lap statistics for individual runs:")
+
+    print(f"{'n':3s}{'| fraction success':20s}{'| lap time':12s}")
+    for n in range(len(times[:,0])):
+        avg_time = np.average(times[n, np.logical_not(np.array(collisions[n]))])
+        frac_succ =  np.sum(np.logical_not(np.array(collisions[n])))/len(np.array(collisions[n]))
+        print(f"{n:3d}", end='')
+        print(f"{frac_succ:20.3f}{avg_time:12.3f}")
+        
+        #print(f"{np.average(np.round(, 1), axis=1)[n]:10.3f}", end='')
+        #print(f"{np.median(np.round(test_progress, 1), axis=1)[n]:10.3f}", end='')
+        #print(f"{np.max(np.round(test_progress, 1), axis=1)[n]:10.3f}", end='')
+        #print(f"{np.min(np.round(test_progress, 1), axis=1)[n]:10.3f}", end='')
+        #print(f"{np.std(np.round(test_progress, 1), axis=1)[n]:10.3f}", end='')
+        #print("")
+
     
 
-def display_moving_agent(agent_name, load_history=False):
+def display_moving_agent(agent_name, load_history=False, n=0):
 
     durations = []
 
@@ -390,7 +403,7 @@ def display_moving_agent(agent_name, load_history=False):
     env = environment(env_dict)
     env.reset(save_history=True, start_condition=[])
     
-    infile = open('agents/' + agent_name + '_hyper_parameters', 'rb')
+    infile = open('agents/' + agent_name + '/' + agent_name + '_params', 'rb')
     agent_dict = pickle.load(infile)
     infile.close()
 
@@ -423,7 +436,7 @@ def display_moving_agent(agent_name, load_history=False):
     if main_dict['learning_method'] == 'td3':
         a = agent_td3.agent(agent_dict)
        
-    a.load_weights(agent_name)
+    a.load_weights(agent_name, n)
 
     if load_history==True:
         env.load_history_func()
@@ -509,7 +522,7 @@ def display_moving_agent(agent_name, load_history=False):
         #print('Progress = ', ph)
         plt.pause(0.001)
 
-def display_path(agent_name, load_history=False):
+def display_path(agent_name, load_history=False, n=0):
     
     agent_file_name = 'agents/' + agent_name
     environment_name = 'environments/' + agent_name
@@ -523,7 +536,7 @@ def display_path(agent_name, load_history=False):
     env = environment(env_dict)
     env.reset(save_history=True, start_condition=[])
 
-    infile = open('agents/' + agent_name + '_hyper_parameters', 'rb')
+    infile = open('agents/' + agent_name + '/' + agent_name + '_params', 'rb')
     agent_dict = pickle.load(infile)
     infile.close()
 
@@ -556,7 +569,7 @@ def display_path(agent_name, load_history=False):
     if main_dict['learning_method'] == 'td3':
         a = agent_td3.agent(agent_dict)
         
-    a.load_weights(agent_name)
+    a.load_weights(agent_name, n)
     
     if load_history==True:
         env.load_history_func()

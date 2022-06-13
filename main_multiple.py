@@ -227,11 +227,11 @@ class trainingLoop():
 
             scores[n, episode] = score
             #scores.append(score)
-            avg_score = np.mean(scores[n, -100:])
+            avg_score = np.mean(scores[n, episode-100:episode])
 
             progress[n, episode] = self.env.progress
             #progress.append(self.env.progress)
-            avg_progress = np.mean(progress[n, -100:])
+            avg_progress = np.mean(progress[n, episode-100:episode])
 
             steps[n, episode] = self.env.steps
 
@@ -413,11 +413,11 @@ def test(agent_name, n_episodes, detect_issues, initial_conditions):
             
             next_obs, reward, done = env.take_action(action)
             score += reward
-            obs = next_obs
-            
+            obs = next_obs 
+         
          test_progress[n, episode] = env.progress
          test_score[n, episode] = score
-         test_collision[n, episode] = env.collision
+         test_collision[n, episode] = env.collision or env.park or env.backwards   
          test_max_steps[n, episode] = env.max_steps_reached
          #terminal_poses[n, episode] = env.pose
             
@@ -542,10 +542,10 @@ def lap_time_test(agent_name, n_episodes, detect_issues, initial_conditions):
             obs = next_obs
             
          time = env.steps*0.01
-         collision = env.collision
+         collision = env.collision or env.park or env.backwards
 
          times[n, episode] = time
-         collisions[n, episode] = collision
+         collisions[n, episode] = collision 
             
          if episode%10==0:
             print('Lap test episode', episode, '| Lap time = %.2f' % time, '| Score = %.2f' % score)
@@ -558,9 +558,9 @@ def lap_time_test(agent_name, n_episodes, detect_issues, initial_conditions):
 if __name__=='__main__':
 
    
-   agent_name = 'td3_1'
+   agent_name = 'td3_end_to_end'
    
-   main_dict = {'name':agent_name, 'max_episodes':20, 'learning_method':'td3', 'runs':5, 'comment':''}
+   main_dict = {'name':agent_name, 'max_episodes':5000, 'learning_method':'td3', 'runs':1, 'comment':''}
 
    agent_dqn_dict = {'gamma':0.99, 'epsilon':1, 'eps_end':0.01, 'eps_dec':1/1000, 'lr':0.001, 'batch_size':64, 'max_mem_size':500000, 
                   'fc1_dims': 64, 'fc2_dims': 64, 'fc3_dims':64}
@@ -597,7 +597,7 @@ if __name__=='__main__':
    
    #action_space_dict = {'action_space': 'discrete', 'n_waypoints': 10, 'vel_select':[7], 'R':[3]}
 
-   path_dict = {'local_path':True, 'waypoint_strategy':'local', 'wpt_arc':np.pi/2}
+   path_dict = {'local_path':False, 'waypoint_strategy':'local', 'wpt_arc':np.pi/2}
    
    if path_dict['local_path'] == True: #True or false
         path_dict['path_strategy'] = 'circle' #circle or linear
@@ -623,36 +623,11 @@ if __name__=='__main__':
             , 'path_dict': path_dict
             } 
    
-   
+
    #a = trainingLoop(main_dict, agent_td3_dict, env_dict, load_agent='')
    #a.train()
    #test(agent_name=agent_name, n_episodes=100, detect_issues=False, initial_conditions=True)
    #lap_time_test(agent_name=agent_name, n_episodes=100, detect_issues=False, initial_conditions=True)
-
-   #agent_name = 'pure_pursuit_dynamic_model_v_c_3'
-   #agent_name = 'pure_pursuit_dynamic_model_v_c_4'
-   #agent_name = 'pure_pursuit_dynamic_model_v_c_5'
-   #agent_name = 'pure_pursuit_dynamic_model_v_c_6'
-   #agent_name = 'pure_pursuit_dynamic_model_v_c_7'
-   #agent_name = 'pure_pursuit_circle_v_c'
-   #agent_name = 'end_to_end_circle_v_c'
-   #agent_name = 'end_to_end_circle_v_c_1'
-   #agent_name = 'end_to_end_circle_v_c_2'
-   #agent_name = 'end_to_end_circle_v_c_3'
-   #agent_name = 'end_to_end_circle_v_c_4'
-   #agent_name = 'pure_pursuit_circle_v_c_1'
-   #agent_name = 'pure_pursuit_circle_v_c_2'
-   #agent_name = 'pure_pursuit_circle_v_c_3'
-   #agent_name = 'pure_pursuit_circle_v_c_4'
-   #agent_name = 'td3'
-   #test(agent_name=agent_name, n_episodes=100, detect_issues=False, initial_conditions=True)
-   #lap_time_test(agent_name=agent_name, n_episodes=100, detect_issues=False, initial_conditions=True)
-   
-   #display_results.display_train_parameters(agent_name=agent_name)
-   #display_results.agent_progress_statistics(agent_name=agent_name)
-   #display_results.display_lap_results(agent_name=agent_name)
-   #display_results.display_moving_agent(agent_name=agent_name, load_history=False)
-
 
    '''
    agent_name = 'stanley_dynamic_model_v_2'
@@ -664,38 +639,18 @@ if __name__=='__main__':
    test(agent_name=agent_name, n_episodes=100, detect_issues=False, initial_conditions=True)
    lap_time_test(agent_name=agent_name, n_episodes=100, detect_issues=False, initial_conditions=True)
    '''
-   
-   
-   agent_name = 'td3'
-   #display_results.durations(agent_name, show_average=True, show_median=True)
-   #display_results.display_collision_distribution(agent_name)
-   #test(agent_name=agent_name, n_episodes=300, detect_issues=False, initial_conditions=False)
-   #display_results.display_train_parameters(agent_name=agent_name)
-   #display_results_multiple.agent_progress_statistics(agent_name=agent_name)
-   #display_results.learning_curve_progress(agent_name=agent_name, show_average=True, show_median=True)
-   #display_results.density_plot_progress([agent_name], legend=[''], legend_title='')
-   #display_results.display_moving_agent(agent_name=agent_name, load_history=False)
-   #display_results.display_path(agent_name=agent_name, load_history=False)
+
+   agent_name = 'td3_end_to_end'
+   #display_results_multiple.learning_curve_progress(agent_name=agent_name,  show_average=True, show_median=True)
+   #display_results_multiple.display_train_parameters(agent_name=agent_name)
+   display_results_multiple.agent_progress_statistics(agent_name=agent_name)
    display_results_multiple.display_lap_results(agent_name=agent_name)
-   #agent_name = 'pure_pursuit_dynamic_model_v_c_1'
-   #display_results.agent_progress_statistics(agent_name=agent_name)
-   #display_results.display_lap_results(agent_name=agent_name)
-   #display_results.display_moving_agent(agent_name=agent_name, load_history=False)
-   
+   #display_results_multiple.display_moving_agent(agent_name=agent_name, load_history=False, n=3)
 
-   #agent_names = ['td3', 'td3_1']
-   #legend = ['td3', 'td3_1']
+   #agent_names = ['td3']
    #legend_title = 'agent'
-   #display_results.density_plot_progress(agent_names, legend, legend_title)
-   #display_results_multiple.compare_learning_curves_progress(agent_names, legend, legend_title, xaxis='episodes')
-   #display_results.compare_learning_curves_progress(agent_names, legend, legend_title, xaxis='episodes')
-   #display_results.compare_learning_curves_progress(agent_names, legend, legend_title, xaxis='steps')
+   #legend = ['td3']
+   #display_results_multiple.compare_learning_curves_progress(agent_names, legend, legend_title, show_average=True, show_median=True, xaxis='episodes')
 
-   #display_results.compare_learning_curves_progress([agent_name], [''], [''], xaxis='times')
-   #display_results.display_train_parameters(agent_name=agent_name)
-   #display_results.learning_curve_score(agent_name=agent_name, show_average=True, show_median=True)
-   #display_results.agent_score_statistics(agent_name=agent_name)
-
-   #display_results.histogram_score(agent_name=agent_name)
-   #display_results.histogram_progress(agent_name=agent_name)
-
+   
+   
