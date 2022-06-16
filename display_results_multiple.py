@@ -28,6 +28,7 @@ import seaborn as sns
 from environment import environment
 import pandas as pd
 import time
+import random
 
 
 
@@ -628,4 +629,94 @@ def display_collision_distribution(agent_name):
     plt.imshow(im)
     plt.plot(np.array(terminal_poses)[:,0], np.array(terminal_poses)[:,1], 'x')
     #sns.jointplot(x=np.array(terminal_poses)[:,0],y=np.array(terminal_poses)[:,1], kind="hex", alpha=0.5)
+    plt.show()
+
+
+def display_path_multiple(agent_names, ns, legend_title, legend):
+    
+
+    for agent_name, n, i in zip(agent_names, ns, range(len(agent_names))):
+
+        infile = open('environments/' + agent_name, 'rb')
+        env_dict = pickle.load(infile)
+        infile.close()
+        #env_dict['max_steps']=3000
+        env = environment(env_dict)
+        env.reset(save_history=True, start_condition=[])
+
+        infile = open('agents/' + agent_name + '/' + agent_name + '_params', 'rb')
+        agent_dict = pickle.load(infile)
+        infile.close()
+
+        infile = open('train_parameters/' + agent_name, 'rb')
+        main_dict = pickle.load(infile)
+        infile.close()
+          
+        if i==0:
+            infile = open('test_initial_condition/' + env_dict['map_name'], 'rb')
+            start_conditions = pickle.load(infile)
+            infile.close()
+            start_pose = random.choice(start_conditions)
+
+        if main_dict['learning_method']=='dqn':
+            agent_dict['epsilon'] = 0
+            a = agent_dqn.agent(agent_dict)
+        if main_dict['learning_method']=='reinforce':
+            a = agent_reinforce.PolicyGradientAgent(agent_dict)
+        if main_dict['learning_method']=='actor_critic_sep':
+            a = agent_actor_critic.actor_critic_separated(agent_dict)
+        if  main_dict['learning_method']=='actor_critic_com':
+            a = agent_actor_critic.actor_critic_combined(agent_dict)
+        if main_dict['learning_method']=='actor_critic_cont':
+            a = agent_actor_critic_continuous.agent_separate(agent_dict)
+        if main_dict['learning_method'] == 'dueling_dqn':
+            agent_dict['epsilon'] = 0
+            a = agent_dueling_dqn.agent(agent_dict)
+        if main_dict['learning_method'] == 'dueling_ddqn':
+            agent_dict['epsilon'] = 0
+            a = agent_dueling_ddqn.agent(agent_dict)
+        if main_dict['learning_method'] == 'rainbow':
+            agent_dict['epsilon'] = 0
+            a = agent_rainbow.agent(agent_dict)
+        if main_dict['learning_method'] == 'ddpg':
+            a = agent_ddpg.agent(agent_dict)
+        if main_dict['learning_method'] == 'td3':
+            a = agent_td3.agent(agent_dict)
+            
+        a.load_weights(agent_name, n)
+
+        env.reset(save_history=True, start_condition=start_pose)
+        obs = env.observation
+        done = False
+        score=0
+
+        while not done:
+            if main_dict['learning_method']=='ddpg' or main_dict['learning_method']=='td3':
+                action = a.choose_greedy_action(obs)
+            else:
+                action = a.choose_action(obs)
+
+            next_obs, reward, done = env.take_action(action)
+            score += reward
+            obs = next_obs
+
+            if env.progress>=0.95:
+                done=True
+            
+
+        print('Total score = ', score)
+        print('Progress = ', env.progress)
+
+        image_path = sys.path[0] + '/maps/' + env.map_name + '.png'
+        im = image.imread(image_path)
+        plt.imshow(im, extent=(0,env.map_width,0,env.map_height))
+        plt.plot(np.array(env.pose_history)[:,0], np.array(env.pose_history)[:,1], linewidth=2.5)
+    
+    plt.legend(legend, title=legend_title)
+    plt.xlabel('x [m]')
+    plt.ylabel('y [m]')
+    plt.xlim([0,env.map_width])
+    plt.ylim([0,env.map_height])
+    #plt.grid(True)
+    plt.title('Agent path')
     plt.show()
