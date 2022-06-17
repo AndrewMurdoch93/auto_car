@@ -558,9 +558,9 @@ def lap_time_test(agent_name, n_episodes, detect_issues, initial_conditions):
 if __name__=='__main__':
 
    
-   agent_name = 'td3_end_to_end'
+   agent_name = 'end_to_end'
    
-   main_dict = {'name':agent_name, 'max_episodes':5000, 'learning_method':'td3', 'runs':1, 'comment':''}
+   main_dict = {'name':agent_name, 'max_episodes':5000, 'learning_method':'td3', 'runs':10, 'comment':''}
 
    agent_dqn_dict = {'gamma':0.99, 'epsilon':1, 'eps_end':0.01, 'eps_dec':1/1000, 'lr':0.001, 'batch_size':64, 'max_mem_size':500000, 
                   'fc1_dims': 64, 'fc2_dims': 64, 'fc3_dims':64}
@@ -623,29 +623,55 @@ if __name__=='__main__':
             , 'path_dict': path_dict
             } 
    
-
    #a = trainingLoop(main_dict, agent_td3_dict, env_dict, load_agent='')
    #a.train()
    #test(agent_name=agent_name, n_episodes=100, detect_issues=False, initial_conditions=True)
    #lap_time_test(agent_name=agent_name, n_episodes=100, detect_issues=False, initial_conditions=True)
-
    '''
-   agent_name = 'stanley_dynamic_model_v_2'
+   agent_name = 'partial_end_to_end_pure_pursuit'
    main_dict['name'] = agent_name
-   env_dict['path_dict']['control_strategy'] = 'stanley'
-   env_dict['path_dict']['track_dict'] = {'l_front': car_params['lf'], 'k':5, 'max_steer':car_params['s_max']}
-   a = trainingLoop(main_dict, agent_ddpg_dict, env_dict, load_agent='')
+   path_dict['local_path'] = True
+   path_dict['path_strategy'] = 'circle' #circle or linear
+   path_dict['control_strategy'] = 'pure_pursuit'
+   path_dict['track_dict'] = {'k':0.1, 'Lfc':1}
+   env_dict['path_dict'] = path_dict
+   a = trainingLoop(main_dict, agent_td3_dict, env_dict, load_agent='')
+   a.train()
+   test(agent_name=agent_name, n_episodes=100, detect_issues=False, initial_conditions=True)
+   lap_time_test(agent_name=agent_name, n_episodes=100, detect_issues=False, initial_conditions=True)
+   
+   agent_name = 'partial_end_to_end_stanley'
+   main_dict['name'] = agent_name
+   path_dict['local_path'] = True
+   path_dict['path_strategy'] = 'circle' #circle or linear
+   path_dict['control_strategy'] = 'stanley'
+   path_dict['track_dict'] = {'l_front': car_params['lf'], 'k':5, 'max_steer':car_params['s_max']}
+   env_dict['path_dict'] = path_dict
+   a = trainingLoop(main_dict, agent_td3_dict, env_dict, load_agent='')
    a.train()
    test(agent_name=agent_name, n_episodes=100, detect_issues=False, initial_conditions=True)
    lap_time_test(agent_name=agent_name, n_episodes=100, detect_issues=False, initial_conditions=True)
    '''
-
-   agent_name = 'td3_end_to_end'
+   
+   #agent_name = 'end_to_end'
    #display_results_multiple.learning_curve_progress(agent_name=agent_name,  show_average=True, show_median=True)
    #display_results_multiple.display_train_parameters(agent_name=agent_name)
-   display_results_multiple.agent_progress_statistics(agent_name=agent_name)
-   display_results_multiple.display_lap_results(agent_name=agent_name)
-   #display_results_multiple.display_moving_agent(agent_name=agent_name, load_history=False, n=3)
+   #display_results_multiple.agent_progress_statistics(agent_name=agent_name)
+   #display_results_multiple.display_lap_results(agent_name=agent_name)
+   #display_results_multiple.display_moving_agent(agent_name=agent_name, load_history=False, n=1)
+   #display_results_multiple.display_path(agent_name=agent_name, load_history=False, n=1)
+   
+   #agent_name = 'end_to_end'
+   #display_results_multiple.display_lap_results(agent_name=agent_name)
+
+
+   #agent_name = 'partial_end_to_end_pure_pursuit'
+   #display_results_multiple.display_path(agent_name=agent_name, load_history=False, n=4)
+   #display_results_multiple.display_lap_results(agent_name=agent_name)
+
+   #agent_name = 'partial_end_to_end_stanley'
+   #display_results_multiple.display_path(agent_name=agent_name, load_history=False, n=4)
+   #display_results_multiple.display_lap_results(agent_name=agent_name)
 
    #agent_names = ['td3']
    #legend_title = 'agent'

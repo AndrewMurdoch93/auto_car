@@ -534,7 +534,7 @@ if __name__=='__main__':
    
    agent_name = 'td3'
    
-   main_dict = {'name':agent_name, 'max_episodes':1000, 'learning_method':'td3', 'runs':1, 'comment':''}
+   main_dict = {'name':agent_name, 'max_episodes':500, 'learning_method':'td3', 'runs':3, 'comment':''}
 
    agent_dqn_dict = {'gamma':0.99, 'epsilon':1, 'eps_end':0.01, 'eps_dec':1/1000, 'lr':0.001, 'batch_size':64, 'max_mem_size':500000, 
                   'fc1_dims': 64, 'fc2_dims': 64, 'fc3_dims':64}
