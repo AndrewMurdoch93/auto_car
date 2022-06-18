@@ -311,7 +311,7 @@ class trainingLoop():
 
    def save_agent(self, n):
       self.agent.save_agent(self.main_dict['name'], n)
-      print("Agent n = " + str(n) + " was saved")
+      print("Agent " + self.main_dict['name'] + ", n = " + str(n) + " was saved")
 
    
 def test(agent_name, n_episodes, detect_issues, initial_conditions):
@@ -558,7 +558,7 @@ def lap_time_test(agent_name, n_episodes, detect_issues, initial_conditions):
 if __name__=='__main__':
 
    
-   agent_name = 'end_to_end'
+   agent_name = 'pete_Lfc_1_col_1'
    
    main_dict = {'name':agent_name, 'max_episodes':5000, 'learning_method':'td3', 'runs':10, 'comment':''}
 
@@ -597,7 +597,7 @@ if __name__=='__main__':
    
    #action_space_dict = {'action_space': 'discrete', 'n_waypoints': 10, 'vel_select':[7], 'R':[3]}
 
-   path_dict = {'local_path':False, 'waypoint_strategy':'local', 'wpt_arc':np.pi/2}
+   path_dict = {'local_path':True, 'waypoint_strategy':'local', 'wpt_arc':np.pi/2}
    
    if path_dict['local_path'] == True: #True or false
         path_dict['path_strategy'] = 'circle' #circle or linear
@@ -623,35 +623,40 @@ if __name__=='__main__':
             , 'path_dict': path_dict
             } 
    
-   #a = trainingLoop(main_dict, agent_td3_dict, env_dict, load_agent='')
-   #a.train()
-   #test(agent_name=agent_name, n_episodes=100, detect_issues=False, initial_conditions=True)
-   #lap_time_test(agent_name=agent_name, n_episodes=100, detect_issues=False, initial_conditions=True)
-   '''
-   agent_name = 'partial_end_to_end_pure_pursuit'
+   a = trainingLoop(main_dict, agent_td3_dict, env_dict, load_agent='')
+   a.train()
+   test(agent_name=agent_name, n_episodes=100, detect_issues=False, initial_conditions=True)
+   lap_time_test(agent_name=agent_name, n_episodes=100, detect_issues=False, initial_conditions=True)
+   
+   
+   agent_name = 'pete_Lfc_2_col_1'
    main_dict['name'] = agent_name
    path_dict['local_path'] = True
    path_dict['path_strategy'] = 'circle' #circle or linear
    path_dict['control_strategy'] = 'pure_pursuit'
-   path_dict['track_dict'] = {'k':0.1, 'Lfc':1}
+   path_dict['track_dict'] = {'k':0.1, 'Lfc':2}
    env_dict['path_dict'] = path_dict
    a = trainingLoop(main_dict, agent_td3_dict, env_dict, load_agent='')
    a.train()
    test(agent_name=agent_name, n_episodes=100, detect_issues=False, initial_conditions=True)
    lap_time_test(agent_name=agent_name, n_episodes=100, detect_issues=False, initial_conditions=True)
    
-   agent_name = 'partial_end_to_end_stanley'
+   agent_name = 'pete_porto'
    main_dict['name'] = agent_name
-   path_dict['local_path'] = True
-   path_dict['path_strategy'] = 'circle' #circle or linear
-   path_dict['control_strategy'] = 'stanley'
-   path_dict['track_dict'] = {'l_front': car_params['lf'], 'k':5, 'max_steer':car_params['s_max']}
-   env_dict['path_dict'] = path_dict
+   env_dict['map_name'] = 'porto_1'
+   env_dict['path_dict']['track_dict'] = {'k':0.1, 'Lfc':1}
    a = trainingLoop(main_dict, agent_td3_dict, env_dict, load_agent='')
    a.train()
    test(agent_name=agent_name, n_episodes=100, detect_issues=False, initial_conditions=True)
    lap_time_test(agent_name=agent_name, n_episodes=100, detect_issues=False, initial_conditions=True)
-   '''
+   
+   agent_name = 'ete_porto'
+   main_dict['name'] = agent_name
+   env_dict['path_dict']['local_path'] = False
+   a = trainingLoop(main_dict, agent_td3_dict, env_dict, load_agent='')
+   a.train()
+   test(agent_name=agent_name, n_episodes=100, detect_issues=False, initial_conditions=True)
+   lap_time_test(agent_name=agent_name, n_episodes=100, detect_issues=False, initial_conditions=True)
    
    #agent_name = 'end_to_end'
    #display_results_multiple.learning_curve_progress(agent_name=agent_name,  show_average=True, show_median=True)
