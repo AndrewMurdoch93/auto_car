@@ -367,16 +367,37 @@ def display_lap_results(agent_name):
     collisions = pickle.load(infile)
     infile.close() 
     
+    collisions_ = []
+    times_ = []
+    for n in range(len(times[:,0])):
+        frac_succ_ =  np.sum(np.logical_not(np.array(collisions[n])))/len(np.array(collisions[n]))
+        if frac_succ_ >= 0.6:
+            collisions_.append(collisions[n,:])
+            times_.append(times[n,:])
+    collisions_ = np.array(collisions_)
+    times_ = np.array(times_)
+
     ave_times = np.average(times[np.logical_not(np.array(collisions))])
     perc_success = np.sum(np.logical_not(np.array(collisions)))/len(np.array(collisions).flatten())
+    std_dev = np.std(times[np.logical_not(np.array(collisions))])
 
-    print('\nLap results over all n:')
+    ave_times_ = np.average(times_[np.logical_not(np.array(collisions_))])
+    perc_success_ = np.sum(np.logical_not(np.array(collisions_)))/len(np.array(collisions_).flatten())
+    std_dev_ = np.std(times_[np.logical_not(np.array(collisions_))])
+    
+    print('\nLap results over all n, including failed runs:')
     print('Average lap time: ', ave_times)
+    print('Lap time std deviation:', std_dev)
     print('Fraction successful laps: ', perc_success)
+
+    print('\nLap results over all n, excluding failed runs:')
+    print('Average lap time: ', ave_times_)
+    print('Lap time std deviation:', std_dev_)
+    print('Fraction successful laps: ', perc_success_)
     
     print("\nAgent lap statistics for individual runs:")
 
-    print(f"{'n':3s}{'| fraction success':20s}{'| lap time':12s}")
+    print(f"{'n':3s}{'| fraction success':20s}{'|avg lap time':12s}")
     for n in range(len(times[:,0])):
         avg_time = np.average(times[n, np.logical_not(np.array(collisions[n]))])
         frac_succ =  np.sum(np.logical_not(np.array(collisions[n])))/len(np.array(collisions[n]))

@@ -214,6 +214,15 @@ class environment():
 
         self.initial_condition_dict = {'x':self.x, 'y':self.y, 'theta':self.theta, 'v':self.v, 'delta':self.delta, 'goal': self.current_goal}
 
+        change_params = {}
+        for i in self.params:
+            if i not in ['v_min', 'v_max', 'width']:
+                change_params[i] = self.params[i]
+        
+        for i in random.sample(list(change_params), 2):
+            self.params[i] *= random.uniform(0.95,1.05)
+
+
     def take_action(self, act):
         self.action_history.append(act)
 
@@ -236,7 +245,10 @@ class environment():
                 if self.action_space=='discrete':
                     delta_ref = math.pi/16-(math.pi/8)*(act/(self.num_actions-1))         
                 else:
-                    delta_ref = (self.max_delta)*act[0]       
+                    if act[0]<=0:
+                        delta_ref = (-self.params['s_min'])*act[0]       
+                    else:
+                        delta_ref = (self.params['s_max'])*act[0] 
 
                 #delta_dot, a = self.control_system(self.delta, delta_ref, self.v, v_ref)
                 

@@ -674,16 +674,17 @@ if __name__=='__main__':
    #display_results_multiple.display_path(agent_name=agent_name, load_history=False, n=4)
    #display_results_multiple.display_lap_results(agent_name=agent_name)
 
-   #agent_name = 'partial_end_to_end_stanley'
+   agent_name = 'end_to_end'
+   #lap_time_test(agent_name=agent_name, n_episodes=100, detect_issues=False, initial_conditions=True)
    #display_results_multiple.display_path(agent_name=agent_name, load_history=False, n=4)
-   #display_results_multiple.display_lap_results(agent_name=agent_name)
-
-   
-
-
-   #agent_name='pete_Lfc_1_col_1'
    #display_results_multiple.display_train_parameters(agent_name=agent_name)
-   #display_results_multiple.display_lap_results(agent_name=agent_name)
+   display_results_multiple.display_lap_results(agent_name=agent_name)
+
+
+   agent_name='pete_Lfc_1_col_1'
+   #lap_time_test(agent_name=agent_name, n_episodes=100, detect_issues=False, initial_conditions=True)
+   #display_results_multiple.display_train_parameters(agent_name=agent_name)
+   display_results_multiple.display_lap_results(agent_name=agent_name)
 
    #agent_name='pete_Lfc_2_col_1'
    #display_results_multiple.display_train_parameters(agent_name=agent_name)
@@ -691,16 +692,19 @@ if __name__=='__main__':
    #display_results_multiple.display_moving_agent(agent_name=agent_name, load_history=False, n=2)
 
    #agent_name = 'pete_porto'
+   #lap_time_test(agent_name=agent_name, n_episodes=100, detect_issues=False, initial_conditions=True)
    #display_results_multiple.display_train_parameters(agent_name=agent_name)
    #display_results_multiple.display_lap_results(agent_name=agent_name)
    #display_results_multiple.display_moving_agent(agent_name=agent_name, load_history=False, n=0)
 
    #agent_name = 'ete_porto'
+   #lap_time_test(agent_name=agent_name, n_episodes=100, detect_issues=False, initial_conditions=True)
    #display_results_multiple.display_train_parameters(agent_name=agent_name)
    #display_results_multiple.display_lap_results(agent_name=agent_name)
-   #display_results_multiple.display_moving_agent(agent_name=agent_name, load_history=False, n=0)
+   #display_results_multiple.display_moving_agent(agent_name=agent_name, load_history=False, n=4)
 
-
+   
+   
    #agent_names = ['td3']
    #legend_title = 'agent'
    #legend = ['td3']
