@@ -346,7 +346,7 @@ def generate_initial_condition(name, episodes):
 #generate_berlin_goals()
 #generate_initial_condition(name='columbia', episodes=2000)
 if __name__ == '__main__':
-    generate_initial_condition(name='columbia_1', episodes=2000)
+    generate_initial_condition(name='porto_1', episodes=2000)
     #def velocity_along_line(theta, velocity, ryaw, )
 
     #generate_berlin_goals()
