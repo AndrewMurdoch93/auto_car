@@ -560,7 +560,7 @@ if __name__=='__main__':
    
    agent_name = 'pete_Lfc_1_col_1'
    
-   main_dict = {'name':agent_name, 'max_episodes':5000, 'learning_method':'td3', 'runs':10, 'comment':''}
+   main_dict = {'name':agent_name, 'max_episodes':5000, 'learning_method':'td3', 'runs':5, 'comment':''}
 
    agent_dqn_dict = {'gamma':0.99, 'epsilon':1, 'eps_end':0.01, 'eps_dec':1/1000, 'lr':0.001, 'batch_size':64, 'max_mem_size':500000, 
                   'fc1_dims': 64, 'fc2_dims': 64, 'fc3_dims':64}
@@ -623,12 +623,12 @@ if __name__=='__main__':
             , 'path_dict': path_dict
             } 
    
-   a = trainingLoop(main_dict, agent_td3_dict, env_dict, load_agent='')
-   a.train()
-   test(agent_name=agent_name, n_episodes=100, detect_issues=False, initial_conditions=True)
-   lap_time_test(agent_name=agent_name, n_episodes=100, detect_issues=False, initial_conditions=True)
+   #a = trainingLoop(main_dict, agent_td3_dict, env_dict, load_agent='')
+   #a.train()
+   #test(agent_name=agent_name, n_episodes=100, detect_issues=False, initial_conditions=True)
+   #lap_time_test(agent_name=agent_name, n_episodes=100, detect_issues=False, initial_conditions=True)
    
-   
+   '''
    agent_name = 'pete_Lfc_2_col_1'
    main_dict['name'] = agent_name
    path_dict['local_path'] = True
@@ -657,7 +657,8 @@ if __name__=='__main__':
    a.train()
    test(agent_name=agent_name, n_episodes=100, detect_issues=False, initial_conditions=True)
    lap_time_test(agent_name=agent_name, n_episodes=100, detect_issues=False, initial_conditions=True)
-   
+   '''
+
    #agent_name = 'end_to_end'
    #display_results_multiple.learning_curve_progress(agent_name=agent_name,  show_average=True, show_median=True)
    #display_results_multiple.display_train_parameters(agent_name=agent_name)
@@ -669,7 +670,6 @@ if __name__=='__main__':
    #agent_name = 'end_to_end'
    #display_results_multiple.display_lap_results(agent_name=agent_name)
 
-
    #agent_name = 'partial_end_to_end_pure_pursuit'
    #display_results_multiple.display_path(agent_name=agent_name, load_history=False, n=4)
    #display_results_multiple.display_lap_results(agent_name=agent_name)
@@ -677,6 +677,29 @@ if __name__=='__main__':
    #agent_name = 'partial_end_to_end_stanley'
    #display_results_multiple.display_path(agent_name=agent_name, load_history=False, n=4)
    #display_results_multiple.display_lap_results(agent_name=agent_name)
+
+   
+
+
+   #agent_name='pete_Lfc_1_col_1'
+   #display_results_multiple.display_train_parameters(agent_name=agent_name)
+   #display_results_multiple.display_lap_results(agent_name=agent_name)
+
+   #agent_name='pete_Lfc_2_col_1'
+   #display_results_multiple.display_train_parameters(agent_name=agent_name)
+   #display_results_multiple.display_lap_results(agent_name=agent_name)
+   #display_results_multiple.display_moving_agent(agent_name=agent_name, load_history=False, n=2)
+
+   #agent_name = 'pete_porto'
+   #display_results_multiple.display_train_parameters(agent_name=agent_name)
+   #display_results_multiple.display_lap_results(agent_name=agent_name)
+   #display_results_multiple.display_moving_agent(agent_name=agent_name, load_history=False, n=0)
+
+   #agent_name = 'ete_porto'
+   #display_results_multiple.display_train_parameters(agent_name=agent_name)
+   #display_results_multiple.display_lap_results(agent_name=agent_name)
+   #display_results_multiple.display_moving_agent(agent_name=agent_name, load_history=False, n=0)
+
 
    #agent_names = ['td3']
    #legend_title = 'agent'
