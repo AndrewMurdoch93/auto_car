@@ -18,6 +18,8 @@ from numba.experimental import jitclass
 import numba
 import mapping
 import cubic_spline_planner
+import agent_td3
+import os
 
 class environment():
 
@@ -746,27 +748,35 @@ class environment():
 
 def test_environment():
     
-    agent_name = 'rainbow_distance'
+    agent_name = 'ete_porto'
+    parent_dir = os.path.dirname(os.path.abspath(__file__))
+    agent_dir = parent_dir + '/agents/' + agent_name
+    agent_params_file = agent_dir + '/' + agent_name + '_params'
     replay_episode_name = 'replay_episodes/' + agent_name
     
     infile=open(replay_episode_name, 'rb')
     action_history = pickle.load(infile)
     initial_condition = pickle.load(infile)
+    n = pickle.load(infile)
     infile.close()
     
     infile = open('environments/' + agent_name, 'rb')
     env_dict = pickle.load(infile)
     infile.close()
     env_dict['display']=True
+
+    infile = open(agent_params_file, 'rb')
+    agent_dict = pickle.load(infile)
+    infile.close()
+
+    env = environment(env_dict)
+    env.reset(save_history=True, start_condition=initial_condition, get_lap_time=False)
+    
+    a = agent_td3.agent(agent_dict)
+    a.load_weights(agent_name, n)
     
 
-    
-    #env_dict = {'sim_conf': functions.load_config(sys.path[0], "config"), 'save_history': False, 'map_name': 'circle'
-    #        , 'max_steps': 500, 'local_path': True, 'waypoint_strategy': 'local', 'wpt_arc': np.pi/2, 'action_space': 'discrete'
-    #        , 'reward_signal': {'goal_reached':0, 'out_of_bounds':-1, 'max_steps':0, 'collision':-1, 'backwards':-1, 'park':-0.5, 'time_step':-0.005, 'progress':0, 'distance':0.3}
-    #        , 'n_waypoints': 11, 'vel_select':[7], 'control_steps': 15, 'display': True, 'R':3, 'track_dict':{'k':0.1, 'Lfc':1}
-    #        , 'lidar_dict': {'is_lidar':True, 'lidar_res':0.1, 'n_beams':8, 'max_range':20, 'fov':np.pi} } 
-    
+    '''
     car_params =   {'mu': 1.0489, 'C_Sf': 4.718, 'C_Sr': 5.4562, 'lf': 0.15875, 'lr': 0.17145
                 , 'h': 0.074, 'm': 3.74, 'I': 0.04712, 's_min': -0.4189, 's_max': 0.4189, 'sv_min': -3.2
                 , 'sv_max': 3.2, 'v_switch': 7.319, 'a_max': 9.51, 'v_min':-5.0, 'v_max': 20.0, 'width': 0.31, 'length': 0.58}
@@ -808,16 +818,16 @@ def test_environment():
     initial_condition = {'x':15, 'y':5, 'v':7, 'delta':0, 'theta':0, 'goal':1}
     #initial_condition = {'x':8, 'y':3, 'v':7, 'delta':0, 'theta':np.pi, 'goal':1}
     #initial_condition = []
-
-
+    '''
 
     env = environment(env_dict)
     env.reset(save_history=True, start_condition=initial_condition, get_lap_time=False)
-    
-    done=False
-    
-    action_history = np.ones(20)*-1
 
+    a = agent_td3.agent(agent_dict)
+    a.load_weights(agent_name, n)
+    
+    #action_history = np.ones(20)*-1
+    done=False
     score=0
     i=0
     while done==False:

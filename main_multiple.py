@@ -424,7 +424,7 @@ def test(agent_name, n_episodes, detect_issues, initial_conditions):
          if episode%10==0:
             print('Progress test episode', episode, '| Progress = %.2f' % env.progress, '| Score = %.2f' % score)
 
-         if detect_issues==True and (score<1):
+         if detect_issues==True and (env.progress<1):
             print('Stop condition met')
             print('Progress = ', env.progress)
             print('score = ', score)
@@ -450,6 +450,7 @@ def lap_time_test(agent_name, n_episodes, detect_issues, initial_conditions):
    parent_dir = os.path.dirname(os.path.abspath(__file__))
    agent_dir = parent_dir + '/agents/' + agent_name
    agent_params_file = agent_dir + '/' + agent_name + '_params'
+   replay_episode_name = 'replay_episodes/' + agent_name
 
    infile = open('environments/' + agent_name, 'rb')
    env_dict = pickle.load(infile)
@@ -543,6 +544,18 @@ def lap_time_test(agent_name, n_episodes, detect_issues, initial_conditions):
             
          time = env.steps*0.01
          collision = env.collision or env.park or env.backwards
+         
+         if detect_issues==True and (collision==True):
+            print('Stop condition met')
+            print('Progress = ', env.progress)
+            print('score = ', score)
+
+            outfile = open(replay_episode_name, 'wb')
+            pickle.dump(action_history, outfile)
+            pickle.dump(env.initial_condition_dict, outfile)
+            pickle.dump(n, outfile)
+            outfile.close()
+            break
 
          times[n, episode] = time
          collisions[n, episode] = collision 
@@ -674,17 +687,17 @@ if __name__=='__main__':
    #display_results_multiple.display_path(agent_name=agent_name, load_history=False, n=4)
    #display_results_multiple.display_lap_results(agent_name=agent_name)
 
-   agent_name = 'end_to_end'
+   #agent_name = 'end_to_end'
    #lap_time_test(agent_name=agent_name, n_episodes=100, detect_issues=False, initial_conditions=True)
    #display_results_multiple.display_path(agent_name=agent_name, load_history=False, n=4)
    #display_results_multiple.display_train_parameters(agent_name=agent_name)
-   display_results_multiple.display_lap_results(agent_name=agent_name)
+   #display_results_multiple.display_lap_results(agent_name=agent_name)
 
 
-   agent_name='pete_Lfc_1_col_1'
+   #agent_name='pete_Lfc_1_col_1'
    #lap_time_test(agent_name=agent_name, n_episodes=100, detect_issues=False, initial_conditions=True)
    #display_results_multiple.display_train_parameters(agent_name=agent_name)
-   display_results_multiple.display_lap_results(agent_name=agent_name)
+   #display_results_multiple.display_lap_results(agent_name=agent_name)
 
    #agent_name='pete_Lfc_2_col_1'
    #display_results_multiple.display_train_parameters(agent_name=agent_name)
@@ -698,17 +711,19 @@ if __name__=='__main__':
    #display_results_multiple.display_moving_agent(agent_name=agent_name, load_history=False, n=0)
 
    #agent_name = 'ete_porto'
-   #lap_time_test(agent_name=agent_name, n_episodes=100, detect_issues=False, initial_conditions=True)
+   #test(agent_name=agent_name, n_episodes=100, detect_issues=False, initial_conditions=True)
+   #lap_time_test(agent_name=agent_name, n_episodes=100, detect_issues=True, initial_conditions=True)
    #display_results_multiple.display_train_parameters(agent_name=agent_name)
    #display_results_multiple.display_lap_results(agent_name=agent_name)
    #display_results_multiple.display_moving_agent(agent_name=agent_name, load_history=False, n=4)
 
    
    
-   #agent_names = ['td3']
-   #legend_title = 'agent'
-   #legend = ['td3']
+   agent_names = ['partial_end_to_end_pure_pursuit', 'end_to_end']
+   legend_title = 'agent'
+   legend = ['pete', 'ete']
+   ns = [4, 5]
    #display_results_multiple.compare_learning_curves_progress(agent_names, legend, legend_title, show_average=True, show_median=True, xaxis='episodes')
-
+   display_results_multiple.display_path_multiple(agent_names=agent_names, ns=ns, legend_title=legend_title, legend=legend)
    
    
