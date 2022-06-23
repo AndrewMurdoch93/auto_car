@@ -131,7 +131,11 @@ class trainingLoop():
 
       for n in range(self.runs):
          
-         self.agent = agent_td3.agent(self.agent_dict)
+         if self.learning_method == 'rainbow':
+            self.agent_dict['epsilon'] = 1
+            self.replay_beta_0=self.agent_dict['replay_beta_0']
+            self.replay_beta=self.replay_beta_0
+         #self.agent = agent_td3.agent(self.agent_dict)
          
          for episode in range(self.max_episodes):
             
@@ -389,7 +393,11 @@ def test(agent_name, n_episodes, detect_issues, initial_conditions):
 
    for n in range(runs):
       
-      a = agent_td3.agent(agent_dict)
+      #a = agent_td3.agent(agent_dict)
+      if main_dict['learning_method'] == 'rainbow':
+         agent_dict['epsilon'] = 0
+         a = agent_rainbow.agent(agent_dict)
+      
       a.load_weights(agent_name, n)
       
       print("Testing agent " + agent_name + ", n = " + str(n))
@@ -571,9 +579,9 @@ def lap_time_test(agent_name, n_episodes, detect_issues, initial_conditions):
 if __name__=='__main__':
 
    
-   agent_name = 'pete_Lfc_1_col_1'
+   agent_name = 'rainbow'
    
-   main_dict = {'name':agent_name, 'max_episodes':5000, 'learning_method':'td3', 'runs':5, 'comment':''}
+   main_dict = {'name':agent_name, 'max_episodes':1000, 'learning_method':'rainbow', 'runs':1, 'comment':''}
 
    agent_dqn_dict = {'gamma':0.99, 'epsilon':1, 'eps_end':0.01, 'eps_dec':1/1000, 'lr':0.001, 'batch_size':64, 'max_mem_size':500000, 
                   'fc1_dims': 64, 'fc2_dims': 64, 'fc3_dims':64}
@@ -606,9 +614,9 @@ if __name__=='__main__':
    
    reward_signal = {'goal_reached':0, 'out_of_bounds':-1, 'max_steps':0, 'collision':-1, 'backwards':-1, 'park':-0.5, 'time_step':-0.005, 'progress':0, 'distance':0.3}    
    
-   action_space_dict = {'action_space': 'continuous', 'vel_select':[4, 6], 'R_range':[3]}
+   #action_space_dict = {'action_space': 'continuous', 'vel_select':[4, 6], 'R_range':[3]}
    
-   #action_space_dict = {'action_space': 'discrete', 'n_waypoints': 10, 'vel_select':[7], 'R':[3]}
+   action_space_dict = {'action_space': 'discrete', 'n_waypoints': 10, 'vel_select':[7], 'R_range':[6]}
 
    path_dict = {'local_path':True, 'waypoint_strategy':'local', 'wpt_arc':np.pi/2}
    
@@ -625,7 +633,7 @@ if __name__=='__main__':
    
    env_dict = {'sim_conf': functions.load_config(sys.path[0], "config")
             , 'save_history': False
-            , 'map_name': 'columbia_1'
+            , 'map_name': 'circle'
             , 'max_steps': 1000
             , 'control_steps': 20
             , 'display': False
@@ -636,10 +644,10 @@ if __name__=='__main__':
             , 'path_dict': path_dict
             } 
    
-   #a = trainingLoop(main_dict, agent_td3_dict, env_dict, load_agent='')
-   #a.train()
-   #test(agent_name=agent_name, n_episodes=100, detect_issues=False, initial_conditions=True)
-   #lap_time_test(agent_name=agent_name, n_episodes=100, detect_issues=False, initial_conditions=True)
+   a = trainingLoop(main_dict, agent_rainbow_dict, env_dict, load_agent='')
+   a.train()
+   test(agent_name=agent_name, n_episodes=100, detect_issues=False, initial_conditions=True)
+   lap_time_test(agent_name=agent_name, n_episodes=100, detect_issues=False, initial_conditions=True)
    
    '''
    agent_name = 'pete_Lfc_2_col_1'
@@ -719,11 +727,11 @@ if __name__=='__main__':
 
    
    
-   agent_names = ['partial_end_to_end_pure_pursuit', 'end_to_end']
-   legend_title = 'agent'
-   legend = ['pete', 'ete']
-   ns = [4, 5]
+   #agent_names = ['partial_end_to_end_pure_pursuit', 'end_to_end']
+   #legend_title = 'agent'
+   #legend = ['pete', 'ete']
+   #ns = [4, 5]
    #display_results_multiple.compare_learning_curves_progress(agent_names, legend, legend_title, show_average=True, show_median=True, xaxis='episodes')
-   display_results_multiple.display_path_multiple(agent_names=agent_names, ns=ns, legend_title=legend_title, legend=legend)
+   #display_results_multiple.display_path_multiple(agent_names=agent_names, ns=ns, legend_title=legend_title, legend=legend)
    
    

@@ -20,6 +20,7 @@ import mapping
 import cubic_spline_planner
 import agent_td3
 import os
+import frenet_optimal_trajectory
 
 class environment():
 
@@ -216,13 +217,13 @@ class environment():
 
         self.initial_condition_dict = {'x':self.x, 'y':self.y, 'theta':self.theta, 'v':self.v, 'delta':self.delta, 'goal': self.current_goal}
 
-        change_params = {}
-        for i in self.params:
-            if i not in ['v_min', 'v_max', 'width']:
-                change_params[i] = self.params[i]
+        #change_params = {}
+        #for i in self.params:
+        #    if i not in ['v_min', 'v_max', 'width']:
+        #        change_params[i] = self.params[i]
         
-        for i in random.sample(list(change_params), 2):
-            self.params[i] *= random.uniform(0.95,1.05)
+        #for i in random.sample(list(change_params), 2):
+        #    self.params[i] *= random.uniform(0.95,1.05)
 
 
     def take_action(self, act):
@@ -278,8 +279,11 @@ class environment():
             #self.save_state(waypoint, reward)
            
         else:
+            if self.path_strategy == 'polynomial':
+                cx, cy, cyaw = self.define_path_polynomial(param=wpt_angle)
+            else:
+                cx, cy, cyaw = self.define_path(waypoint, wpt_angle, R)
             
-            cx, cy, cyaw = self.define_path(waypoint, wpt_angle, R)
             self.path_tracker.record_waypoints(cx, cy, cyaw)
             
             if self.path_dict['control_strategy'] == 'pure_pursuit':
@@ -338,6 +342,16 @@ class environment():
                 
         return self.observation, reward, done
     
+    
+    def define_path_polynomial(self, param):
+        ds=0.1
+        s, s_ind, n = functions.convert_global_to_s_n(self.rx, self.ry, self.x, self.y, ds)
+        
+        #fplist = calc_frenet_paths(c_speed, c_d, c_d_d, c_d_dd, s0)
+        #fplist = calc_global_paths(fplist, csp)
+
+
+    
     def define_path(self, waypoint,  wpt_angle , R):
         if self.path_strategy == 'linear':
             cx = (((np.arange(0.1, 1, 0.01))*(waypoint[0] - self.x)) + self.x).tolist()
@@ -381,8 +395,6 @@ class environment():
 
                 cx = cx.flatten().tolist()
                 cy = cy.flatten()
-
-            
 
             cx, cy, cyaw, ck, s = cubic_spline_planner.calc_spline_course(cx, cy)
             
@@ -510,11 +522,14 @@ class environment():
         if self.action_space=='discrete':
             wpt = action%self.num_waypoints
             R=self.R_range[-1]
+            
+          
             if strategy=='global':
                 waypoint = [int((action+1)%3), int((action+1)/3)]
 
             if strategy=='local':
                 waypoint_relative_angle = self.theta - self.wpt_arc +(2*self.wpt_arc)*(wpt/(self.num_waypoints-1))
+                wpt_angle =  waypoint_relative_angle-(self.theta-np.pi/2)
                 waypoint = [self.x + R*math.cos(waypoint_relative_angle), self.y + R*math.sin(waypoint_relative_angle)]
             
             if strategy == 'waypoint':
@@ -522,6 +537,8 @@ class environment():
 
             i = int(action/self.num_waypoints)
             self.v_ref = self.vel_select[i]
+
+            return waypoint, wpt_angle, R, self.v_ref
 
         '''
         if self.v_ref>=1 and self.v_ref<=7:
@@ -748,6 +765,7 @@ class environment():
 
 def test_environment():
     
+    '''
     agent_name = 'ete_porto'
     parent_dir = os.path.dirname(os.path.abspath(__file__))
     agent_dir = parent_dir + '/agents/' + agent_name
@@ -774,17 +792,17 @@ def test_environment():
     
     a = agent_td3.agent(agent_dict)
     a.load_weights(agent_name, n)
-    
-
     '''
+
+    
     car_params =   {'mu': 1.0489, 'C_Sf': 4.718, 'C_Sr': 5.4562, 'lf': 0.15875, 'lr': 0.17145
                 , 'h': 0.074, 'm': 3.74, 'I': 0.04712, 's_min': -0.4189, 's_max': 0.4189, 'sv_min': -3.2
                 , 'sv_max': 3.2, 'v_switch': 7.319, 'a_max': 9.51, 'v_min':-5.0, 'v_max': 20.0, 'width': 0.31, 'length': 0.58}
     
     reward_signal = {'goal_reached':0, 'out_of_bounds':-1, 'max_steps':0, 'collision':-1, 'backwards':-1, 'park':-0.5, 'time_step':-0.005, 'progress':0, 'distance':0.3}    
     
-    action_space_dict = {'action_space': 'continuous', 'vel_select':[3, 6], 'R_range':[3]}
-    #action_space_dict = {'action_space': 'discrete', 'n_waypoints': 10, 'vel_select':[7], 'R_range':[3]}
+    #action_space_dict = {'action_space': 'continuous', 'vel_select':[3, 6], 'R_range':[3]}
+    action_space_dict = {'action_space': 'discrete', 'n_waypoints': 10, 'vel_select':[7], 'R_range':[3]}
     
     path_dict = {'local_path':True, 'waypoint_strategy':'local', 'wpt_arc':np.pi/2}
      
@@ -818,15 +836,15 @@ def test_environment():
     initial_condition = {'x':15, 'y':5, 'v':7, 'delta':0, 'theta':0, 'goal':1}
     #initial_condition = {'x':8, 'y':3, 'v':7, 'delta':0, 'theta':np.pi, 'goal':1}
     #initial_condition = []
-    '''
+    
 
     env = environment(env_dict)
     env.reset(save_history=True, start_condition=initial_condition, get_lap_time=False)
 
-    a = agent_td3.agent(agent_dict)
-    a.load_weights(agent_name, n)
+    #a = agent_td3.agent(agent_dict)
+    #a.load_weights(agent_name, n)
     
-    #action_history = np.ones(20)*-1
+    action_history = np.ones(10)*7
     done=False
     score=0
     i=0

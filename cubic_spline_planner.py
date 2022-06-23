@@ -7,6 +7,7 @@ Author: Atsushi Sakai(@Atsushi_twi)
 import math
 import numpy as np
 import bisect
+import functions
 
 
 class Spline:
@@ -190,6 +191,8 @@ def calc_spline_course(x, y, ds=0.1):
     return rx, ry, ryaw, rk, s
 
 
+        
+
 def main():  # pragma: no cover
     print("Spline 2D test")
     import matplotlib.pyplot as plt
@@ -199,16 +202,27 @@ def main():  # pragma: no cover
 
     sp = Spline2D(x, y)
     s = np.arange(0, sp.s[-1], ds)
-
     rx, ry, ryaw, rk = [], [], [], []
     for i_s in s:
         ix, iy = sp.calc_position(i_s)
+        #s = sp.__calc_s(ix,iy)
         rx.append(ix)
         ry.append(iy)
         ryaw.append(sp.calc_yaw(i_s))
         rk.append(sp.calc_curvature(i_s))
 
+    x_ = 5
+    y_ = 0
+    s_, s_ind_, n_ = functions.convert_global_to_s_n(rx, ry, x_, y_, ds)
+    
+    
+
     plt.subplots(1)
+    plt.plot()
+
+    plt.plot([x_, rx[s_ind_]], [y_, ry[s_ind_]])
+    #plt.plot(rx[s_ind_], ry[s_ind_], 'x')
+
     plt.plot(x, y, "xb", label="input")
     plt.plot(rx, ry, "-r", label="spline")
     plt.grid(True)
@@ -217,6 +231,7 @@ def main():  # pragma: no cover
     plt.ylabel("y[m]")
     plt.legend()
 
+    '''
     plt.subplots(1)
     plt.plot(s, [np.rad2deg(iyaw) for iyaw in ryaw], "-r", label="yaw")
     plt.grid(True)
@@ -230,18 +245,21 @@ def main():  # pragma: no cover
     plt.legend()
     plt.xlabel("line length[m]")
     plt.ylabel("curvature [1/m]")
+    '''
 
     plt.show()
 
 
 if __name__ == '__main__':
     import matplotlib.pyplot as plt
-    #main()
-    R=10
-    theta=np.linspace(0, 2*math.pi, 17)
-    x = 15+R*np.cos(theta-math.pi/2)
-    y = 15+R*np.sin(theta-math.pi/2)
-    rx, ry, ryaw, rk, s = calc_spline_course(x, y)
-    plt.plot(rx, ry, "-r", label="spline")
-    plt.plot(x, y, 'x')
-    plt.show()
+    main()
+    #R=10
+    #theta=np.linspace(0, 2*math.pi, 17)
+    #x = 15+R*np.cos(theta-math.pi/2)
+    #y = 15+R*np.sin(theta-math.pi/2)
+    #rx, ry, ryaw, rk, s = calc_spline_course(x, y)
+    #plt.plot(rx, ry, "-r", label="spline")
+    #plt.plot(x, y, 'x')
+    #plt.show()
+
+

@@ -247,6 +247,16 @@ def find_closest_point(rx, ry, x, y):
     
     return ind
 
+def convert_global_to_s_n(rx, ry, x, y, ds):
+    dx = [x - irx for irx in rx]
+    dy = [y - iry for iry in ry]
+    d = np.hypot(dx, dy)    
+    ind = np.argmin(d)
+
+    s = ind*ds
+    n = d[ind]
+    
+    return s, ind, n
 
 
 def find_angle_to_line(ryaw, theta):
@@ -346,7 +356,29 @@ def generate_initial_condition(name, episodes):
 #generate_berlin_goals()
 #generate_initial_condition(name='columbia', episodes=2000)
 if __name__ == '__main__':
-    generate_initial_condition(name='porto_1', episodes=2000)
+    #generate_initial_condition(name='porto_1', episodes=2000)
+    
+    s_0 = 0
+    s_1 = 1
+    theta = 0.5
+    n_0 = 0
+    n_1 = -1
+    A = np.array([[3*s_1**2, 2*s_1, 1, 0], [3*s_0**2, 2*s_0, 1, 0], [s_0**3, s_0**2, s_0, 1], [s_1**3, s_1**2, s_0, 1]])
+    B = np.array([0, theta, n_0, n_1])
+
+    x = np.linalg.solve(A, B)
+    print(x)
+
+    a = x[0]
+    b = x[1]
+    c = x[2]
+    d = x[3]
+
+    s = np.linspace(s_0, s_1)
+    n = a*s**3 + b*s**2 + c*s + d
+
+    plt.plot(s, n)
+    plt.show()
     #def velocity_along_line(theta, velocity, ryaw, )
 
     #generate_berlin_goals()
