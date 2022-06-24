@@ -18,7 +18,7 @@ from numba import int32, int64, float32, float64,bool_
 from numba.experimental import jitclass
 import pickle
 import mapping
-
+import cubic_spline_planner
 
 def load_config(path, fname):
     full_path = path + '/config/' + fname + '.yaml'
@@ -247,17 +247,78 @@ def find_closest_point(rx, ry, x, y):
     
     return ind
 
-def convert_global_to_s_n(rx, ry, x, y, ds):
+def convert_xy_to_sn(rx, ry, ryaw, x, y, ds):
     dx = [x - irx for irx in rx]
     dy = [y - iry for iry in ry]
     d = np.hypot(dx, dy)    
     ind = np.argmin(d)
-
     s = ind*ds
     n = d[ind]
-    
+
+
+    xy_angle = np.arctan((y-ry[ind])/(x-rx[ind]))
+    yaw_angle = ryaw[ind]
+
+    angle = sub_angles_complex(xy_angle, yaw_angle)
+
+    if angle >=0:
+        print('dir = 1')
+        direct=1
+    else:
+        print('dir = -1')
+        direct=-1
+
+
+    n = n*direct
+
     return s, ind, n
 
+def convert_sn_to_xy(s, n, csp):
+    x = []
+    y = []
+    yaw = []
+    ds = []
+    c = []
+    for i in range(len(s)):
+        ix, iy = csp.calc_position(s[i])
+        if ix is None:
+            break
+        i_yaw = csp.calc_yaw(s[i])
+        ni = n[i]
+        fx = ix + ni * math.cos(i_yaw + math.pi / 2.0)
+        fy = iy + ni * math.sin(i_yaw + math.pi / 2.0)
+        x.append(fx)
+        y.append(fy)
+
+    # calc yaw and ds
+    for i in range(len(x) - 1):
+        dx = x[i + 1] - x[i]
+        dy = y[i + 1] - y[i]
+        yaw.append(math.atan2(dy, dx))
+        ds.append(math.hypot(dx, dy))
+        yaw.append(yaw[-1])
+        ds.append(ds[-1])
+
+    # calc curvature
+    #for i in range(len(yaw) - 1):
+    #    c.append((yaw[i + 1] - yaw[i]) / ds[i])
+    c = 0
+
+    return x, y, yaw, ds, c
+
+def generate_line(x, y):
+    csp = cubic_spline_planner.Spline2D(x, y)
+    s = np.arange(0, csp.s[-1], 0.1)
+
+    rx, ry, ryaw, rk = [], [], [], []
+    for i_s in s:
+        ix, iy = csp.calc_position(i_s)
+        rx.append(ix)
+        ry.append(iy)
+        ryaw.append(csp.calc_yaw(i_s))
+        rk.append(csp.calc_curvature(i_s))
+
+    return rx, ry, ryaw, rk, s, csp
 
 def find_angle_to_line(ryaw, theta):
 
@@ -359,11 +420,13 @@ if __name__ == '__main__':
     #generate_initial_condition(name='porto_1', episodes=2000)
     
     s_0 = 0
-    s_1 = 1
+    s_1 = s_0+1
+    s_2 = s_1+2
     theta = 0.5
-    n_0 = 0
-    n_1 = -1
-    A = np.array([[3*s_1**2, 2*s_1, 1, 0], [3*s_0**2, 2*s_0, 1, 0], [s_0**3, s_0**2, s_0, 1], [s_1**3, s_1**2, s_0, 1]])
+    n_0 = 0.8
+    n_1 = 1
+    
+    A = np.array([[3*s_1**2, 2*s_1, 1, 0], [3*s_0**2, 2*s_0, 1, 0], [s_0**3, s_0**2, s_0, 1], [s_1**3, s_1**2, s_1, 1]])
     B = np.array([0, theta, n_0, n_1])
 
     x = np.linalg.solve(A, B)
@@ -376,8 +439,12 @@ if __name__ == '__main__':
 
     s = np.linspace(s_0, s_1)
     n = a*s**3 + b*s**2 + c*s + d
-
+    s = np.concatenate((s, np.linspace(s_1, s_2)))
+    n = np.concatenate((n, np.ones(len(np.linspace(s_1, s_2)))*n_1))
+    
     plt.plot(s, n)
+    #plt.plot(np.linspace(s_1, s_2), np.ones(len(np.linspace(s_1, s_2)))*n_1)
+    plt.xlim([s_0, s_2])
     plt.show()
     #def velocity_along_line(theta, velocity, ryaw, )
 

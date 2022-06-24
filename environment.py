@@ -120,7 +120,7 @@ class environment():
         #self.goal_x, self.goal_y, self.rx, self.ry, self.ryaw, self.rk, self.d = functions.generate_circle_goals()
         #self.goal_x, self.goal_y, self.rx, self.ry, self.ryaw, self.rk, self.d = functions.generate_berlin_goals()
         
-        self.rx, self.ry, self.ryaw, self.rk, self.d = cubic_spline_planner.calc_spline_course(self.goal_x, self.goal_y)
+        self.rx, self.ry, self.ryaw, self.rk, self.d, self.csp = functions.generate_line(self.goal_x, self.goal_y)
 
         #Car sensors - lidar
         if self.lidar_dict['is_lidar']==True:
@@ -232,6 +232,10 @@ class environment():
         reward = 0
         done=False
         
+        #waypoint = 0
+        #wpt_angle = 0
+        #R = 3
+        #v_ref = 4
         waypoint, wpt_angle, R, v_ref = self.convert_action_to_coord(strategy=self.waypoint_strategy, action=act)
 
         if self.local_path==False:
@@ -280,7 +284,7 @@ class environment():
            
         else:
             if self.path_strategy == 'polynomial':
-                cx, cy, cyaw = self.define_path_polynomial(param=wpt_angle)
+                cx, cy, cyaw = self.define_path_polynomial(param=act)
             else:
                 cx, cy, cyaw = self.define_path(waypoint, wpt_angle, R)
             
@@ -344,13 +348,31 @@ class environment():
     
     
     def define_path_polynomial(self, param):
+        track_width = 3
         ds=0.1
-        s, s_ind, n = functions.convert_global_to_s_n(self.rx, self.ry, self.x, self.y, ds)
-        
-        #fplist = calc_frenet_paths(c_speed, c_d, c_d_d, c_d_dd, s0)
-        #fplist = calc_global_paths(fplist, csp)
+        s_0, s_0_ind, n_0 = functions.convert_xy_to_sn(self.rx, self.ry, self.ryaw, self.x, self.y, ds)
+        s_1 = s_0 + 2
+        s_2 = s_1+2
+        n_1 = param[0]*track_width/2
+
+        A = np.array([[3*s_1**2, 2*s_1, 1, 0], [3*s_0**2, 2*s_0, 1, 0], [s_0**3, s_0**2, s_0, 1], [s_1**3, s_1**2, s_1, 1]])
+        B = np.array([0, self.theta, n_0, n_1])
+        x = np.linalg.solve(A, B)
+        s = np.linspace(s_0, s_1)
+        n = x[0]*s**3 + x[1]*s**2 + x[2]*s + x[3]
+        s = np.concatenate((s, np.linspace(s_1, s_2)))
+        n = np.concatenate((n, np.ones(len(np.linspace(s_1, s_2)))*n_1))
+
+        cx, cy, cyaw, ds, c = functions.convert_sn_to_xy(s, n, self.csp)
+
+        #plt.plot(self.rx, self.ry)
+        #plt.plot(self.x, self.y, 'x')
+        #plt.plot(self.rx[s_0_ind], self.ry[s_0_ind], 'x')
+        #plt.plot(cx, cy)
+        #plt.show()
 
 
+        return np.array(cx), np.array(cy), np.array(cyaw)
     
     def define_path(self, waypoint,  wpt_angle , R):
         if self.path_strategy == 'linear':
@@ -523,7 +545,6 @@ class environment():
             wpt = action%self.num_waypoints
             R=self.R_range[-1]
             
-          
             if strategy=='global':
                 waypoint = [int((action+1)%3), int((action+1)/3)]
 
@@ -801,14 +822,14 @@ def test_environment():
     
     reward_signal = {'goal_reached':0, 'out_of_bounds':-1, 'max_steps':0, 'collision':-1, 'backwards':-1, 'park':-0.5, 'time_step':-0.005, 'progress':0, 'distance':0.3}    
     
-    #action_space_dict = {'action_space': 'continuous', 'vel_select':[3, 6], 'R_range':[3]}
-    action_space_dict = {'action_space': 'discrete', 'n_waypoints': 10, 'vel_select':[7], 'R_range':[3]}
+    action_space_dict = {'action_space': 'continuous', 'vel_select':[4], 'R_range':[3]}
+    #action_space_dict = {'action_space': 'discrete', 'n_waypoints': 10, 'vel_select':[7], 'R_range':[3]}
     
     path_dict = {'local_path':True, 'waypoint_strategy':'local', 'wpt_arc':np.pi/2}
      
     if path_dict['local_path'] == True: #True or false
-        path_dict['path_strategy'] = 'circle' #circle or linear
-        path_dict['control_strategy'] = 'stanley' #pure_pursuit or stanley
+        path_dict['path_strategy'] = 'polynomial' #circle or linear
+        path_dict['control_strategy'] = 'pure_pursuit' #pure_pursuit or stanley
         
         if path_dict['control_strategy'] == 'pure_pursuit':
             path_dict['track_dict'] = {'k':0.1, 'Lfc':1}
@@ -833,7 +854,7 @@ def test_environment():
 
     env_dict['name'] = 'test'
     #initial_condition = {'x':8.18, 'y':26.24, 'v':4, 'delta':0, 'theta':np.pi, 'goal':1}
-    initial_condition = {'x':15, 'y':5, 'v':7, 'delta':0, 'theta':0, 'goal':1}
+    initial_condition = {'x':17, 'y':4, 'v':7, 'delta':0, 'theta':0, 'goal':1}
     #initial_condition = {'x':8, 'y':3, 'v':7, 'delta':0, 'theta':np.pi, 'goal':1}
     #initial_condition = []
     
@@ -844,7 +865,9 @@ def test_environment():
     #a = agent_td3.agent(agent_dict)
     #a.load_weights(agent_name, n)
     
-    action_history = np.ones(10)*7
+    action_history = np.ones((20,1))*1
+    
+
     done=False
     score=0
     i=0
