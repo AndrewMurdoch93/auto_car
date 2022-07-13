@@ -39,6 +39,7 @@ class environment():
         self.max_steps = input_dict['max_steps']
         self.control_steps = input_dict['control_steps']
         self.display = input_dict['display']
+        self.architecture = self.input_dict['architecture']
         
         self.params = input_dict['car_params']
         self.reward_signal = input_dict['reward_signal']
@@ -49,6 +50,7 @@ class environment():
         self.local_path = self.path_dict['local_path']
         self.waypoint_strategy = self.path_dict['waypoint_strategy']
         self.wpt_arc = self.path_dict['wpt_arc']
+        
         
         
         #Initialise car parameters
