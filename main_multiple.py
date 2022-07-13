@@ -579,9 +579,9 @@ def lap_time_test(agent_name, n_episodes, detect_issues, initial_conditions):
 if __name__=='__main__':
 
    
-   agent_name = 'sn_path'
+   agent_name = 'testing'
    
-   main_dict = {'name':agent_name, 'max_episodes':1000, 'learning_method':'td3', 'runs':1, 'comment':''}
+   main_dict = {'name':agent_name, 'max_episodes':3000, 'learning_method':'td3', 'runs':1, 'comment':''}
 
    agent_dqn_dict = {'gamma':0.99, 'epsilon':1, 'eps_end':0.01, 'eps_dec':1/1000, 'lr':0.001, 'batch_size':64, 'max_mem_size':500000, 
                   'fc1_dims': 64, 'fc2_dims': 64, 'fc3_dims':64}
@@ -606,7 +606,7 @@ if __name__=='__main__':
    agent_ddpg_dict = {'alpha':0.000025, 'beta':0.00025, 'tau':0.001, 'gamma':0.99, 'max_size':1000000, 'layer1_size':400, 'layer2_size':300, 'batch_size':64}
    
    agent_td3_dict = {'alpha':0.001, 'beta':0.001, 'tau':0.005, 'gamma':0.99, 'update_actor_interval':2, 'warmup':100, 
-                        'max_size':1000000, 'layer1_size':400, 'layer2_size':300, 'batch_size':100, 'noise':0.1}
+                        'max_size':1000000, 'layer1_size':400, 'layer2_size':300, 'layer3_size':300, 'batch_size':100, 'noise':0.1}
    
    car_params =   {'mu': 1.0489, 'C_Sf': 4.718, 'C_Sr': 5.4562, 'lf': 0.15875, 'lr': 0.17145
                   , 'h': 0.074, 'm': 3.74, 'I': 0.04712, 's_min': -0.4189, 's_max': 0.4189, 'sv_min': -3.2
@@ -614,14 +614,14 @@ if __name__=='__main__':
    
    reward_signal = {'goal_reached':0, 'out_of_bounds':-1, 'max_steps':0, 'collision':-1, 'backwards':-1, 'park':-0.5, 'time_step':-0.005, 'progress':0, 'distance':0.3}    
    
-   action_space_dict = {'action_space': 'continuous', 'vel_select':[5], 'R_range':[3]}
+   action_space_dict = {'action_space': 'continuous', 'vel_select':[7], 'R_range':[3]}
    
    #action_space_dict = {'action_space': 'discrete', 'n_waypoints': 10, 'vel_select':[7], 'R_range':[6]}
 
-   path_dict = {'local_path':True, 'waypoint_strategy':'local', 'wpt_arc':np.pi/2}
+   path_dict = {'local_path':False, 'waypoint_strategy':'local', 'wpt_arc':np.pi/2}
    
    if path_dict['local_path'] == True: #True or false
-        path_dict['path_strategy'] = 'polynomial' #circle or linear
+        path_dict['path_strategy'] = 'circle' #circle or linear or polynomial
         path_dict['control_strategy'] = 'pure_pursuit' #pure_pursuit or stanley
         
         if path_dict['control_strategy'] == 'pure_pursuit':
@@ -634,9 +634,10 @@ if __name__=='__main__':
    env_dict = {'sim_conf': functions.load_config(sys.path[0], "config")
             , 'save_history': False
             , 'map_name': 'circle'
-            , 'max_steps': 2000
+            , 'max_steps': 3000
             , 'control_steps': 20
             , 'display': False
+            , 'architecture': 'ete'    #pete, ete
             , 'car_params':car_params
             , 'reward_signal':reward_signal
             , 'lidar_dict':lidar_dict
@@ -680,7 +681,7 @@ if __name__=='__main__':
    lap_time_test(agent_name=agent_name, n_episodes=100, detect_issues=False, initial_conditions=True)
    '''
 
-   agent_name = 'sn_path'
+   agent_name = 'testing'
    #display_results_multiple.learning_curve_progress(agent_name=agent_name,  show_average=True, show_median=True)
    #display_results_multiple.display_train_parameters(agent_name=agent_name)
    #display_results_multiple.agent_progress_statistics(agent_name=agent_name)

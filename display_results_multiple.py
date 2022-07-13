@@ -500,7 +500,7 @@ def display_moving_agent(agent_name, load_history=False, n=0):
     print(np.average(np.array(durations)[np.nonzero(np.array(durations))][1:-1]))  #duration without zeros and first action
     print(np.average(np.array(durations)[1:-1]))
     
-    for i in range(len(env.waypoint_history)):
+    for i in range(len(env.pose_history)):
         plt.cla()
         plt.imshow(im, extent=(0,env.map_width,0,env.map_height))
         sh=env.pose_history[i]

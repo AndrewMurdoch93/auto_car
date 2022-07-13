@@ -74,7 +74,6 @@ class environment():
                 self.path_tracker = path_tracker.stanley(self.track_dict)
 
         
-        
         self.vel_select = self.action_space_dict['vel_select']
         self.R_range = self.action_space_dict['R_range']
         self.action_space = self.action_space_dict['action_space']
@@ -86,6 +85,9 @@ class environment():
         if self.action_space == 'continuous':
             self.num_actions = 1 + int(len(self.action_space_dict['vel_select'])>1) + int(len(self.action_space_dict['R_range'])>1)
 
+        if self.architecture == 'ete':
+            self.num_actions = 2
+        
         #simulation parameters
         self.dt = self.sim_conf.time_step
 
@@ -238,9 +240,10 @@ class environment():
         #wpt_angle = 0
         #R = 3
         #v_ref = 4
-        waypoint, wpt_angle, R, v_ref = self.convert_action_to_coord(strategy=self.waypoint_strategy, action=act)
+        
+        if self.architecture == 'ete':
+            waypoint, wpt_angle, R, v_ref = self.convert_action_to_coord(strategy=self.waypoint_strategy, action=act)
 
-        if self.local_path==False:
             for _ in range(self.control_steps):
                 if self.display==True:
                     self.visualise(waypoint)
@@ -250,18 +253,24 @@ class environment():
                     self.action_step_history.append(act)
                 
                 #delta_ref = path_tracker.pure_pursuit(self.wheelbase, waypoint, self.x, self.y, self.theta)
-                
-                if self.action_space=='discrete':
-                    delta_ref = math.pi/16-(math.pi/8)*(act/(self.num_actions-1))         
-                else:
-                    if act[0]<=0:
-                        delta_ref = (-self.params['s_min'])*act[0]       
-                    else:
-                        delta_ref = (self.params['s_max'])*act[0] 
 
-                #delta_dot, a = self.control_system(self.delta, delta_ref, self.v, v_ref)
                 
-                self.update_pose(delta_ref, v_ref)
+                #delta_dot = act[0] 
+                #if delta_dot<=0:
+                #    delta_dot = (-self.params['sv_min'])*delta_dot    
+                #else:
+                #    delta_dot = (self.params['sv_max'])*delta_dot
+
+                if act[0]<=0:
+                    delta_ref = (-self.params['s_min'])*act[0]       
+                else:
+                    delta_ref = (self.params['s_max'])*act[0] 
+
+
+                v_dot = act[1]*self.params['a_max']
+     
+                self.update_pose(delta_ref, v_dot)
+
                 self.update_variables()
                 self.steps += 1
                 self.set_flags()
@@ -282,64 +291,111 @@ class environment():
                 
                 if done==True:
                     break
-            #self.save_state(waypoint, reward)
-           
-        else:
-            if self.path_strategy == 'polynomial':
-                cx, cy, cyaw = self.define_path_polynomial(param=act)
-            else:
-                cx, cy, cyaw = self.define_path(waypoint, wpt_angle, R)
-            
-            self.path_tracker.record_waypoints(cx, cy, cyaw)
-            
-            if self.path_dict['control_strategy'] == 'pure_pursuit':
-                target_index, _ = self.path_tracker.search_target_waypoint(self.x, self.y, self.v)
-            elif self.path_dict['control_strategy'] == 'stanley':
-                target_index, _ = self.path_tracker.calc_target_index(self.state)
 
-            lastIndex = len(cx)-1
-            i=0
-            while (lastIndex > target_index) and i<self.control_steps:
-                if self.display==True:
-                    self.visualise(waypoint)
-               
-                if self.save_history==True:
-                    self.waypoint_history.append(waypoint)
-                    self.action_step_history.append(act)
+
+        elif self.architecture == 'pete':
+            waypoint, wpt_angle, R, v_ref = self.convert_action_to_coord(strategy=self.waypoint_strategy, action=act)
+
+            if self.local_path==False:
+                for _ in range(self.control_steps):
+                    if self.display==True:
+                        self.visualise(waypoint)
+                    
+                    if self.save_history==True:
+                        self.waypoint_history.append(waypoint)
+                        self.action_step_history.append(act)
+                    
+                    #delta_ref = path_tracker.pure_pursuit(self.wheelbase, waypoint, self.x, self.y, self.theta)
+                    
+                    if self.action_space=='discrete':
+                        delta_ref = math.pi/16-(math.pi/8)*(act/(self.num_actions-1))         
+                    else:
+                        if act[0]<=0:
+                            delta_ref = (-self.params['s_min'])*act[0]       
+                        else:
+                            delta_ref = (self.params['s_max'])*act[0] 
+
+                    #delta_dot, a = self.control_system(self.delta, delta_ref, self.v, v_ref)
+                    
+                    self.update_pose(delta_ref, v_ref)
+                    self.update_variables()
+                    self.steps += 1
+                    self.set_flags()
+                    reward += self.getReward()
+
+                    #print(reward)
+
+                    done = self.isEnd()
+                    
+                    if self.lidar_dict['is_lidar']==True:
+                        self.lidar_dists, self.lidar_coords = self.lidar.get_scan(self.x, self.y, self.theta)
+
+                    self.save_pose()
+                    
+                    if self.save_history==True:
+                        self.reward_history.append(reward)
+                        self.append_history_func()
+                    
+                    if done==True:
+                        break
+                #self.save_state(waypoint, reward)
+            
+            else:
+                if self.path_strategy == 'polynomial':
+                    cx, cy, cyaw = self.define_path_polynomial(param=act)
+                else:
+                    cx, cy, cyaw = self.define_path(waypoint, wpt_angle, R)
+                
+                self.path_tracker.record_waypoints(cx, cy, cyaw)
                 
                 if self.path_dict['control_strategy'] == 'pure_pursuit':
-                    delta_ref, target_index = self.path_tracker.pure_pursuit_steer_control(self.x, self.y, self.theta, self.v, target_index)
-                if self.path_dict['control_strategy'] == 'stanley':
-                    delta_ref, target_idx = self.path_tracker.stanley_control(self.state, target_index)
-                
-                #delta_dot, a = self.control_system(self.delta, delta_ref, self.v, v_ref)
-                self.update_pose(delta_ref, v_ref)
-                self.update_variables()
+                    target_index, _ = self.path_tracker.search_target_waypoint(self.x, self.y, self.v)
+                elif self.path_dict['control_strategy'] == 'stanley':
+                    target_index, _ = self.path_tracker.calc_target_index(self.state)
 
-                self.steps += 1
-
-                self.local_path_history.append([cx, cy][:])
-                self.set_flags()
-                reward += self.getReward()
+                lastIndex = len(cx)-1
+                i=0
+                while (lastIndex > target_index) and i<self.control_steps:
+                    if self.display==True:
+                        self.visualise(waypoint)
                 
-                if self.lidar_dict['is_lidar']==True:
-                    self.lidar_dists, self.lidar_coords = self.lidar.get_scan(self.x, self.y, self.theta)
+                    if self.save_history==True:
+                        self.waypoint_history.append(waypoint)
+                        self.action_step_history.append(act)
+                    
+                    if self.path_dict['control_strategy'] == 'pure_pursuit':
+                        delta_ref, target_index = self.path_tracker.pure_pursuit_steer_control(self.x, self.y, self.theta, self.v, target_index)
+                    if self.path_dict['control_strategy'] == 'stanley':
+                        delta_ref, target_idx = self.path_tracker.stanley_control(self.state, target_index)
+                    
+                    #delta_dot, a = self.control_system(self.delta, delta_ref, self.v, v_ref)
+                    self.update_pose(delta_ref, v_ref)
+                    self.update_variables()
 
-                self.save_pose()
+                    self.steps += 1
 
-                if self.save_history==True:
-                    self.reward_history.append(reward)
-                    self.append_history_func()
-                
-                #plt.plot(self.rx, self.ry)
-                #plt.plot(self.x, self.y, 'x')
-                #plt.plot(self.rx[self.det_prg.old_nearest_point_index], self.ry[self.det_prg.old_nearest_point_index], 'x')
-                #plt.show()
-                
-                i+=1
-                done = self.isEnd()
-                if done == True:
-                    break
+                    self.local_path_history.append([cx, cy][:])
+                    self.set_flags()
+                    reward += self.getReward()
+                    
+                    if self.lidar_dict['is_lidar']==True:
+                        self.lidar_dists, self.lidar_coords = self.lidar.get_scan(self.x, self.y, self.theta)
+
+                    self.save_pose()
+
+                    if self.save_history==True:
+                        self.reward_history.append(reward)
+                        self.append_history_func()
+                    
+                    #plt.plot(self.rx, self.ry)
+                    #plt.plot(self.x, self.y, 'x')
+                    #plt.plot(self.rx[self.det_prg.old_nearest_point_index], self.ry[self.det_prg.old_nearest_point_index], 'x')
+                    #plt.show()
+                    
+                    i+=1
+                    done = self.isEnd()
+                    if done == True:
+                        break
             
             if done == True:
                 #print(self.steps)
@@ -752,7 +808,21 @@ class environment():
 
     def update_pose(self, steer, vel):
          # steering angle velocity input to steering velocity acceleration input
-        accl, sv = vehicle_model.pid(vel, steer, self.state[3], self.state[2], self.params['sv_max'], self.params['a_max'], self.params['v_max'], self.params['v_min'])
+        if self.architecture == 'ete': 
+            sv = steer
+            accl = vel
+            
+            _, sv = vehicle_model.pid(vel, steer, self.state[3], self.state[2], self.params['sv_max'], self.params['a_max'], self.params['v_max'], self.params['v_min'])
+        
+
+            #sv = vehicle_model.steering_constraint(steering_angle=self.state[2], steering_velocity=sv, 
+            #    s_min=self.params['s_min'], s_max=self.params['s_max'], sv_min=self.params['sv_min'], sv_max=self.params['sv_max'])
+            
+            accl = vehicle_model.accl_constraints(vel=self.state[3], accl=accl, v_switch=self.params['v_switch'], 
+                a_max=self.params['a_max'], v_min=self.params['v_min'], v_max=self.params['v_max'])
+
+        elif self.architecture == 'pete':
+            accl, sv = vehicle_model.pid(vel, steer, self.state[3], self.state[2], self.params['sv_max'], self.params['a_max'], self.params['v_max'], self.params['v_min'])
         
         # update physics, get RHS of diff'eq
         f = vehicle_model.vehicle_dynamics_st(
@@ -828,7 +898,7 @@ def test_environment():
     action_space_dict = {'action_space': 'continuous', 'vel_select':[5], 'R_range':[3]}
     #action_space_dict = {'action_space': 'discrete', 'n_waypoints': 10, 'vel_select':[7], 'R_range':[3]}
     
-    path_dict = {'local_path':True, 'waypoint_strategy':'local', 'wpt_arc':np.pi/2}
+    path_dict = {'local_path':False, 'waypoint_strategy':'local', 'wpt_arc':np.pi/2}
      
     if path_dict['local_path'] == True: #True or false
         path_dict['path_strategy'] = 'polynomial' #circle or linear
@@ -847,6 +917,7 @@ def test_environment():
         , 'max_steps': 2000
         , 'control_steps': 15
         , 'display': True
+        , 'architecture': 'ete'
         , 'car_params':car_params
         , 'reward_signal':reward_signal
         , 'lidar_dict':lidar_dict
@@ -857,7 +928,7 @@ def test_environment():
 
     env_dict['name'] = 'test'
     #initial_condition = {'x':8.18, 'y':26.24, 'v':4, 'delta':0, 'theta':np.pi, 'goal':1}
-    initial_condition = {'x':16, 'y':4, 'v':5, 'delta':0, 'theta':0, 'goal':1}
+    initial_condition = {'x':16, 'y':4, 'v':7, 'delta':0, 'theta':0, 'goal':1}
     #initial_condition = {'x':8, 'y':3, 'v':7, 'delta':0, 'theta':np.pi, 'goal':1}
     #initial_condition = []
     
@@ -868,8 +939,8 @@ def test_environment():
     #a = agent_td3.agent(agent_dict)
     #a.load_weights(agent_name, n)
     
-    action_history = np.ones((1000,1))*1
-    
+    action_history = np.ones((1000,2))*0.5
+    action_history[:,1] = np.zeros(1000)
 
     done=False
     score=0

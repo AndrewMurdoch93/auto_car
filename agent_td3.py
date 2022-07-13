@@ -41,18 +41,20 @@ class ReplayBuffer():
         return states, actions, rewards, states_, dones
 
 class CriticNetwork(nn.Module):
-    def __init__(self, beta, input_dims, fc1_dims, fc2_dims, n_actions, filename):
+    def __init__(self, beta, input_dims, fc1_dims, fc2_dims, fc3_dims, n_actions, filename):
         super(CriticNetwork, self).__init__()
         self.filename = 'agents/' + filename + '/'
         self.input_dims = input_dims
         self.fc1_dims = fc1_dims
         self.fc2_dims = fc2_dims
+        self.fc3_dims = fc3_dims
         self.n_actions = n_actions
 
 
         self.fc1 = nn.Linear(self.input_dims + n_actions, self.fc1_dims)
         self.fc2 = nn.Linear(self.fc1_dims, self.fc2_dims)
-        self.q1 = nn.Linear(self.fc2_dims, 1)
+        self.fc3 = nn.Linear(self.fc2_dims, self.fc3_dims)
+        self.q1 = nn.Linear(self.fc3_dims, 1)
 
         self.optimizer = optim.Adam(self.parameters(), lr=beta)
         self.device = T.device('cuda:0' if T.cuda.is_available() else 'cpu')
@@ -64,6 +66,9 @@ class CriticNetwork(nn.Module):
         q1_action_value = F.relu(q1_action_value)
         q1_action_value = self.fc2(q1_action_value)
         q1_action_value = F.relu(q1_action_value)
+        q1_action_value = self.fc3(q1_action_value)
+        q1_action_value = F.relu(q1_action_value)
+        
         q1 = self.q1(q1_action_value)
 
         return q1
@@ -75,17 +80,19 @@ class CriticNetwork(nn.Module):
         self.load_state_dict(T.load(self.filename+name))
 
 class ActorNetwork(nn.Module):
-    def __init__(self, alpha, input_dims, fc1_dims, fc2_dims, n_actions, filename):
+    def __init__(self, alpha, input_dims, fc1_dims, fc2_dims, fc3_dims, n_actions, filename):
         super(ActorNetwork, self).__init__()
         self.filename = 'agents/' + filename + '/'
         self.input_dims = input_dims
         self.fc1_dims = fc1_dims
         self.fc2_dims = fc2_dims
+        self.fc3_dims = fc3_dims
         self.n_actions = n_actions
 
         self.fc1 = nn.Linear(self.input_dims, self.fc1_dims)
         self.fc2 = nn.Linear(self.fc1_dims, self.fc2_dims)
-        self.mu = nn.Linear(self.fc2_dims, self.n_actions)
+        self.fc3 = nn.Linear(self.fc2_dims, self.fc3_dims)
+        self.mu = nn.Linear(self.fc3_dims, self.n_actions)
 
         self.optimizer = optim.Adam(self.parameters(), lr=alpha)
         self.device = T.device('cuda:0' if T.cuda.is_available() else 'cpu')
@@ -96,6 +103,8 @@ class ActorNetwork(nn.Module):
         prob = self.fc1(state)
         prob = F.relu(prob)
         prob = self.fc2(prob)
+        prob = F.relu(prob)
+        prob = self.fc3(prob)
         prob = F.relu(prob)
 
         mu = T.tanh(self.mu(prob))
@@ -130,19 +139,20 @@ class agent():
         input_dims = agent_dict["input_dims"]
         layer1_size = agent_dict["layer1_size"]
         layer2_size = agent_dict["layer2_size"]
+        layer3_size = agent_dict["layer3_size"]
         n_actions = agent_dict["n_actions"]
 
-        self.actor = ActorNetwork(alpha, input_dims, layer1_size, layer2_size, n_actions=n_actions, filename=self.name)
+        self.actor = ActorNetwork(alpha, input_dims, layer1_size, layer2_size, layer3_size, n_actions=n_actions, filename=self.name)
 
-        self.critic_1 = CriticNetwork(beta, input_dims, layer1_size, layer2_size, n_actions=n_actions, filename=self.name)
+        self.critic_1 = CriticNetwork(beta, input_dims, layer1_size, layer2_size, layer3_size, n_actions=n_actions, filename=self.name)
 
-        self.critic_2 = CriticNetwork(beta, input_dims, layer1_size, layer2_size, n_actions=n_actions, filename=self.name)
+        self.critic_2 = CriticNetwork(beta, input_dims, layer1_size, layer2_size, layer3_size, n_actions=n_actions, filename=self.name)
 
-        self.target_actor = ActorNetwork(alpha, input_dims, layer1_size, layer2_size, n_actions=n_actions, filename=self.name)
+        self.target_actor = ActorNetwork(alpha, input_dims, layer1_size, layer2_size, layer3_size, n_actions=n_actions, filename=self.name)
 
-        self.target_critic_1 = CriticNetwork(beta, input_dims, layer1_size, layer2_size, n_actions=n_actions, filename=self.name)
+        self.target_critic_1 = CriticNetwork(beta, input_dims, layer1_size, layer2_size, layer3_size, n_actions=n_actions, filename=self.name)
 
-        self.target_critic_2 = CriticNetwork(beta, input_dims, layer1_size, layer2_size, n_actions=n_actions, filename=self.name)
+        self.target_critic_2 = CriticNetwork(beta, input_dims, layer1_size, layer2_size, layer3_size, n_actions=n_actions, filename=self.name)
 
         self.noise = agent_dict["noise"]
 
