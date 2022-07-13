@@ -351,16 +351,17 @@ class environment():
         track_width = 3
         ds=0.1
         s_0, s_0_ind, n_0 = functions.convert_xy_to_sn(self.rx, self.ry, self.ryaw, self.x, self.y, ds)
-        s_1 = s_0 + 2
-        s_2 = s_1+2
+        s_1 = s_0 + 3
+        s_2 = s_1 + 2
         n_1 = param[0]*track_width/2
-
+        theta = functions.sub_angles_complex(self.theta, self.ryaw[s_0_ind])
         A = np.array([[3*s_1**2, 2*s_1, 1, 0], [3*s_0**2, 2*s_0, 1, 0], [s_0**3, s_0**2, s_0, 1], [s_1**3, s_1**2, s_1, 1]])
-        B = np.array([0, self.theta, n_0, n_1])
+        B = np.array([0, theta, n_0, n_1])
         x = np.linalg.solve(A, B)
         s = np.linspace(s_0, s_1)
         n = x[0]*s**3 + x[1]*s**2 + x[2]*s + x[3]
         s = np.concatenate((s, np.linspace(s_1, s_2)))
+        s = np.mod(s, self.d[-1])
         n = np.concatenate((n, np.ones(len(np.linspace(s_1, s_2)))*n_1))
 
         cx, cy, cyaw, ds, c = functions.convert_sn_to_xy(s, n, self.csp)
@@ -445,9 +446,9 @@ class environment():
         plt.plot(self.x, self.y, 'o')
         plt.plot(waypoint[0], waypoint[1], 'x')
 
-        plt.plot([current_goal[0]-self.s, current_goal[0]+self.s, current_goal[0]+self.s, current_goal[0]-self.s, 
-        current_goal[0]-self.s], [current_goal[1]-self.s, current_goal[1]-self.s, current_goal[1]+self.s, 
-        current_goal[1]+self.s, current_goal[1]-self.s], 'r')
+        #plt.plot([current_goal[0]-self.s, current_goal[0]+self.s, current_goal[0]+self.s, current_goal[0]-self.s, 
+        #current_goal[0]-self.s], [current_goal[1]-self.s, current_goal[1]-self.s, current_goal[1]+self.s, 
+        #current_goal[1]+self.s, current_goal[1]-self.s], 'r')
 
         if self.lidar_dict['is_lidar']==True:
             for coord in self.lidar_coords:
@@ -455,8 +456,8 @@ class environment():
             
         plt.plot(np.array(self.pose_history)[0:self.steps,0], np.array(self.pose_history)[0:self.steps,1])
         
-        plt.plot(self.rx, self.ry)
-        plt.plot(self.rx[self.old_closest_point], self.ry[self.old_closest_point], 'x')
+        #plt.plot(self.rx, self.ry)
+        #plt.plot(self.rx[self.old_closest_point], self.ry[self.old_closest_point], 'x')
         plt.xlabel('x coordinate')
         plt.ylabel('y coordinate')
         plt.xlim([0,self.map_width])
@@ -822,7 +823,7 @@ def test_environment():
     
     reward_signal = {'goal_reached':0, 'out_of_bounds':-1, 'max_steps':0, 'collision':-1, 'backwards':-1, 'park':-0.5, 'time_step':-0.005, 'progress':0, 'distance':0.3}    
     
-    action_space_dict = {'action_space': 'continuous', 'vel_select':[4], 'R_range':[3]}
+    action_space_dict = {'action_space': 'continuous', 'vel_select':[5], 'R_range':[3]}
     #action_space_dict = {'action_space': 'discrete', 'n_waypoints': 10, 'vel_select':[7], 'R_range':[3]}
     
     path_dict = {'local_path':True, 'waypoint_strategy':'local', 'wpt_arc':np.pi/2}
@@ -841,7 +842,7 @@ def test_environment():
     env_dict = {'sim_conf': functions.load_config(sys.path[0], "config")
         , 'save_history': False
         , 'map_name': 'circle'
-        , 'max_steps': 500
+        , 'max_steps': 2000
         , 'control_steps': 15
         , 'display': True
         , 'car_params':car_params
@@ -854,7 +855,7 @@ def test_environment():
 
     env_dict['name'] = 'test'
     #initial_condition = {'x':8.18, 'y':26.24, 'v':4, 'delta':0, 'theta':np.pi, 'goal':1}
-    initial_condition = {'x':17, 'y':4, 'v':7, 'delta':0, 'theta':0, 'goal':1}
+    initial_condition = {'x':16, 'y':4, 'v':5, 'delta':0, 'theta':0, 'goal':1}
     #initial_condition = {'x':8, 'y':3, 'v':7, 'delta':0, 'theta':np.pi, 'goal':1}
     #initial_condition = []
     
@@ -865,7 +866,7 @@ def test_environment():
     #a = agent_td3.agent(agent_dict)
     #a.load_weights(agent_name, n)
     
-    action_history = np.ones((20,1))*1
+    action_history = np.ones((1000,1))*1
     
 
     done=False

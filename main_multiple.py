@@ -131,11 +131,11 @@ class trainingLoop():
 
       for n in range(self.runs):
          
-         if self.learning_method == 'rainbow':
-            self.agent_dict['epsilon'] = 1
-            self.replay_beta_0=self.agent_dict['replay_beta_0']
-            self.replay_beta=self.replay_beta_0
-         #self.agent = agent_td3.agent(self.agent_dict)
+         #if self.learning_method == 'rainbow':
+         #   self.agent_dict['epsilon'] = 1
+         #   self.replay_beta_0=self.agent_dict['replay_beta_0']
+         #   self.replay_beta=self.replay_beta_0
+         self.agent = agent_td3.agent(self.agent_dict)
          
          for episode in range(self.max_episodes):
             
@@ -253,9 +253,9 @@ class trainingLoop():
 
             if episode%10==0:
                if self.learning_method=='dqn' or self.learning_method=='dueling_dqn' or self.learning_method=='dueling_ddqn' or self.learning_method=='rainbow':
-                  print(f"{'Run':3s} {n:2.0f} {'| Episode':8s} {episode:5.0f} {'| Score':8s} {score:6.2f} {'| Progress':12s} {self.env.progress:3.2f} {'| Average score':15s} {avg_score:6.2f} {'| Average progress':18s} {avg_progress:3.2f} {'| Epsilon':9s} {self.agent.epsilon:.2f}")
+                  print(f"{'Run':3s} {n:2.0f} {'| Episode':8s} {episode:5.0f} {'| Score':8s} {score:6.2f} {'| Progress':12s} {self.env.progress:3.2f} {'| collision ':14s} {self.env.collision} {'| Average score':15s} {avg_score:6.2f} {'| Average progress':18s} {avg_progress:3.2f} {'| Epsilon':9s} {self.agent.epsilon:.2f}")
                if self.learning_method=='reinforce' or self.learning_method=='actor_critic_sep' or self.learning_method=='actor_critic_com' or self.learning_method=='actor_critic_cont' or self.learning_method=='ddpg' or self.learning_method=='td3':
-                  print(f"{'Run':3s} {n:2.0f} {'| Episode':8s} {episode:5.0f} {'| Score':8s} {score:6.2f} {'| Progress':12s} {self.env.progress:3.2f} {'| Average score':15s} {avg_score:6.2f} {'| Average progress':18s} {avg_progress:3.2f}")
+                  print(f"{'Run':3s} {n:2.0f} {'| Episode':8s} {episode:5.0f} {'| Score':8s} {score:6.2f} {'| Progress':12s} {self.env.progress:3.2f} {'| collision ':14s} {self.env.collision} {'| Average score':15s} {avg_score:6.2f} {'| Average progress':18s} {avg_progress:3.2f}")
                
          
          self.save_agent(n)
@@ -341,7 +341,7 @@ def test(agent_name, n_episodes, detect_issues, initial_conditions):
    start_conditions = pickle.load(infile)
    infile.close()
 
-   env_dict['max_steps'] = 1000
+   env_dict['max_steps'] = 2000
 
    #env = environment(env_dict, start_condition={'x':15,'y':5,'theta':0,'goal':0})
    env = environment(env_dict)
@@ -393,10 +393,10 @@ def test(agent_name, n_episodes, detect_issues, initial_conditions):
 
    for n in range(runs):
       
-      #a = agent_td3.agent(agent_dict)
-      if main_dict['learning_method'] == 'rainbow':
-         agent_dict['epsilon'] = 0
-         a = agent_rainbow.agent(agent_dict)
+      a = agent_td3.agent(agent_dict)
+      #if main_dict['learning_method'] == 'rainbow':
+      #   agent_dict['epsilon'] = 0
+      #   a = agent_rainbow.agent(agent_dict)
       
       a.load_weights(agent_name, n)
       
@@ -579,9 +579,9 @@ def lap_time_test(agent_name, n_episodes, detect_issues, initial_conditions):
 if __name__=='__main__':
 
    
-   agent_name = 'rainbow'
+   agent_name = 'sn_path'
    
-   main_dict = {'name':agent_name, 'max_episodes':1000, 'learning_method':'rainbow', 'runs':1, 'comment':''}
+   main_dict = {'name':agent_name, 'max_episodes':1000, 'learning_method':'td3', 'runs':1, 'comment':''}
 
    agent_dqn_dict = {'gamma':0.99, 'epsilon':1, 'eps_end':0.01, 'eps_dec':1/1000, 'lr':0.001, 'batch_size':64, 'max_mem_size':500000, 
                   'fc1_dims': 64, 'fc2_dims': 64, 'fc3_dims':64}
@@ -614,14 +614,14 @@ if __name__=='__main__':
    
    reward_signal = {'goal_reached':0, 'out_of_bounds':-1, 'max_steps':0, 'collision':-1, 'backwards':-1, 'park':-0.5, 'time_step':-0.005, 'progress':0, 'distance':0.3}    
    
-   #action_space_dict = {'action_space': 'continuous', 'vel_select':[4, 6], 'R_range':[3]}
+   action_space_dict = {'action_space': 'continuous', 'vel_select':[5], 'R_range':[3]}
    
-   action_space_dict = {'action_space': 'discrete', 'n_waypoints': 10, 'vel_select':[7], 'R_range':[6]}
+   #action_space_dict = {'action_space': 'discrete', 'n_waypoints': 10, 'vel_select':[7], 'R_range':[6]}
 
    path_dict = {'local_path':True, 'waypoint_strategy':'local', 'wpt_arc':np.pi/2}
    
    if path_dict['local_path'] == True: #True or false
-        path_dict['path_strategy'] = 'circle' #circle or linear
+        path_dict['path_strategy'] = 'polynomial' #circle or linear
         path_dict['control_strategy'] = 'pure_pursuit' #pure_pursuit or stanley
         
         if path_dict['control_strategy'] == 'pure_pursuit':
@@ -634,7 +634,7 @@ if __name__=='__main__':
    env_dict = {'sim_conf': functions.load_config(sys.path[0], "config")
             , 'save_history': False
             , 'map_name': 'circle'
-            , 'max_steps': 1000
+            , 'max_steps': 2000
             , 'control_steps': 20
             , 'display': False
             , 'car_params':car_params
@@ -644,10 +644,10 @@ if __name__=='__main__':
             , 'path_dict': path_dict
             } 
    
-   a = trainingLoop(main_dict, agent_rainbow_dict, env_dict, load_agent='')
-   a.train()
-   test(agent_name=agent_name, n_episodes=100, detect_issues=False, initial_conditions=True)
-   lap_time_test(agent_name=agent_name, n_episodes=100, detect_issues=False, initial_conditions=True)
+   #a = trainingLoop(main_dict, agent_td3_dict, env_dict, load_agent='')
+   #a.train()
+   #test(agent_name=agent_name, n_episodes=100, detect_issues=False, initial_conditions=True)
+   #lap_time_test(agent_name=agent_name, n_episodes=100, detect_issues=False, initial_conditions=True)
    
    '''
    agent_name = 'pete_Lfc_2_col_1'
@@ -680,13 +680,13 @@ if __name__=='__main__':
    lap_time_test(agent_name=agent_name, n_episodes=100, detect_issues=False, initial_conditions=True)
    '''
 
-   #agent_name = 'end_to_end'
+   agent_name = 'sn_path'
    #display_results_multiple.learning_curve_progress(agent_name=agent_name,  show_average=True, show_median=True)
    #display_results_multiple.display_train_parameters(agent_name=agent_name)
    #display_results_multiple.agent_progress_statistics(agent_name=agent_name)
    #display_results_multiple.display_lap_results(agent_name=agent_name)
-   #display_results_multiple.display_moving_agent(agent_name=agent_name, load_history=False, n=1)
-   #display_results_multiple.display_path(agent_name=agent_name, load_history=False, n=1)
+   display_results_multiple.display_moving_agent(agent_name=agent_name, load_history=False, n=0)
+   #display_results_multiple.display_path(agent_name=agent_name, load_history=False, n=0)
    
    #agent_name = 'end_to_end'
    #display_results_multiple.display_lap_results(agent_name=agent_name)

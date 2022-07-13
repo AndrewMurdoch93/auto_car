@@ -248,30 +248,50 @@ def find_closest_point(rx, ry, x, y):
     return ind
 
 def convert_xy_to_sn(rx, ry, ryaw, x, y, ds):
-    dx = [x - irx for irx in rx]
+    dx = [x - irx for irx in rx]    
     dy = [y - iry for iry in ry]
-    d = np.hypot(dx, dy)    
-    ind = np.argmin(d)
-    s = ind*ds
-    n = d[ind]
+    d = np.hypot(dx, dy)    #Get distances from (x,y) to each point on centerline    
+    ind = np.argmin(d)      #Index of s coordinate
+    s = ind*ds              #Exact position of s
+    n = d[ind]              #n distance (unsigned), not interpolated
 
+    #Get sign of n by comparing angle between (x,y) and (s,0), and the angle of the centerline at s
+    xy_angle = np.arctan2((y-ry[ind]),(x-rx[ind]))      #angle between (x,y) and (s,0)
+    yaw_angle = ryaw[ind]                               #angle at s
+    angle = sub_angles_complex(xy_angle, yaw_angle)     
+    if angle >=0:   #Vehicle is above s line
+        direct=1    #Positive n direction
+    else:           #Vehicle is below s line
+        direct=-1   #Negative n direction
 
-    xy_angle = np.arctan((y-ry[ind])/(x-rx[ind]))
-    yaw_angle = ryaw[ind]
-
-    angle = sub_angles_complex(xy_angle, yaw_angle)
-
-    if angle >=0:
-        print('dir = 1')
-        direct=1
-    else:
-        print('dir = -1')
-        direct=-1
-
-
-    n = n*direct
+    n = n*direct   #Include sign 
 
     return s, ind, n
+
+def find_angle(A, B, C):
+    # RETURNS THE ANGLE BÂC
+    vec_AB = A - B
+    vec_AC = A - C 
+    dot = vec_AB.dot(vec_AC)
+    #dot = (A[0] - C[0])*(A[0] - B[0]) + (A[1] - C[1])*(A[1] - B[1])
+    magnitude_AB = np.linalg.norm(vec_AB)
+    magnitude_AC = np.linalg.norm(vec_AC)
+
+    angle = np.arccos(dot/(magnitude_AB*magnitude_AC))
+    
+    return angle
+
+def get_angle(a,b,c):
+    ba = a - b
+    bc = c - b
+
+    cosine_angle = np.dot(ba, bc) / (np.linalg.norm(ba) * np.linalg.norm(bc))
+    angle = np.arccos(cosine_angle)
+    print(np.degrees(angle))
+
+    return angle
+
+
 
 def convert_sn_to_xy(s, n, csp):
     x = []
@@ -414,39 +434,58 @@ def generate_initial_condition(name, episodes):
     pickle.dump(initial_conditions, outfile)
     outfile.close()
 
-#generate_berlin_goals()
-#generate_initial_condition(name='columbia', episodes=2000)
+
 if __name__ == '__main__':
-    #generate_initial_condition(name='porto_1', episodes=2000)
+    '''
+    ds = 0.1
+    x_sparse = np.array([0,10])
+    y_sparse = [0,0]
+    rx, ry, ryaw, rk, s, csp = generate_line(x_sparse, y_sparse)
+    
+    x = 1
+    y = 1
+    #transform_XY_to_NS(rx, ry, x, y)
+    convert_xy_to_sn(rx, ry, ryaw, x, y, ds)
+    '''
+    
     
     s_0 = 0
     s_1 = s_0+1
-    s_2 = s_1+2
+    s_2 = s_1+0.5
     theta = 0.5
     n_0 = 0.8
-    n_1 = 1
     
-    A = np.array([[3*s_1**2, 2*s_1, 1, 0], [3*s_0**2, 2*s_0, 1, 0], [s_0**3, s_0**2, s_0, 1], [s_1**3, s_1**2, s_1, 1]])
-    B = np.array([0, theta, n_0, n_1])
-
-    x = np.linalg.solve(A, B)
-    print(x)
-
-    a = x[0]
-    b = x[1]
-    c = x[2]
-    d = x[3]
-
-    s = np.linspace(s_0, s_1)
-    n = a*s**3 + b*s**2 + c*s + d
-    s = np.concatenate((s, np.linspace(s_1, s_2)))
-    n = np.concatenate((n, np.ones(len(np.linspace(s_1, s_2)))*n_1))
+    plt.plot(s_0,n_0, 'x')
+    plt.plot([0,s_2], [1,1])
+    plt.plot([0,s_2], [-1,-1])
     
-    plt.plot(s, n)
+    for n_1 in np.linspace(-1,1,10): 
+        #n_1 = 1
+        
+        A = np.array([[3*s_1**2, 2*s_1, 1, 0], [3*s_0**2, 2*s_0, 1, 0], [s_0**3, s_0**2, s_0, 1], [s_1**3, s_1**2, s_1, 1]])
+        B = np.array([0, theta, n_0, n_1])
+        x = np.linalg.solve(A, B)
+        #print(x)
+
+        a = x[0]
+        b = x[1]
+        c = x[2]
+        d = x[3]
+
+        s = np.linspace(s_0, s_1)
+        n = a*s**3 + b*s**2 + c*s + d
+        s = np.concatenate((s, np.linspace(s_1, s_2)))
+        n = np.concatenate((n, np.ones(len(np.linspace(s_1, s_2)))*n_1))
+        plt.plot(s, n)
+
     #plt.plot(np.linspace(s_1, s_2), np.ones(len(np.linspace(s_1, s_2)))*n_1)
+    plt.legend(['vehicle position', 'upper track boundary', 'lower track boundary'])
     plt.xlim([s_0, s_2])
+    plt.xlabel('s [m], distance along centerline')
+    plt.ylabel('n [m], distance perpendicular to centerline')
     plt.show()
     #def velocity_along_line(theta, velocity, ryaw, )
+    
 
     #generate_berlin_goals()
     #x, y, rx, ry, ryaw, rk, s = generate_circle_goals()
