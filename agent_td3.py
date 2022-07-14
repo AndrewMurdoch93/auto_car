@@ -53,8 +53,8 @@ class CriticNetwork(nn.Module):
 
         self.fc1 = nn.Linear(self.input_dims + n_actions, self.fc1_dims)
         self.fc2 = nn.Linear(self.fc1_dims, self.fc2_dims)
-        self.fc3 = nn.Linear(self.fc2_dims, self.fc3_dims)
-        self.q1 = nn.Linear(self.fc3_dims, 1)
+        #self.fc3 = nn.Linear(self.fc2_dims, self.fc3_dims)
+        self.q1 = nn.Linear(self.fc2_dims, 1)
 
         self.optimizer = optim.Adam(self.parameters(), lr=beta)
         self.device = T.device('cuda:0' if T.cuda.is_available() else 'cpu')
@@ -66,8 +66,8 @@ class CriticNetwork(nn.Module):
         q1_action_value = F.relu(q1_action_value)
         q1_action_value = self.fc2(q1_action_value)
         q1_action_value = F.relu(q1_action_value)
-        q1_action_value = self.fc3(q1_action_value)
-        q1_action_value = F.relu(q1_action_value)
+        #q1_action_value = self.fc3(q1_action_value)
+        #q1_action_value = F.relu(q1_action_value)
         
         q1 = self.q1(q1_action_value)
 
@@ -91,8 +91,8 @@ class ActorNetwork(nn.Module):
 
         self.fc1 = nn.Linear(self.input_dims, self.fc1_dims)
         self.fc2 = nn.Linear(self.fc1_dims, self.fc2_dims)
-        self.fc3 = nn.Linear(self.fc2_dims, self.fc3_dims)
-        self.mu = nn.Linear(self.fc3_dims, self.n_actions)
+        #self.fc3 = nn.Linear(self.fc2_dims, self.fc3_dims)
+        self.mu = nn.Linear(self.fc2_dims, self.n_actions)
 
         self.optimizer = optim.Adam(self.parameters(), lr=alpha)
         self.device = T.device('cuda:0' if T.cuda.is_available() else 'cpu')
@@ -104,8 +104,8 @@ class ActorNetwork(nn.Module):
         prob = F.relu(prob)
         prob = self.fc2(prob)
         prob = F.relu(prob)
-        prob = self.fc3(prob)
-        prob = F.relu(prob)
+        #prob = self.fc3(prob)
+        #prob = F.relu(prob)
 
         mu = T.tanh(self.mu(prob))
 

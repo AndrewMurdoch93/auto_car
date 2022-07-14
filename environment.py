@@ -54,11 +54,6 @@ class environment():
         
         
         #Initialise car parameters
-        self.mass = self.params['m']                         
-        self.max_delta = self.params['s_max']               
-        self.max_delta_dot = self.params['sv_max']          
-        self.max_v = self.params['v_max']                        
-        self.max_a = self.params['a_max']
         self.wheelbase = self.params['lf'] + self.params['lr'] 
         
         
@@ -91,13 +86,7 @@ class environment():
         #simulation parameters
         self.dt = self.sim_conf.time_step
 
-        #Initialise car parameters
-        self.mass = self.params['m']                         
-        self.max_delta = self.params['s_max']               
-        self.max_delta_dot = self.params['sv_max']          
-        self.max_v = self.params['v_max']                        
-        self.max_a = self.params['a_max']
-        self.wheelbase = self.params['lf'] + self.params['lr'] 
+
         
         #Initialise map and goal settings
         #self.occupancy_grid, self.map_height, c, self.map_res = functions.map_generator(map_name = self.map_name)
@@ -220,7 +209,7 @@ class environment():
             self.append_history_func()
 
         self.initial_condition_dict = {'x':self.x, 'y':self.y, 'theta':self.theta, 'v':self.v, 'delta':self.delta, 'goal': self.current_goal}
-
+        
         #change_params = {}
         #for i in self.params:
         #    if i not in ['v_min', 'v_max', 'width']:
@@ -229,6 +218,18 @@ class environment():
         #for i in random.sample(list(change_params), 2):
         #    self.params[i] *= random.uniform(0.95,1.05)
 
+        self.params['mu'] *= random.uniform(0.95,1.05)
+        self.params['C_Sf'] *= random.uniform(0.95,1.05)
+        self.params['C_Sr'] *= random.uniform(0.95,1.05)
+        self.params['lr'] *= random.uniform(0.95,1.05)
+        self.params['sv_min'] *= random.uniform(0.95,1.05)
+        self.params['sv_max'] *= random.uniform(0.95,1.05)
+        self.params['s_min'] *= random.uniform(0.95,1.05)
+        self.params['s_max'] *= random.uniform(0.95,1.05)
+        self.params['a_max'] *= random.uniform(0.95,1.05)
+        self.params['v_max'] *= random.uniform(0.95,1.05)
+        self.params['m'] *= random.uniform(0.95,1.05)
+        self.params['I'] *= random.uniform(0.95,1.05)
 
     def take_action(self, act):
         self.action_history.append(act)
@@ -268,7 +269,7 @@ class environment():
 
 
                 v_dot = act[1]*self.params['a_max']
-     
+    
                 self.update_pose(delta_ref, v_dot)
 
                 self.update_variables()
@@ -537,8 +538,8 @@ class environment():
         x_norm = self.x/self.map_width
         y_norm = self.y/self.map_height
         theta_norm = (self.theta)/(2*math.pi)
-        v_norm = self.v/self.max_v
-        v_ref_norm = self.v_ref/self.max_v
+        v_norm = self.v/self.params['v_max']
+        v_ref_norm = self.v_ref/self.params['v_max']
         
         #self.observation = [x_norm, y_norm, theta_norm]
         self.observation = [x_norm, y_norm, theta_norm, v_norm]
@@ -859,7 +860,7 @@ class environment():
 
 def test_environment():
     
-    '''
+    
     agent_name = 'ete_porto'
     parent_dir = os.path.dirname(os.path.abspath(__file__))
     agent_dir = parent_dir + '/agents/' + agent_name
@@ -876,59 +877,61 @@ def test_environment():
     env_dict = pickle.load(infile)
     infile.close()
     env_dict['display']=True
+    env_dict['architecture'] = 'pete'
 
     infile = open(agent_params_file, 'rb')
     agent_dict = pickle.load(infile)
     infile.close()
+    agent_dict['layer3_size'] = 300
 
     env = environment(env_dict)
     env.reset(save_history=True, start_condition=initial_condition, get_lap_time=False)
     
     a = agent_td3.agent(agent_dict)
     a.load_weights(agent_name, n)
-    '''
+    
 
     
-    car_params =   {'mu': 1.0489, 'C_Sf': 4.718, 'C_Sr': 5.4562, 'lf': 0.15875, 'lr': 0.17145
-                , 'h': 0.074, 'm': 3.74, 'I': 0.04712, 's_min': -0.4189, 's_max': 0.4189, 'sv_min': -3.2
-                , 'sv_max': 3.2, 'v_switch': 7.319, 'a_max': 9.51, 'v_min':-5.0, 'v_max': 20.0, 'width': 0.31, 'length': 0.58}
+    # car_params =   {'mu': 1.0489, 'C_Sf': 4.718, 'C_Sr': 5.4562, 'lf': 0.15875, 'lr': 0.17145
+    #             , 'h': 0.074, 'm': 3.74, 'I': 0.04712, 's_min': -0.4189, 's_max': 0.4189, 'sv_min': -3.2
+    #             , 'sv_max': 3.2, 'v_switch': 7.319, 'a_max': 9.51, 'v_min':-5.0, 'v_max': 20.0, 'width': 0.31, 'length': 0.58}
     
-    reward_signal = {'goal_reached':0, 'out_of_bounds':-1, 'max_steps':0, 'collision':-1, 'backwards':-1, 'park':-0.5, 'time_step':-0.005, 'progress':0, 'distance':0.3}    
+    # reward_signal = {'goal_reached':0, 'out_of_bounds':-1, 'max_steps':0, 'collision':-1, 'backwards':-1, 'park':-0.5, 'time_step':-0.005, 'progress':0, 'distance':0.3}    
     
-    action_space_dict = {'action_space': 'continuous', 'vel_select':[5], 'R_range':[3]}
-    #action_space_dict = {'action_space': 'discrete', 'n_waypoints': 10, 'vel_select':[7], 'R_range':[3]}
+    # action_space_dict = {'action_space': 'continuous', 'vel_select':[5], 'R_range':[3]}
+    # #action_space_dict = {'action_space': 'discrete', 'n_waypoints': 10, 'vel_select':[7], 'R_range':[3]}
     
-    path_dict = {'local_path':False, 'waypoint_strategy':'local', 'wpt_arc':np.pi/2}
+    # path_dict = {'local_path':False, 'waypoint_strategy':'local', 'wpt_arc':np.pi/2}
      
-    if path_dict['local_path'] == True: #True or false
-        path_dict['path_strategy'] = 'polynomial' #circle or linear
-        path_dict['control_strategy'] = 'pure_pursuit' #pure_pursuit or stanley
+    # if path_dict['local_path'] == True: #True or false
+    #     path_dict['path_strategy'] = 'polynomial' #circle or linear
+    #     path_dict['control_strategy'] = 'pure_pursuit' #pure_pursuit or stanley
         
-        if path_dict['control_strategy'] == 'pure_pursuit':
-            path_dict['track_dict'] = {'k':0.1, 'Lfc':1}
-        if path_dict['control_strategy'] == 'stanley':
-            path_dict['track_dict'] = {'l_front': car_params['lf'], 'k':1, 'max_steer':car_params['s_max']}
+    #     if path_dict['control_strategy'] == 'pure_pursuit':
+    #         path_dict['track_dict'] = {'k':0.1, 'Lfc':1}
+    #     if path_dict['control_strategy'] == 'stanley':
+    #         path_dict['track_dict'] = {'l_front': car_params['lf'], 'k':1, 'max_steer':car_params['s_max']}
     
-    lidar_dict = {'is_lidar':True, 'lidar_res':0.1, 'n_beams':8, 'max_range':20, 'fov':np.pi}
+    # lidar_dict = {'is_lidar':True, 'lidar_res':0.1, 'n_beams':8, 'max_range':20, 'fov':np.pi}
     
-    env_dict = {'sim_conf': functions.load_config(sys.path[0], "config")
-        , 'save_history': False
-        , 'map_name': 'circle'
-        , 'max_steps': 2000
-        , 'control_steps': 15
-        , 'display': True
-        , 'architecture': 'ete'
-        , 'car_params':car_params
-        , 'reward_signal':reward_signal
-        , 'lidar_dict':lidar_dict
-        , 'action_space_dict':action_space_dict
-        , 'path_dict': path_dict
-        } 
+    # env_dict = {'sim_conf': functions.load_config(sys.path[0], "config")
+    #     , 'save_history': False
+    #     , 'map_name': 'circle'
+    #     , 'max_steps': 2000
+    #     , 'control_steps': 15
+    #     , 'display': True
+    #     , 'architecture': 'pete'
+    #     , 'car_params':car_params
+    #     , 'reward_signal':reward_signal
+    #     , 'lidar_dict':lidar_dict
+    #     , 'action_space_dict':action_space_dict
+    #     , 'path_dict': path_dict
+    #     } 
+    
 
-
-    env_dict['name'] = 'test'
+    #env_dict['name'] = 'test'
     #initial_condition = {'x':8.18, 'y':26.24, 'v':4, 'delta':0, 'theta':np.pi, 'goal':1}
-    initial_condition = {'x':16, 'y':4, 'v':7, 'delta':0, 'theta':0, 'goal':1}
+    #initial_condition = {'x':16, 'y':4, 'v':7, 'delta':0, 'theta':0, 'goal':1}
     #initial_condition = {'x':8, 'y':3, 'v':7, 'delta':0, 'theta':np.pi, 'goal':1}
     #initial_condition = []
     
@@ -939,8 +942,8 @@ def test_environment():
     #a = agent_td3.agent(agent_dict)
     #a.load_weights(agent_name, n)
     
-    action_history = np.ones((1000,2))*0.5
-    action_history[:,1] = np.zeros(1000)
+    #action_history = np.ones((1000,2))*0.5
+    #action_history[:,1] = np.zeros(1000)
 
     done=False
     score=0

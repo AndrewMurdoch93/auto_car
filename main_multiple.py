@@ -331,6 +331,7 @@ def test(agent_name, n_episodes, detect_issues, initial_conditions):
    infile = open('environments/' + agent_name, 'rb')
    env_dict = pickle.load(infile)
    infile.close()
+   env_dict['architecture'] = 'pete'
 
    if initial_conditions==True:
       start_condition_file_name = 'test_initial_condition/' + env_dict['map_name']
@@ -352,6 +353,7 @@ def test(agent_name, n_episodes, detect_issues, initial_conditions):
    infile = open(agent_params_file, 'rb')
    agent_dict = pickle.load(infile)
    infile.close()
+   agent_dict['layer3_size'] = 300
    
    infile = open('train_parameters/' + agent_name, 'rb')
    main_dict = pickle.load(infile)
@@ -432,7 +434,7 @@ def test(agent_name, n_episodes, detect_issues, initial_conditions):
          if episode%10==0:
             print('Progress test episode', episode, '| Progress = %.2f' % env.progress, '| Score = %.2f' % score)
 
-         if detect_issues==True and (env.progress<1):
+         if detect_issues==True and (env.progress<0.5):
             print('Stop condition met')
             print('Progress = ', env.progress)
             print('score = ', score)
@@ -481,6 +483,8 @@ def lap_time_test(agent_name, n_episodes, detect_issues, initial_conditions):
    #               , 'sv_max': 3.2, 'v_switch': 7.319, 'a_max': 9.51, 'v_min':-5.0, 'v_max': 20.0, 'width': 0.31, 'length': 0.58}
 
    #env = environment(env_dict, start_condition={'x':15,'y':5,'theta':0,'goal':0})
+   
+   env_dict['architecture'] = 'pete'
    env = environment(env_dict)
    env.reset(save_history=False, start_condition=[], get_lap_time=True)
    
@@ -489,7 +493,8 @@ def lap_time_test(agent_name, n_episodes, detect_issues, initial_conditions):
    infile = open(agent_params_file, 'rb')
    agent_dict = pickle.load(infile)
    infile.close()
-   
+   agent_dict['layer3_size']=300
+
    infile = open('train_parameters/' + agent_name, 'rb')
    main_dict = pickle.load(infile)
    infile.close()
@@ -562,6 +567,7 @@ def lap_time_test(agent_name, n_episodes, detect_issues, initial_conditions):
             pickle.dump(action_history, outfile)
             pickle.dump(env.initial_condition_dict, outfile)
             pickle.dump(n, outfile)
+            pickle.dump(env_dict, outfile)
             outfile.close()
             break
 
@@ -579,7 +585,7 @@ def lap_time_test(agent_name, n_episodes, detect_issues, initial_conditions):
 if __name__=='__main__':
 
    
-   agent_name = 'testing'
+   agent_name = 'pete_porto'
    
    main_dict = {'name':agent_name, 'max_episodes':3000, 'learning_method':'td3', 'runs':1, 'comment':''}
 
@@ -633,8 +639,8 @@ if __name__=='__main__':
    
    env_dict = {'sim_conf': functions.load_config(sys.path[0], "config")
             , 'save_history': False
-            , 'map_name': 'circle'
-            , 'max_steps': 3000
+            , 'map_name': 'columbia_1'
+            , 'max_steps': 1000
             , 'control_steps': 20
             , 'display': False
             , 'architecture': 'ete'    #pete, ete
@@ -648,7 +654,7 @@ if __name__=='__main__':
    #a = trainingLoop(main_dict, agent_td3_dict, env_dict, load_agent='')
    #a.train()
    #test(agent_name=agent_name, n_episodes=100, detect_issues=False, initial_conditions=True)
-   #lap_time_test(agent_name=agent_name, n_episodes=100, detect_issues=False, initial_conditions=True)
+   lap_time_test(agent_name=agent_name, n_episodes=100, detect_issues=False, initial_conditions=True)
    
    '''
    agent_name = 'pete_Lfc_2_col_1'
@@ -681,52 +687,20 @@ if __name__=='__main__':
    lap_time_test(agent_name=agent_name, n_episodes=100, detect_issues=False, initial_conditions=True)
    '''
 
-   agent_name = 'testing'
+   agent_name = 'pete_porto'
    #display_results_multiple.learning_curve_progress(agent_name=agent_name,  show_average=True, show_median=True)
    #display_results_multiple.display_train_parameters(agent_name=agent_name)
    #display_results_multiple.agent_progress_statistics(agent_name=agent_name)
-   #display_results_multiple.display_lap_results(agent_name=agent_name)
-   display_results_multiple.display_moving_agent(agent_name=agent_name, load_history=False, n=0)
+   display_results_multiple.display_lap_results(agent_name=agent_name)
+   #display_results_multiple.display_moving_agent(agent_name=agent_name, load_history=False, n=3)
    #display_results_multiple.display_path(agent_name=agent_name, load_history=False, n=0)
-   
-   #agent_name = 'end_to_end'
-   #display_results_multiple.display_lap_results(agent_name=agent_name)
 
-   #agent_name = 'partial_end_to_end_pure_pursuit'
-   #display_results_multiple.display_path(agent_name=agent_name, load_history=False, n=4)
-   #display_results_multiple.display_lap_results(agent_name=agent_name)
-
-   #agent_name = 'end_to_end'
-   #lap_time_test(agent_name=agent_name, n_episodes=100, detect_issues=False, initial_conditions=True)
-   #display_results_multiple.display_path(agent_name=agent_name, load_history=False, n=4)
-   #display_results_multiple.display_train_parameters(agent_name=agent_name)
-   #display_results_multiple.display_lap_results(agent_name=agent_name)
-
-
-   #agent_name='pete_Lfc_1_col_1'
-   #lap_time_test(agent_name=agent_name, n_episodes=100, detect_issues=False, initial_conditions=True)
-   #display_results_multiple.display_train_parameters(agent_name=agent_name)
-   #display_results_multiple.display_lap_results(agent_name=agent_name)
-
-   #agent_name='pete_Lfc_2_col_1'
-   #display_results_multiple.display_train_parameters(agent_name=agent_name)
-   #display_results_multiple.display_lap_results(agent_name=agent_name)
-   #display_results_multiple.display_moving_agent(agent_name=agent_name, load_history=False, n=2)
-
-   #agent_name = 'pete_porto'
-   #lap_time_test(agent_name=agent_name, n_episodes=100, detect_issues=False, initial_conditions=True)
-   #display_results_multiple.display_train_parameters(agent_name=agent_name)
-   #display_results_multiple.display_lap_results(agent_name=agent_name)
-   #display_results_multiple.display_moving_agent(agent_name=agent_name, load_history=False, n=0)
-
-   #agent_name = 'ete_porto'
+   #agent_name = 'pete_Lfc_1_col_1'
    #test(agent_name=agent_name, n_episodes=100, detect_issues=False, initial_conditions=True)
    #lap_time_test(agent_name=agent_name, n_episodes=100, detect_issues=True, initial_conditions=True)
    #display_results_multiple.display_train_parameters(agent_name=agent_name)
    #display_results_multiple.display_lap_results(agent_name=agent_name)
    #display_results_multiple.display_moving_agent(agent_name=agent_name, load_history=False, n=4)
-
-   
    
    #agent_names = ['partial_end_to_end_pure_pursuit', 'end_to_end']
    #legend_title = 'agent'

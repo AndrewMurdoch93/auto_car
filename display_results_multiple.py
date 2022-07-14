@@ -422,12 +422,15 @@ def display_moving_agent(agent_name, load_history=False, n=0):
     env_dict = pickle.load(infile)
     infile.close()
     env_dict['max_steps']=3000
+    env_dict['architecture'] = 'pete'
+
     env = environment(env_dict)
     env.reset(save_history=True, start_condition=[])
     
     infile = open('agents/' + agent_name + '/' + agent_name + '_params', 'rb')
     agent_dict = pickle.load(infile)
     infile.close()
+    agent_dict['layer3_size']=300
 
     infile = open('train_parameters/' + agent_name, 'rb')
     main_dict = pickle.load(infile)
