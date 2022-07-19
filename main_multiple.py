@@ -331,7 +331,7 @@ def test(agent_name, n_episodes, detect_issues, initial_conditions):
    infile = open('environments/' + agent_name, 'rb')
    env_dict = pickle.load(infile)
    infile.close()
-   env_dict['architecture'] = 'pete'
+   #env_dict['architecture'] = 'pete'
 
    if initial_conditions==True:
       start_condition_file_name = 'test_initial_condition/' + env_dict['map_name']
@@ -484,7 +484,7 @@ def lap_time_test(agent_name, n_episodes, detect_issues, initial_conditions):
 
    #env = environment(env_dict, start_condition={'x':15,'y':5,'theta':0,'goal':0})
    
-   env_dict['architecture'] = 'pete'
+   #env_dict['architecture'] = 'pete'
    env = environment(env_dict)
    env.reset(save_history=False, start_condition=[], get_lap_time=True)
    
@@ -585,9 +585,9 @@ def lap_time_test(agent_name, n_episodes, detect_issues, initial_conditions):
 if __name__=='__main__':
 
    
-   agent_name = 'pete_porto'
+   agent_name = 'ete_new__porto'
    
-   main_dict = {'name':agent_name, 'max_episodes':3000, 'learning_method':'td3', 'runs':1, 'comment':''}
+   main_dict = {'name':agent_name, 'max_episodes':5000, 'learning_method':'td3', 'runs':5, 'comment':''}
 
    agent_dqn_dict = {'gamma':0.99, 'epsilon':1, 'eps_end':0.01, 'eps_dec':1/1000, 'lr':0.001, 'batch_size':64, 'max_mem_size':500000, 
                   'fc1_dims': 64, 'fc2_dims': 64, 'fc3_dims':64}
@@ -639,7 +639,7 @@ if __name__=='__main__':
    
    env_dict = {'sim_conf': functions.load_config(sys.path[0], "config")
             , 'save_history': False
-            , 'map_name': 'columbia_1'
+            , 'map_name': 'porto_1'
             , 'max_steps': 1000
             , 'control_steps': 20
             , 'display': False
@@ -651,47 +651,26 @@ if __name__=='__main__':
             , 'path_dict': path_dict
             } 
    
-   #a = trainingLoop(main_dict, agent_td3_dict, env_dict, load_agent='')
-   #a.train()
-   #test(agent_name=agent_name, n_episodes=100, detect_issues=False, initial_conditions=True)
-   lap_time_test(agent_name=agent_name, n_episodes=100, detect_issues=False, initial_conditions=True)
-   
-   '''
-   agent_name = 'pete_Lfc_2_col_1'
-   main_dict['name'] = agent_name
-   path_dict['local_path'] = True
-   path_dict['path_strategy'] = 'circle' #circle or linear
-   path_dict['control_strategy'] = 'pure_pursuit'
-   path_dict['track_dict'] = {'k':0.1, 'Lfc':2}
-   env_dict['path_dict'] = path_dict
    a = trainingLoop(main_dict, agent_td3_dict, env_dict, load_agent='')
    a.train()
    test(agent_name=agent_name, n_episodes=100, detect_issues=False, initial_conditions=True)
    lap_time_test(agent_name=agent_name, n_episodes=100, detect_issues=False, initial_conditions=True)
    
-   agent_name = 'pete_porto'
+   
+   agent_name = 'ete_new_col'
    main_dict['name'] = agent_name
-   env_dict['map_name'] = 'porto_1'
-   env_dict['path_dict']['track_dict'] = {'k':0.1, 'Lfc':1}
    a = trainingLoop(main_dict, agent_td3_dict, env_dict, load_agent='')
    a.train()
+   env_dict['map_name'] = 'columbia_1'
    test(agent_name=agent_name, n_episodes=100, detect_issues=False, initial_conditions=True)
    lap_time_test(agent_name=agent_name, n_episodes=100, detect_issues=False, initial_conditions=True)
    
-   agent_name = 'ete_porto'
-   main_dict['name'] = agent_name
-   env_dict['path_dict']['local_path'] = False
-   a = trainingLoop(main_dict, agent_td3_dict, env_dict, load_agent='')
-   a.train()
-   test(agent_name=agent_name, n_episodes=100, detect_issues=False, initial_conditions=True)
-   lap_time_test(agent_name=agent_name, n_episodes=100, detect_issues=False, initial_conditions=True)
-   '''
-
-   agent_name = 'pete_porto'
+   
+   #agent_name = 'pete_porto'
    #display_results_multiple.learning_curve_progress(agent_name=agent_name,  show_average=True, show_median=True)
    #display_results_multiple.display_train_parameters(agent_name=agent_name)
    #display_results_multiple.agent_progress_statistics(agent_name=agent_name)
-   display_results_multiple.display_lap_results(agent_name=agent_name)
+   #display_results_multiple.display_lap_results(agent_name=agent_name)
    #display_results_multiple.display_moving_agent(agent_name=agent_name, load_history=False, n=3)
    #display_results_multiple.display_path(agent_name=agent_name, load_history=False, n=0)
 
