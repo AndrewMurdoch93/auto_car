@@ -682,7 +682,7 @@ def lap_time_test_mismatch(agent_name, n_episodes, detect_issues, initial_condit
 
          a = agent_td3.agent(agent_dict) 
          a.load_weights(agent_name, n)
-         print("Testing agent " + agent_name + ", n = " + str(n))
+         print("Testing agent " + agent_name + ", n = " + str(n) + ", parameter = " + parameter + ", variation = " + str(frac_vary))
 
          for episode in range(n_episodes):
 
@@ -725,7 +725,7 @@ def lap_time_test_mismatch(agent_name, n_episodes, detect_issues, initial_condit
             param_dict['collision_results'][n, v_i, episode] = collision
 
             if episode%10==0:
-               print('Lap test episode', episode, '| Lap time = %.2f' % time, '| Score = %.2f' % score)
+               print('Lap test episode', episode, '| Lap time = %.2f' % time, '| Score = %.2f' % score, '| Fail = %.2f' %collision)
 
    outfile=open(results_file, 'wb')
    pickle.dump(param_dict, outfile)
@@ -823,7 +823,49 @@ if __name__=='__main__':
    #test(agent_name=agent_name, n_episodes=100, detect_issues=False, initial_conditions=True)
    #lap_time_test(agent_name=agent_name, n_episodes=100, detect_issues=False, initial_conditions=True)
    
+   agent_name = 'ete_new__porto'
+   lap_time_test_mismatch(agent_name=agent_name, n_episodes=100, detect_issues=False, initial_conditions=True, parameter='mu', frac_variation=np.linspace(-0.2,0.2,0.02) )
+   lap_time_test_mismatch(agent_name=agent_name, n_episodes=100, detect_issues=False, initial_conditions=True, parameter='C_Sf', frac_variation=np.linspace(-0.2,0.2,0.02) )
+   lap_time_test_mismatch(agent_name=agent_name, n_episodes=100, detect_issues=False, initial_conditions=True, parameter='C_Sr', frac_variation=np.linspace(-0.2,0.2,0.02) )
+   lap_time_test_mismatch(agent_name=agent_name, n_episodes=100, detect_issues=False, initial_conditions=True, parameter='lf', frac_variation=np.linspace(-0.2,0.2,0.02) )
+   lap_time_test_mismatch(agent_name=agent_name, n_episodes=100, detect_issues=False, initial_conditions=True, parameter='lr', frac_variation=np.linspace(-0.2,0.2,0.02) )
+   lap_time_test_mismatch(agent_name=agent_name, n_episodes=100, detect_issues=False, initial_conditions=True, parameter='h', frac_variation=np.linspace(-0.2,0.2,0.02) )
+   lap_time_test_mismatch(agent_name=agent_name, n_episodes=100, detect_issues=False, initial_conditions=True, parameter='m', frac_variation=np.linspace(-0.2,0.2,0.02) )
+   lap_time_test_mismatch(agent_name=agent_name, n_episodes=100, detect_issues=False, initial_conditions=True, parameter='I', frac_variation=np.linspace(-0.2,0.2,0.02) )
+   lap_time_test_mismatch(agent_name=agent_name, n_episodes=100, detect_issues=False, initial_conditions=True, parameter='s_min', frac_variation=np.linspace(-0.2,0.2,0.02) )
+   lap_time_test_mismatch(agent_name=agent_name, n_episodes=100, detect_issues=False, initial_conditions=True, parameter='s_max', frac_variation=np.linspace(-0.2,0.2,0.02) )
+   lap_time_test_mismatch(agent_name=agent_name, n_episodes=100, detect_issues=False, initial_conditions=True, parameter='sv_min', frac_variation=np.linspace(-0.2,0.2,0.02) )
+   lap_time_test_mismatch(agent_name=agent_name, n_episodes=100, detect_issues=False, initial_conditions=True, parameter='sv_max', frac_variation=np.linspace(-0.2,0.2,0.02) )
+   lap_time_test_mismatch(agent_name=agent_name, n_episodes=100, detect_issues=False, initial_conditions=True, parameter='a_max', frac_variation=np.linspace(-0.2,0.2,0.02) )
+   lap_time_test_mismatch(agent_name=agent_name, n_episodes=100, detect_issues=False, initial_conditions=True, parameter='v_min', frac_variation=np.linspace(-0.2,0.2,0.02) )
+   lap_time_test_mismatch(agent_name=agent_name, n_episodes=100, detect_issues=False, initial_conditions=True, parameter='v_max', frac_variation=np.linspace(-0.2,0.2,0.02) )
+   lap_time_test_mismatch(agent_name=agent_name, n_episodes=100, detect_issues=False, initial_conditions=True, parameter='width', frac_variation=np.linspace(-0.2,0.2,0.02) )
+   lap_time_test_mismatch(agent_name=agent_name, n_episodes=100, detect_issues=False, initial_conditions=True, parameter='length', frac_variation=np.linspace(-0.2,0.2,0.02) )
+  
+   agent_name = 'ete_new_col'
+   lap_time_test_mismatch(agent_name=agent_name, n_episodes=100, detect_issues=False, initial_conditions=True, parameter='mu', frac_variation=np.linspace(-0.2,0.2,0.02) )
+   lap_time_test_mismatch(agent_name=agent_name, n_episodes=100, detect_issues=False, initial_conditions=True, parameter='C_Sf', frac_variation=np.linspace(-0.2,0.2,0.02) )
+   lap_time_test_mismatch(agent_name=agent_name, n_episodes=100, detect_issues=False, initial_conditions=True, parameter='C_Sr', frac_variation=np.linspace(-0.2,0.2,0.02) )
+   lap_time_test_mismatch(agent_name=agent_name, n_episodes=100, detect_issues=False, initial_conditions=True, parameter='lf', frac_variation=np.linspace(-0.2,0.2,0.02) )
+   lap_time_test_mismatch(agent_name=agent_name, n_episodes=100, detect_issues=False, initial_conditions=True, parameter='lr', frac_variation=np.linspace(-0.2,0.2,0.02) )
+   lap_time_test_mismatch(agent_name=agent_name, n_episodes=100, detect_issues=False, initial_conditions=True, parameter='h', frac_variation=np.linspace(-0.2,0.2,0.02) )
+   lap_time_test_mismatch(agent_name=agent_name, n_episodes=100, detect_issues=False, initial_conditions=True, parameter='m', frac_variation=np.linspace(-0.2,0.2,0.02) )
+   lap_time_test_mismatch(agent_name=agent_name, n_episodes=100, detect_issues=False, initial_conditions=True, parameter='I', frac_variation=np.linspace(-0.2,0.2,0.02) )
+   lap_time_test_mismatch(agent_name=agent_name, n_episodes=100, detect_issues=False, initial_conditions=True, parameter='s_min', frac_variation=np.linspace(-0.2,0.2,0.02) )
+   lap_time_test_mismatch(agent_name=agent_name, n_episodes=100, detect_issues=False, initial_conditions=True, parameter='s_max', frac_variation=np.linspace(-0.2,0.2,0.02) )
+   lap_time_test_mismatch(agent_name=agent_name, n_episodes=100, detect_issues=False, initial_conditions=True, parameter='sv_min', frac_variation=np.linspace(-0.2,0.2,0.02) )
+   lap_time_test_mismatch(agent_name=agent_name, n_episodes=100, detect_issues=False, initial_conditions=True, parameter='sv_max', frac_variation=np.linspace(-0.2,0.2,0.02) )
+   lap_time_test_mismatch(agent_name=agent_name, n_episodes=100, detect_issues=False, initial_conditions=True, parameter='a_max', frac_variation=np.linspace(-0.2,0.2,0.02) )
+   lap_time_test_mismatch(agent_name=agent_name, n_episodes=100, detect_issues=False, initial_conditions=True, parameter='v_min', frac_variation=np.linspace(-0.2,0.2,0.02) )
+   lap_time_test_mismatch(agent_name=agent_name, n_episodes=100, detect_issues=False, initial_conditions=True, parameter='v_max', frac_variation=np.linspace(-0.2,0.2,0.02) )
+   lap_time_test_mismatch(agent_name=agent_name, n_episodes=100, detect_issues=False, initial_conditions=True, parameter='width', frac_variation=np.linspace(-0.2,0.2,0.02) )
+   lap_time_test_mismatch(agent_name=agent_name, n_episodes=100, detect_issues=False, initial_conditions=True, parameter='length', frac_variation=np.linspace(-0.2,0.2,0.02) )
+  
    
+   #display_results_multiple.display_lap_mismatch_results(agent_name='ete_new__porto', parameter='C_Sf')
+
+
+
    #agent_name = 'pete_porto'
    #display_results_multiple.learning_curve_progress(agent_name=agent_name,  show_average=True, show_median=True)
    #display_results_multiple.display_train_parameters(agent_name=agent_name)

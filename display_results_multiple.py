@@ -412,7 +412,28 @@ def display_lap_results(agent_name):
         #print(f"{np.std(np.round(test_progress, 1), axis=1)[n]:10.3f}", end='')
         #print("")
 
-    
+
+def display_lap_mismatch_results(agent_name, parameter):
+
+    infile = open('lap_results_mismatch/' + agent_name + '/' + parameter, 'rb')
+    results_dict = pickle.load(infile)
+    infile.close() 
+
+    n_episodes = len(results_dict['collision_results'][0,0,:])
+    n_param = len(results_dict['collision_results'][0,:,0])
+    n_runs = len(results_dict['collision_results'][:,0,0])
+
+    y = np.zeros(n_param)
+
+    for i in range(n_param):
+        y[i] = 1-np.sum(results_dict['collision_results'][:,i,:])/(n_episodes*n_runs)
+
+    plt.plot(results_dict['frac_variation']*100, y)
+    plt.show()
+    pass
+
+
+
 
 def display_moving_agent(agent_name, load_history=False, n=0):
 
