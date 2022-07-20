@@ -70,7 +70,7 @@ class trainingLoop():
 
       #self.env = environment(self.env_dict, start_condition={'x':15,'y':5,'theta':0,'goal':0})
       self.env = environment(self.env_dict)
-      self.env.reset(save_history=False, start_condition=[], get_lap_time=False)
+      self.env.reset(save_history=False, start_condition=[], car_params=self.env_dict['car_params'], get_lap_time=False)
       
       self.agent_dict['name'] = self.main_dict['name']
       self.agent_dict['input_dims'] = len(self.env.observation)
@@ -137,9 +137,11 @@ class trainingLoop():
          #   self.replay_beta=self.replay_beta_0
          self.agent = agent_td3.agent(self.agent_dict)
          
+         car_params = self.env_dict['car_params']
+
          for episode in range(self.max_episodes):
             
-            self.env.reset(save_history=True, start_condition=[], get_lap_time=False)  #Reset the environment every episode
+            self.env.reset(save_history=True, start_condition=[], car_params=car_params, get_lap_time=False)  #Reset the environment every episode
             obs = self.env.observation      #Records starting state
             done = False
             score = 0                       #Initialise score counter for every episode
@@ -280,7 +282,8 @@ class trainingLoop():
       test_score = []
       
       for episode in range(n_episodes):
-         self.env.reset(save_history=True, start_condition=[], get_lap_time=False)
+         
+         self.env.reset(save_history=True, start_condition=[], car_params=self.env_dict['car_params'],get_lap_time=False)
          obs = self.env.observation
          done = False
          score=0
@@ -346,7 +349,9 @@ def test(agent_name, n_episodes, detect_issues, initial_conditions):
 
    #env = environment(env_dict, start_condition={'x':15,'y':5,'theta':0,'goal':0})
    env = environment(env_dict)
-   env.reset(save_history=False, start_condition=[], get_lap_time=False)
+   car_params = env_dict['car_params']
+
+   env.reset(save_history=False, start_condition=[], car_params=car_params, get_lap_time=False)
    
    action_history = []
    
@@ -406,7 +411,7 @@ def test(agent_name, n_episodes, detect_issues, initial_conditions):
 
       for episode in range(n_episodes):
          
-         env.reset(save_history=True, start_condition=start_conditions[episode], get_lap_time=False)
+         env.reset(save_history=True, start_condition=start_conditions[episode], car_params=car_params,get_lap_time=False)
          action_history = []
          obs = env.observation
          done = False
@@ -465,6 +470,7 @@ def lap_time_test(agent_name, n_episodes, detect_issues, initial_conditions):
    infile = open('environments/' + agent_name, 'rb')
    env_dict = pickle.load(infile)
    infile.close()
+   car_params = env_dict['car_params']
    
 
    if initial_conditions==True:
@@ -477,16 +483,13 @@ def lap_time_test(agent_name, n_episodes, detect_issues, initial_conditions):
    infile.close()
 
    env_dict['max_steps'] = 2000
-   #env_dict['car_params'] =   
-   #{'mu': 1.0489, 'C_Sf': 4.718, 'C_Sr': 5.4562, 'lf': 0.15875, 'lr': 0.17145
-   #               , 'h': 0.074, 'm': 3.74, 'I': 0.04712, 's_min': -0.4189, 's_max': 0.4189, 'sv_min': -3.2
-   #               , 'sv_max': 3.2, 'v_switch': 7.319, 'a_max': 9.51, 'v_min':-5.0, 'v_max': 20.0, 'width': 0.31, 'length': 0.58}
+   
 
    #env = environment(env_dict, start_condition={'x':15,'y':5,'theta':0,'goal':0})
    
    #env_dict['architecture'] = 'pete'
    env = environment(env_dict)
-   env.reset(save_history=False, start_condition=[], get_lap_time=True)
+   env.reset(save_history=False, start_condition=[], car_params=car_params, get_lap_time=True)
    
    action_history = []
    
@@ -537,7 +540,7 @@ def lap_time_test(agent_name, n_episodes, detect_issues, initial_conditions):
 
       for episode in range(n_episodes):
 
-         env.reset(save_history=True, start_condition=start_conditions[episode], get_lap_time=True)
+         env.reset(save_history=True, start_condition=start_conditions[episode], get_lap_time=True, car_params=car_params)
          action_history = []
          obs = env.observation
          done = False
@@ -582,12 +585,159 @@ def lap_time_test(agent_name, n_episodes, detect_issues, initial_conditions):
    pickle.dump(collisions, outfile)
    outfile.close()
 
-if __name__=='__main__':
+def lap_time_test_mismatch(agent_name, n_episodes, detect_issues, initial_conditions, parameter,  frac_variation):
+
+   results_dir = 'lap_results_mismatch/' + agent_name
+   results_file = results_dir + '/' + parameter
+   parent_dir = os.path.dirname(os.path.abspath(__file__))
+   agent_dir = parent_dir + '/agents/' + agent_name
+   agent_params_file = agent_dir + '/' + agent_name + '_params'
+   replay_episode_name = 'replay_episodes/' + agent_name
+
+   try:
+      os.mkdir(results_dir)
+   except OSError as error:
+      print(error)
+      print("Warning: Files will be overwritten")
 
    
-   agent_name = 'ete_new__porto'
+   infile = open('environments/' + agent_name, 'rb')
+   env_dict = pickle.load(infile)
+   infile.close()
+   init_car_params = env_dict['car_params']
    
-   main_dict = {'name':agent_name, 'max_episodes':5000, 'learning_method':'td3', 'runs':5, 'comment':''}
+
+   if initial_conditions==True:
+      start_condition_file_name = 'test_initial_condition/' + env_dict['map_name']
+   else:
+      start_condition_file_name = 'test_initial_condition/none' 
+   
+   infile = open(start_condition_file_name, 'rb')
+   start_conditions = pickle.load(infile)
+   infile.close()
+
+   env_dict['max_steps'] = 2000
+   
+
+   #env = environment(env_dict, start_condition={'x':15,'y':5,'theta':0,'goal':0})
+   
+   #env_dict['architecture'] = 'pete'
+   env = environment(env_dict)
+   env.reset(save_history=False, start_condition=[], car_params=init_car_params, get_lap_time=True)
+   
+   action_history = []
+   
+   infile = open(agent_params_file, 'rb')
+   agent_dict = pickle.load(infile)
+   infile.close()
+   agent_dict['layer3_size']=300
+
+   infile = open('train_parameters/' + agent_name, 'rb')
+   main_dict = pickle.load(infile)
+   infile.close()
+
+   runs = main_dict['runs']
+
+   # if main_dict['learning_method']=='dqn':
+   #    agent_dict['epsilon'] = 0
+   #    a = agent_dqn.agent(agent_dict)
+   # if main_dict['learning_method']=='reinforce':
+   #    a = agent_reinforce.PolicyGradientAgent(agent_dict)
+   # if main_dict['learning_method']=='actor_critic_sep':
+   #    a = agent_actor_critic.actor_critic_separated(agent_dict)
+   # if main_dict['learning_method']=='actor_critic_com':
+   #    a = agent_actor_critic.actor_critic_combined(agent_dict)
+   # if main_dict['learning_method']=='actor_critic_cont':
+   #    a = agent_actor_critic_continuous.agent_separate(agent_dict) 
+   # if main_dict['learning_method'] == 'dueling_dqn':
+   #    agent_dict['epsilon'] = 0
+   #    a = agent_dueling_dqn.agent(agent_dict)
+   # if main_dict['learning_method'] == 'dueling_ddqn':
+   #    agent_dict['epsilon'] = 0
+   #    a = agent_dueling_ddqn.agent(agent_dict)
+   # if main_dict['learning_method'] == 'rainbow':
+   #    agent_dict['epsilon'] = 0
+   #    a = agent_rainbow.agent(agent_dict)
+   # if main_dict['learning_method'] == 'ddpg':
+   #    a = agent_ddpg.agent(agent_dict)
+   # if main_dict['learning_method'] == 'td3':
+   #    a = agent_td3.agent(agent_dict)
+   
+   #parameter = 'C_Sf'
+   #frac_variation = np.array([-0.05, 0.05])
+
+   param_dict = {'parameter': parameter
+               , 'original_value':init_car_params[parameter]
+               , 'frac_variation': frac_variation
+               , 'times_results': np.zeros((runs, len(frac_variation), n_episodes))
+               , 'collision_results': np.zeros((runs, len(frac_variation), n_episodes))
+               }
+
+   for v_i, frac_vary in enumerate(frac_variation):
+      
+      car_params = init_car_params
+      car_params[parameter] = init_car_params[parameter]*(1+frac_vary)
+   
+      for n in range(runs):
+
+         a = agent_td3.agent(agent_dict) 
+         a.load_weights(agent_name, n)
+         print("Testing agent " + agent_name + ", n = " + str(n))
+
+         for episode in range(n_episodes):
+
+            env.reset(save_history=True, start_condition=start_conditions[episode], get_lap_time=True, car_params=car_params)
+            action_history = []
+            obs = env.observation
+            done = False
+            score = 0
+
+            while not done:
+               if main_dict['learning_method']=='ddpg' or main_dict['learning_method']=='td3':
+                  action = a.choose_greedy_action(obs)
+               else:
+                  action = a.choose_action(obs)
+
+               action_history.append(action)
+               
+               next_obs, reward, done = env.take_action(action)
+               score += reward
+               obs = next_obs
+               
+            time = env.steps*0.01
+            collision = env.collision or env.park or env.backwards
+            
+            if detect_issues==True and (collision==True):
+               print('Stop condition met')
+               print('Progress = ', env.progress)
+               print('score = ', score)
+
+               outfile = open(replay_episode_name, 'wb')
+               pickle.dump(action_history, outfile)
+               pickle.dump(env.initial_condition_dict, outfile)
+               pickle.dump(n, outfile)
+               env_dict['car_params'] = car_params
+               pickle.dump(env_dict, outfile)
+               outfile.close()
+               break
+
+            param_dict['times_results'][n, v_i, episode] = time
+            param_dict['collision_results'][n, v_i, episode] = collision
+
+            if episode%10==0:
+               print('Lap test episode', episode, '| Lap time = %.2f' % time, '| Score = %.2f' % score)
+
+   outfile=open(results_file, 'wb')
+   pickle.dump(param_dict, outfile)
+   outfile.close()
+
+   
+
+if __name__=='__main__':
+
+   agent_name = 'mismatch_test'
+   
+   main_dict = {'name':agent_name, 'max_episodes':1000, 'learning_method':'td3', 'runs':3, 'comment':''}
 
    agent_dqn_dict = {'gamma':0.99, 'epsilon':1, 'eps_end':0.01, 'eps_dec':1/1000, 'lr':0.001, 'batch_size':64, 'max_mem_size':500000, 
                   'fc1_dims': 64, 'fc2_dims': 64, 'fc3_dims':64}
@@ -651,19 +801,27 @@ if __name__=='__main__':
             , 'path_dict': path_dict
             } 
    
-   a = trainingLoop(main_dict, agent_td3_dict, env_dict, load_agent='')
-   a.train()
-   test(agent_name=agent_name, n_episodes=100, detect_issues=False, initial_conditions=True)
-   lap_time_test(agent_name=agent_name, n_episodes=100, detect_issues=False, initial_conditions=True)
    
    
-   agent_name = 'ete_new_col'
-   main_dict['name'] = agent_name
-   a = trainingLoop(main_dict, agent_td3_dict, env_dict, load_agent='')
-   a.train()
-   env_dict['map_name'] = 'columbia_1'
-   test(agent_name=agent_name, n_episodes=100, detect_issues=False, initial_conditions=True)
-   lap_time_test(agent_name=agent_name, n_episodes=100, detect_issues=False, initial_conditions=True)
+   #a = trainingLoop(main_dict, agent_td3_dict, env_dict, load_agent='')
+   #a.train()
+   #test(agent_name=agent_name, n_episodes=50, detect_issues=False, initial_conditions=True)
+   #lap_time_test(agent_name=agent_name, n_episodes=50, detect_issues=False, initial_conditions=True)
+   #lap_time_test_mismatch(agent_name=agent_name, n_episodes=100, detect_issues=False, initial_conditions=True, parameter='C_Sf', frac_variation=np.array([-0.05, 0.05]))
+   
+
+   #infile = open('lap_results_mismatch\mismatch_test\C_Sf', 'rb')
+   #param_dict = pickle.load(infile)
+   #infile.close()
+
+
+   #agent_name = 'ete_new_col'
+   #main_dict['name'] = agent_name
+   #a = trainingLoop(main_dict, agent_td3_dict, env_dict, load_agent='')
+   #a.train()
+   #env_dict['map_name'] = 'columbia_1'
+   #test(agent_name=agent_name, n_episodes=100, detect_issues=False, initial_conditions=True)
+   #lap_time_test(agent_name=agent_name, n_episodes=100, detect_issues=False, initial_conditions=True)
    
    
    #agent_name = 'pete_porto'
