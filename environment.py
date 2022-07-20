@@ -52,7 +52,6 @@ class environment():
         self.wpt_arc = self.path_dict['wpt_arc']
         
         
-        
         #Initialise car parameters
         self.wheelbase = self.params['lf'] + self.params['lr'] 
         
@@ -127,11 +126,10 @@ class environment():
                         , occupancy_grid=self.occupancy_grid, map_res=self.map_res, map_height=self.map_height)
         
         self.episode = 0
-        #self.reset(self.save_history, start_condition=)
 
 
 
-    def reset(self, save_history, start_condition, get_lap_time=False):
+    def reset(self, save_history, start_condition, car_params ,get_lap_time=False):
         self.episode+=1
         self.save_history=save_history
         self.start_condition = start_condition
@@ -210,6 +208,7 @@ class environment():
 
         self.initial_condition_dict = {'x':self.x, 'y':self.y, 'theta':self.theta, 'v':self.v, 'delta':self.delta, 'goal': self.current_goal}
         
+        self.params = car_params
         #change_params = {}
         #for i in self.params:
         #    if i not in ['v_min', 'v_max', 'width']:
@@ -218,18 +217,18 @@ class environment():
         #for i in random.sample(list(change_params), 2):
         #    self.params[i] *= random.uniform(0.95,1.05)
 
-        self.params['mu'] *= random.uniform(0.95,1.05)
-        self.params['C_Sf'] *= random.uniform(0.95,1.05)
-        self.params['C_Sr'] *= random.uniform(0.95,1.05)
-        self.params['lr'] *= random.uniform(0.95,1.05)
-        self.params['sv_min'] *= random.uniform(0.95,1.05)
-        self.params['sv_max'] *= random.uniform(0.95,1.05)
-        self.params['s_min'] *= random.uniform(0.95,1.05)
-        self.params['s_max'] *= random.uniform(0.95,1.05)
-        self.params['a_max'] *= random.uniform(0.95,1.05)
-        self.params['v_max'] *= random.uniform(0.95,1.05)
-        self.params['m'] *= random.uniform(0.95,1.05)
-        self.params['I'] *= random.uniform(0.95,1.05)
+        # self.params['mu'] *= random.uniform(0.95,1.05)
+        # self.params['C_Sf'] *= random.uniform(0.95,1.05)
+        # self.params['C_Sr'] *= random.uniform(0.95,1.05)
+        # self.params['lr'] *= random.uniform(0.95,1.05)
+        # self.params['sv_min'] *= random.uniform(0.95,1.05)
+        # self.params['sv_max'] *= random.uniform(0.95,1.05)
+        # self.params['s_min'] *= random.uniform(0.95,1.05)
+        # self.params['s_max'] *= random.uniform(0.95,1.05)
+        # self.params['a_max'] *= random.uniform(0.95,1.05)
+        # self.params['v_max'] *= random.uniform(0.95,1.05)
+        # self.params['m'] *= random.uniform(0.95,1.05)
+        # self.params['I'] *= random.uniform(0.95,1.05)
 
     def take_action(self, act):
         self.action_history.append(act)
