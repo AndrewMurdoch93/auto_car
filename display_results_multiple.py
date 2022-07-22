@@ -413,24 +413,70 @@ def display_lap_results(agent_name):
         #print("")
 
 
-def display_lap_mismatch_results(agent_name, parameter):
+def display_lap_mismatch_results(agent_names, parameter, legend_title, legend):
 
-    infile = open('lap_results_mismatch/' + agent_name + '/' + parameter, 'rb')
-    results_dict = pickle.load(infile)
-    infile.close() 
+    for agent in agent_names:
+        
+        infile = open('lap_results_mismatch/' + agent + '/' + parameter, 'rb')
+        results_dict = pickle.load(infile)
+        infile.close() 
 
-    n_episodes = len(results_dict['collision_results'][0,0,:])
-    n_param = len(results_dict['collision_results'][0,:,0])
-    n_runs = len(results_dict['collision_results'][:,0,0])
+        n_episodes = len(results_dict['collision_results'][0,0,:])
+        n_param = len(results_dict['collision_results'][0,:,0])
+        n_runs = len(results_dict['collision_results'][:,0,0])
 
-    y = np.zeros(n_param)
+        y = np.zeros(n_param)
 
-    for i in range(n_param):
-        y[i] = 1-np.sum(results_dict['collision_results'][:,i,:])/(n_episodes*n_runs)
+        for i in range(n_param):
+            y[i] = np.sum(np.logical_not(results_dict['collision_results'][:,i,:]))/(n_episodes*n_runs)
 
-    plt.plot(results_dict['frac_variation']*100, y)
+        plt.plot(results_dict['frac_variation']*100, y)
+
+    plt.title('Lap success result for ' + parameter + ' parameter mismatch')
+    plt.xlabel('% variation from original ' + parameter + ' value')
+    plt.ylabel('fraction successful laps')
+    plt.legend(legend, title=legend_title, loc='lower left')
     plt.show()
+    
+
+
+def display_lap_mismatch_results_box(agent_names, parameter, legend_title, legend):
+
+    results = []
+    results_data = []
+    data = []
+
+    for agent in agent_names:
+        
+        infile = open('lap_results_mismatch/' + agent + '/' + parameter, 'rb')
+        results_dict = pickle.load(infile)
+        results.append(results_dict)
+        infile.close() 
+        
+        n_episodes = len(results_dict['collision_results'][0,0,:])
+        n_param = len(results_dict['collision_results'][0,:,0])
+        n_runs = len(results_dict['collision_results'][:,0,0])
+
+        y = np.zeros((n_param, n_runs))
+
+        for i in range(n_param):
+            y = np.sum(np.logical_not(results_dict['collision_results'][:,i,:]), axis=1)/(n_episodes*n_runs)
+
+            for n, success in enumerate(y):
+                data.append({'agent_name':agent, 'frac_variation':results_dict['frac_variation'][i], 'n':n, 'success_rate':success})
+                pass
+            pass
+
+    df = pd.DataFrame(data)
     pass
+    sns.boxplot(x='frac_variation', y='success_rate', data=df)
+    plt.plot()
+
+    #plt.title('Lap success result for ' + parameter + ' parameter mismatch')
+    #plt.xlabel('% variation from original ' + parameter + ' value')
+    #plt.ylabel('fraction successful laps')
+    #plt.legend(legend, title=legend_title, loc='lower left')
+    #plt.show()
 
 
 

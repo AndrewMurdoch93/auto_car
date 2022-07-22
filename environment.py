@@ -209,6 +209,7 @@ class environment():
         self.initial_condition_dict = {'x':self.x, 'y':self.y, 'theta':self.theta, 'v':self.v, 'delta':self.delta, 'goal': self.current_goal}
         
         self.params = car_params
+        
         #change_params = {}
         #for i in self.params:
         #    if i not in ['v_min', 'v_max', 'width']:
