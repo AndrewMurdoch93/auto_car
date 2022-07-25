@@ -247,6 +247,49 @@ def find_closest_point(rx, ry, x, y):
     
     return ind
 
+def check_closest_point(rx, ry, x, y, occupancy_grid, res, map_height):
+    cp_ind = find_closest_point(rx, ry, x, y)   #find closest point 
+    
+    cp_x = rx[cp_ind]
+    cp_y = ry[cp_ind]
+    
+    los_x = np.linspace(x, cp_x)
+    los_y = np.linspace(y, cp_y)
+
+    for x, y in zip(los_x, los_y):
+        if occupied_cell(x, y, occupancy_grid, res, map_height):
+            return True
+    return False
+
+def find_correct_closest_point(rx, ry, x, y, occupancy_grid, res, map_height):
+    
+    if check_closest_point(rx, ry, x, y, occupancy_grid, res, map_height):
+        dx = [x - irx for irx in rx]
+        dy = [y - iry for iry in ry]
+        d = np.hypot(dx, dy)
+        cp_inds = np.argsort(d)
+
+        for ind in cp_inds: 
+
+            line_x = rx[ind]
+            line_y = ry[ind]
+            los_x = np.linspace(x, line_x)
+            los_y = np.linspace(y, line_y)
+
+            for x, y in zip(los_x, los_y):
+                if occupied_cell(x, y, occupancy_grid, res, map_height):
+                    break
+            else:
+                return ind
+       
+    
+    else:
+        cp_ind = find_closest_point(rx, ry, x, y)    
+        return cp_ind
+
+
+
+
 def convert_xy_to_sn(rx, ry, ryaw, x, y, ds):
     dx = [x - irx for irx in rx]    
     dy = [y - iry for iry in ry]
@@ -436,55 +479,53 @@ def generate_initial_condition(name, episodes):
 
 
 if __name__ == '__main__':
-    '''
-    ds = 0.1
-    x_sparse = np.array([0,10])
-    y_sparse = [0,0]
-    rx, ry, ryaw, rk, s, csp = generate_line(x_sparse, y_sparse)
     
-    x = 1
-    y = 1
-    #transform_XY_to_NS(rx, ry, x, y)
-    convert_xy_to_sn(rx, ry, ryaw, x, y, ds)
-    '''
+    # ds = 0.1
+    # x_sparse = np.array([0,10])
+    # y_sparse = [0,0]
+    # rx, ry, ryaw, rk, s, csp = generate_line(x_sparse, y_sparse)
     
+    # x = 1
+    # y = 1
+    # #transform_XY_to_NS(rx, ry, x, y)
+    # convert_xy_to_sn(rx, ry, ryaw, x, y, ds)
     
-    s_0 = 0
-    s_1 = s_0+1
-    s_2 = s_1+0.5
-    theta = 0.5
-    n_0 = 0.8
+    # s_0 = 0
+    # s_1 = s_0+1
+    # s_2 = s_1+0.5
+    # theta = 0.5
+    # n_0 = 0.8
     
-    plt.plot(s_0,n_0, 'x')
-    plt.plot([0,s_2], [1,1])
-    plt.plot([0,s_2], [-1,-1])
+    # plt.plot(s_0,n_0, 'x')
+    # plt.plot([0,s_2], [1,1])
+    # plt.plot([0,s_2], [-1,-1])
     
-    for n_1 in np.linspace(-1,1,10): 
-        #n_1 = 1
+    # for n_1 in np.linspace(-1,1,10): 
+    #     #n_1 = 1
         
-        A = np.array([[3*s_1**2, 2*s_1, 1, 0], [3*s_0**2, 2*s_0, 1, 0], [s_0**3, s_0**2, s_0, 1], [s_1**3, s_1**2, s_1, 1]])
-        B = np.array([0, theta, n_0, n_1])
-        x = np.linalg.solve(A, B)
-        #print(x)
+    #     A = np.array([[3*s_1**2, 2*s_1, 1, 0], [3*s_0**2, 2*s_0, 1, 0], [s_0**3, s_0**2, s_0, 1], [s_1**3, s_1**2, s_1, 1]])
+    #     B = np.array([0, theta, n_0, n_1])
+    #     x = np.linalg.solve(A, B)
+    #     #print(x)
 
-        a = x[0]
-        b = x[1]
-        c = x[2]
-        d = x[3]
+    #     a = x[0]
+    #     b = x[1]
+    #     c = x[2]
+    #     d = x[3]
 
-        s = np.linspace(s_0, s_1)
-        n = a*s**3 + b*s**2 + c*s + d
-        s = np.concatenate((s, np.linspace(s_1, s_2)))
-        n = np.concatenate((n, np.ones(len(np.linspace(s_1, s_2)))*n_1))
-        plt.plot(s, n)
+    #     s = np.linspace(s_0, s_1)
+    #     n = a*s**3 + b*s**2 + c*s + d
+    #     s = np.concatenate((s, np.linspace(s_1, s_2)))
+    #     n = np.concatenate((n, np.ones(len(np.linspace(s_1, s_2)))*n_1))
+    #     plt.plot(s, n)
 
-    #plt.plot(np.linspace(s_1, s_2), np.ones(len(np.linspace(s_1, s_2)))*n_1)
-    plt.legend(['vehicle position', 'upper track boundary', 'lower track boundary'])
-    plt.xlim([s_0, s_2])
-    plt.xlabel('s [m], distance along centerline')
-    plt.ylabel('n [m], distance perpendicular to centerline')
-    plt.show()
-    #def velocity_along_line(theta, velocity, ryaw, )
+    # plt.plot(np.linspace(s_1, s_2), np.ones(len(np.linspace(s_1, s_2)))*n_1)
+    # plt.legend(['vehicle position', 'upper track boundary', 'lower track boundary'])
+    # plt.xlim([s_0, s_2])
+    # plt.xlabel('s [m], distance along centerline')
+    # plt.ylabel('n [m], distance perpendicular to centerline')
+    # plt.show()
+    # def velocity_along_line(theta, velocity, ryaw, )
     
 
     #generate_berlin_goals()
@@ -495,6 +536,7 @@ if __name__ == '__main__':
     #occupancy_grid, map_height, map_width, res = map_generator(map_name='circle')
     #a = lidar_scan(res, 3, 10, np.pi, occupancy_grid, res, 30)
     #print(a.get_scan(15,5,0))
+    generate_initial_condition('redbull_ring', 1000)
 
 
     #im = image.imread(image_path)

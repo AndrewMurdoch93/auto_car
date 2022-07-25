@@ -272,17 +272,17 @@ class agent():
 
     def save_agent(self, name, run):
         self.actor.save_checkpoint(name + '_actor_n_' + str(run))
-        self.target_actor.save_checkpoint(name + '_target_actor_n_' + str(run))
-        self.critic_1.save_checkpoint(name + '_critic_1_n_' + str(run))
-        self.critic_2.save_checkpoint(name + '_critic_2_n_' + str(run))
-        self.target_critic_1.save_checkpoint(name + '_target_critic_1_n_' + str(run))
-        self.target_critic_2.save_checkpoint(name + '_target_critic_2_n_' + str(run))
+        #self.target_actor.save_checkpoint(name + '_target_actor_n_' + str(run))
+        #self.critic_1.save_checkpoint(name + '_critic_1_n_' + str(run))
+        #self.critic_2.save_checkpoint(name + '_critic_2_n_' + str(run))
+        #self.target_critic_1.save_checkpoint(name + '_target_critic_1_n_' + str(run))
+        #self.target_critic_2.save_checkpoint(name + '_target_critic_2_n_' + str(run))
 
     def load_weights(self, name, run):
         self.actor.load_checkpoint(name + '_actor_n_' + str(run))
-        self.target_actor.load_checkpoint(name + '_target_actor_n_' + str(run))
-        self.critic_1.load_checkpoint(name + '_critic_1_n_' + str(run))
-        self.critic_2.load_checkpoint(name + '_critic_2_n_' + str(run))
-        self.target_critic_1.load_checkpoint(name + '_target_critic_1_n_' + str(run))
-        self.target_critic_2.load_checkpoint(name + '_target_critic_2_n_' + str(run))
+        #self.target_actor.load_checkpoint(name + '_target_actor_n_' + str(run))
+        #self.critic_1.load_checkpoint(name + '_critic_1_n_' + str(run))
+        #self.critic_2.load_checkpoint(name + '_critic_2_n_' + str(run))
+        #self.target_critic_1.load_checkpoint(name + '_target_critic_1_n_' + str(run))
+        #self.target_critic_2.load_checkpoint(name + '_target_critic_2_n_' + str(run))
 

@@ -413,64 +413,104 @@ def display_lap_results(agent_name):
         #print("")
 
 
-def display_lap_mismatch_results(agent_names, parameter, legend_title, legend):
+def display_lap_mismatch_results(agent_names, parameters, legend_title, legend):
+
+    # for agent in agent_names:
+        
+    #     infile = open('lap_results_mismatch/' + agent + '/' + parameter, 'rb')
+    #     results_dict = pickle.load(infile)
+    #     infile.close() 
+
+    #     n_episodes = len(results_dict['collision_results'][0,0,:])
+    #     n_param = len(results_dict['collision_results'][0,:,0])
+    #     n_runs = len(results_dict['collision_results'][:,0,0])
+
+    #     y = np.zeros(n_param)
+
+    #     for i in range(n_param):
+    #         y[i] = np.sum(np.logical_not(results_dict['collision_results'][:,i,:]))/(n_episodes*n_runs)
+
+    #     plt.plot(results_dict['frac_variation']*100, y)
+
+    # plt.title('Lap success result for ' + parameter + ' parameter mismatch')
+    # plt.xlabel('% variation from original ' + parameter + ' value')
+    # plt.ylabel('fraction successful laps')
+    # plt.legend(legend, title=legend_title, loc='lower left')
+    # plt.show()
+
+    results = []
+    data = []
 
     for agent in agent_names:
-        
-        infile = open('lap_results_mismatch/' + agent + '/' + parameter, 'rb')
-        results_dict = pickle.load(infile)
-        infile.close() 
+        for param in parameters:
+            infile = open('lap_results_mismatch/' + agent + '/' + param, 'rb')
+            results_dict = pickle.load(infile)
+            results.append(results_dict)
+            infile.close() 
+            
+            n_episodes = len(results_dict['collision_results'][0,0,:])
+            n_param = len(results_dict['collision_results'][0,:,0])
+            n_runs = len(results_dict['collision_results'][:,0,0])
 
-        n_episodes = len(results_dict['collision_results'][0,0,:])
-        n_param = len(results_dict['collision_results'][0,:,0])
-        n_runs = len(results_dict['collision_results'][:,0,0])
+            y = np.zeros((n_param, n_runs))
 
-        y = np.zeros(n_param)
+            for i in range(n_param):
+                y = np.sum(np.logical_not(results_dict['collision_results'][:,i,:]))/(n_episodes*n_runs)
+                data.append({'agent_name':agent, 'parameter':param,'frac_variation':round(results_dict['frac_variation'][i],2)*100, 'success_rate':y})
 
-        for i in range(n_param):
-            y[i] = np.sum(np.logical_not(results_dict['collision_results'][:,i,:]))/(n_episodes*n_runs)
-
-        plt.plot(results_dict['frac_variation']*100, y)
-
-    plt.title('Lap success result for ' + parameter + ' parameter mismatch')
-    plt.xlabel('% variation from original ' + parameter + ' value')
-    plt.ylabel('fraction successful laps')
-    plt.legend(legend, title=legend_title, loc='lower left')
+    df = pd.DataFrame(data)
+    
+    if len(parameters)>1:
+        p = sns.factorplot(x='frac_variation', y='success_rate', hue='agent_name', row='parameter',data=df)
+    else:
+        p = sns.lineplot(x='frac_variation', y='success_rate', hue='agent_name', data=df)
+        p.set_xlabel('% variation from original ' + param + ' value')
+        p.set_ylabel('fraction successful laps')
+        handles, _ = p.get_legend_handles_labels()
+        p.legend(handles, legend ,title=legend_title, loc='lower left')
+        plt.title('Lap success rate for ' + param + ' mismatch')
     plt.show()
+
     
 
-
-def display_lap_mismatch_results_box(agent_names, parameter, legend_title, legend):
+def display_lap_mismatch_results_box(agent_names, parameters, legend_title, legend):
 
     results = []
     results_data = []
     data = []
 
     for agent in agent_names:
-        
-        infile = open('lap_results_mismatch/' + agent + '/' + parameter, 'rb')
-        results_dict = pickle.load(infile)
-        results.append(results_dict)
-        infile.close() 
-        
-        n_episodes = len(results_dict['collision_results'][0,0,:])
-        n_param = len(results_dict['collision_results'][0,:,0])
-        n_runs = len(results_dict['collision_results'][:,0,0])
+        for param in parameters:
+            infile = open('lap_results_mismatch/' + agent + '/' + param, 'rb')
+            results_dict = pickle.load(infile)
+            results.append(results_dict)
+            infile.close() 
+            
+            n_episodes = len(results_dict['collision_results'][0,0,:])
+            n_param = len(results_dict['collision_results'][0,:,0])
+            n_runs = len(results_dict['collision_results'][:,0,0])
 
-        y = np.zeros((n_param, n_runs))
+            y = np.zeros((n_param, n_runs))
 
-        for i in range(n_param):
-            y = np.sum(np.logical_not(results_dict['collision_results'][:,i,:]), axis=1)/(n_episodes*n_runs)
+            for i in range(n_param):
+                y = np.sum(np.logical_not(results_dict['collision_results'][:,i,:]), axis=1)/(n_episodes)
 
-            for n, success in enumerate(y):
-                data.append({'agent_name':agent, 'frac_variation':results_dict['frac_variation'][i], 'n':n, 'success_rate':success})
-                pass
-            pass
+                for n, success in enumerate(y):
+                    data.append({'agent_name':agent, 'parameter':param,'frac_variation':round(results_dict['frac_variation'][i],2)*100, 'n':n, 'success_rate':success})
 
     df = pd.DataFrame(data)
-    pass
-    sns.boxplot(x='frac_variation', y='success_rate', data=df)
-    plt.plot()
+    df['frac_var_cut'] = pd.cut(df['frac_variation'], 5)
+    
+    if len(parameters)>1:
+        p = sns.factorplot(x='frac_var_cut', y='success_rate', hue='agent_name', row='parameter', kind='box',data=df)
+    else:
+        p = sns.boxplot(x='frac_var_cut', y='success_rate', hue='agent_name',data=df)
+        p.set_xlabel('% variation from original ' + param + ' value')
+        p.set_ylabel('fraction successful laps')
+        handles, _ = p.get_legend_handles_labels()
+        p.legend(handles, legend)
+        plt.title('Lap success rate for ' + param + ' mismatch')
+    plt.show()
 
     #plt.title('Lap success result for ' + parameter + ' parameter mismatch')
     #plt.xlabel('% variation from original ' + parameter + ' value')
@@ -489,10 +529,10 @@ def display_moving_agent(agent_name, load_history=False, n=0):
     env_dict = pickle.load(infile)
     infile.close()
     env_dict['max_steps']=3000
-    env_dict['architecture'] = 'pete'
+    #env_dict['architecture'] = 'pete'
 
     env = environment(env_dict)
-    env.reset(save_history=True, start_condition=[])
+    env.reset(save_history=True, start_condition=[], car_params=env_dict['car_params'])
     
     infile = open('agents/' + agent_name + '/' + agent_name + '_params', 'rb')
     agent_dict = pickle.load(infile)
@@ -534,7 +574,7 @@ def display_moving_agent(agent_name, load_history=False, n=0):
         env.load_history_func()
     
     else:
-        env.reset(save_history=True, start_condition=[])
+        env.reset(save_history=True, start_condition=[], car_params=env_dict['car_params'])
         obs = env.observation
         done = False
         score=0
@@ -626,7 +666,7 @@ def display_path(agent_name, load_history=False, n=0):
     infile.close()
     env_dict['max_steps']=3000
     env = environment(env_dict)
-    env.reset(save_history=True, start_condition=[])
+    env.reset(save_history=True, start_condition=[], car_params=env_dict['car_params'])
 
     infile = open('agents/' + agent_name + '/' + agent_name + '_params', 'rb')
     agent_dict = pickle.load(infile)
@@ -667,7 +707,7 @@ def display_path(agent_name, load_history=False, n=0):
         env.load_history_func()
         
     else:
-        env.reset(save_history=True, start_condition=[])
+        env.reset(save_history=True, start_condition=[], car_params=env_dict['car_params'])
         obs = env.observation
         done = False
         score=0
@@ -733,7 +773,7 @@ def display_path_multiple(agent_names, ns, legend_title, legend):
         infile.close()
         #env_dict['max_steps']=3000
         env = environment(env_dict)
-        env.reset(save_history=True, start_condition=[])
+        env.reset(save_history=True, start_condition=[], car_params=env_dict['car_params'])
 
         infile = open('agents/' + agent_name + '/' + agent_name + '_params', 'rb')
         agent_dict = pickle.load(infile)
@@ -776,7 +816,7 @@ def display_path_multiple(agent_names, ns, legend_title, legend):
             
         a.load_weights(agent_name, n)
 
-        env.reset(save_history=True, start_condition=start_pose)
+        env.reset(save_history=True, start_condition=start_pose, car_params=env_dict['car_params'])
         obs = env.observation
         done = False
         score=0
