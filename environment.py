@@ -359,6 +359,7 @@ class environment():
                 lastIndex = len(cx)-1
                 i=0
                 while (lastIndex > target_index) and i<self.control_steps:
+                    
                     if self.display==True:
                         self.visualise(waypoint)
                 
@@ -382,8 +383,9 @@ class environment():
                     reward += self.getReward()
                     
                     if self.lidar_dict['is_lidar']==True:
-                        if i >= self.control_steps-1:
-                            self.lidar_dists, self.lidar_coords = self.lidar.get_scan(self.x, self.y, self.theta)
+                        #if i >= self.control_steps-1:
+                        #    self.lidar_dists, self.lidar_coords = self.lidar.get_scan(self.x, self.y, self.theta)
+                        self.lidar_dists, self.lidar_coords = self.lidar.get_scan(self.x, self.y, self.theta)
 
 
                     self.save_pose()
@@ -399,6 +401,9 @@ class environment():
                     
                     i+=1
                     done = self.isEnd()
+                    if target_index>lastIndex:
+                        print('Agent ran out of local path')
+                        print(i)
                     if done == True:
                         break
             
@@ -773,24 +778,22 @@ class environment():
         self.new_d_goal = np.linalg.norm(np.array([self.x_to_goal, self.y_to_goal]))
         self.new_angle = math.atan2(self.y-15, self.x-15)%(2*math.pi)
 
-        new_closest_point = functions.find_closest_point(self.rx, self.ry, self.x, self.y)
-        
+
         if functions.occupied_cell(self.x, self.y, self.occupancy_grid, self.map_res, self.map_height)== False:
-            new_closest_point = functions.find_closest_point(self.rx, self.ry, self.x, self.y)
-            if functions.check_closest_point(self.rx, self.ry, self.x, self.y, self.occupancy_grid, self.map_res, self.map_height):
-                correct_closest_point = functions.find_correct_closest_point(self.rx, self.ry, self.x, self.y, self.occupancy_grid, self.map_res, self.map_height)
-
-                plt.imshow(self.im, extent=(0,self.map_width,0,self.map_height))
-                plt.plot(self.x, self.y, 'x')
-                plt.plot(self.rx, self.ry)
-                plt.plot(self.rx[new_closest_point], self.ry[new_closest_point], 'x')
-                plt.plot(self.rx[correct_closest_point], self.ry[correct_closest_point], 'x')
-                plt.plot()
-                plt.xlim([0,self.map_width])
-                plt.ylim([0,self.map_height])
-                plt.show()
-                print('Error')
-
+            #new_closest_point = functions.find_closest_point(self.rx, self.ry, self.x, self.y)
+            new_closest_point = functions.find_correct_closest_point(self.rx, self.ry, self.x, self.y, self.occupancy_grid, self.map_res, self.map_height)
+            
+            # if incorrect_closest_point != new_closest_point:
+            #     plt.imshow(self.im, extent=(0,self.map_width,0,self.map_height))
+            #     plt.plot(self.x, self.y, 'x')
+            #     plt.plot(self.rx, self.ry)
+            #     plt.plot(self.rx[incorrect_closest_point], self.ry[incorrect_closest_point], 'x')
+            #     plt.plot(self.rx[new_closest_point], self.ry[new_closest_point], 'x')
+            #     plt.plot()
+            #     plt.xlim([0,self.map_width])
+            #     plt.ylim([0,self.map_height])
+            #     plt.legend(['car', 'centerline', 'incorrect', 'correct'])
+            #     plt.show()
         
         else:
             new_closest_point=self.old_closest_point

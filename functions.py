@@ -261,34 +261,38 @@ def check_closest_point(rx, ry, x, y, occupancy_grid, res, map_height):
             return True
     return False
 
+
+def is_line_of_sight_clear(x1, y1, x2, y2, occupancy_grid, res, map_height):
+    
+    los_x = np.linspace(x1, x2)
+    los_y = np.linspace(y1, y2)
+
+    for x, y in zip(los_x, los_y):
+        if occupied_cell(x, y, occupancy_grid, res, map_height):
+            return False
+    return True
+
 def find_correct_closest_point(rx, ry, x, y, occupancy_grid, res, map_height):
     
-    if check_closest_point(rx, ry, x, y, occupancy_grid, res, map_height):
+    ind = find_closest_point(rx, ry, x, y)
+    cpx = rx[ind]
+    cpy = ry[ind]
+    if is_line_of_sight_clear(x, y, cpx, cpy, occupancy_grid, res, map_height):
+        return ind
+    else:
         dx = [x - irx for irx in rx]
         dy = [y - iry for iry in ry]
-        d = np.hypot(dx, dy)
-        cp_inds = np.argsort(d)
+        d = np.hypot(dx, dy)    
+        inds = np.argsort(d)
 
-        for ind in cp_inds: 
-
-            line_x = rx[ind]
-            line_y = ry[ind]
-            los_x = np.linspace(x, line_x)
-            los_y = np.linspace(y, line_y)
-
-            for x, y in zip(los_x, los_y):
-                if occupied_cell(x, y, occupancy_grid, res, map_height):
-                    break
-            else:
-                return ind
-       
-    
-    else:
-        cp_ind = find_closest_point(rx, ry, x, y)    
-        return cp_ind
-
-
-
+        for i in inds:
+            cpx = rx[i]
+            cpy = ry[i]
+            if is_line_of_sight_clear(x, y, cpx, cpy, occupancy_grid, res, map_height):
+                return i
+        else:
+            print('No line of sight to centerline')
+            return ind
 
 def convert_xy_to_sn(rx, ry, ryaw, x, y, ds):
     dx = [x - irx for irx in rx]    
