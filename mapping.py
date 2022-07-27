@@ -145,7 +145,53 @@ def test_map():
     m.find_centerline(False)
     rx, ry, ryaw, rk, d = cubic_spline_planner.calc_spline_course(m.centerline[:,0], m.centerline[:,1])
     plt.imshow(m.gray_im, extent=(0,m.map_width,0,m.map_height))
+    
+    x=35
+    plt.plot(rx[x-10], ry[x-10], 'x')
+    plt.plot(rx[x], ry[x], 'x')
+    plt.plot(rx[x+10], ry[x+10], 'x')
     plt.plot(rx, ry)
+
+    x=115
+    plt.plot(rx[x-10], ry[x-10], 'x')
+    plt.plot(rx[x], ry[x], 'x')
+    plt.plot(rx[x+10], ry[x+10], 'x')
+    plt.plot(rx, ry)
+
+    x=190
+    plt.plot(rx[x-10], ry[x-10], 'x')
+    plt.plot(rx[x], ry[x], 'x')
+    plt.plot(rx[x+10], ry[x+10], 'x')
+    plt.plot(rx, ry)
+
+    x=230
+    plt.plot(rx[x-10], ry[x-10], 'x')
+    plt.plot(rx[x], ry[x], 'x')
+    plt.plot(rx[x+10], ry[x+10], 'x')
+    plt.plot(rx, ry)
+
+    x=260
+    plt.plot(rx[x-10], ry[x-10], 'x')
+    plt.plot(rx[x], ry[x], 'x')
+    plt.plot(rx[x+10], ry[x+10], 'x')
+    plt.plot(rx, ry)
+
+    x=330
+    plt.plot(rx[x-10], ry[x-10], 'x')
+    plt.plot(rx[x], ry[x], 'x')
+    plt.plot(rx[x+10], ry[x+10], 'x')
+    plt.plot(rx, ry)
+    
+    x=350
+    plt.plot(rx[x-10], ry[x-10], 'x')
+    plt.plot(rx[x], ry[x], 'x')
+    plt.plot(rx[x+10], ry[x+10], 'x')
+    plt.plot(rx, ry)
+
+
+
+
+
     #plt.plot(m.centerline[:,0], m.centerline[:,1], 'x')
     plt.show()
 

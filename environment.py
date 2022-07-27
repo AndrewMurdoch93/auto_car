@@ -346,6 +346,8 @@ class environment():
             else:
                 if self.path_strategy == 'polynomial':
                     cx, cy, cyaw = self.define_path_polynomial(param=act)
+                elif self.path_strategy == 'gradient':
+                    cx, cy, cyaw = self.define_path_gradient(param=act)
                 else:
                     cx, cy, cyaw = self.define_path(waypoint, wpt_angle, R)
                 
@@ -415,6 +417,32 @@ class environment():
         return self.observation, reward, done
     
     
+    def define_path_gradient(self, param):
+        d=0.5
+        cx = [self.x]
+        cy = [self.y]
+        theta = self.theta
+
+        x_1 = self.x
+        y_1 = self.y 
+        
+        for _ in range(10):
+            x_2 = x_1 + d*np.cos(theta)
+            y_2 = y_1 + d*np.sin(theta)
+            theta += param[0]*0.2
+            x_1 = x_2
+            y_1 = y_2
+
+            cx.append(x_2)
+            cy.append(y_2)
+
+        plt.plot(cx, cy)
+        plt.show()
+
+        cx, cy, cyaw, ck, s = cubic_spline_planner.calc_spline_course(cx, cy)
+
+        return np.array(cx), np.array(cy), np.array(cyaw)
+    
     def define_path_polynomial(self, param):
         track_width = 3
         ds=0.1
@@ -453,10 +481,17 @@ class environment():
                 cx = (((np.arange(0.1, 1, 0.01))*(waypoint[0] - self.x)) + self.x).tolist()
                 cy = ((np.arange(0.1, 1, 0.01))*(waypoint[1] - self.y) + self.y)
             
-            elif 0.01<wpt_angle<np.pi-0.01:
-                L=R*np.sin(wpt_angle)/np.sin(np.pi-2*wpt_angle)
+            #elif 0.01<wpt_angle<np.pi-0.01:
+            else:
+                if wpt_angle>np.pi-0.01:
+                    wpt_angle=np.pi-0.01
+                if wpt_angle<0.01:
+                    wpt_angle=0.01
+                
+                L=(R)*np.sin(wpt_angle)/np.sin(np.pi-2*wpt_angle)
                 a = self.theta-np.pi/2
                 angles = np.linspace(0,np.pi-2*wpt_angle)
+                #angles = np.linspace(0,np.pi-wpt_angle)
                 x_arc = L*(1 - np.cos(angles))
                 y_arc = L*np.sin(angles)
                 d_arc = np.sqrt(np.power(x_arc[1:-1], 2) + np.power(y_arc[1:-1], 2))
@@ -468,31 +503,38 @@ class environment():
                 cy = d_arc*np.sin(a_arc+a) + self.y
 
                 cx = cx.flatten().tolist()
-                cy = cy.flatten()
+                cy = cy.flatten().tolist()
             
-            else:
-                L=R/2
-                a = self.theta-np.pi/2
-                angles = np.linspace(0,np.pi-2*wpt_angle)
-                x_arc = R*(1 - np.cos(angles))
-                y_arc = R*np.sin(angles)
-                d_arc = np.sqrt(np.power(x_arc[1:-1], 2) + np.power(y_arc[1:-1], 2))
-                if wpt_angle<np.pi/2:
-                    a_arc = np.arctan(np.true_divide(y_arc[1:-1], x_arc[1:-1]))
-                if wpt_angle>np.pi/2:
-                    a_arc = np.arctan(np.true_divide(y_arc[1:-1], x_arc[1:-1]))+np.pi
-                cx = d_arc*np.cos(a_arc+a) + self.x
-                cy = d_arc*np.sin(a_arc+a) + self.y
+            # else:
+            #     L=R/2
+            #     a = self.theta-np.pi/2
+            #     angles = np.linspace(0,np.pi-2*wpt_angle)
+            #     x_arc = R*(1 - np.cos(angles))
+            #     y_arc = R*np.sin(angles)
+            #     d_arc = np.sqrt(np.power(x_arc[1:-1], 2) + np.power(y_arc[1:-1], 2))
+            #     if wpt_angle<np.pi/2:
+            #         a_arc = np.arctan(np.true_divide(y_arc[1:-1], x_arc[1:-1]))
+            #     if wpt_angle>np.pi/2:
+            #         a_arc = np.arctan(np.true_divide(y_arc[1:-1], x_arc[1:-1]))+np.pi
+            #     cx = d_arc*np.cos(a_arc+a) + self.x
+            #     cy = d_arc*np.sin(a_arc+a) + self.y
 
-                cx = cx.flatten().tolist()
-                cy = cy.flatten()
+            #     cx = cx.flatten().tolist()
+            #     cy = cy.flatten()
 
+            yaw = np.arctan2(cy[-1]-cy[-2], cx[-1]-cx[-2])
+            d = 2
+            x = cx[-1] + d*np.cos(yaw)
+            y = cy[-1] + d*np.sin(yaw)
+            
+            x_straight = np.linspace(cx[-1], x, 10)
+            y_straight = np.linspace(cy[-1], y, 10)
+
+            [cx.append(i) for i in x_straight[1:-1]]
+            [cy.append(i) for i in y_straight[1:-1]]
+            
             cx, cy, cyaw, ck, s = cubic_spline_planner.calc_spline_course(cx, cy)
-            
-            #plt.plot(x_arc, y_arc, 'x')
-            #plt.plot(cx, cy, 'o')
-            #plt.axis('equal')
-            #plt.show()
+
 
         return np.array(cx), np.array(cy), np.array(cyaw)
 
@@ -905,89 +947,90 @@ class environment():
 def test_environment():
     
     
-    agent_name = 'ete_porto'
-    parent_dir = os.path.dirname(os.path.abspath(__file__))
-    agent_dir = parent_dir + '/agents/' + agent_name
-    agent_params_file = agent_dir + '/' + agent_name + '_params'
-    replay_episode_name = 'replay_episodes/' + agent_name
+    # agent_name = 'ete_porto'
+    # parent_dir = os.path.dirname(os.path.abspath(__file__))
+    # agent_dir = parent_dir + '/agents/' + agent_name
+    # agent_params_file = agent_dir + '/' + agent_name + '_params'
+    # replay_episode_name = 'replay_episodes/' + agent_name
     
-    infile=open(replay_episode_name, 'rb')
-    action_history = pickle.load(infile)
-    initial_condition = pickle.load(infile)
-    n = pickle.load(infile)
-    infile.close()
+    # infile=open(replay_episode_name, 'rb')
+    # action_history = pickle.load(infile)
+    # initial_condition = pickle.load(infile)
+    # n = pickle.load(infile)
+    # infile.close()
     
-    infile = open('environments/' + agent_name, 'rb')
-    env_dict = pickle.load(infile)
-    infile.close()
-    env_dict['display']=True
-    env_dict['architecture'] = 'pete'
+    # infile = open('environments/' + agent_name, 'rb')
+    # env_dict = pickle.load(infile)
+    # infile.close()
+    # env_dict['display']=True
+    # env_dict['architecture'] = 'pete'
 
-    infile = open(agent_params_file, 'rb')
-    agent_dict = pickle.load(infile)
-    infile.close()
-    agent_dict['layer3_size'] = 300
+    # infile = open(agent_params_file, 'rb')
+    # agent_dict = pickle.load(infile)
+    # infile.close()
+    # agent_dict['layer3_size'] = 300
 
-    env = environment(env_dict)
-    env.reset(save_history=True, start_condition=initial_condition, get_lap_time=False)
+    #env = environment(env_dict)
+    # env.reset(save_history=True, start_condition=initial_condition, get_lap_time=False)
     
-    a = agent_td3.agent(agent_dict)
-    a.load_weights(agent_name, n)
+    # a = agent_td3.agent(agent_dict)
+    # a.load_weights(agent_name, n)
     
 
     
-    # car_params =   {'mu': 1.0489, 'C_Sf': 4.718, 'C_Sr': 5.4562, 'lf': 0.15875, 'lr': 0.17145
-    #             , 'h': 0.074, 'm': 3.74, 'I': 0.04712, 's_min': -0.4189, 's_max': 0.4189, 'sv_min': -3.2
-    #             , 'sv_max': 3.2, 'v_switch': 7.319, 'a_max': 9.51, 'v_min':-5.0, 'v_max': 20.0, 'width': 0.31, 'length': 0.58}
-    
-    # reward_signal = {'goal_reached':0, 'out_of_bounds':-1, 'max_steps':0, 'collision':-1, 'backwards':-1, 'park':-0.5, 'time_step':-0.005, 'progress':0, 'distance':0.3}    
-    
-    # action_space_dict = {'action_space': 'continuous', 'vel_select':[5], 'R_range':[3]}
-    # #action_space_dict = {'action_space': 'discrete', 'n_waypoints': 10, 'vel_select':[7], 'R_range':[3]}
-    
-    # path_dict = {'local_path':False, 'waypoint_strategy':'local', 'wpt_arc':np.pi/2}
-     
-    # if path_dict['local_path'] == True: #True or false
-    #     path_dict['path_strategy'] = 'polynomial' #circle or linear
-    #     path_dict['control_strategy'] = 'pure_pursuit' #pure_pursuit or stanley
+    car_params =   {'mu': 1.0489, 'C_Sf': 4.718, 'C_Sr': 5.4562, 'lf': 0.15875, 'lr': 0.17145
+                  , 'h': 0.074, 'm': 3.74, 'I': 0.04712, 's_min': -0.4189, 's_max': 0.4189, 'sv_min': -3.2
+                  , 'sv_max': 3.2, 'v_switch': 7.319, 'a_max': 9.51, 'v_min':-5.0, 'v_max': 20.0, 'width': 0.31, 'length': 0.58}
+   
+    reward_signal = {'goal_reached':0, 'out_of_bounds':-1, 'max_steps':0, 'collision':-1, 'backwards':-1, 'park':-0.5, 'time_step':-0.005, 'progress':0, 'distance':0.3}    
+   
+    action_space_dict = {'action_space': 'continuous', 'vel_select':[3,7], 'R_range':[2]}
+   
+    #action_space_dict = {'action_space': 'discrete', 'n_waypoints': 10, 'vel_select':[7], 'R_range':[6]}
+
+    path_dict = {'local_path':True, 'waypoint_strategy':'local', 'wpt_arc':np.pi/2}
+   
+    if path_dict['local_path'] == True: #True or false
+        path_dict['path_strategy'] = 'circle' #circle or linear or polynomial or gradient
+        path_dict['control_strategy'] = 'pure_pursuit' #pure_pursuit or stanley
         
-    #     if path_dict['control_strategy'] == 'pure_pursuit':
-    #         path_dict['track_dict'] = {'k':0.1, 'Lfc':1}
-    #     if path_dict['control_strategy'] == 'stanley':
-    #         path_dict['track_dict'] = {'l_front': car_params['lf'], 'k':1, 'max_steer':car_params['s_max']}
+        if path_dict['control_strategy'] == 'pure_pursuit':
+            path_dict['track_dict'] = {'k':0.1, 'Lfc':1}
+        if path_dict['control_strategy'] == 'stanley':
+            path_dict['track_dict'] = {'l_front': car_params['lf'], 'k':5, 'max_steer':car_params['s_max']}
+   
+    lidar_dict = {'is_lidar':True, 'lidar_res':0.1, 'n_beams':8, 'max_range':20, 'fov':np.pi}
+   
+    env_dict = {'sim_conf': functions.load_config(sys.path[0], "config")
+            , 'save_history': False
+            , 'map_name': 'circle'
+            , 'max_steps': 3000
+            , 'control_steps': 20
+            , 'display': True
+            , 'architecture': 'pete'    #pete, ete
+            , 'car_params':car_params
+            , 'reward_signal':reward_signal
+            , 'lidar_dict':lidar_dict
+            , 'action_space_dict':action_space_dict
+            , 'path_dict': path_dict
+            } 
     
-    # lidar_dict = {'is_lidar':True, 'lidar_res':0.1, 'n_beams':8, 'max_range':20, 'fov':np.pi}
+    env_dict['name'] = 'test'
     
-    # env_dict = {'sim_conf': functions.load_config(sys.path[0], "config")
-    #     , 'save_history': False
-    #     , 'map_name': 'circle'
-    #     , 'max_steps': 2000
-    #     , 'control_steps': 15
-    #     , 'display': True
-    #     , 'architecture': 'pete'
-    #     , 'car_params':car_params
-    #     , 'reward_signal':reward_signal
-    #     , 'lidar_dict':lidar_dict
-    #     , 'action_space_dict':action_space_dict
-    #     , 'path_dict': path_dict
-    #     } 
-    
-
-    #env_dict['name'] = 'test'
     #initial_condition = {'x':8.18, 'y':26.24, 'v':4, 'delta':0, 'theta':np.pi, 'goal':1}
-    #initial_condition = {'x':16, 'y':4, 'v':7, 'delta':0, 'theta':0, 'goal':1}
-    #initial_condition = {'x':8, 'y':3, 'v':7, 'delta':0, 'theta':np.pi, 'goal':1}
+    initial_condition = {'x':16, 'y':4, 'v':5, 'delta':0, 'theta':0, 'goal':1}
+    #initial_condition = {'x':6, 'y':6.5, 'v':4, 'delta':0, 'theta':np.pi, 'goal':1}
     #initial_condition = []
     
 
     env = environment(env_dict)
-    env.reset(save_history=True, start_condition=initial_condition, get_lap_time=False)
+    env.reset(save_history=True, start_condition=initial_condition, get_lap_time=False, car_params=env_dict['car_params'])
 
     #a = agent_td3.agent(agent_dict)
     #a.load_weights(agent_name, n)
     
-    #action_history = np.ones((1000,2))*0.5
-    #action_history[:,1] = np.zeros(1000)
+    action_history = np.ones((1000,2))*0.3
+    action_history[:,1] = np.ones(1000)*5/7
 
     done=False
     score=0
