@@ -204,10 +204,10 @@ def map_generator(map_name):
     return occupancy_grid, map_height, map_width, res 
 
    
-def random_start(x, y, rx, ry, ryaw, rk, s):
+def random_start(rx, ry, ryaw, distance_offset, angle_offset):
     
-    offset=0.3
     #random.seed(datetime.now())
+    
     '''
     if episode < 20000:
         if random.uniform(0,1)<0.1:
@@ -223,19 +223,27 @@ def random_start(x, y, rx, ry, ryaw, rk, s):
 
     else:
     '''
-    i = int(random.uniform(0, len(x)-2))
+
+    # i = int(random.uniform(0, len(x)-2))
     
-    #i = int(random.uniform(0, len(x)-2))
-    #i = int(random.uniform(10, 12))
+    # #i = int(random.uniform(0, len(x)-2))
+    # #i = int(random.uniform(10, 12))
     
-    next_i = (i+1)%len(y)
-    start_x = x[i] + (random.uniform(-offset, offset))
-    start_y = y[i] + (random.uniform(-offset, offset))
+    # next_i = (i+1)%len(y)
+    # start_x = x[i] + (random.uniform(-distance_offset, distance_offset))
+    # start_y = y[i] + (random.uniform(-distance_offset, distance_offset))
     
-    start_theta = math.atan2(y[next_i]-y[i], x[next_i]-x[i]) + (random.uniform(-math.pi/6, math.pi/6))
-    next_goal = (i+1)%len(x)
+    # start_theta = math.atan2(y[next_i]-y[i], x[next_i]-x[i]) + (random.uniform(-angle_offset, angle_offset))
+    # next_goal = (i+1)%len(x)
+
+    i = int(random.uniform(0, len(rx)))
+    start_x = rx[i] + random.uniform(-distance_offset, distance_offset)
+    start_y = ry[i] + random.uniform(-distance_offset, distance_offset)
+    start_theta = ryaw[i] + random.uniform(-angle_offset, angle_offset)
+    next_i = 0
 
     return start_x, start_y, start_theta, next_i
+
 
 
 def find_closest_point(rx, ry, x, y):
@@ -457,7 +465,7 @@ class lidar_scan():
 
         return scan, coords
 
-def generate_initial_condition(name, episodes):
+def generate_initial_condition(name, episodes, distance_offset, angle_offset):
     file_name = 'test_initial_condition/' + name
    
     initial_conditions = []
@@ -467,16 +475,36 @@ def generate_initial_condition(name, episodes):
     goal_x = track.centerline[:,0]
     goal_y = track.centerline[:,1]
     rx, ry, ryaw, rk, d = cubic_spline_planner.calc_spline_course(goal_x, goal_y)
-   
+    
+    k = [i for i in range(len(rk)) if abs(rk[i])>1]
+    spawn_ind = np.full(len(rx), True)
+    for i in k:
+        spawn_ind[np.arange(i-10, i+5)] = False
+    
+    x = [rx[i] for i in range(len(rx)) if spawn_ind[i]==True]
+    y = [ry[i] for i in range(len(ry)) if spawn_ind[i]==True]
+    yaw = [ryaw[i] for i in range(len(ryaw)) if spawn_ind[i]==True]
+    
     for eps in range(episodes):
-        x, y, theta, current_goal = random_start(goal_x, goal_y, rx, ry, ryaw, rk, d)
-        v = random.random()*1
-        delta = 0
-        i = {'x':x, 'y':y, 'v':v, 'delta':delta, 'theta':theta, 'goal':current_goal}
+        x_s, y_s, theta_s, current_goal = random_start(x, y, yaw, distance_offset, angle_offset)
+        #x, y, theta = random_start(goal_x, goal_y, rx, ry, ryaw, rk, d, distance_offset, angle_offset)
+        v_s = random.random()*0.5
+        delta_s = 0
+        i = {'x':x_s, 'y':y_s, 'v':v_s, 'delta':delta_s, 'theta':theta_s, 'goal':current_goal}
         initial_conditions.append(i)
 
-   #initial_conditions = [ [] for _ in range(episodes)]
-   
+    #initial_conditions = [ [] for _ in range(episodes)]
+
+    x = [initial_conditions[i]['x'] for i in range(len(initial_conditions))]
+    y = [initial_conditions[i]['y'] for i in range(len(initial_conditions))]  
+    
+    plt.imshow(track.gray_im, extent=(0,track.map_width,0,track.map_height))
+    plt.plot(rx, ry)
+    plt.plot(goal_x, goal_y, 'o')
+    plt.plot(x, y, 'x')
+    plt.show()
+
+
     outfile=open(file_name, 'wb')
     pickle.dump(initial_conditions, outfile)
     outfile.close()
@@ -540,7 +568,7 @@ if __name__ == '__main__':
     #occupancy_grid, map_height, map_width, res = map_generator(map_name='circle')
     #a = lidar_scan(res, 3, 10, np.pi, occupancy_grid, res, 30)
     #print(a.get_scan(15,5,0))
-    generate_initial_condition('redbull_ring', 1000)
+    generate_initial_condition('redbull_ring', 2000, distance_offset=0.2, angle_offset=np.pi/8)
 
 
     #im = image.imread(image_path)

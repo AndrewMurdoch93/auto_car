@@ -1,4 +1,5 @@
 
+from re import I
 import sys
 import numpy as np
 from matplotlib import  pyplot as plt
@@ -141,58 +142,67 @@ class map:
     #def generate_line(self)
 
 def test_map():
-    m = map('redbull_ring')
+    m = map('torino')
     m.find_centerline(False)
     rx, ry, ryaw, rk, d = cubic_spline_planner.calc_spline_course(m.centerline[:,0], m.centerline[:,1])
     plt.imshow(m.gray_im, extent=(0,m.map_width,0,m.map_height))
     
-    x=35
-    plt.plot(rx[x-10], ry[x-10], 'x')
-    plt.plot(rx[x], ry[x], 'x')
-    plt.plot(rx[x+10], ry[x+10], 'x')
-    plt.plot(rx, ry)
-
-    x=115
-    plt.plot(rx[x-10], ry[x-10], 'x')
-    plt.plot(rx[x], ry[x], 'x')
-    plt.plot(rx[x+10], ry[x+10], 'x')
-    plt.plot(rx, ry)
-
-    x=190
-    plt.plot(rx[x-10], ry[x-10], 'x')
-    plt.plot(rx[x], ry[x], 'x')
-    plt.plot(rx[x+10], ry[x+10], 'x')
-    plt.plot(rx, ry)
-
-    x=230
-    plt.plot(rx[x-10], ry[x-10], 'x')
-    plt.plot(rx[x], ry[x], 'x')
-    plt.plot(rx[x+10], ry[x+10], 'x')
-    plt.plot(rx, ry)
-
-    x=260
-    plt.plot(rx[x-10], ry[x-10], 'x')
-    plt.plot(rx[x], ry[x], 'x')
-    plt.plot(rx[x+10], ry[x+10], 'x')
-    plt.plot(rx, ry)
-
-    x=330
-    plt.plot(rx[x-10], ry[x-10], 'x')
-    plt.plot(rx[x], ry[x], 'x')
-    plt.plot(rx[x+10], ry[x+10], 'x')
-    plt.plot(rx, ry)
+    k = [i for i in range(len(rk)) if abs(rk[i])>1]
+    spawn_ind = np.full(len(rx), True)
+    for i in k:
+        spawn_ind[np.arange(i-10, i+5)] = False
     
-    x=350
-    plt.plot(rx[x-10], ry[x-10], 'x')
-    plt.plot(rx[x], ry[x], 'x')
-    plt.plot(rx[x+10], ry[x+10], 'x')
-    plt.plot(rx, ry)
+    x = [rx[i] for i in range(len(rx)) if spawn_ind[i]==True]
+    y = [ry[i] for i in range(len(ry)) if spawn_ind[i]==True]
+    yaw = [ryaw[i] for i in range(len(ryaw)) if spawn_ind[i]==True]
+
+    # x=35
+    # print('x = ', x, 'rk = ', rk[x-10:x+10])
+    # plt.plot(rx[x-10], ry[x-10], 'x')
+    # plt.plot(rx[x], ry[x], 'x')
+    # plt.plot(rx[x+10], ry[x+10], 'x')
+    # plt.plot(rx, ry)
+
+    # x=115
+    # plt.plot(rx[x-10], ry[x-10], 'x')
+    # plt.plot(rx[x], ry[x], 'x')
+    # plt.plot(rx[x+10], ry[x+10], 'x')
+    # plt.plot(rx, ry)
+
+    # x=190
+    # plt.plot(rx[x-10], ry[x-10], 'x')
+    # plt.plot(rx[x], ry[x], 'x')
+    # plt.plot(rx[x+10], ry[x+10], 'x')
+    # plt.plot(rx, ry)
+
+    # x=230
+    # plt.plot(rx[x-10], ry[x-10], 'x')
+    # plt.plot(rx[x], ry[x], 'x')
+    # plt.plot(rx[x+10], ry[x+10], 'x')
+    # plt.plot(rx, ry)
+
+    # x=260
+    # plt.plot(rx[x-10], ry[x-10], 'x')
+    # plt.plot(rx[x], ry[x], 'x')
+    # plt.plot(rx[x+10], ry[x+10], 'x')
+    # plt.plot(rx, ry)
+
+    # x=330
+    # plt.plot(rx[x-10], ry[x-10], 'x')
+    # plt.plot(rx[x], ry[x], 'x')
+    # plt.plot(rx[x+10], ry[x+10], 'x')
+    # plt.plot(rx, ry)
+    
+    # x=350
+    # plt.plot(rx[x-10], ry[x-10], 'x')
+    # plt.plot(rx[x], ry[x], 'x')
+    # plt.plot(rx[x+10], ry[x+10], 'x')
+    # plt.plot(rx, ry)
 
 
-
-
-
-    #plt.plot(m.centerline[:,0], m.centerline[:,1], 'x')
+    plt.plot(rx,ry)
+    plt.plot(x, y, 'x')
+    plt.plot(m.centerline[:,0], m.centerline[:,1], 'x')
     plt.show()
 
 

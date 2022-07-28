@@ -144,8 +144,19 @@ class environment():
             self.delta = self.start_condition['delta']
             self.current_goal = self.start_condition['goal']
         else:
-            self.x, self.y, self.theta, self.current_goal = functions.random_start(self.goal_x, self.goal_y, self.rx, self.ry, self.ryaw, self.rk, self.d)
-            self.v = random.random()*self.vel_select[-1]
+            
+            k = [i for i in range(len(self.rk)) if abs(self.rk[i])>1]
+            spawn_ind = np.full(len(self.rx), True)
+            for i in k:
+                spawn_ind[np.arange(i-10, i+5)] = False
+            
+            x = [self.rx[i] for i in range(len(self.rx)) if spawn_ind[i]==True]
+            y = [self.ry[i] for i in range(len(self.ry)) if spawn_ind[i]==True]
+            yaw = [self.ryaw[i] for i in range(len(self.ryaw)) if spawn_ind[i]==True]
+            distance_offset = 0.2
+            angle_offset = np.pi/8
+            self.x, self.y, self.theta, self.current_goal = functions.random_start(x, y, yaw, distance_offset, angle_offset)
+            self.v = random.random()*self.vel_select[-1]*0.7
             #self.v = random.random()*7
             #self.v=0    
             #self.v = 20
@@ -522,16 +533,16 @@ class environment():
             #     cx = cx.flatten().tolist()
             #     cy = cy.flatten()
 
-            yaw = np.arctan2(cy[-1]-cy[-2], cx[-1]-cx[-2])
-            d = 2
-            x = cx[-1] + d*np.cos(yaw)
-            y = cy[-1] + d*np.sin(yaw)
-            
-            x_straight = np.linspace(cx[-1], x, 10)
-            y_straight = np.linspace(cy[-1], y, 10)
+                yaw = np.arctan2(cy[-1]-cy[-2], cx[-1]-cx[-2])
+                d = 2
+                x = cx[-1] + d*np.cos(yaw)
+                y = cy[-1] + d*np.sin(yaw)
+                
+                x_straight = np.linspace(cx[-1], x, 10)
+                y_straight = np.linspace(cy[-1], y, 10)
 
-            [cx.append(i) for i in x_straight[1:-1]]
-            [cy.append(i) for i in y_straight[1:-1]]
+                [cx.append(i) for i in x_straight[1:-1]]
+                [cy.append(i) for i in y_straight[1:-1]]
             
             cx, cy, cyaw, ck, s = cubic_spline_planner.calc_spline_course(cx, cy)
 
