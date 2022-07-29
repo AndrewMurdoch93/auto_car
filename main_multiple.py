@@ -42,6 +42,7 @@ class trainingLoop():
       self.runs = main_dict['runs']
       self.agent_name = main_dict['name']
       self.max_episodes = main_dict['max_episodes']
+      self.max_steps = main_dict['max_steps']
       self.comment = main_dict['comment']
 
       #Initialise file names for saving data
@@ -122,7 +123,6 @@ class trainingLoop():
       pickle.dump(self.agent_dict, outfile)
       outfile.close()
 
-
       scores = np.zeros([self.runs, self.max_episodes])
       progress = np.zeros([self.runs, self.max_episodes])
       times = np.zeros([self.runs, self.max_episodes])
@@ -139,7 +139,9 @@ class trainingLoop():
          
          car_params = self.env_dict['car_params']
 
-         for episode in range(self.max_episodes):
+         episode=0
+         
+         while np.sum(steps)<=self.max_steps and episode<=self.max_episodes:
             
             self.env.reset(save_history=True, start_condition=[], car_params=car_params, get_lap_time=False)  #Reset the environment every episode
             obs = self.env.observation      #Records starting state
@@ -214,9 +216,6 @@ class trainingLoop():
                
             if self.learning_method == 'ddpg' or self.learning_method == 'td3':
                while not done: 
-                  
-                
-
                   action = self.agent.choose_action(obs)    #Select an action
                   next_obs, reward, done = self.env.take_action(action) #Environment executes action
                   self.agent.store_transition(obs, action, reward, next_obs, int(done))
@@ -257,8 +256,9 @@ class trainingLoop():
                   print(f"{'Run':3s} {n:2.0f} {'| Episode':8s} {episode:5.0f} {'| Score':8s} {score:6.2f} {'| Progress':12s} {self.env.progress:3.2f} {'| collision ':14s} {self.env.collision} {'| Average score':15s} {avg_score:6.2f} {'| Average progress':18s} {avg_progress:3.2f} {'| Epsilon':9s} {self.agent.epsilon:.2f}")
                if self.learning_method=='reinforce' or self.learning_method=='actor_critic_sep' or self.learning_method=='actor_critic_com' or self.learning_method=='actor_critic_cont' or self.learning_method=='ddpg' or self.learning_method=='td3':
                   print(f"{'Run':3s} {n:2.0f} {'| Episode':8s} {episode:5.0f} {'| Score':8s} {score:6.2f} {'| Progress':12s} {self.env.progress:3.2f} {'| collision ':14s} {self.env.collision} {'| Average score':15s} {avg_score:6.2f} {'| Average progress':18s} {avg_progress:3.2f}")
+
+            episode+=1
                
-         
          self.save_agent(n)
 
       outfile=open(self.train_results_file_name, 'wb')
@@ -735,8 +735,9 @@ def lap_time_test_mismatch(agent_name, n_episodes, detect_issues, initial_condit
 if __name__=='__main__':
 
    agent_name = 'pete_sv_berlin'
-   
-   main_dict = {'name':agent_name, 'max_episodes':2000, 'learning_method':'td3', 'runs':1, 'comment':''}
+   agent_name = 'test_1'
+
+   main_dict = {'name':agent_name, 'max_episodes':50000, 'max_steps':3e6, 'learning_method':'td3', 'runs':1, 'comment':''}
 
    agent_dqn_dict = {'gamma':0.99, 'epsilon':1, 'eps_end':0.01, 'eps_dec':1/1000, 'lr':0.001, 'batch_size':64, 'max_mem_size':500000, 
                   'fc1_dims': 64, 'fc2_dims': 64, 'fc3_dims':64}
@@ -767,7 +768,9 @@ if __name__=='__main__':
                   , 'h': 0.074, 'm': 3.74, 'I': 0.04712, 's_min': -0.4189, 's_max': 0.4189, 'sv_min': -3.2
                   , 'sv_max': 3.2, 'v_switch': 7.319, 'a_max': 9.51, 'v_min':-5.0, 'v_max': 20.0, 'width': 0.31, 'length': 0.58}
    
-   reward_signal = {'goal_reached':0, 'out_of_bounds':-1, 'max_steps':0, 'collision':-1, 'backwards':-1, 'park':-0.5, 'time_step':-0.005, 'progress':0, 'distance':0.3}    
+   reward_signal = {'goal_reached':0, 'out_of_bounds':-1, 'max_steps':0, 'collision':-1, 
+                     'backwards':-1, 'park':-1, 'time_step':-0.005, 'progress':0, 'distance':0.3, 
+                     'max_progress':0}    
    
    action_space_dict = {'action_space': 'continuous', 'vel_select':[3,7], 'R_range':[2]}
    
@@ -788,11 +791,11 @@ if __name__=='__main__':
    
    env_dict = {'sim_conf': functions.load_config(sys.path[0], "config")
             , 'save_history': False
-            , 'map_name': 'berlin'
+            , 'map_name': 'redbull_ring'
             , 'max_steps': 3000
             , 'control_steps': 20
             , 'display': False
-            , 'architecture': 'pete'    #pete, ete
+            , 'architecture': 'ete'    #pete, ete
             , 'car_params':car_params
             , 'reward_signal':reward_signal
             , 'lidar_dict':lidar_dict
@@ -804,12 +807,12 @@ if __name__=='__main__':
    a = trainingLoop(main_dict, agent_td3_dict, env_dict, load_agent='')
    a.train()
    test(agent_name=agent_name, n_episodes=100, detect_issues=False, initial_conditions=True)
-   lap_time_test(agent_name=agent_name, n_episodes=500, detect_issues=False, initial_conditions=True)
+   lap_time_test(agent_name=agent_name, n_episodes=100, detect_issues=False, initial_conditions=True)
    lap_time_test_mismatch(agent_name=agent_name, n_episodes=100, detect_issues=False, initial_conditions=True, parameter='C_Sf', frac_variation=np.array([-0.05, 0.05]))
    
    agent_name = 'pete_sv_circle'
    main_dict['name'] = agent_name
-   main_dict['episodes'] = 1000
+   main_dict['max_steps'] = 1e6
    env_dict['map_name'] = 'circle'
    env_dict['architecture'] = 'pete'
    a = trainingLoop(main_dict, agent_td3_dict, env_dict, load_agent='')
@@ -819,17 +822,17 @@ if __name__=='__main__':
 
    agent_name = 'pete_sv_torino'
    main_dict['name'] = agent_name
-   main_dict['episodes'] = 2000
+   main_dict['max_steps'] = 3e6
    env_dict['map_name'] = 'torino'
    env_dict['architecture'] = 'pete'
    a = trainingLoop(main_dict, agent_td3_dict, env_dict, load_agent='')
-   # a.train()
-   # test(agent_name=agent_name, n_episodes=100, detect_issues=False, initial_conditions=True)
-   # lap_time_test(agent_name=agent_name, n_episodes=500, detect_issues=False, initial_conditions=True)
+   a.train()
+   test(agent_name=agent_name, n_episodes=100, detect_issues=False, initial_conditions=True)
+   lap_time_test(agent_name=agent_name, n_episodes=500, detect_issues=False, initial_conditions=True)
 
    agent_name = 'pete_sv_redbull_ring'
    main_dict['name'] = agent_name
-   main_dict['episodes'] = 8000
+   main_dict['max_steps'] = 4e6
    env_dict['map_name'] = 'redbull_ring'
    env_dict['architecture'] = 'pete'
    a = trainingLoop(main_dict, agent_td3_dict, env_dict, load_agent='')
@@ -839,7 +842,7 @@ if __name__=='__main__':
 
    agent_name = 'pete_v_berlin'
    main_dict['name'] = agent_name
-   main_dict['episodes'] = 2000
+   main_dict['max_steps'] = 3e6
    env_dict['map_name'] = 'berlin'
    env_dict['architecture'] = 'pete'
    env_dict['path_dict']['local_path'] = False
@@ -850,7 +853,7 @@ if __name__=='__main__':
 
    agent_name = 'pete_v_circle'
    main_dict['name'] = agent_name
-   main_dict['episodes'] = 1000
+   main_dict['max_steps'] = 1e6
    env_dict['map_name'] = 'circle'
    env_dict['architecture'] = 'pete'
    env_dict['path_dict']['local_path'] = False
@@ -861,7 +864,7 @@ if __name__=='__main__':
 
    agent_name = 'pete_v_torino'
    main_dict['name'] = agent_name
-   main_dict['episodes'] = 2000
+   main_dict['max_steps'] = 3e6
    env_dict['map_name'] = 'torino'
    env_dict['architecture'] = 'pete'
    env_dict['path_dict']['local_path'] = False
@@ -872,7 +875,7 @@ if __name__=='__main__':
 
    agent_name = 'pete_v_redbull_ring'
    main_dict['name'] = agent_name
-   main_dict['episodes'] = 8000
+   main_dict['max_steps'] = 4e6
    env_dict['map_name'] = 'redbull_ring'
    env_dict['architecture'] = 'pete'
    env_dict['path_dict']['local_path'] = False
@@ -883,7 +886,7 @@ if __name__=='__main__':
 
    agent_name = 'ete_berlin'
    main_dict['name'] = agent_name
-   main_dict['episodes'] = 2000
+   main_dict['max_steps'] = 3e6
    env_dict['map_name'] = 'berlin'
    env_dict['architecture'] = 'ete'
    a = trainingLoop(main_dict, agent_td3_dict, env_dict, load_agent='')
@@ -893,7 +896,7 @@ if __name__=='__main__':
 
    agent_name = 'ete_circle'
    main_dict['name'] = agent_name
-   main_dict['episodes'] = 1000
+   main_dict['max_steps'] = 1e6
    env_dict['map_name'] = 'circle'
    env_dict['architecture'] = 'ete'
    a = trainingLoop(main_dict, agent_td3_dict, env_dict, load_agent='')
@@ -903,7 +906,7 @@ if __name__=='__main__':
 
    agent_name = 'ete_torino'
    main_dict['name'] = agent_name
-   main_dict['episodes'] = 2000
+   main_dict['max_steps'] = 3e6
    env_dict['map_name'] = 'torino'
    env_dict['architecture'] = 'ete'
    a = trainingLoop(main_dict, agent_td3_dict, env_dict, load_agent='')
@@ -913,7 +916,7 @@ if __name__=='__main__':
 
    agent_name = 'ete_redbull_ring'
    main_dict['name'] = agent_name
-   main_dict['episodes'] = 8000
+   main_dict['max_steps'] = 4e6
    env_dict['map_name'] = 'redbull_ring'
    env_dict['architecture'] = 'ete'
    a = trainingLoop(main_dict, agent_td3_dict, env_dict, load_agent='')
@@ -985,11 +988,17 @@ if __name__=='__main__':
    #display_results_multiple.display_lap_mismatch_results(agent_names, parameters, legend_title, legend)
    #display_results_multiple.display_lap_mismatch_results_box(agent_names, parameters, legend_title, legend)
    
-   #agent_name = 'pete_sv_berlin'
-   #display_results_multiple.learning_curve_progress(agent_name=agent_name,  show_average=True, show_median=True)
+   agent_name = 'pete_sv_berlin'
+   #agent_name = 'pete_v_circle'
+   #agent_name = 'ete_circle'
+
+   legend = [agent_name]
+   legend_title = 'agent name'
+   display_results_multiple.compare_learning_curves_progress(agent_names=[agent_name], legend=legend, legend_title=legend_title, 
+      show_average=True, show_median=False, xaxis='steps')
    #display_results_multiple.display_train_parameters(agent_name=agent_name)
    #display_results_multiple.agent_progress_statistics(agent_name=agent_name)
-   #display_results_multiple.display_lap_results(agent_name=agent_name)
+   display_results_multiple.display_lap_results(agent_name=agent_name)
    #display_results_multiple.display_moving_agent(agent_name=agent_name, load_history=False, n=0)
    #display_results_multiple.display_path(agent_name=agent_name, load_history=False, n=0)
 

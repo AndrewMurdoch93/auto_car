@@ -128,8 +128,11 @@ class environment():
         self.episode = 0
 
 
-
     def reset(self, save_history, start_condition, car_params ,get_lap_time=False):
+        self.max_progress=1
+        self.max_progress_reached=False
+
+        
         self.episode+=1
         self.save_history=save_history
         self.start_condition = start_condition
@@ -280,6 +283,7 @@ class environment():
 
 
                 v_dot = act[1]*self.params['a_max']
+                v_dot = vehicle_model.accl_constraints(self.v, v_dot, self.params['v_switch'], self.params['a_max'], self.vel_select[0], self.vel_select[1])
     
                 self.update_pose(delta_ref, v_dot)
 
@@ -744,6 +748,9 @@ class environment():
         if self.goals_reached==(len(self.goals)):
             self.max_goals_reached=True
         
+        if self.progress>=self.max_progress:
+            self.max_progress_reached=True
+        
         if self.steps>1 and self.v<0.1:
             self.park=True
         else:
@@ -787,7 +794,10 @@ class environment():
 
         elif self.park==True:
             reward=self.reward_signal['park']
-
+        
+        elif self.max_progress_reached==True:
+            reward=self.reward_signal['max_progress']
+        
         else:
             reward=0
             reward+=self.reward_signal['time_step']
@@ -818,7 +828,7 @@ class environment():
             return True
         elif self.get_lap_time==True and self.progress>=1:
             return True
-        elif self.progress>=1.5:
+        elif self.max_progress_reached==True:
             return True
         else:
             return False
