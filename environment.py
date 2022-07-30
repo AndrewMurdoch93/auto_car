@@ -755,7 +755,10 @@ class environment():
             self.park=True
         else:
             self.park=False
-
+        
+        if self.current_progress<0:
+            self.backwards=True
+        
         if functions.occupied_cell(self.x, self.y, self.occupancy_grid, self.map_res, self.map_height)==True:
             self.collision=True
         else:
