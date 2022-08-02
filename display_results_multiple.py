@@ -622,7 +622,7 @@ def display_moving_agent(agent_name, load_history=False, n=0):
         #gh = env.goal_history[i]
         #plt.plot([gh[0]-env.s, gh[0]+env.s, gh[0]+env.s, gh[0]-env.s, gh[0]-env.s], [gh[1]-env.s, gh[1]-env.s, gh[1]+env.s, gh[1]+env.s, gh[1]-env.s], 'r')
         
-        if env.local_path==True:
+        if env.local_path==True and env.architecture=='pete':
             lph = env.local_path_history[i]
             plt.plot(lph[0], lph[1])
         
