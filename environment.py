@@ -152,12 +152,13 @@ class environment():
             spawn_ind = np.full(len(self.rx), True)
             for i in k:
                 spawn_ind[np.arange(i-10, i+5)] = False
-            
             x = [self.rx[i] for i in range(len(self.rx)) if spawn_ind[i]==True]
             y = [self.ry[i] for i in range(len(self.ry)) if spawn_ind[i]==True]
             yaw = [self.ryaw[i] for i in range(len(self.ryaw)) if spawn_ind[i]==True]
+            
             distance_offset = 0.2
             angle_offset = np.pi/8
+            #self.x, self.y, self.theta, self.current_goal = functions.random_start(rx, ry, ryaw, distance_offset, angle_offset)
             self.x, self.y, self.theta, self.current_goal = functions.random_start(x, y, yaw, distance_offset, angle_offset)
             self.v = random.random()*self.vel_select[-1]*0.7
             #self.v = random.random()*7
@@ -375,6 +376,11 @@ class environment():
 
                 lastIndex = len(cx)-1
                 i=0
+
+                if lastIndex<=target_index:
+                    done=True
+                    
+
                 while (lastIndex > target_index) and i<self.control_steps:
                     
                     if self.display==True:
@@ -959,11 +965,14 @@ class environment():
         # update state
         self.state = self.state + f * self.dt
         
-        self.x = self.state[0]
-        self.y = self.state[1]
-        self.theta = self.state[4]%(2*np.pi)
-        self.v = self.state[3]
-        self.delta = self.state[2]
+        try:
+            self.x = self.state[0]
+            self.y = self.state[1]
+            self.theta = self.state[4]%(2*np.pi)
+            self.v = self.state[3]
+            self.delta = self.state[2]
+        except:
+            print('Invalid state value')
 
         #print(self.theta)
         #print(self.delta)
@@ -1012,7 +1021,7 @@ def test_environment():
    
     #action_space_dict = {'action_space': 'discrete', 'n_waypoints': 10, 'vel_select':[7], 'R_range':[6]}
 
-    path_dict = {'local_path':True, 'waypoint_strategy':'local', 'wpt_arc':np.pi/2}
+    path_dict = {'local_path':False, 'waypoint_strategy':'local', 'wpt_arc':np.pi/2}
    
     if path_dict['local_path'] == True: #True or false
         path_dict['path_strategy'] = 'circle' #circle or linear or polynomial or gradient
@@ -1031,7 +1040,7 @@ def test_environment():
             , 'max_steps': 3000
             , 'control_steps': 20
             , 'display': True
-            , 'architecture': 'pete'    #pete, ete
+            , 'architecture': 'ete'    #pete, ete
             , 'car_params':car_params
             , 'reward_signal':reward_signal
             , 'lidar_dict':lidar_dict
