@@ -139,7 +139,8 @@ class agent():
         input_dims = agent_dict["input_dims"]
         layer1_size = agent_dict["layer1_size"]
         layer2_size = agent_dict["layer2_size"]
-        layer3_size = agent_dict["layer3_size"]
+        #layer3_size = agent_dict["layer3_size"]
+        layer3_size = 300
         n_actions = agent_dict["n_actions"]
 
         self.actor = ActorNetwork(alpha, input_dims, layer1_size, layer2_size, layer3_size, n_actions=n_actions, filename=self.name)

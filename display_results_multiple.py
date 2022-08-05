@@ -1,4 +1,5 @@
 from audioop import avg
+from re import S
 from statistics import median
 import numpy as np
 import agent_dqn
@@ -18,8 +19,6 @@ import matplotlib.pyplot as plt
 import pickle
 import functions
 import sys
-import matplotlib.patches as patches
-import matplotlib.animation as animation
 import math
 from matplotlib import image
 from PIL import Image
@@ -29,7 +28,17 @@ from environment import environment
 import pandas as pd
 import time
 import random
+from matplotlib.ticker import FormatStrFormatter
+import mapping
 
+# import matplotlib
+# matplotlib.use("pgf")
+# matplotlib.rcParams.update({
+#     "pgf.texsystem": "pdflatex",
+#     'font.family': 'serif',
+#     'text.usetex': True,
+#     'pgf.rcfonts': False,
+# })
 
 
 #from numpy import unique
@@ -412,64 +421,183 @@ def display_lap_results(agent_name):
         #print(f"{np.std(np.round(test_progress, 1), axis=1)[n]:10.3f}", end='')
         #print("")
 
-
-def display_lap_mismatch_results(agent_names, parameters, legend_title, legend):
-
-    # for agent in agent_names:
-        
-    #     infile = open('lap_results_mismatch/' + agent + '/' + parameter, 'rb')
-    #     results_dict = pickle.load(infile)
-    #     infile.close() 
-
-    #     n_episodes = len(results_dict['collision_results'][0,0,:])
-    #     n_param = len(results_dict['collision_results'][0,:,0])
-    #     n_runs = len(results_dict['collision_results'][:,0,0])
-
-    #     y = np.zeros(n_param)
-
-    #     for i in range(n_param):
-    #         y[i] = np.sum(np.logical_not(results_dict['collision_results'][:,i,:]))/(n_episodes*n_runs)
-
-    #     plt.plot(results_dict['frac_variation']*100, y)
-
-    # plt.title('Lap success result for ' + parameter + ' parameter mismatch')
-    # plt.xlabel('% variation from original ' + parameter + ' value')
-    # plt.ylabel('fraction successful laps')
-    # plt.legend(legend, title=legend_title, loc='lower left')
-    # plt.show()
-
-    results = []
+def graph_lap_results(agent_names):
+    
+    results_dict = {}
+    results = {}
+    envs = {}
+    lap_data = []
+    success_data = []
     data = []
 
     for agent in agent_names:
-        for param in parameters:
-            infile = open('lap_results_mismatch/' + agent + '/' + param, 'rb')
-            results_dict = pickle.load(infile)
-            results.append(results_dict)
-            infile.close() 
+        infile = open('lap_results/' + agent, 'rb')
+        results_dict['times'] = pickle.load(infile)
+        results_dict['collisions'] = pickle.load(infile)
+        results[agent] = results_dict
+        infile.close()
+
+        infile = open('environments/' + agent, 'rb')
+        env_dict = pickle.load(infile)
+        envs[agent] = env_dict
+        infile.close()
+
+        pass
+        
+        if env_dict['architecture']=='pete' and env_dict['path_dict']['local_path']==True:
+            architecture = 'partial end-to-end, velocity and steering control'
+
+        elif env_dict['architecture']=='pete' and env_dict['path_dict']['local_path']==False:
+            architecture = 'partial end-to-end, velocity control'
+
+        elif env_dict['architecture']=='ete':
+            architecture = 'fully end-to-end'
+        
+
+        for lap_time, collision in zip(results_dict['times'].flatten(), results_dict['collisions'].flatten()):
+            if collision==False:
+                lap_data.append({'agent_name':agent, 'architecture':architecture, 'map':env_dict['map_name'], 'lap_time':lap_time})
             
+            success_data.append({'agent_name':agent, 'architecture':architecture, 'map':env_dict['map_name'], 'success':np.logical_not(collision)})
+            data.append({'agent_name':agent, 'architecture':architecture, 'map':env_dict['map_name'], 'success':np.logical_not(collision), 'lap_time':lap_time})
+    
+    pass
+    df_lap = pd.DataFrame(lap_data)
+    df_success = pd.DataFrame(success_data)
+    df = pd.DataFrame(data)
+
+    archs = df['architecture'].unique()
+    maps = df['map'].unique()
+
+    arch_lap_results = np.zeros((len(archs), len(maps)))
+    arch_success_results = np.zeros((len(archs), len(maps)))
+
+    for a_idx, a in enumerate(archs):
+        for m_idx, m in enumerate(maps): 
+            arch_lap_results[a_idx, m_idx] = np.average(np.array(df[np.logical_and(np.logical_and(df['architecture']==a, df['map']==m), df['success']==True)]['lap_time']))
+            arch_success_results[a_idx, m_idx] = np.average(np.array(df[np.logical_and(df['architecture']==a, df['map']==m)]['success']))
+
+    x = ['circle', 'porto', 'berlin', 'torino', 'redbull ring']
+    
+    w=0.25
+    bar1 = np.arange(len(maps))
+    bar2 = [i+w for i in bar1]
+    bar3 = [i+w for i in bar2]
+    
+    fig, axs = plt.subplots(2, sharex=True)
+    
+    axs[0].bar(bar1, arch_lap_results[0], w, label=archs[0])
+    axs[0].bar(bar2, arch_lap_results[1], w, label=archs[1])
+    axs[0].bar(bar3, arch_lap_results[2], w, label=archs[2])
+    axs[0].set(ylabel='Lap time [s]')
+    axs[0].set_ylim([5,18])
+    axs[0].legend(archs)
+
+
+    axs[1].bar(bar1, arch_success_results[0], w, label=archs[0])
+    axs[1].bar(bar2, arch_success_results[1], w, label=archs[1])
+    axs[1].bar(bar3, arch_success_results[2], w, label=archs[2])
+    axs[1].set_xticks(bar1+w, x)
+    axs[1].set(xlabel='Track', ylabel='Fraction successful laps')
+    axs[1].set_ylim([0.75,1])
+    #axs[1].legend(archs)
+    plt.show()
+
+
+
+    #axs[0].barplot(x='map', y='lap_time', hue='architecture', capsize=.2, data=df_lap)
+    # p.set_xlabel('% variation from original ' + param + ' value')
+    # p.set_ylabel('fraction successful laps')
+    # handles, _ = p.get_legend_handles_labels()
+    # p.legend(handles, legend ,title=legend_title, loc='lower left')
+    # plt.title('Lap success rate for ' + param + ' mismatch')
+    #plt.show()
+
+    #p = sns.barplot(x='map', y='success', hue='architecture', capsize=.2, data=df_success)
+    # p.set_xlabel('% variation from original ' + param + ' value')
+    # p.set_ylabel('fraction successful laps')
+    # handles, _ = p.get_legend_handles_labels()
+    # p.legend(handles, legend ,title=legend_title, loc='lower left')
+    # plt.title('Lap success rate for ' + param + ' mismatch')
+    #plt.show()
+
+
+agent_names = ['ete_circle_1', 'ete_porto', 'ete_berlin_1', 'ete_torino_1', 'ete_redbull_ring_1', 
+            'pete_v_circle_1', 'ete_new__porto', 'pete_v_berlin_1', 'pete_v_torino_1', 'pete_v_redbull_ring',
+            'pete_sv_circle_1', 'pete_porto', 'pete_sv_berlin_1', 'pete_sv_torino_1', 'pete_sv_redbull_ring']           
+
+#graph_lap_results(agent_names)
+
+
+
+
+def display_lap_mismatch_results(agent_names, parameters, legend_title, legend, plot_titles):
+    
+    fig, axs = plt.subplots(len(parameters), sharex=True)
+
+    for j, parameter in enumerate(parameters):
+        for agent in agent_names:
+            
+            infile = open('lap_results_mismatch/' + agent + '_new/' + parameter, 'rb')
+            results_dict = pickle.load(infile)
+            infile.close() 
+
             n_episodes = len(results_dict['collision_results'][0,0,:])
             n_param = len(results_dict['collision_results'][0,:,0])
             n_runs = len(results_dict['collision_results'][:,0,0])
 
-            y = np.zeros((n_param, n_runs))
+            avg = np.zeros(n_param)
+            dev = np.zeros(n_param)
 
             for i in range(n_param):
-                y = np.sum(np.logical_not(results_dict['collision_results'][:,i,:]))/(n_episodes*n_runs)
-                data.append({'agent_name':agent, 'parameter':param,'frac_variation':round(results_dict['frac_variation'][i],2)*100, 'success_rate':y})
+                avg[i] = np.round(np.sum(np.logical_not(results_dict['collision_results'][:,i,:]))/(n_episodes*n_runs), 2)
+                failures = np.count_nonzero(results_dict['collision_results'][:,0,:].flatten())
+                successes = n_episodes - failures
+                dev[i] = np.sqrt(n_episodes*(successes/n_episodes)*((failures)/n_episodes))/(n_episodes*n_runs)
 
-    df = pd.DataFrame(data)
-    
-    if len(parameters)>1:
-        p = sns.factorplot(x='frac_variation', y='success_rate', hue='agent_name', row='parameter',data=df)
-    else:
-        p = sns.lineplot(x='frac_variation', y='success_rate', hue='agent_name', data=df)
-        p.set_xlabel('% variation from original ' + param + ' value')
-        p.set_ylabel('fraction successful laps')
-        handles, _ = p.get_legend_handles_labels()
-        p.legend(handles, legend ,title=legend_title, loc='lower left')
-        plt.title('Lap success rate for ' + param + ' mismatch')
+            axs[j].yaxis.set_major_formatter(FormatStrFormatter('%.2f'))
+            axs[j].plot(results_dict['frac_variation']*100, avg)
+            #plt.fill_between(results_dict['frac_variation']*100, avg-dev, avg+dev, alpha=0.25)
+            axs[j].set(ylabel='% successful laps')
+            #axs.yaxis.set_major_formatter(plt.ticker.FormatStrFormatter('%.2f'))
+
+        axs[j].set_title(plot_titles[j])
+    axs[j].set(xlabel='% variation from original value')
+    axs[j].legend(legend, title=legend_title, loc='lower right')
     plt.show()
+
+    # results = []
+    # data = []
+
+    # for agent in agent_names:
+    #     for param in parameters:
+    #         infile = open('lap_results_mismatch/' + agent + '_new/' + param, 'rb')
+    #         results_dict = pickle.load(infile)
+    #         results.append(results_dict)
+    #         infile.close() 
+            
+    #         n_episodes = len(results_dict['collision_results'][0,0,:])
+    #         n_param = len(results_dict['collision_results'][0,:,0])
+    #         n_runs = len(results_dict['collision_results'][:,0,0])
+
+    #         y = np.zeros((n_param, n_runs))
+
+    #         for i in range(n_param):
+    #             y = np.sum(np.logical_not(results_dict['collision_results'][:,i,:]))/(n_episodes*n_runs)
+    #             data.append({'agent_name':agent, 'parameter':param,'frac_variation':round(results_dict['frac_variation'][i],2)*100, 'success_rate':y})
+
+    # df = pd.DataFrame(data)
+    
+    # if len(parameters)>1:
+    #     p = sns.factorplot(x='frac_variation', y='success_rate', hue='agent_name', row='parameter',data=df)
+    # else:
+    #     p = sns.lineplot(x='frac_variation', y='success_rate', hue='agent_name', data=df)
+    #     p.set_xlabel('% variation from original ' + param + ' value')
+    #     p.set_ylabel('fraction successful laps')
+    #     handles, _ = p.get_legend_handles_labels()
+    #     p.legend(handles, legend ,title=legend_title, loc='lower left')
+    #     plt.title('Lap success rate for ' + param + ' mismatch')
+    # plt.show()
 
     
 
@@ -530,6 +658,7 @@ def display_moving_agent(agent_name, load_history=False, n=0):
     infile.close()
     env_dict['max_steps']=3000
     #env_dict['architecture'] = 'pete'
+    env_dict['reward_signal']['max_progress'] = 0
 
     env = environment(env_dict)
     env.reset(save_history=True, start_condition=[], car_params=env_dict['car_params'])
@@ -765,13 +894,16 @@ def display_collision_distribution(agent_name):
 
 def display_path_multiple(agent_names, ns, legend_title, legend):
     
-
+    pose_history = []
+    progress_history = []
+    
     for agent_name, n, i in zip(agent_names, ns, range(len(agent_names))):
 
         infile = open('environments/' + agent_name, 'rb')
         env_dict = pickle.load(infile)
         infile.close()
         #env_dict['max_steps']=3000
+        env_dict['reward_signal']['max_progress'] = 0
         env = environment(env_dict)
         env.reset(save_history=True, start_condition=[], car_params=env_dict['car_params'])
 
@@ -816,6 +948,7 @@ def display_path_multiple(agent_names, ns, legend_title, legend):
             
         a.load_weights(agent_name, n)
 
+        #start_pose = {'x':11.2, 'y':7.7, 'v':0, 'delta':0, 'theta':0, 'goal':1}
         env.reset(save_history=True, start_condition=start_pose, car_params=env_dict['car_params'])
         obs = env.observation
         done = False
@@ -831,25 +964,90 @@ def display_path_multiple(agent_names, ns, legend_title, legend):
             score += reward
             obs = next_obs
 
-            if env.progress>=0.95:
+            if env.progress>=0.98:
                 done=True
             
 
         print('Total score = ', score)
         print('Progress = ', env.progress)
 
-        image_path = sys.path[0] + '/maps/' + env.map_name + '.png'
-        im = image.imread(image_path)
-        plt.imshow(im, extent=(0,env.map_width,0,env.map_height))
-        plt.plot(np.array(env.pose_history)[:,0], np.array(env.pose_history)[:,1], linewidth=2.5)
-    
+        pose_history.append(env.pose_history)
+        progress_history.append(env.progress_history)
+        
+        
+        # image_path = sys.path[0] + '/maps/' + env.map_name + '.png'
+        # im = image.imread(image_path)
+        # plt.imshow(im, extent=(0,env.map_width,0,env.map_height))
+        # plt.plot(np.array(env.pose_history)[:,0], np.array(env.pose_history)[:,1], linewidth=1.5)
+        # plt.legend(legend, title=legend_title)
+
     #plt.legend(legend, title=legend_title)
     #plt.xlabel('x [m]')
     #plt.ylabel('y [m]')
-    plt.xticks([])
-    plt.yticks([])
-    plt.xlim([0,env.map_width])
-    plt.ylim([0,env.map_height])
-    #plt.grid(True)
-    #plt.title('Agent path')
+    # plt.xticks([])
+    # plt.yticks([])
+    # plt.xlim([0,env.map_width])
+    # plt.ylim([0,env.map_height])
+    # #plt.grid(True)
+    # #plt.title('Agent path')
+    # plt.show()
+
+    # plt.plot(np.array(env.progress_history)[:], np.array(env.pose_history)[:,4], linewidth=1.5)
+    # plt.show()
+
+    # print('done')
+    
+    fig, axs = plt.subplots(2) 
+    
+    image_path = sys.path[0] + '/maps/' + env.map_name + '.png'
+    im = image.imread(image_path)
+    axs[0].imshow(im, extent=(0,env.map_width,0,env.map_height))
+    for i in range(len(agent_names)):
+        axs[0].plot(np.array(pose_history[i])[:,0], np.array(pose_history[i])[:,1], linewidth=1.5)
+    axs[0].set(xlabel='x coordinate [m]', ylabel='y coordinate [m]')
+    #axs[0].legend(legend, title=legend_title, bbox_to_anchor=[1,1.6])
+    #axs[0].legend(legend, title=legend_title)
+    #axs[0].show()
+
+    for i in range(len(agent_names)):
+        axs[1].plot(np.array(progress_history[i])*100, np.array(pose_history[i])[:,4], linewidth=1.5)
+        #plt.plot(np.array(pose_history[i])[:,4], linewidth=1.5)
+    axs[1].set(xlabel='progress along centerline [%]', ylabel='Longitudinal velocity [m/s]')
+    #axs[1].legend(legend, title=legend_title)
+    #axs[1].set_ylim([0, 15])
+    #plt.ylabel('Longitudinal velocity')
+    #plt.xlabel('progress along centerline [%]')
     plt.show()
+
+
+def display_maps():
+    names = ['Circle', 'Redbull ring', 'Berlin', 'Columbia', 'Porto', 'Torino']
+    circle = mapping.map('circle')
+    columbia = mapping.map('columbia_1')
+    porto = mapping.map('porto_1')
+    berlin = mapping.map('berlin')
+    torino = mapping.map('torino')
+    redbull_ring = mapping.map('redbull_ring')
+
+    fig, axs = plt.subplots(2, 3)
+    axs[0,0].imshow(circle.gray_im, extent=(0,circle.map_width,0,circle.map_height))
+    axs[0,1].imshow(redbull_ring.gray_im, extent=(0,redbull_ring.map_width,0,redbull_ring.map_height))
+    axs[0,2].imshow(berlin.gray_im, extent=(0,berlin.map_width,0,berlin.map_height))
+    
+    axs[1,0].imshow(columbia.gray_im, extent=(0,columbia.map_width,0,columbia.map_height))
+    axs[1,1].imshow(porto.gray_im, extent=(0,porto.map_width,0,porto.map_height))
+    axs[1,2].imshow(torino.gray_im, extent=(0,torino.map_width,0,torino.map_height))
+
+    for i in range(2):
+        for j in range(3):
+                #axs[i,j].set(ylabel='y [m]', xlabel='x [m]')
+                axs[i,j].axis('off')
+                axs[i,j].set_title(names[j+i*3])
+    plt.show()
+
+#display_maps()
+
+
+
+    
+
