@@ -31,6 +31,7 @@ import random
 from matplotlib.ticker import FormatStrFormatter
 import mapping
 
+
 # import matplotlib
 # matplotlib.use("pgf")
 # matplotlib.rcParams.update({
@@ -505,6 +506,7 @@ def graph_lap_results(agent_names):
 
 
 
+
     #axs[0].barplot(x='map', y='lap_time', hue='architecture', capsize=.2, data=df_lap)
     # p.set_xlabel('% variation from original ' + param + ' value')
     # p.set_ylabel('fraction successful laps')
@@ -522,11 +524,140 @@ def graph_lap_results(agent_names):
     #plt.show()
 
 
-agent_names = ['ete_circle_1', 'ete_porto', 'ete_berlin_1', 'ete_torino_1', 'ete_redbull_ring_1', 
-            'pete_v_circle_1', 'ete_new__porto', 'pete_v_berlin_1', 'pete_v_torino_1', 'pete_v_redbull_ring',
-            'pete_sv_circle_1', 'pete_porto', 'pete_sv_berlin_1', 'pete_sv_torino_1', 'pete_sv_redbull_ring']           
+def graph_lap_results_mismatch(agent_names, mismatch_parameter):
+    
+    results_dict = {}
+    results = {}
+    envs = {}
+    lap_data = []
+    success_data = []
+    data = []
 
-#graph_lap_results(agent_names)
+    for agent in agent_names:
+        
+        infile = open('lap_results_mismatch/' + agent + '/' + mismatch_parameter, 'rb')
+        results_dict = pickle.load(infile)
+        infile.close() 
+
+        infile = open('environments/' + agent, 'rb')
+        env_dict = pickle.load(infile)
+        envs[agent] = env_dict
+        infile.close()
+        
+        if env_dict['architecture']=='pete' and env_dict['path_dict']['local_path']==True:
+            architecture = 'steering and velocity control'
+
+        elif env_dict['architecture']=='pete' and env_dict['path_dict']['local_path']==False:
+            architecture = 'velocity control'
+
+        elif env_dict['architecture']=='ete':
+            architecture = 'no controllers'
+        
+        for i in range(len(results_dict['times_results'][0])):
+            for j in range(len(results_dict['times_results'][0][0])):
+                data.append({'agent_name':agent, 'architecture':architecture, 'map':env_dict['map_name'], 'mismatch_parameter':mismatch_parameter,
+                        'frac_vary':results_dict['frac_variation'][i], 'success':np.logical_not(results_dict['collision_results'][0][i][j]), 
+                        'lap_time':results_dict['times_results'][0][i][j]})
+
+    df = pd.DataFrame(data)
+
+    archs = df['architecture'].unique()
+    maps = df['map'].unique()
+    vary = df['frac_vary'].unique()
+    vary_select = np.array([2, 4])
+
+    arch_lap_results = np.zeros((len(vary_select), len(archs), len(maps)))
+    arch_success_results = np.zeros((len(vary_select), len(archs), len(maps)))
+
+    for v_idx, v in  enumerate(vary_select):
+        for a_idx, a in enumerate(archs):
+             for m_idx, m in enumerate(maps): 
+                condition_time = np.logical_and(np.logical_and(np.logical_and(df['architecture']==a, df['map']==m), df['success']==True), df['frac_vary']==vary[v])
+                condition_succ = np.logical_and(np.logical_and(df['architecture']==a, df['map']==m), df['frac_vary']==vary[v])
+                
+                arch_lap_results[v_idx, a_idx, m_idx] = np.average(np.array(df[condition_time]['lap_time']))
+                arch_success_results[v_idx, a_idx, m_idx] = np.average(np.array(df[condition_succ]['success']))
+
+    x = ['circle', 'porto', 'berlin', 'torino', 'redbull ring']
+    
+    time_errors = arch_lap_results[1]-arch_lap_results[0]
+    succ_errors = arch_success_results[1]-arch_success_results[0]
+
+    #x = maps
+
+    w=0.25
+    bar1 = np.arange(len(maps))
+    bar2 = [i+w for i in bar1]
+    bar3 = [i+w for i in bar2]
+    
+    #error bar method
+    #fig, axs = plt.subplots(2, sharex=True)
+    # axs[0].bar(bar1, arch_lap_results[0,0], w, label=archs[0], yerr=[np.zeros(len(time_errors[0])), time_errors[0]])
+    # axs[0].bar(bar2, arch_lap_results[0,1], w, label=archs[1], yerr=[np.zeros(len(time_errors[0])), time_errors[1]])
+    # axs[0].bar(bar3, arch_lap_results[0,2], w, label=archs[2], yerr=[np.zeros(len(time_errors[0])), time_errors[2]])
+    # axs[0].set(ylabel='Lap time [s]')
+    # axs[0].set_ylim([5,18])
+    # axs[0].legend(archs)
+    # axs[1].bar(bar1, arch_success_results[0,0], w, label=archs[0], yerr=[np.zeros(len(succ_errors[0])), succ_errors[0]])
+    # axs[1].bar(bar2, arch_success_results[0,1], w, label=archs[1], yerr=[np.zeros(len(succ_errors[0])), succ_errors[1]])
+    # axs[1].bar(bar3, arch_success_results[0,2], w, label=archs[2], yerr=[np.zeros(len(succ_errors[0])), succ_errors[2]])
+    # axs[1].set_xticks(bar1+w, x)
+    # axs[1].set(xlabel='Track', ylabel='Fraction successful laps')
+    # axs[1].set_ylim([0,1.1])
+    # plt.show()
+
+    #new figures for every parameter
+    # for idx, _ in enumerate(vary_select):
+    #     fig, axs = plt.subplots(2, sharex=True)
+    #     axs[0].bar(bar1, arch_lap_results[idx,0], w, label=archs[0])
+    #     axs[0].bar(bar2, arch_lap_results[idx,1], w, label=archs[1])
+    #     axs[0].bar(bar3, arch_lap_results[idx,2], w, label=archs[2])
+    #     axs[0].set(ylabel='Lap time [s]')
+    #     axs[0].set(ylabel='Lap time [s]')
+    #     axs[0].set_ylim([5,18])
+    #     axs[0].legend(archs)
+
+    #     axs[1].bar(bar1, arch_success_results[idx,0], w, label=archs[0])
+    #     axs[1].bar(bar2, arch_success_results[idx,1], w, label=archs[1])
+    #     axs[1].bar(bar3, arch_success_results[idx,2], w, label=archs[2])
+    #     axs[1].set_xticks(bar1+w, x)
+    #     axs[1].set(xlabel='Track', ylabel='Fraction successful laps')
+    #     axs[1].set_ylim([0,1.1])
+    #     axs[0].set(ylabel='Lap time [s]')
+    #     axs[0].set_ylim([5,18])
+    #     axs[0].legend(archs)
+    
+    #     plt.show()
+    
+    #Only plot fraction success
+    fig, axs = plt.subplots(2, sharex=True)
+    axs[0].bar(bar1, arch_success_results[0,0], w, label=archs[0])
+    axs[0].bar(bar2, arch_success_results[0,1], w, label=archs[1])
+    axs[0].bar(bar3, arch_success_results[0,2], w, label=archs[2])
+    axs[0].set_ylabel('Fraction successful laps')
+    axs[0].legend(archs)
+    axs[0].set_ylim([0,1.8])
+
+    axs[1].bar(bar1, arch_success_results[1,0], w, label=archs[0])
+    axs[1].bar(bar2, arch_success_results[1,1], w, label=archs[1])
+    axs[1].bar(bar3, arch_success_results[1,2], w, label=archs[2])
+    axs[1].set_xticks(bar1+w, x)
+    axs[1].set_xlabel('Track')
+    axs[1].set_ylabel('Fraction successful laps')
+
+    plt.show()
+
+
+
+
+agent_names = [ 'ete_circle_1', 'pete_v_circle_1', 'pete_sv_circle_1',
+            'ete_new__porto', 'ete_porto', 'pete_porto',
+            'ete_berlin_1', 'pete_v_berlin_1', 'pete_sv_berlin_1', 
+            'ete_torino_1', 'pete_v_torino_2', 'pete_sv_torino_2',
+            'ete_redbull_ring_1', 'pete_v_redbull_ring_2', 'pete_sv_redbull_ring']               
+
+
+#graph_lap_results_mismatch(agent_names, 'C_Sf')
 
 
 
@@ -534,11 +665,13 @@ agent_names = ['ete_circle_1', 'ete_porto', 'ete_berlin_1', 'ete_torino_1', 'ete
 def display_lap_mismatch_results(agent_names, parameters, legend_title, legend, plot_titles):
     
     fig, axs = plt.subplots(len(parameters), sharex=True)
+    numbering = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p']
 
     for j, parameter in enumerate(parameters):
         for agent in agent_names:
             
-            infile = open('lap_results_mismatch/' + agent + '_new/' + parameter, 'rb')
+            #infile = open('lap_results_mismatch/' + agent + '_new/' + parameter, 'rb')
+            infile = open('lap_results_mismatch/' + agent + '/' + parameter, 'rb')
             results_dict = pickle.load(infile)
             infile.close() 
 
@@ -555,13 +688,14 @@ def display_lap_mismatch_results(agent_names, parameters, legend_title, legend, 
                 successes = n_episodes - failures
                 dev[i] = np.sqrt(n_episodes*(successes/n_episodes)*((failures)/n_episodes))/(n_episodes*n_runs)
 
+            axs[j].set_ylim([0,1.1])
             axs[j].yaxis.set_major_formatter(FormatStrFormatter('%.2f'))
             axs[j].plot(results_dict['frac_variation']*100, avg)
             #plt.fill_between(results_dict['frac_variation']*100, avg-dev, avg+dev, alpha=0.25)
-            axs[j].set(ylabel='% successful laps')
+            axs[j].set(ylabel='fraction successful laps')
             #axs.yaxis.set_major_formatter(plt.ticker.FormatStrFormatter('%.2f'))
 
-        axs[j].set_title(plot_titles[j])
+        axs[j].set_title('(' + numbering[j] + ') ' + plot_titles[j])
     axs[j].set(xlabel='% variation from original value')
     axs[j].legend(legend, title=legend_title, loc='lower right')
     plt.show()
@@ -892,18 +1026,26 @@ def display_collision_distribution(agent_name):
     plt.show()
 
 
-def display_path_multiple(agent_names, ns, legend_title, legend):
+def display_path_multiple(agent_names, ns, legend_title, legend, mismatch_parameters, frac_vary):
     
     pose_history = []
     progress_history = []
+    state_history = []
     
     for agent_name, n, i in zip(agent_names, ns, range(len(agent_names))):
 
         infile = open('environments/' + agent_name, 'rb')
         env_dict = pickle.load(infile)
         infile.close()
-        #env_dict['max_steps']=3000
+        # Compensate for changes to reward structure
         env_dict['reward_signal']['max_progress'] = 0
+        
+        # Model mismatches
+        if mismatch_parameters:
+            for par, var in zip(mismatch_parameters, frac_vary):
+                env_dict['car_params'][par] *= 1+var 
+
+
         env = environment(env_dict)
         env.reset(save_history=True, start_condition=[], car_params=env_dict['car_params'])
 
@@ -971,6 +1113,7 @@ def display_path_multiple(agent_names, ns, legend_title, legend):
         print('Total score = ', score)
         print('Progress = ', env.progress)
 
+        state_history.append(env.state_history)
         pose_history.append(env.pose_history)
         progress_history.append(env.progress_history)
         
@@ -997,27 +1140,57 @@ def display_path_multiple(agent_names, ns, legend_title, legend):
 
     # print('done')
     
-    fig, axs = plt.subplots(2) 
-    
+    plt.figure(1)
+    #fig, axs = plt.subplots(4) 
     image_path = sys.path[0] + '/maps/' + env.map_name + '.png'
     im = image.imread(image_path)
-    axs[0].imshow(im, extent=(0,env.map_width,0,env.map_height))
+    plt.imshow(im, extent=(0,env.map_width,0,env.map_height))
     for i in range(len(agent_names)):
-        axs[0].plot(np.array(pose_history[i])[:,0], np.array(pose_history[i])[:,1], linewidth=1.5)
-    axs[0].set(xlabel='x coordinate [m]', ylabel='y coordinate [m]')
+        plt.plot(np.array(pose_history[i])[:,0], np.array(pose_history[i])[:,1], linewidth=1.5)
+    plt.xlabel('x coordinate [m]') 
+    plt.ylabel('y coordinate [m]')
     #axs[0].legend(legend, title=legend_title, bbox_to_anchor=[1,1.6])
     #axs[0].legend(legend, title=legend_title)
     #axs[0].show()
 
+    plt.figure(2)
     for i in range(len(agent_names)):
-        axs[1].plot(np.array(progress_history[i])*100, np.array(pose_history[i])[:,4], linewidth=1.5)
+        plt.plot(np.array(progress_history[i])*100, np.array(pose_history[i])[:,4], linewidth=1.5)
         #plt.plot(np.array(pose_history[i])[:,4], linewidth=1.5)
-    axs[1].set(xlabel='progress along centerline [%]', ylabel='Longitudinal velocity [m/s]')
-    #axs[1].legend(legend, title=legend_title)
+    plt.xlabel('progress along centerline [%]')
+    plt.ylabel('Longitudinal velocity [m/s]')
+    #axs[1].set(xlabel='progress along centerline [%]', ylabel='Longitudinal velocity [m/s]')
+    plt.legend(legend, title=legend_title)
     #axs[1].set_ylim([0, 15])
     #plt.ylabel('Longitudinal velocity')
     #plt.xlabel('progress along centerline [%]')
+
+    plt.figure(3)
+    for i in range(len(agent_names)):
+        plt.plot(np.array(progress_history[i])*100, np.array(state_history[i])[:,6], linewidth=1.5)
+        #plt.plot(np.array(pose_history[i])[:,4], linewidth=1.5)
+    plt.xlabel('progress along centerline [%]')
+    plt.ylabel('Slip angle')
+    #axs[2].set(xlabel='progress along centerline [%]', ylabel='Slip angle')
+    plt.legend(legend, title=legend_title)
+    #axs[1].set_ylim([0, 15])
+    #plt.ylabel('Longitudinal velocity')
+    #plt.xlabel('progress along centerline [%]')
+    
+    plt.figure(4)
+    for i in range(len(agent_names)):
+        plt.plot(np.arange(len(progress_history[i])), np.array(progress_history[i])*100, linewidth=1.5)
+        #plt.plot(np.array(pose_history[i])[:,4], linewidth=1.5)
+    plt.xlabel('Simulation step')
+    plt.ylabel('progress along centerline [%]')
+    #axs[3].set(ylabel='progress along centerline [%]', xlabel='Simulation step')
+    plt.legend(legend, title=legend_title)
+    #axs[1].set_ylim([0, 15])
+    #plt.ylabel('Longitudinal velocity')
+    #plt.xlabel('progress along centerline [%]')
+    
     plt.show()
+
 
 
 def display_maps():
