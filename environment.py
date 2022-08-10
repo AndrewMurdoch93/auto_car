@@ -198,6 +198,7 @@ class environment():
         self.lidar_dist_history = []
         self.lidar_coords_history = []
         self.action_step_history = []
+        self.state_history = []
 
         #Initialise flags
         self.max_goals_reached=False
@@ -665,6 +666,7 @@ class environment():
         self.goal_history.append(self.goals[self.current_goal])
         self.observation_history.append(self.observation)
         self.progress_history.append(self.progress)
+        self.state_history.append(self.state)
         if self.lidar_dict['is_lidar']==True:
             self.lidar_coords_history.append(self.lidar_coords)
 

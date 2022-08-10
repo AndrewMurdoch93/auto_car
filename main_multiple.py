@@ -1011,6 +1011,56 @@ if __name__=='__main__':
    # lap_time_test_mismatch(agent_name=agent_name, n_episodes=100, detect_issues=False, initial_conditions=True, parameter='a_max', frac_variation=np.linspace(-0.2,0.2,21) )
    # lap_time_test_mismatch(agent_name=agent_name, n_episodes=100, detect_issues=False, initial_conditions=True, parameter='v_max', frac_variation=np.linspace(-0.2,0.2,21) )
   
+   # agent_name = 'pete_sv_berlin_1'
+   # lap_time_test_mismatch(agent_name=agent_name, n_episodes=100, detect_issues=False, initial_conditions=True, parameter='C_Sf', frac_variation=np.linspace(-0.2,0.2,5) )
+   # agent_name = 'pete_v_berlin_1'
+   # lap_time_test_mismatch(agent_name=agent_name, n_episodes=100, detect_issues=False, initial_conditions=True, parameter='C_Sf', frac_variation=np.linspace(-0.2,0.2,5) )
+   # agent_name = 'ete_berlin_1'
+   # lap_time_test_mismatch(agent_name=agent_name, n_episodes=100, detect_issues=False, initial_conditions=True, parameter='C_Sf', frac_variation=np.linspace(-0.2,0.2,5) )
+   # agent_name = 'pete_sv_berlin_1'
+   # lap_time_test_mismatch(agent_name=agent_name, n_episodes=100, detect_issues=False, initial_conditions=True, parameter='C_Sr', frac_variation=np.linspace(-0.2,0.2,5) )
+   # agent_name = 'pete_v_berlin_1'
+   # lap_time_test_mismatch(agent_name=agent_name, n_episodes=100, detect_issues=False, initial_conditions=True, parameter='C_Sr', frac_variation=np.linspace(-0.2,0.2,5) )
+   # agent_name = 'ete_berlin_1'
+   # lap_time_test_mismatch(agent_name=agent_name, n_episodes=100, detect_issues=False, initial_conditions=True, parameter='C_Sr', frac_variation=np.linspace(-0.2,0.2,5) )
+   
+   # agent_name = 'pete_sv_circle_1'
+   # lap_time_test_mismatch(agent_name=agent_name, n_episodes=100, detect_issues=False, initial_conditions=True, parameter='C_Sf', frac_variation=np.linspace(-0.2,0.2,5) )
+   # agent_name = 'pete_v_circle_1'
+   # lap_time_test_mismatch(agent_name=agent_name, n_episodes=100, detect_issues=False, initial_conditions=True, parameter='C_Sf', frac_variation=np.linspace(-0.2,0.2,5) )
+   # agent_name = 'ete_circle_1'
+   # lap_time_test_mismatch(agent_name=agent_name, n_episodes=100, detect_issues=False, initial_conditions=True, parameter='C_Sf', frac_variation=np.linspace(-0.2,0.2,5) )
+   # agent_name = 'pete_sv_circle_1'
+   # lap_time_test_mismatch(agent_name=agent_name, n_episodes=100, detect_issues=False, initial_conditions=True, parameter='C_Sr', frac_variation=np.linspace(-0.2,0.2,5) )
+   # agent_name = 'pete_v_circle_1'
+   # lap_time_test_mismatch(agent_name=agent_name, n_episodes=100, detect_issues=False, initial_conditions=True, parameter='C_Sr', frac_variation=np.linspace(-0.2,0.2,5) )
+   # agent_name = 'ete_circle_1'
+   # lap_time_test_mismatch(agent_name=agent_name, n_episodes=100, detect_issues=False, initial_conditions=True, parameter='C_Sr', frac_variation=np.linspace(-0.2,0.2,5) )
+   
+   # agent_name = 'pete_sv_torino_2'
+   # lap_time_test_mismatch(agent_name=agent_name, n_episodes=100, detect_issues=False, initial_conditions=True, parameter='C_Sf', frac_variation=np.linspace(-0.2,0.2,5) )
+   # agent_name = 'pete_v_torino_2'
+   # lap_time_test_mismatch(agent_name=agent_name, n_episodes=100, detect_issues=False, initial_conditions=True, parameter='C_Sf', frac_variation=np.linspace(-0.2,0.2,5) )
+   # agent_name = 'ete_torino_1'
+   # lap_time_test_mismatch(agent_name=agent_name, n_episodes=100, detect_issues=False, initial_conditions=True, parameter='C_Sf', frac_variation=np.linspace(-0.2,0.2,5) )
+   # agent_name = 'pete_sv_torino_2'
+   # lap_time_test_mismatch(agent_name=agent_name, n_episodes=100, detect_issues=False, initial_conditions=True, parameter='C_Sr', frac_variation=np.linspace(-0.2,0.2,5) )
+   # agent_name = 'pete_v_torino_2'
+   # lap_time_test_mismatch(agent_name=agent_name, n_episodes=100, detect_issues=False, initial_conditions=True, parameter='C_Sr', frac_variation=np.linspace(-0.2,0.2,5) )
+   # agent_name = 'ete_torino_1'
+   # lap_time_test_mismatch(agent_name=agent_name, n_episodes=100, detect_issues=False, initial_conditions=True, parameter='C_Sr', frac_variation=np.linspace(-0.2,0.2,5) )
+   
+   # agent_name = 'pete_sv_redbull_ring'
+   # lap_time_test_mismatch(agent_name=agent_name, n_episodes=100, detect_issues=False, initial_conditions=True, parameter='C_Sf', frac_variation=np.linspace(-0.2,0.2,5) )
+   # lap_time_test_mismatch(agent_name=agent_name, n_episodes=100, detect_issues=False, initial_conditions=True, parameter='C_Sr', frac_variation=np.linspace(-0.2,0.2,5) )
+   # agent_name = 'pete_v_redbull_ring_2'
+   # lap_time_test_mismatch(agent_name=agent_name, n_episodes=100, detect_issues=False, initial_conditions=True, parameter='C_Sf', frac_variation=np.linspace(-0.2,0.2,5) )
+   # lap_time_test_mismatch(agent_name=agent_name, n_episodes=100, detect_issues=False, initial_conditions=True, parameter='C_Sr', frac_variation=np.linspace(-0.2,0.2,5) )
+   # agent_name = 'ete_redbull_ring_1'
+   # lap_time_test_mismatch(agent_name=agent_name, n_episodes=100, detect_issues=False, initial_conditions=True, parameter='C_Sf', frac_variation=np.linspace(-0.2,0.2,5) )
+   # lap_time_test_mismatch(agent_name=agent_name, n_episodes=100, detect_issues=False, initial_conditions=True, parameter='C_Sr', frac_variation=np.linspace(-0.2,0.2,5) )
+   
+
    # agent_name = 'ete_porto'
    # environment_name = 'environments/' + agent_name
    
@@ -1023,13 +1073,20 @@ if __name__=='__main__':
    # pickle.dump(env_dict, outfile)
    # outfile.close()
 
-   # agent_names = ['ete_new__porto', 'ete_porto', 'pete_porto']
-   # legend_title = 'architecture description'
-   # legend = ['fully end-to-end', 'partial, velocity controller', 'partial, steering and velocity controllers']
-   # parameters = ['lf', 'a_max', 'C_Sf', 'C_Sr']
-   # plot_titles = ['Distance between CoG and front axle', 'Maximum acceleration', 'Front tyres cornering stiffness', 'Rear tyres cornering stiffness']
-   # display_results_multiple.display_lap_mismatch_results(agent_names, parameters, legend_title, legend, plot_titles)
-   # display_results_multiple.display_lap_mismatch_results_box(agent_names, parameters, legend_title, legend)
+   #agent_names = ['ete_new__porto', 'ete_porto', 'pete_porto']
+   #agent_names = ['ete_berlin_1', 'pete_v_berlin_1', 'pete_sv_berlin_1']
+   #agent_names = ['ete_circle_1', 'pete_v_circle_1', 'pete_sv_circle_1']
+   #agent_names = ['ete_torino_1', 'pete_v_torino_2', 'pete_sv_torino_2']
+   #agent_names = ['ete_redbull_ring_1', 'pete_v_redbull_ring_2', 'pete_sv_redbull_ring']
+
+   #legend_title = 'architecture description'
+   #legend = ['No controllers', 'Velocity controller', 'Steering and velocity controllers']
+   #parameters = ['lf', 'a_max', 'C_Sf', 'C_Sr']
+   #parameters = ['C_Sf', 'C_Sr']
+   #plot_titles = ['Distance between CoG and front axle', 'Maximum acceleration', 'Front tyres cornering stiffness', 'Rear tyres cornering stiffness']
+   #plot_titles = ['Front tyres cornering stiffness', 'Rear tyres cornering stiffness']
+   #display_results_multiple.display_lap_mismatch_results(agent_names, parameters, legend_title, legend, plot_titles)
+   #display_results_multiple.display_lap_mismatch_results_box(agent_names, parameters, legend_title, legend)
    
    # agent_name = 'pete_sv_circle_1'
    # agent_name = 'pete_sv_berlin_1' #failed - must redo
@@ -1039,14 +1096,18 @@ if __name__=='__main__':
    # agent_name = 'pete_v_circle_1'
    # agent_name = 'pete_v_berlin_1'
    # agent_name = 'pete_v_torino_1'
-   # agent_name = 'pete_v_redbull_ring'
+   # agent_name = 'pete_v_redbull_ring_2'
 
    # agent_name = 'ete_circle_1'
    # agent_name = 'ete_berlin_1'
    # agent_name = 'ete_torino_1'
    # agent_name = 'ete_redbull_ring_1'
 
+<<<<<<< HEAD
    #agent_name = 'pete_sv_berlin_2'
+=======
+
+>>>>>>> b9209fa097b2046cb999a4c7a28f214ccaca29a1
    #legend = [agent_name]
    #legend_title = 'agent name'
    #display_results_multiple.compare_learning_curves_progress(agent_names=[agent_name], legend=legend, legend_title=legend_title, 
@@ -1072,16 +1133,32 @@ if __name__=='__main__':
    # ns = [0, 0, 0]
    # display_results_multiple.compare_learning_curves_progress(agent_names, legend, legend_title, show_average=True, show_median=True, xaxis='episodes')
    # display_results_multiple.display_path_multiple(agent_names=agent_names, ns=ns, legend_title=legend_title, legend=legend)
-
-   # agent_names = ['ete_porto', 'ete_new__porto', 'pete_porto']
-   # #agent_names = ['ete_berlin_1', 'pete_v_berlin_1', 'pete_sv_berlin_1']
-   # legend_title = 'Architecture'
-   # legend = ['fully end-to-end', 'partial end-to-end, velocity controller', 'partial end-to-end, steering and velocity controllers']
-   # ns = [0, 0, 0]
-   # #display_results_multiple.compare_learning_curves_progress(agent_names, legend, legend_title, show_average=True, show_median=True, xaxis='episodes')
-   # display_results_multiple.display_path_multiple(agent_names=agent_names, ns=ns, legend_title=legend_title, legend=legend)
-
-
-
    
    
+   #agent_names = ['ete_new__porto', 'ete_porto', 'pete_porto']
+   #agent_names = ['ete_berlin_1', 'pete_v_berlin_1', 'pete_sv_berlin_1']
+   #agent_names = ['ete_circle_1', 'pete_v_circle_1', 'pete_sv_circle_1']
+   #agent_names = ['ete_torino_1', 'pete_v_torino_2', 'pete_sv_torino_2']
+   #agent_names = ['ete_redbull_ring_1', 'pete_v_redbull_ring_2', 'pete_sv_redbull_ring']
+   #legend_title = 'Architecture'
+   #legend = ['no controllers', 'only velocity control', 'steering and velocity control']
+   #ns = [0, 0, 0]
+   #mismatch_parameters = ['C_Sr']
+   #frac_vary = [-0.2]
+   #display_results_multiple.compare_learning_curves_progress(agent_names, legend, legend_title, show_average=True, show_median=True, xaxis='episodes')
+   #display_results_multiple.display_path_multiple(agent_names=agent_names, ns=ns, legend_title=legend_title, 
+   #           legend=legend, mismatch_parameters=mismatch_parameters, frac_vary=frac_vary)
+
+
+
+   # agent_name = 'pete_sv_redbull_ring_2'
+   # infile = open('train_parameters/' + agent_name, 'rb')
+   # main_dict = pickle.load(infile)
+   # infile.close()
+   # main_dict['runs']=1
+
+   # outfile=open('train_parameters/' + agent_name, 'wb')
+   # pickle.dump(main_dict, outfile)
+   # outfile.close()
+
+
