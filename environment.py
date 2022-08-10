@@ -39,8 +39,9 @@ class environment():
         self.max_steps = input_dict['max_steps']
         self.control_steps = input_dict['control_steps']
         self.display = input_dict['display']
-        self.architecture = self.input_dict['architecture']
-        
+        self.velocity_control = self.input_dict['velocity_control']
+        self.steering_control = self.input_dict['steering_control']
+
         self.params = input_dict['car_params']
         self.reward_signal = input_dict['reward_signal']
         self.lidar_dict = input_dict['lidar_dict']
@@ -79,7 +80,7 @@ class environment():
         if self.action_space == 'continuous':
             self.num_actions = 1 + int(len(self.action_space_dict['vel_select'])>1) + int(len(self.action_space_dict['R_range'])>1)
 
-        if self.architecture == 'ete':
+        if self.velocity_control==False and self.steering_control==False:
             self.num_actions = 2
         
         #simulation parameters
@@ -258,7 +259,7 @@ class environment():
         #R = 3
         #v_ref = 4
         
-        if self.architecture == 'ete':
+        if self.velocity_control==False and self.steering_control==False:
             waypoint, wpt_angle, R, v_ref = self.convert_action_to_coord(strategy=self.waypoint_strategy, action=act)
 
             for step in range(self.control_steps):

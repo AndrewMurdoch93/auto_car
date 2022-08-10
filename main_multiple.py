@@ -796,6 +796,8 @@ if __name__=='__main__':
             , 'control_steps': 20
             , 'display': False
             , 'architecture': 'pete'    #pete, ete
+            , 'velocity_control': False
+            , 'steering_control': False
             , 'car_params':car_params
             , 'reward_signal':reward_signal
             , 'lidar_dict':lidar_dict
