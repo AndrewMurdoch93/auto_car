@@ -1103,11 +1103,6 @@ if __name__=='__main__':
    # agent_name = 'ete_torino_1'
    # agent_name = 'ete_redbull_ring_1'
 
-<<<<<<< HEAD
-   #agent_name = 'pete_sv_berlin_2'
-=======
-
->>>>>>> b9209fa097b2046cb999a4c7a28f214ccaca29a1
    #legend = [agent_name]
    #legend_title = 'agent name'
    #display_results_multiple.compare_learning_curves_progress(agent_names=[agent_name], legend=legend, legend_title=legend_title, 
