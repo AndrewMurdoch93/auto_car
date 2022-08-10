@@ -634,6 +634,7 @@ def graph_lap_results_mismatch(agent_names, mismatch_parameter):
     axs[0].bar(bar1, arch_success_results[0,0], w, label=archs[0])
     axs[0].bar(bar2, arch_success_results[0,1], w, label=archs[1])
     axs[0].bar(bar3, arch_success_results[0,2], w, label=archs[2])
+    axs[0].set_title('(a) No model-mismatch')
     axs[0].set_ylabel('Fraction successful laps')
     axs[0].legend(archs)
     axs[0].set_ylim([0,1.8])
@@ -642,6 +643,7 @@ def graph_lap_results_mismatch(agent_names, mismatch_parameter):
     axs[1].bar(bar2, arch_success_results[1,1], w, label=archs[1])
     axs[1].bar(bar3, arch_success_results[1,2], w, label=archs[2])
     axs[1].set_xticks(bar1+w, x)
+    axs[1].set_title('(b) C_Sf 20% higher than expected')
     axs[1].set_xlabel('Track')
     axs[1].set_ylabel('Fraction successful laps')
 
@@ -688,6 +690,7 @@ def display_lap_mismatch_results(agent_names, parameters, legend_title, legend, 
                 successes = n_episodes - failures
                 dev[i] = np.sqrt(n_episodes*(successes/n_episodes)*((failures)/n_episodes))/(n_episodes*n_runs)
 
+            axs[j].grid()
             axs[j].set_ylim([0,1.1])
             axs[j].yaxis.set_major_formatter(FormatStrFormatter('%.2f'))
             axs[j].plot(results_dict['frac_variation']*100, avg)
