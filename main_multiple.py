@@ -142,7 +142,7 @@ class trainingLoop():
 
          episode=0
          
-         while np.sum(steps)<=self.max_steps and episode<=self.max_episodes:
+         while np.sum(steps[n,:])<=self.max_steps and episode<=self.max_episodes:
             
             self.env.reset(save_history=True, start_condition=[], car_params=car_params, get_lap_time=False)  #Reset the environment every episode
             obs = self.env.observation      #Records starting state
@@ -735,9 +735,9 @@ def lap_time_test_mismatch(agent_name, n_episodes, detect_issues, initial_condit
 
 if __name__=='__main__':
 
-   agent_name = 'pete_sv_berlin_2'
+   agent_name = 'pete_sv_berlin_3'
 
-   main_dict = {'name':agent_name, 'max_episodes':50000, 'max_steps':4e6, 'learning_method':'td3', 'runs':5, 'comment':''}
+   main_dict = {'name':agent_name, 'max_episodes':50000, 'max_steps':5e6, 'learning_method':'td3', 'runs':5, 'comment':''}
 
    agent_dqn_dict = {'gamma':0.99, 'epsilon':1, 'eps_end':0.01, 'eps_dec':1/1000, 'lr':0.001, 'batch_size':64, 'max_mem_size':500000, 
                   'fc1_dims': 64, 'fc2_dims': 64, 'fc3_dims':64}
@@ -803,114 +803,168 @@ if __name__=='__main__':
             , 'path_dict': path_dict
             } 
    
-   # a = trainingLoop(main_dict, agent_td3_dict, env_dict, load_agent='')
-   # a.train()
-   # test(agent_name=agent_name, n_episodes=100, detect_issues=False, initial_conditions=True)
-   # lap_time_test(agent_name=agent_name, n_episodes=100, detect_issues=False, initial_conditions=False)
-   # lap_time_test_mismatch(agent_name=agent_name, n_episodes=100, detect_issues=False, initial_conditions=True, parameter='C_Sf', frac_variation=np.array([-0.05, 0.05]))
+   a = trainingLoop(main_dict, agent_td3_dict, env_dict, load_agent='')
+   a.train()
+   test(agent_name=agent_name, n_episodes=100, detect_issues=False, initial_conditions=True)
+   lap_time_test(agent_name=agent_name, n_episodes=500, detect_issues=False, initial_conditions=True)
+   lap_time_test_mismatch(agent_name=agent_name, n_episodes=100, detect_issues=False, initial_conditions=True, parameter='C_Sf', frac_variation=np.array([-0.05, 0.05]))
    
-   # agent_name = 'pete_sv_circle_2'
-   # main_dict['name'] = agent_name
-   # main_dict['max_steps'] = 1.5e6
-   # env_dict['map_name'] = 'circle'
-   # env_dict['architecture'] = 'pete'
-   # a = trainingLoop(main_dict, agent_td3_dict, env_dict, load_agent='')
-   # a.train()
-   # lap_time_test(agent_name=agent_name, n_episodes=500, detect_issues=False, initial_conditions=True)
+   agent_name = 'pete_sv_circle_3'
+   main_dict['name'] = agent_name
+   env_dict['map_name'] = 'circle'
+   env_dict['architecture'] = 'pete'
+   a = trainingLoop(main_dict, agent_td3_dict, env_dict, load_agent='')
+   a.train()
+   lap_time_test(agent_name=agent_name, n_episodes=500, detect_issues=False, initial_conditions=True)
 
-   # agent_name = 'pete_sv_torino_2'
-   # main_dict['name'] = agent_name
-   # main_dict['max_steps'] = 3e6
-   # env_dict['map_name'] = 'torino'
-   # env_dict['architecture'] = 'pete'
-   # a = trainingLoop(main_dict, agent_td3_dict, env_dict, load_agent='')
-   # a.train()
-   # lap_time_test(agent_name=agent_name, n_episodes=500, detect_issues=False, initial_conditions=True)
+   agent_name = 'pete_sv_torino_3'
+   main_dict['name'] = agent_name
+   env_dict['map_name'] = 'torino'
+   env_dict['architecture'] = 'pete'
+   a = trainingLoop(main_dict, agent_td3_dict, env_dict, load_agent='')
+   a.train()
+   lap_time_test(agent_name=agent_name, n_episodes=500, detect_issues=False, initial_conditions=True)
 
-   # agent_name = 'pete_sv_redbull_ring_2'
-   # main_dict['name'] = agent_name
-   # main_dict['max_steps'] = 4e6
-   # env_dict['map_name'] = 'redbull_ring'
-   # env_dict['architecture'] = 'pete'
-   # a = trainingLoop(main_dict, agent_td3_dict, env_dict, load_agent='')
-   # a.train()
-   # lap_time_test(agent_name=agent_name, n_episodes=500, detect_issues=False, initial_conditions=True)
+   agent_name = 'pete_sv_columbia_3'
+   main_dict['name'] = agent_name
+   env_dict['map_name'] = 'columbia_1'
+   env_dict['architecture'] = 'pete'
+   a = trainingLoop(main_dict, agent_td3_dict, env_dict, load_agent='')
+   a.train()
+   lap_time_test(agent_name=agent_name, n_episodes=500, detect_issues=False, initial_conditions=True)
 
-   # agent_name = 'pete_v_berlin_2'
-   # main_dict['name'] = agent_name
-   # main_dict['max_steps'] = 3e6
-   # env_dict['map_name'] = 'berlin'
-   # env_dict['architecture'] = 'pete'
-   # env_dict['path_dict']['local_path'] = False
-   # a = trainingLoop(main_dict, agent_td3_dict, env_dict, load_agent='')
-   # a.train()
-   # lap_time_test(agent_name=agent_name, n_episodes=500, detect_issues=False, initial_conditions=True)
+   agent_name = 'pete_sv_porto_3'
+   main_dict['name'] = agent_name
+   env_dict['map_name'] = 'porto_1'
+   env_dict['architecture'] = 'pete'
+   a = trainingLoop(main_dict, agent_td3_dict, env_dict, load_agent='')
+   a.train()
+   lap_time_test(agent_name=agent_name, n_episodes=500, detect_issues=False, initial_conditions=True)
+   
+   agent_name = 'pete_sv_redbull_ring_3'
+   main_dict['name'] = agent_name
+   env_dict['map_name'] = 'redbull_ring'
+   env_dict['architecture'] = 'pete'
+   env_dict['reward_signal']['time_step']=-0.005
+   a = trainingLoop(main_dict, agent_td3_dict, env_dict, load_agent='')
+   a.train()
+   lap_time_test(agent_name=agent_name, n_episodes=500, detect_issues=False, initial_conditions=True)
 
-   # agent_name = 'pete_v_circle_2'
-   # main_dict['name'] = agent_name
-   # main_dict['max_steps'] = 1.5e6
-   # env_dict['map_name'] = 'circle'
-   # env_dict['architecture'] = 'pete'
-   # env_dict['path_dict']['local_path'] = False
-   # a = trainingLoop(main_dict, agent_td3_dict, env_dict, load_agent='')
-   # a.train()
-   # lap_time_test(agent_name=agent_name, n_episodes=500, detect_issues=False, initial_conditions=True)
+   
+   
 
-   # agent_name = 'pete_v_torino_2'
-   # main_dict['name'] = agent_name
-   # main_dict['max_steps'] = 3e6
-   # env_dict['map_name'] = 'torino'
-   # env_dict['architecture'] = 'pete'
-   # env_dict['path_dict']['local_path'] = False
-   # a = trainingLoop(main_dict, agent_td3_dict, env_dict, load_agent='')
-   # a.train()
-   # lap_time_test(agent_name=agent_name, n_episodes=500, detect_issues=False, initial_conditions=True)
+   agent_name = 'pete_v_berlin_3'
+   main_dict['name'] = agent_name
+   env_dict['map_name'] = 'berlin'
+   env_dict['architecture'] = 'pete'
+   env_dict['path_dict']['local_path'] = False
+   env_dict['reward_signal']['time_step']=-0.01
+   a = trainingLoop(main_dict, agent_td3_dict, env_dict, load_agent='')
+   a.train()
+   lap_time_test(agent_name=agent_name, n_episodes=500, detect_issues=False, initial_conditions=True)
 
-   # agent_name = 'pete_v_redbull_ring_2'
-   # main_dict['name'] = agent_name
-   # main_dict['max_steps'] = 4e6
-   # env_dict['map_name'] = 'redbull_ring'
-   # env_dict['architecture'] = 'pete'
-   # env_dict['path_dict']['local_path'] = False
-   # a = trainingLoop(main_dict, agent_td3_dict, env_dict, load_agent='')
-   # a.train()
-   # lap_time_test(agent_name=agent_name, n_episodes=500, detect_issues=False, initial_conditions=True)
+   agent_name = 'pete_v_circle_3'
+   main_dict['name'] = agent_name
+   env_dict['map_name'] = 'circle'
+   env_dict['architecture'] = 'pete'
+   env_dict['path_dict']['local_path'] = False
+   a = trainingLoop(main_dict, agent_td3_dict, env_dict, load_agent='')
+   a.train()
+   lap_time_test(agent_name=agent_name, n_episodes=500, detect_issues=False, initial_conditions=True)
 
-   # agent_name = 'ete_berlin_1'
-   # main_dict['name'] = agent_name
-   # main_dict['max_steps'] = 3e6
-   # env_dict['map_name'] = 'berlin'
-   # env_dict['architecture'] = 'ete'
-   # a = trainingLoop(main_dict, agent_td3_dict, env_dict, load_agent='')
-   # a.train()
-   # lap_time_test(agent_name=agent_name, n_episodes=500, detect_issues=False, initial_conditions=True)
+   agent_name = 'pete_v_torino_3'
+   main_dict['name'] = agent_name
+   env_dict['map_name'] = 'torino'
+   env_dict['architecture'] = 'pete'
+   env_dict['path_dict']['local_path'] = False
+   a = trainingLoop(main_dict, agent_td3_dict, env_dict, load_agent='')
+   a.train()
+   lap_time_test(agent_name=agent_name, n_episodes=500, detect_issues=False, initial_conditions=True)
 
-   # agent_name = 'ete_circle_1'
-   # main_dict['name'] = agent_name
-   # main_dict['max_steps'] = 1.5e6
-   # env_dict['map_name'] = 'circle'
-   # env_dict['architecture'] = 'ete'
-   # a = trainingLoop(main_dict, agent_td3_dict, env_dict, load_agent='')
-   # a.train()
-   # lap_time_test(agent_name=agent_name, n_episodes=500, detect_issues=False, initial_conditions=True)
+   agent_name = 'pete_v_columbia_3'
+   main_dict['name'] = agent_name
+   env_dict['map_name'] = 'columbia_1'
+   env_dict['architecture'] = 'pete'
+   env_dict['path_dict']['local_path'] = False
+   a = trainingLoop(main_dict, agent_td3_dict, env_dict, load_agent='')
+   a.train()
+   lap_time_test(agent_name=agent_name, n_episodes=500, detect_issues=False, initial_conditions=True)
 
-   # agent_name = 'ete_torino_1'
-   # main_dict['name'] = agent_name
-   # main_dict['max_steps'] = 3e6
-   # env_dict['map_name'] = 'torino'
-   # env_dict['architecture'] = 'ete'
-   # a = trainingLoop(main_dict, agent_td3_dict, env_dict, load_agent='')
-   # a.train()
-   # lap_time_test(agent_name=agent_name, n_episodes=500, detect_issues=False, initial_conditions=True)
+   agent_name = 'pete_v_porto_3'
+   main_dict['name'] = agent_name
+   env_dict['map_name'] = 'porto_1'
+   env_dict['architecture'] = 'pete'
+   env_dict['path_dict']['local_path'] = False
+   a = trainingLoop(main_dict, agent_td3_dict, env_dict, load_agent='')
+   a.train()
+   lap_time_test(agent_name=agent_name, n_episodes=500, detect_issues=False, initial_conditions=True)
 
-   # agent_name = 'ete_redbull_ring_1'
-   # main_dict['name'] = agent_name
-   # main_dict['max_steps'] = 4e6
-   # env_dict['map_name'] = 'redbull_ring'
-   # env_dict['architecture'] = 'ete'
-   # a = trainingLoop(main_dict, agent_td3_dict, env_dict, load_agent='')
-   # a.train()
-   # lap_time_test(agent_name=agent_name, n_episodes=500, detect_issues=False, initial_conditions=True)
+   agent_name = 'pete_v_redbull_ring_3'
+   main_dict['name'] = agent_name
+   env_dict['map_name'] = 'redbull_ring'
+   env_dict['architecture'] = 'pete'
+   env_dict['path_dict']['local_path'] = False
+   env_dict['reward_signal']['time_step']=-0.005
+   a = trainingLoop(main_dict, agent_td3_dict, env_dict, load_agent='')
+   a.train()
+   lap_time_test(agent_name=agent_name, n_episodes=500, detect_issues=False, initial_conditions=True)
+
+
+
+
+
+   agent_name = 'ete_berlin_3'
+   main_dict['name'] = agent_name
+   env_dict['map_name'] = 'berlin'
+   env_dict['architecture'] = 'ete'
+   env_dict['path_dict']['local_path'] = False
+   env_dict['reward_signal']['time_step']=-0.01
+   a = trainingLoop(main_dict, agent_td3_dict, env_dict, load_agent='')
+   a.train()
+   lap_time_test(agent_name=agent_name, n_episodes=500, detect_issues=False, initial_conditions=True)
+
+   agent_name = 'ete_circle_3'
+   main_dict['name'] = agent_name
+   env_dict['map_name'] = 'circle'
+   env_dict['architecture'] = 'ete'
+   a = trainingLoop(main_dict, agent_td3_dict, env_dict, load_agent='')
+   a.train()
+   lap_time_test(agent_name=agent_name, n_episodes=500, detect_issues=False, initial_conditions=True)
+
+   agent_name = 'ete_torino_3'
+   main_dict['name'] = agent_name
+   env_dict['map_name'] = 'torino'
+   env_dict['architecture'] = 'ete'
+   a = trainingLoop(main_dict, agent_td3_dict, env_dict, load_agent='')
+   a.train()
+   lap_time_test(agent_name=agent_name, n_episodes=500, detect_issues=False, initial_conditions=True)
+
+   agent_name = 'ete_columbia_3'
+   main_dict['name'] = agent_name
+   env_dict['map_name'] = 'columbia_1'
+   env_dict['architecture'] = 'ete'
+   a = trainingLoop(main_dict, agent_td3_dict, env_dict, load_agent='')
+   a.train()
+   lap_time_test(agent_name=agent_name, n_episodes=500, detect_issues=False, initial_conditions=True)
+
+   agent_name = 'ete_porto_3'
+   main_dict['name'] = agent_name
+   env_dict['map_name'] = 'porto_1'
+   env_dict['architecture'] = 'ete'
+   a = trainingLoop(main_dict, agent_td3_dict, env_dict, load_agent='')
+   a.train()
+   lap_time_test(agent_name=agent_name, n_episodes=500, detect_issues=False, initial_conditions=True)
+   
+   agent_name = 'ete_redbull_ring_3'
+   main_dict['name'] = agent_name
+   env_dict['map_name'] = 'redbull_ring'
+   env_dict['architecture'] = 'ete'
+   env_dict['reward_signal']['time_step']=-0.005
+   a = trainingLoop(main_dict, agent_td3_dict, env_dict, load_agent='')
+   a.train()
+   lap_time_test(agent_name=agent_name, n_episodes=500, detect_issues=False, initial_conditions=True)
+
+
 
    # agent_name = 'ete_new__porto'
    # lap_time_test_mismatch(agent_name=agent_name, n_episodes=100, detect_issues=False, initial_conditions=True, parameter='C_Sf', frac_variation=np.linspace(-0.2,0.2,21) )
@@ -992,7 +1046,7 @@ if __name__=='__main__':
    # agent_name = 'ete_torino_1'
    # agent_name = 'ete_redbull_ring_1'
 
-   #agent_name = 'ete_torino'
+   #agent_name = 'pete_sv_berlin_2'
    #legend = [agent_name]
    #legend_title = 'agent name'
    #display_results_multiple.compare_learning_curves_progress(agent_names=[agent_name], legend=legend, legend_title=legend_title, 
