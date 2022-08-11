@@ -259,20 +259,17 @@ class environment():
         #R = 3
         #v_ref = 4
         
-        if self.velocity_control==False and self.steering_control==False:
-            waypoint, wpt_angle, R, v_ref = self.convert_action_to_coord(strategy=self.waypoint_strategy, action=act)
+        if self.steering_control==False:
 
             for step in range(self.control_steps):
                 if self.display==True:
-                    self.visualise(waypoint)
+                    self.visualise()
+                    #self.visualise(waypoint)
                 
                 if self.save_history==True:
-                    self.waypoint_history.append(waypoint)
+                    #self.waypoint_history.append(waypoint)
                     self.action_step_history.append(act)
-                
-                #delta_ref = path_tracker.pure_pursuit(self.wheelbase, waypoint, self.x, self.y, self.theta)
 
-                
                 #delta_dot = act[0] 
                 #if delta_dot<=0:
                 #    delta_dot = (-self.params['sv_min'])*delta_dot    
@@ -284,10 +281,17 @@ class environment():
                 else:
                     delta_ref = (self.params['s_max'])*act[0] 
 
+                if self.velocity_control==False:
+                    #v_dot = act[1]*self.params['a_max']
+                    #v_dot = vehicle_model.accl_constraints(self.v, v_dot, self.params['v_switch'], self.params['a_max'], self.vel_select[0], self.vel_select[1])
+                    v_dot = self.convert_action_to_accl(param=act[1])
+                    
+                elif self.velocity_control==True:
+                    v_ref = self.convert_action_to_vel_ref(param=act[1])
+                    self.v_ref = v_ref
+                    v_dot, sv = vehicle_model.pid(v_ref, delta_ref, self.state[3], self.state[2], self.params['sv_max'], self.params['a_max'], self.params['v_max'], self.params['v_min'])
+        
 
-                v_dot = act[1]*self.params['a_max']
-                v_dot = vehicle_model.accl_constraints(self.v, v_dot, self.params['v_switch'], self.params['a_max'], self.vel_select[0], self.vel_select[1])
-    
                 self.update_pose(delta_ref, v_dot)
 
                 self.update_variables()
@@ -313,7 +317,7 @@ class environment():
                     break
 
 
-        elif self.architecture == 'pete':
+        elif self.steering_control == True:
             waypoint, wpt_angle, R, v_ref = self.convert_action_to_coord(strategy=self.waypoint_strategy, action=act)
 
             if self.local_path==False:
@@ -363,11 +367,14 @@ class environment():
             
             else:
                 if self.path_strategy == 'polynomial':
-                    cx, cy, cyaw = self.define_path_polynomial(param=act)
+                    cx, cy, cyaw = self.define_path_polynomial(param=act[0])
                 elif self.path_strategy == 'gradient':
-                    cx, cy, cyaw = self.define_path_gradient(param=act)
-                else:
-                    cx, cy, cyaw = self.define_path(waypoint, wpt_angle, R)
+                    cx, cy, cyaw = self.define_path_gradient(param=act[0])
+                elif self.path_strategy == 'linear':
+                    cx, cy, cyaw = self.define_path_linear(param=act[0])
+                elif self.path_strategy == 'circle':
+                    #cx, cy, cyaw = self.define_path(waypoint, wpt_angle, R)
+                    cx, cy, cyaw = self.define_path_circle(param=act[0])
                 
                 self.path_tracker.record_waypoints(cx, cy, cyaw)
                 
@@ -382,7 +389,6 @@ class environment():
                 if lastIndex<=target_index:
                     done=True
                     
-
                 while (lastIndex > target_index) and i<self.control_steps:
                     
                     if self.display==True:
@@ -452,7 +458,7 @@ class environment():
         for _ in range(10):
             x_2 = x_1 + d*np.cos(theta)
             y_2 = y_1 + d*np.sin(theta)
-            theta += param[0]*0.2
+            theta += param*0.2
             x_1 = x_2
             y_1 = y_2
 
@@ -472,7 +478,7 @@ class environment():
         s_0, s_0_ind, n_0 = functions.convert_xy_to_sn(self.rx, self.ry, self.ryaw, self.x, self.y, ds)
         s_1 = s_0 + 3
         s_2 = s_1 + 2
-        n_1 = param[0]*track_width/2
+        n_1 = param*track_width/2
         theta = functions.sub_angles_complex(self.theta, self.ryaw[s_0_ind])
         A = np.array([[3*s_1**2, 2*s_1, 1, 0], [3*s_0**2, 2*s_0, 1, 0], [s_0**3, s_0**2, s_0, 1], [s_1**3, s_1**2, s_1, 1]])
         B = np.array([0, theta, n_0, n_1])
@@ -494,76 +500,120 @@ class environment():
 
         return np.array(cx), np.array(cy), np.array(cyaw)
     
-    def define_path(self, waypoint,  wpt_angle , R):
-        if self.path_strategy == 'linear':
+    def define_path_linear(self, param):
+        waypoint = self.convert_action_to_coord(param)
+        
+        cx = (((np.arange(0.1, 1, 0.01))*(waypoint[0] - self.x)) + self.x).tolist()
+        cy = ((np.arange(0.1, 1, 0.01))*(waypoint[1] - self.y) + self.y)
+        cx, cy, cyaw, ck, s = cubic_spline_planner.calc_spline_course(cx, cy)
+        
+        return np.array(cx), np.array(cy), np.array(cyaw)
+
+    
+    #def define_path_circle(self, waypoint,  wpt_angle , R):
+    def define_path_circle(self, param):
+        waypoint = self.convert_action_to_coord(param)
+        R = self.R_range[-1]
+        
+        if np.pi/2-0.01 < wpt_angle < np.pi/2+0.01:
             cx = (((np.arange(0.1, 1, 0.01))*(waypoint[0] - self.x)) + self.x).tolist()
             cy = ((np.arange(0.1, 1, 0.01))*(waypoint[1] - self.y) + self.y)
-
-        if self.path_strategy == 'circle':
-            if np.pi/2-0.01 < wpt_angle < np.pi/2+0.01:
-                cx = (((np.arange(0.1, 1, 0.01))*(waypoint[0] - self.x)) + self.x).tolist()
-                cy = ((np.arange(0.1, 1, 0.01))*(waypoint[1] - self.y) + self.y)
+        
+        else:
+            if wpt_angle>np.pi-0.01:
+                wpt_angle=np.pi-0.01
+            if wpt_angle<0.01:
+                wpt_angle=0.01
             
-            #elif 0.01<wpt_angle<np.pi-0.01:
-            else:
-                if wpt_angle>np.pi-0.01:
-                    wpt_angle=np.pi-0.01
-                if wpt_angle<0.01:
-                    wpt_angle=0.01
-                
-                L=(R)*np.sin(wpt_angle)/np.sin(np.pi-2*wpt_angle)
-                a = self.theta-np.pi/2
-                angles = np.linspace(0,np.pi-2*wpt_angle)
-                #angles = np.linspace(0,np.pi-wpt_angle)
-                x_arc = L*(1 - np.cos(angles))
-                y_arc = L*np.sin(angles)
-                d_arc = np.sqrt(np.power(x_arc[1:-1], 2) + np.power(y_arc[1:-1], 2))
-                if wpt_angle<np.pi/2:
-                    a_arc = np.arctan(np.true_divide(y_arc[1:-1], x_arc[1:-1]))
-                if wpt_angle>np.pi/2:
-                    a_arc = np.arctan(np.true_divide(y_arc[1:-1], x_arc[1:-1]))+np.pi
-                cx = d_arc*np.cos(a_arc+a) + self.x
-                cy = d_arc*np.sin(a_arc+a) + self.y
+            L=(R)*np.sin(wpt_angle)/np.sin(np.pi-2*wpt_angle)
+            a = self.theta-np.pi/2
+            angles = np.linspace(0,np.pi-2*wpt_angle)
+            #angles = np.linspace(0,np.pi-wpt_angle)
+            x_arc = L*(1 - np.cos(angles))
+            y_arc = L*np.sin(angles)
+            d_arc = np.sqrt(np.power(x_arc[1:-1], 2) + np.power(y_arc[1:-1], 2))
+            if wpt_angle<np.pi/2:
+                a_arc = np.arctan(np.true_divide(y_arc[1:-1], x_arc[1:-1]))
+            if wpt_angle>np.pi/2:
+                a_arc = np.arctan(np.true_divide(y_arc[1:-1], x_arc[1:-1]))+np.pi
+            cx = d_arc*np.cos(a_arc+a) + self.x
+            cy = d_arc*np.sin(a_arc+a) + self.y
 
-                cx = cx.flatten().tolist()
-                cy = cy.flatten().tolist()
+            cx = cx.flatten().tolist()
+            cy = cy.flatten().tolist()
+
+            yaw = np.arctan2(cy[-1]-cy[-2], cx[-1]-cx[-2])
+            d = 2
+            x = cx[-1] + d*np.cos(yaw)
+            y = cy[-1] + d*np.sin(yaw)
             
-            # else:
-            #     L=R/2
-            #     a = self.theta-np.pi/2
-            #     angles = np.linspace(0,np.pi-2*wpt_angle)
-            #     x_arc = R*(1 - np.cos(angles))
-            #     y_arc = R*np.sin(angles)
-            #     d_arc = np.sqrt(np.power(x_arc[1:-1], 2) + np.power(y_arc[1:-1], 2))
-            #     if wpt_angle<np.pi/2:
-            #         a_arc = np.arctan(np.true_divide(y_arc[1:-1], x_arc[1:-1]))
-            #     if wpt_angle>np.pi/2:
-            #         a_arc = np.arctan(np.true_divide(y_arc[1:-1], x_arc[1:-1]))+np.pi
-            #     cx = d_arc*np.cos(a_arc+a) + self.x
-            #     cy = d_arc*np.sin(a_arc+a) + self.y
+            x_straight = np.linspace(cx[-1], x, 10)
+            y_straight = np.linspace(cy[-1], y, 10)
 
-            #     cx = cx.flatten().tolist()
-            #     cy = cy.flatten()
-
-                yaw = np.arctan2(cy[-1]-cy[-2], cx[-1]-cx[-2])
-                d = 2
-                x = cx[-1] + d*np.cos(yaw)
-                y = cy[-1] + d*np.sin(yaw)
-                
-                x_straight = np.linspace(cx[-1], x, 10)
-                y_straight = np.linspace(cy[-1], y, 10)
-
-                [cx.append(i) for i in x_straight[1:-1]]
-                [cy.append(i) for i in y_straight[1:-1]]
+            [cx.append(i) for i in x_straight[1:-1]]
+            [cy.append(i) for i in y_straight[1:-1]]
             
             cx, cy, cyaw, ck, s = cubic_spline_planner.calc_spline_course(cx, cy)
 
-
         return np.array(cx), np.array(cy), np.array(cyaw)
 
+    def convert_action_to_coord(self, action):
+        #wpt = action%self.num_waypoints
+        #print('wpt = ', wpt)
+        
+        if self.action_space=='discrete':
+            wpt = action%self.num_waypoints
+            R=self.R_range[-1]
+            waypoint_relative_angle = self.theta - self.wpt_arc +(2*self.wpt_arc)*(wpt/(self.num_waypoints-1))
+            wpt_angle =  waypoint_relative_angle-(self.theta-np.pi/2)
+            waypoint = [self.x + R*math.cos(waypoint_relative_angle), self.y + R*math.sin(waypoint_relative_angle)]
 
+        if self.action_space=='continuous':
+            wpt_action=action[0]
+            R = self.R_range[-1]
+            waypoint_relative_angle = self.theta + self.wpt_arc*(wpt_action)
+            waypoint = [self.x + R*math.cos(waypoint_relative_angle), self.y + R*math.sin(waypoint_relative_angle)]
+            wpt_angle =  waypoint_relative_angle-(self.theta-np.pi/2) #angle in cars reference frame
+            #return waypoint, wpt_angle, R, self.v_ref
+        
+        return waypoint
 
-    def visualise(self, waypoint):
+    
+    def convert_action_to_vel_ref(self, param):
+        if self.action_space=='discrete':
+            i = int(param/self.num_waypoints)
+            v_ref = self.vel_select[i]
+        
+        elif self.action_space=='continuous':
+            if len(self.vel_select)>1:
+                v_ref = param[1]*(self.vel_select[1]-self.vel_select[0]) + self.vel_select[0] + (self.vel_select[1]-self.vel_select[0])/2
+            else:
+                v_ref=self.vel_select[-1]
+        
+        return v_ref
+
+    
+    def convert_action_to_accl(self, param):
+
+        if self.action_space=='discrete':
+            print('Warning: discrete no velocity control is not yet programmed')
+        
+        elif self.action_space=='continuous':
+            if len(self.vel_select)>1:
+                v_dot = param*self.params['a_max']
+                v_dot = vehicle_model.accl_constraints(self.v, v_dot, self.params['v_switch'], self.params['a_max'], self.vel_select[0], self.vel_select[1])
+    
+            else:
+                v_dot = 0
+                v_dot = vehicle_model.accl_constraints(self.v, v_dot, self.params['v_switch'], self.params['a_max'], self.vel_select[0], self.vel_select[0])
+    
+        return v_dot
+    
+  
+
+    
+    
+    def visualise(self):
         
         current_goal = self.goals[self.current_goal]
         plt.cla()
@@ -577,7 +627,7 @@ class environment():
         plt.arrow(self.x, self.y, 0.5*math.cos(self.theta+self.delta), 0.5*math.sin(self.theta+self.delta), head_length=0.5, head_width=0.5, shape='full',ec='None', fc='red')
         
         plt.plot(self.x, self.y, 'o')
-        plt.plot(waypoint[0], waypoint[1], 'x')
+        #plt.plot(waypoint[0], waypoint[1], 'x')
 
         #plt.plot([current_goal[0]-self.s, current_goal[0]+self.s, current_goal[0]+self.s, current_goal[0]-self.s, 
         #current_goal[0]-self.s], [current_goal[1]-self.s, current_goal[1]-self.s, current_goal[1]+self.s, 
@@ -613,7 +663,7 @@ class environment():
         y_norm = self.y/self.map_height
         theta_norm = (self.theta)/(2*math.pi)
         v_norm = self.v/self.params['v_max']
-        v_ref_norm = self.v_ref/self.params['v_max']
+        #v_ref_norm = self.v_ref/self.params['v_max']
         
         #self.observation = [x_norm, y_norm, theta_norm]
         self.observation = [x_norm, y_norm, theta_norm, v_norm]
@@ -672,69 +722,6 @@ class environment():
             self.lidar_coords_history.append(self.lidar_coords)
 
           
-    def convert_action_to_coord(self, strategy, action):
-        #wpt = action%self.num_waypoints
-        #print('wpt = ', wpt)
-        
-        if self.action_space=='discrete':
-            wpt = action%self.num_waypoints
-            R=self.R_range[-1]
-            
-            if strategy=='global':
-                waypoint = [int((action+1)%3), int((action+1)/3)]
-
-            if strategy=='local':
-                waypoint_relative_angle = self.theta - self.wpt_arc +(2*self.wpt_arc)*(wpt/(self.num_waypoints-1))
-                wpt_angle =  waypoint_relative_angle-(self.theta-np.pi/2)
-                waypoint = [self.x + R*math.cos(waypoint_relative_angle), self.y + R*math.sin(waypoint_relative_angle)]
-            
-            if strategy == 'waypoint':
-                waypoint = action
-
-            i = int(action/self.num_waypoints)
-            self.v_ref = self.vel_select[i]
-
-            return waypoint, wpt_angle, R, self.v_ref
-
-        '''
-        if self.v_ref>=1 and self.v_ref<=7:
-            self.v_ref += self.vel_select[i]
-        elif self.v_ref<1:
-            self.v_ref = 1
-        else:
-            self.v_ref = 7
-        '''
-        '''
-        if self.v_ref>=1 and self.v_ref<=7:
-            self.v_ref = self.v + self.vel_select[i]
-        elif self.v_ref<1:
-            self.v_ref = 1
-        else:
-            self.v_ref = 7
-        '''
-        #print('v = ', self.v, 'v_ref = ',  self.v_ref)
-        #v_ref = int(action/self.num_waypoints)*self.max_v
-
-        if self.action_space=='continuous':
-            #wpt_action = action[0]
-            #vel_action = action[1]
-            #R_action = action[2]
-       
-            wpt_action=action[0]
-            
-            R = self.R_range[-1]
-
-            waypoint_relative_angle = self.theta + self.wpt_arc*(wpt_action)
-            waypoint = [self.x + R*math.cos(waypoint_relative_angle), self.y + R*math.sin(waypoint_relative_angle)]
-            
-            if len(self.vel_select)>1:
-                self.v_ref = action[1]*(self.vel_select[1]-self.vel_select[0]) + self.vel_select[0] + (self.vel_select[1]-self.vel_select[0])/2
-            else:
-                self.v_ref=self.vel_select[-1]
-
-        wpt_angle =  waypoint_relative_angle-(self.theta-np.pi/2) #angle in cars reference frame
-
-        return waypoint, wpt_angle, R, self.v_ref
 
     def set_flags(self):
         
@@ -926,7 +913,8 @@ class environment():
         self.dist_to_line = np.hypot(self.x-self.rx[new_closest_point], self.y-self.ry[new_closest_point])
         self.old_closest_point = new_closest_point
 
-    def update_pose(self, steer, vel):
+    #def update_pose(self, steer, vel):
+    def update_pose(self, sv, accl)
          # steering angle velocity input to steering velocity acceleration input
         if self.architecture == 'ete': 
             sv = steer
