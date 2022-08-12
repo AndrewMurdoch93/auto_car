@@ -254,9 +254,9 @@ class trainingLoop():
 
             if episode%10==0:
                if self.learning_method=='dqn' or self.learning_method=='dueling_dqn' or self.learning_method=='dueling_ddqn' or self.learning_method=='rainbow':
-                  print(f"{'Run':3s} {n:2.0f} {'| Episode':8s} {episode:5.0f} {'| Score':8s} {score:6.2f} {'| Progress':12s} {self.env.progress:3.2f} {'| collision ':14s} {self.env.collision} {'| Average score':15s} {avg_score:6.2f} {'| Average progress':18s} {avg_progress:3.2f} {'| Epsilon':9s} {self.agent.epsilon:.2f}")
+                  print(f"{'Run':3s} {n:2.0f} {'| Episode':8s} {episode:5.0f} {'| Score':8s} {score:6.2f} {'| Progress':12s} {self.env.progress:3.2f} {'| collision ':13s} {self.env.collision} {'| Average score':15s} {avg_score:6.2f} {'| Average progress':18s} {avg_progress:3.2f} {'| Epsilon':9s} {self.agent.epsilon:.2f}")
                if self.learning_method=='reinforce' or self.learning_method=='actor_critic_sep' or self.learning_method=='actor_critic_com' or self.learning_method=='actor_critic_cont' or self.learning_method=='ddpg' or self.learning_method=='td3':
-                  print(f"{'Run':3s} {n:2.0f} {'| Episode':8s} {episode:5.0f} {'| Score':8s} {score:6.2f} {'| Progress':12s} {self.env.progress:3.2f} {'| collision ':14s} {self.env.collision} {'| Average score':15s} {avg_score:6.2f} {'| Average progress':18s} {avg_progress:3.2f}")
+                  print(f"{'Run':3s} {n:2.0f} {'| Episode':8s} {episode:5.0f} {'| Score':8s} {score:6.2f} {'| Progress':12s} {self.env.progress:3.2f} {'| collision ':13s} {self.env.collision} {'| Average score':15s} {avg_score:6.2f} {'| Average progress':18s} {avg_progress:3.2f}")
 
             episode+=1
                
@@ -439,7 +439,8 @@ def test(agent_name, n_episodes, detect_issues, initial_conditions):
          if episode%10==0:
             print('Progress test episode', episode, '| Progress = %.2f' % env.progress, '| Score = %.2f' % score)
 
-         if detect_issues==True and (env.progress<0.5):
+         if detect_issues==True and (env.progress>0.8) and (score<0):
+
             print('Stop condition met')
             print('Progress = ', env.progress)
             print('score = ', score)
@@ -447,9 +448,11 @@ def test(agent_name, n_episodes, detect_issues, initial_conditions):
             outfile = open(replay_episode_name, 'wb')
             pickle.dump(action_history, outfile)
             pickle.dump(env.initial_condition_dict, outfile)
+            pickle.dump(n, outfile)
+            pickle.dump(env_dict, outfile)
             outfile.close()
             break
-         
+
    outfile=open(results_file_name, 'wb')
    pickle.dump(test_score, outfile)
    pickle.dump(test_progress, outfile)
@@ -540,7 +543,9 @@ def lap_time_test(agent_name, n_episodes, detect_issues, initial_conditions):
 
       for episode in range(n_episodes):
 
-         env.reset(save_history=True, start_condition=start_conditions[episode], get_lap_time=True, car_params=car_params)
+         #env.reset(save_history=True, start_condition=start_conditions[episode], get_lap_time=True, car_params=car_params)
+         env.reset(save_history=True, start_condition=[], get_lap_time=True, car_params=car_params)
+         
          action_history = []
          obs = env.observation
          done = False
@@ -707,7 +712,7 @@ def lap_time_test_mismatch(agent_name, n_episodes, detect_issues, initial_condit
             time = env.steps*0.01
             collision = env.collision or env.park or env.backwards
             
-            if detect_issues==True and (collision==True):
+            if detect_issues==True and (collision==False):
                print('Stop condition met')
                print('Progress = ', env.progress)
                print('score = ', score)
@@ -735,9 +740,9 @@ def lap_time_test_mismatch(agent_name, n_episodes, detect_issues, initial_condit
 
 if __name__=='__main__':
 
-   agent_name = 'pete_sv_berlin_3'
+   agent_name = 'rl_mpc_style_porto'
 
-   main_dict = {'name':agent_name, 'max_episodes':50000, 'max_steps':5e6, 'learning_method':'td3', 'runs':5, 'comment':''}
+   main_dict = {'name':agent_name, 'max_episodes':50000, 'max_steps':5e6, 'learning_method':'td3', 'runs':1, 'comment':''}
 
    agent_dqn_dict = {'gamma':0.99, 'epsilon':1, 'eps_end':0.01, 'eps_dec':1/1000, 'lr':0.001, 'batch_size':64, 'max_mem_size':500000, 
                   'fc1_dims': 64, 'fc2_dims': 64, 'fc3_dims':64}
@@ -768,48 +773,46 @@ if __name__=='__main__':
                   , 'h': 0.074, 'm': 3.74, 'I': 0.04712, 's_min': -0.4189, 's_max': 0.4189, 'sv_min': -3.2
                   , 'sv_max': 3.2, 'v_switch': 7.319, 'a_max': 9.51, 'v_min':-5.0, 'v_max': 20.0, 'width': 0.31, 'length': 0.58}
    
-   reward_signal = {'goal_reached':0, 'out_of_bounds':-1, 'max_steps':0, 'collision':-1, 
-                     'backwards':-1, 'park':-1, 'time_step':-0.01, 'progress':0, 'distance':0.3, 
+   reward_signal = {'goal_reached':0, 'out_of_bounds':-1, 'max_steps':0, 'collision':-2, 
+                     'backwards':-0.01, 'park':-1, 'time_step':-0.005, 'progress':0, 'distance':0.3, 
                      'max_progress':0}    
    
-   action_space_dict = {'action_space': 'continuous', 'vel_select':[3,7], 'R_range':[2]}
+   action_space_dict = {'action_space': 'continuous', 'vel_select':[3,6], 'R_range':[2]}
    
    #action_space_dict = {'action_space': 'discrete', 'n_waypoints': 10, 'vel_select':[7], 'R_range':[6]}
 
-   path_dict = {'local_path':True, 'waypoint_strategy':'local', 'wpt_arc':np.pi/2}
+   steer_control_dict = {'steering_control': False, 'wpt_arc':np.pi/2}
+
+   if  steer_control_dict['steering_control'] == True:
+      steer_control_dict['path_strategy'] = 'circle'  #circle or linear or polynomial or gradient
+      steer_control_dict['control_strategy'] = 'pure_pursuit'  #pure_pursuit or stanley
    
-   if path_dict['local_path'] == True: #True or false
-        path_dict['path_strategy'] = 'circle' #circle or linear or polynomial or gradient
-        path_dict['control_strategy'] = 'pure_pursuit' #pure_pursuit or stanley
-        
-        if path_dict['control_strategy'] == 'pure_pursuit':
-            path_dict['track_dict'] = {'k':0.1, 'Lfc':1}
-        if path_dict['control_strategy'] == 'stanley':
-            path_dict['track_dict'] = {'l_front': car_params['lf'], 'k':5, 'max_steer':car_params['s_max']}
+      if steer_control_dict['control_strategy'] == 'pure_pursuit':
+         steer_control_dict['track_dict'] = {'k':0.1, 'Lfc':1}
+      if steer_control_dict['control_strategy'] == 'stanley':
+         steer_control_dict['track_dict'] = {'l_front': car_params['lf'], 'k':5, 'max_steer':car_params['s_max']}
    
    lidar_dict = {'is_lidar':True, 'lidar_res':0.1, 'n_beams':8, 'max_range':20, 'fov':np.pi}
    
    env_dict = {'sim_conf': functions.load_config(sys.path[0], "config")
             , 'save_history': False
-            , 'map_name': 'berlin'
+            , 'map_name': 'porto_1'
             , 'max_steps': 3000
             , 'control_steps': 20
             , 'display': False
-            , 'architecture': 'pete'    #pete, ete
             , 'velocity_control': False
-            , 'steering_control': False
+            , 'steer_control_dict': steer_control_dict
             , 'car_params':car_params
             , 'reward_signal':reward_signal
             , 'lidar_dict':lidar_dict
             , 'action_space_dict':action_space_dict
-            , 'path_dict': path_dict
             } 
    
-   # a = trainingLoop(main_dict, agent_td3_dict, env_dict, load_agent='')
-   # a.train()
-   # test(agent_name=agent_name, n_episodes=100, detect_issues=False, initial_conditions=True)
-   # lap_time_test(agent_name=agent_name, n_episodes=500, detect_issues=False, initial_conditions=True)
-   # lap_time_test_mismatch(agent_name=agent_name, n_episodes=100, detect_issues=False, initial_conditions=True, parameter='C_Sf', frac_variation=np.array([-0.05, 0.05]))
+   #a = trainingLoop(main_dict, agent_td3_dict, env_dict, load_agent='')
+   #a.train()
+   #test(agent_name=agent_name, n_episodes=100, detect_issues=False, initial_conditions=True)
+   #lap_time_test(agent_name=agent_name, n_episodes=100, detect_issues=False, initial_conditions=True)
+   #lap_time_test_mismatch(agent_name=agent_name, n_episodes=50, detect_issues=False, initial_conditions=True, parameter='C_Sf', frac_variation=np.array([-0.05, 0.05]))
    
    # agent_name = 'pete_sv_circle_3'
    # main_dict['name'] = agent_name
@@ -1099,7 +1102,7 @@ if __name__=='__main__':
    # agent_name = 'ete_berlin_1'
    # agent_name = 'ete_torino_1'
    # agent_name = 'ete_redbull_ring_1'
-
+   #agent_name = 'rl_mpc_style_porto'
    #legend = [agent_name]
    #legend_title = 'agent name'
    #display_results_multiple.compare_learning_curves_progress(agent_names=[agent_name], legend=legend, legend_title=legend_title, 
@@ -1137,9 +1140,17 @@ if __name__=='__main__':
    #ns = [0, 0, 0]
    #mismatch_parameters = ['C_Sr']
    #frac_vary = [-0.2]
-   #display_results_multiple.compare_learning_curves_progress(agent_names, legend, legend_title, show_average=True, show_median=True, xaxis='episodes')
-   #display_results_multiple.display_path_multiple(agent_names=agent_names, ns=ns, legend_title=legend_title, 
-   #           legend=legend, mismatch_parameters=mismatch_parameters, frac_vary=frac_vary)
+   
+   # agent_names = ['torino_ete_test', 'torino_sv_test_7', 'torino_v_test_1']
+   # agent_names = ['rl_mpc_style_porto']
+   # ns = [0, 0, 0]
+   # legend_title = 'Architecture'
+   # legend = ['no control', 'steering and velocity control', 'velocity control']
+   # mismatch_parameters = ['C_Sf']
+   # frac_vary = [0]
+   # #display_results_multiple.compare_learning_curves_progress(agent_names, legend, legend_title, show_average=True, show_median=True, xaxis='episodes')
+   # display_results_multiple.display_path_multiple(agent_names=agent_names, ns=ns, legend_title=legend_title, 
+   #             legend=legend, mismatch_parameters=mismatch_parameters, frac_vary=frac_vary)
 
 
    # agent_name = 'pete_sv_redbull_ring_2'

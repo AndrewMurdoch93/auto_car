@@ -206,7 +206,7 @@ def pid(speed, steer, current_speed, current_steer, max_sv, max_a, max_v, min_v)
             accl = kp * vel_diff
         else:
             # braking
-            kp = 2.0 * max_a / (-min_v)
+            kp = 2.0 * max_a / (min_v)
             accl = kp * vel_diff
     # currently backwards
     else:

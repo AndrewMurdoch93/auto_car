@@ -445,14 +445,17 @@ def graph_lap_results(agent_names):
 
         pass
         
-        if env_dict['architecture']=='pete' and env_dict['path_dict']['local_path']==True:
-            architecture = 'partial end-to-end, velocity and steering control'
+        if env_dict['velocity_control']==True and env_dict['steer_control_dict']['steering_control']==True:
+            architecture = 'steering and velocity control'
 
-        elif env_dict['architecture']=='pete' and env_dict['path_dict']['local_path']==False:
-            architecture = 'partial end-to-end, velocity control'
+        elif env_dict['velocity_control']==True and env_dict['steer_control_dict']['steering_control']==False:
+            architecture = 'velocity control'
 
-        elif env_dict['architecture']=='ete':
-            architecture = 'fully end-to-end'
+        elif env_dict['velocity_control']==False and env_dict['steer_control_dict']['steering_control']==True:
+            architecture = 'steering control'
+
+        elif env_dict['velocity_control']==False and env_dict['steer_control_dict']['steering_control']==False:
+            architecture = 'no controller'
         
 
         for lap_time, collision in zip(results_dict['times'].flatten(), results_dict['collisions'].flatten()):
@@ -543,15 +546,18 @@ def graph_lap_results_mismatch(agent_names, mismatch_parameter):
         env_dict = pickle.load(infile)
         envs[agent] = env_dict
         infile.close()
-        
-        if env_dict['architecture']=='pete' and env_dict['path_dict']['local_path']==True:
+    
+        if env_dict['velocity_control']==True and env_dict['steer_control_dict']['steering_control']==True:
             architecture = 'steering and velocity control'
 
-        elif env_dict['architecture']=='pete' and env_dict['path_dict']['local_path']==False:
+        elif env_dict['velocity_control']==True and env_dict['steer_control_dict']['steering_control']==False:
             architecture = 'velocity control'
 
-        elif env_dict['architecture']=='ete':
-            architecture = 'no controllers'
+        elif env_dict['velocity_control']==False and env_dict['steer_control_dict']['steering_control']==True:
+            architecture = 'steering control'
+
+        elif env_dict['velocity_control']==False and env_dict['steer_control_dict']['steering_control']==False:
+            architecture = 'no controller'
         
         for i in range(len(results_dict['times_results'][0])):
             for j in range(len(results_dict['times_results'][0][0])):
@@ -883,12 +889,12 @@ def display_moving_agent(agent_name, load_history=False, n=0):
         plt.arrow(sh[0], sh[1], 0.5*math.cos(sh[2]), 0.5*math.sin(sh[2]), head_length=0.5, head_width=0.5, shape='full', ec='None', fc='blue')
         plt.arrow(sh[0], sh[1], 0.5*math.cos(sh[2]+sh[3]), 0.5*math.sin(sh[2]+sh[3]), head_length=0.5, head_width=0.5, shape='full',ec='None', fc='red')
         plt.plot(sh[0], sh[1], 'o')
-        wh = env.waypoint_history[i]
-        plt.plot(wh[0], wh[1], 'x')
+        #wh = env.waypoint_history[i]
+        #plt.plot(wh[0], wh[1], 'x')
         #gh = env.goal_history[i]
         #plt.plot([gh[0]-env.s, gh[0]+env.s, gh[0]+env.s, gh[0]-env.s, gh[0]-env.s], [gh[1]-env.s, gh[1]-env.s, gh[1]+env.s, gh[1]+env.s, gh[1]-env.s], 'r')
         
-        if env.local_path==True and env.architecture=='pete':
+        if env_dict['velocity_control']==True and env_dict['steer_control_dict']['steering_control']==True:
             lph = env.local_path_history[i]
             plt.plot(lph[0], lph[1])
         

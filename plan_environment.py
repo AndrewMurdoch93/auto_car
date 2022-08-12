@@ -265,7 +265,7 @@ class environment():
             else:
                 delta_ref = (self.params['s_max'])*act[0] 
             v_dot = act[1]*self.params['a_max']
-            v_dot = vehicle_model.accl_constraints(self.v, v_dot, self.params['v_switch'], self.params['a_max'], self.vel_select[0], self.vel_select[1])
+            v_dot = vehicle_model.accl_constraints(new_state[3], v_dot, self.params['v_switch'], self.params['a_max'], self.vel_select[0], self.vel_select[1])
             
             new_state, observation, fail = self.update_pose_plan(delta_ref, v_dot, new_state)
             if fail==True:
@@ -314,7 +314,7 @@ class environment():
         if lastIndex<=target_index:
             done=True
             
-        while (lastIndex > target_index) and i<self.control_steps:
+        while (lastIndex > target_index) and i<40:
             
             if self.display==True:
                 self.visualise(waypoint)

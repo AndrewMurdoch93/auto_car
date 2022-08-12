@@ -246,17 +246,58 @@ class environment():
         # self.params['m'] *= random.uniform(0.95,1.05)
         # self.params['I'] *= random.uniform(0.95,1.05)
 
+        self.reset_trajectory()
+
+    def reset_trajectory(self):
+        self.path_x = []
+        self.path_y = []
+        self.path_v = []
+
+    def plan_action(self, new_state, act):
+        
+        for step in range(self.control_steps):
+            
+            if act[0]<=0:
+                delta_ref = (-self.params['s_min'])*act[0]       
+            else:
+                delta_ref = (self.params['s_max'])*act[0] 
+            
+            # Get v_dot
+            v_dot = self.convert_action_to_accl(param=act[1])
+            v_ref = 0
+            
+            #Get delta_dot
+            _, delta_dot = vehicle_model.pid(v_ref, delta_ref, new_state[3], new_state[2], self.params['sv_max'], 
+                                self.params['a_max'], self.params['v_max'], self.params['v_min'])
+            #Constrain delta_dot and v_dot
+            delta_dot = vehicle_model.steering_constraint(new_state[2], delta_dot, self.params['s_min'], 
+                self.params['s_max'], self.params['sv_min'], self.params['sv_max'])
+            v_dot = vehicle_model.accl_constraints(vel=new_state[3], accl=v_dot, v_switch=self.params['v_switch'], 
+                a_max=self.params['a_max'], v_min=self.vel_select[0], v_max=self.vel_select[1])
+
+            new_state, observation, fail = self.update_pose_plan(delta_dot, v_dot, new_state)
+            
+            if fail==True:
+                break
+            
+            self.path_x.append(new_state[0])
+            self.path_y.append(new_state[1])
+            self.path_v.append(new_state[3])
+
+        # plt.imshow(self.im, extent=(0,self.map_width,0,self.map_height)) 
+        # plt.plot(self.path_x, self.path_y)
+        # plt.xlim([0,self.map_width])
+        # plt.ylim([0,self.map_height])
+        # plt.show()
+
+        return observation, new_state, fail
+
     def take_action(self, act):
         self.action_history.append(act)
 
         reward = 0
         done=False
-        
-        #waypoint = 0
-        #wpt_angle = 0
-        #R = 3
-        #v_ref = 4
-        
+
         if self.steering_control==False:
 
             for step in range(self.control_steps):
@@ -335,7 +376,9 @@ class environment():
             elif self.path_strategy == 'circle':
                 #cx, cy, cyaw = self.define_path(waypoint, wpt_angle, R)
                 cx, cy, cyaw = self.define_path_circle(param=act[0])
-            
+            elif self.path_strategy == 'ete_control':
+                cx, cy, cyaw, ck, cs = cubic_spline_planner.calc_spline_course(self.path_x, self.path_y)
+
             self.path_tracker.record_waypoints(cx, cy, cyaw)
             
             if self.steer_control_dict['control_strategy'] == 'pure_pursuit':
@@ -349,7 +392,7 @@ class environment():
             if lastIndex<=target_index:
                 done=True
                 
-            while (lastIndex > target_index) and i<self.control_steps:
+            while (lastIndex > target_index) and i<200:
                 
                 if self.display==True:
                     self.visualise()
@@ -370,7 +413,9 @@ class environment():
                     v_ref = 0
                 elif self.velocity_control==True:
                     v_ref = self.convert_action_to_vel_ref(param=act[1])
-                    self.v_ref = v_ref
+                    #self.v_ref = v_ref
+                    self.v_ref = 5
+                    v_ref = 5
                     v_dot, _ = vehicle_model.pid(v_ref, delta_ref, self.state[3], self.state[2], self.params['sv_max'], 
                                 self.params['a_max'], self.vel_select[0], self.vel_select[1])
                 
@@ -422,7 +467,7 @@ class environment():
 
         if self.display==True:
             print(reward)        
-        
+        self.reset_trajectory()
         return self.observation, reward, done
     
     
@@ -890,9 +935,63 @@ class environment():
         self.dist_to_line = np.hypot(self.x-self.rx[new_closest_point], self.y-self.ry[new_closest_point])
         self.old_closest_point = new_closest_point
 
+
+    def update_pose_plan(self, sv, accl, state):
+
+        f = vehicle_model.vehicle_dynamics_st(
+            state,
+            np.array([sv, accl]),
+            self.params['mu'],
+            self.params['C_Sf'],
+            self.params['C_Sr'],
+            self.params['lf'],
+            self.params['lr'],
+            self.params['h'],
+            self.params['m'],
+            self.params['I'],
+            self.params['s_min'],
+            self.params['s_max'],
+            self.params['sv_min'],
+            self.params['sv_max'],
+            self.params['v_switch'],
+            self.params['a_max'],
+            self.params['v_min'],
+            self.params['v_max'])
+
+        # update state
+        state_ = state + f * self.dt
+        
+        x = state[0]
+        y = state[1]
+        theta = state[4]%(2*np.pi)
+        v = state[3]
+        delta = state[2]
+
+        x_norm = x/self.map_width
+        y_norm = y/self.map_height
+        theta_norm = theta/(2*math.pi)
+        v_norm = v/self.params['v_max']
+
+        observation_ = [x_norm, y_norm, theta_norm, v_norm]
+
+        lidar_dists, _ = self.lidar.get_scan(x, y, theta)
+
+
+        if self.lidar_dict['is_lidar']==True:
+            #lidar_norm = np.array(self.lidar_dists)<0.5
+            lidar_norm = np.array(lidar_dists)/self.lidar_dict['max_range']
+            for n in lidar_norm:
+                observation_.append(n)
+            pass
+        
+        fail = functions.occupied_cell(x, y, self.occupancy_grid, self.map_res, self.map_height)
+        
+        return state_, observation_, fail
+
+
+
     #def update_pose(self, steer, vel):
     def update_pose(self, sv, accl):
-         # steering angle velocity input to steering velocity acceleration input
 
         f = vehicle_model.vehicle_dynamics_st(
             self.state,
@@ -1035,8 +1134,91 @@ def test_environment():
     print('score = ', score)
     #env.save_initial_condition()
     
+def plan():
+    initial_conditions=True
+
+    agent_name = 'rl_mpc_style_porto'
+    parent_dir = os.path.dirname(os.path.abspath(__file__))
+    agent_dir = parent_dir + '/agents/' + agent_name
+    agent_params_file = agent_dir + '/' + agent_name + '_params'
+    
+    infile = open('environments/' + agent_name, 'rb')
+    env_dict = pickle.load(infile)
+    infile.close()
+    init_car_params = env_dict['car_params']
+
+    env_dict['save_history'] = True
+    env_dict['display'] = True
+    env_dict['steer_control_dict']['steering_control']=True
+    env_dict['steer_control_dict']['path_strategy']='ete_control'
+
+    #env_dict['steer_control_dict']['control_strategy'] = 'pure_pursuit'
+    #env_dict['steer_control_dict']['track_dict'] = {'k':0.1, 'Lfc':1}
+    
+    #env_dict['steer_control_dict']['control_strategy'] = 'stanley'
+    #env_dict['steer_control_dict']['track_dict'] = {'l_front': env_dict['car_params']['lf'], 'k':5, 'max_steer':env_dict['car_params']['s_max']}
+
+    env_dict['velocity_control'] = True
+    
+    #outfile=open('environments/' + agent_name, 'wb')
+    #pickle.dump(env_dict, outfile)
+    #outfile.close()
+    
+    if initial_conditions==True:
+        start_condition_file_name = 'test_initial_condition/' + env_dict['map_name']
+    else:
+        start_condition_file_name = 'test_initial_condition/none' 
+   
+    infile = open(start_condition_file_name, 'rb')
+    start_conditions = pickle.load(infile)
+    infile.close()
+    env = environment(env_dict)
+
+    initial_condition = {'x':16, 'y':7, 'v':5, 'delta':0, 'theta':0, 'goal':1}
+    env.reset(save_history=True, start_condition=[], car_params=init_car_params, get_lap_time=True)
+
+    action_history = []
+
+    infile = open(agent_params_file, 'rb')
+    agent_dict = pickle.load(infile)
+    infile.close()
+    agent_dict['layer3_size']=300
+
+    infile = open('train_parameters/' + agent_name, 'rb')
+    main_dict = pickle.load(infile)
+    infile.close()
+
+    n=0
+    a = agent_td3.agent(agent_dict)
+    a.load_weights(agent_name, n)
+    
+    #######################################################################################################################################
+
+    obs = env.observation
+    done=False
+    score=0
+
+    while done==False:
+        
+        fail=False
+        plan_step=0
+        state = env.state.copy()
+
+        while fail==False and plan_step<=20:
+            action = a.choose_greedy_action(obs)
+            obs, state_, fail = env.plan_action(state, action)
+            state = state_
+            plan_step+=1
+        
+        obs, reward, done = env.take_action(action)
+        score+=reward
+
+
+
 if __name__=='__main__':
-    test_environment()
+    #test_environment()
+    plan()
+
 
 
         
