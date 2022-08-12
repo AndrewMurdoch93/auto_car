@@ -740,7 +740,7 @@ def lap_time_test_mismatch(agent_name, n_episodes, detect_issues, initial_condit
 
 if __name__=='__main__':
 
-   agent_name = 'rl_mpc_style_porto'
+   agent_name = 'v_berlin'
 
    main_dict = {'name':agent_name, 'max_episodes':50000, 'max_steps':5e6, 'learning_method':'td3', 'runs':1, 'comment':''}
 
@@ -774,7 +774,7 @@ if __name__=='__main__':
                   , 'sv_max': 3.2, 'v_switch': 7.319, 'a_max': 9.51, 'v_min':-5.0, 'v_max': 20.0, 'width': 0.31, 'length': 0.58}
    
    reward_signal = {'goal_reached':0, 'out_of_bounds':-1, 'max_steps':0, 'collision':-2, 
-                     'backwards':-0.01, 'park':-1, 'time_step':-0.005, 'progress':0, 'distance':0.3, 
+                     'backwards':-0.01, 'park':-1, 'time_step':-0.01, 'progress':0, 'distance':0.3, 
                      'max_progress':0}    
    
    action_space_dict = {'action_space': 'continuous', 'vel_select':[3,6], 'R_range':[2]}
@@ -796,7 +796,7 @@ if __name__=='__main__':
    
    env_dict = {'sim_conf': functions.load_config(sys.path[0], "config")
             , 'save_history': False
-            , 'map_name': 'porto_1'
+            , 'map_name': 'berlin'
             , 'max_steps': 3000
             , 'control_steps': 20
             , 'display': False
@@ -1102,7 +1102,7 @@ if __name__=='__main__':
    # agent_name = 'ete_berlin_1'
    # agent_name = 'ete_torino_1'
    # agent_name = 'ete_redbull_ring_1'
-   #agent_name = 'rl_mpc_style_porto'
+   #agent_name = 'v_berlin'
    #legend = [agent_name]
    #legend_title = 'agent name'
    #display_results_multiple.compare_learning_curves_progress(agent_names=[agent_name], legend=legend, legend_title=legend_title, 
