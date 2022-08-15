@@ -377,6 +377,7 @@ class environment():
                  # get delta_dot
                 _, delta_dot = vehicle_model.pid(v_ref, delta_ref, self.state[3], self.state[2], self.params['sv_max'], 
                                 self.params['a_max'], self.params['v_max'], self.params['v_min'])
+                
                 #Constrain delta_dot and v_dot
                 delta_dot = vehicle_model.steering_constraint(self.delta, delta_dot, self.params['s_min'], 
                     self.params['s_max'], self.params['sv_min'], self.params['sv_max'])
