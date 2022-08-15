@@ -465,7 +465,7 @@ class lidar_scan():
 
         return scan, coords
 
-def generate_initial_condition(name, episodes, distance_offset, angle_offset):
+def generate_initial_condition(name, episodes, distance_offset, angle_offset, vel_select):
     file_name = 'test_initial_condition/' + name
    
     initial_conditions = []
@@ -488,7 +488,7 @@ def generate_initial_condition(name, episodes, distance_offset, angle_offset):
     for eps in range(episodes):
         x_s, y_s, theta_s, current_goal = random_start(x, y, yaw, distance_offset, angle_offset)
         #x, y, theta = random_start(goal_x, goal_y, rx, ry, ryaw, rk, d, distance_offset, angle_offset)
-        v_s = random.random()*0.5
+        v_s = random.random()*(vel_select[1]-vel_select[0])+vel_select[0]
         delta_s = 0
         i = {'x':x_s, 'y':y_s, 'v':v_s, 'delta':delta_s, 'theta':theta_s, 'goal':current_goal}
         initial_conditions.append(i)
@@ -568,7 +568,7 @@ if __name__ == '__main__':
     #occupancy_grid, map_height, map_width, res = map_generator(map_name='circle')
     #a = lidar_scan(res, 3, 10, np.pi, occupancy_grid, res, 30)
     #print(a.get_scan(15,5,0))
-    generate_initial_condition('redbull_ring', 2000, distance_offset=0.2, angle_offset=np.pi/8)
+    generate_initial_condition('berlin', 2000, distance_offset=0.2, angle_offset=np.pi/8, vel_select=[3,6])
 
 
     #im = image.imread(image_path)

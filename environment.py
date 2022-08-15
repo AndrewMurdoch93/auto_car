@@ -159,7 +159,7 @@ class environment():
             angle_offset = np.pi/8
             #self.x, self.y, self.theta, self.current_goal = functions.random_start(rx, ry, ryaw, distance_offset, angle_offset)
             self.x, self.y, self.theta, self.current_goal = functions.random_start(x, y, yaw, distance_offset, angle_offset)
-            self.v = random.random()*self.vel_select[-1]*0.7
+            self.v = random.random()*(self.vel_select[1]-self.vel_select[0])+self.vel_select[0]
             #self.v = random.random()*7
             #self.v=0    
             #self.v = 20
@@ -1008,7 +1008,7 @@ def test_environment():
     env_dict['name'] = 'test'
     
     # initial_condition = {'x':8.18, 'y':26.24, 'v':4, 'delta':0, 'theta':np.pi, 'goal':1}
-    initial_condition = {'x':16, 'y':7, 'v':7, 'delta':0, 'theta':0, 'goal':1}
+    initial_condition = {'x':16, 'y':7, 'v':0.101, 'delta':0, 'theta':0, 'goal':1}
     # initial_condition = {'x':6, 'y':6.5, 'v':4, 'delta':0, 'theta':np.pi, 'goal':1}
     #initial_condition = []
     
@@ -1020,7 +1020,7 @@ def test_environment():
     #a.load_weights(agent_name, n)
     
     action_history = np.ones((1000,2))*0
-    action_history[:,1] = np.ones(1000)*-1
+    action_history[:,1] = np.ones(1000)*1
 
     done=False
     score=0
