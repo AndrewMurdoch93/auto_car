@@ -808,11 +808,11 @@ if __name__=='__main__':
             , 'action_space_dict':action_space_dict
             } 
    
-   a = trainingLoop(main_dict, agent_td3_dict, env_dict, load_agent='')
-   a.train()
-   test(agent_name=agent_name, n_episodes=100, detect_issues=False, initial_conditions=True)
-   lap_time_test(agent_name=agent_name, n_episodes=100, detect_issues=False, initial_conditions=True)
-   lap_time_test_mismatch(agent_name=agent_name, n_episodes=50, detect_issues=False, initial_conditions=True, parameter='C_Sf', frac_variation=np.array([-0.05, 0.05]))
+   # a = trainingLoop(main_dict, agent_td3_dict, env_dict, load_agent='')
+   # a.train()
+   # test(agent_name=agent_name, n_episodes=100, detect_issues=False, initial_conditions=True)
+   # lap_time_test(agent_name=agent_name, n_episodes=100, detect_issues=False, initial_conditions=True)
+   # lap_time_test_mismatch(agent_name=agent_name, n_episodes=50, detect_issues=False, initial_conditions=True, parameter='C_Sf', frac_variation=np.array([-0.05, 0.05]))
    
    agent_name = 'circle_pete_s'
    main_dict['name'] = agent_name
