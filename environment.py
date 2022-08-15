@@ -377,6 +377,7 @@ class environment():
                  # get delta_dot
                 _, delta_dot = vehicle_model.pid(v_ref, delta_ref, self.state[3], self.state[2], self.params['sv_max'], 
                                 self.params['a_max'], self.params['v_max'], self.params['v_min'])
+                
                 #Constrain delta_dot and v_dot
                 delta_dot = vehicle_model.steering_constraint(self.delta, delta_dot, self.params['s_min'], 
                     self.params['s_max'], self.params['sv_min'], self.params['sv_max'])
@@ -512,7 +513,7 @@ class environment():
             x_arc = L*(1 - np.cos(angles))
             y_arc = L*np.sin(angles)
             d_arc = np.sqrt(np.power(x_arc[1:-1], 2) + np.power(y_arc[1:-1], 2))
-            if wpt_angle<np.pi/2:
+            if wpt_angle<=np.pi/2:
                 a_arc = np.arctan(np.true_divide(y_arc[1:-1], x_arc[1:-1]))
             if wpt_angle>np.pi/2:
                 a_arc = np.arctan(np.true_divide(y_arc[1:-1], x_arc[1:-1]))+np.pi
@@ -917,14 +918,15 @@ class environment():
         # update state
         self.state = self.state + f * self.dt
         
-        try:
-            self.x = self.state[0]
-            self.y = self.state[1]
-            self.theta = self.state[4]%(2*np.pi)
-            self.v = self.state[3]
-            self.delta = self.state[2]
-        except:
-            print('Invalid state value')
+        if np.any(np.isnan(self.state)) or np.any(np.isnan(f)):
+            print('nan is true!')
+
+        self.x = self.state[0]
+        self.y = self.state[1]
+        self.theta = self.state[4]%(2*np.pi)
+        self.v = self.state[3]
+        self.delta = self.state[2]
+
 
         #print(self.theta)
         #print(self.delta)
