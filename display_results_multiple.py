@@ -153,7 +153,45 @@ def learning_curve_progress(agent_name, show_average=False, show_median=True):
         plt.legend(['Average progress', 'Standard deviation from mean'])
         plt.show()
 
+def learning_curve_lap_time(agent_names, legend, legend_title, show_average=True, show_median=True):
+    
+    progress = [[] for _ in range(len(agent_names))]
+    #avg = [[] for _ in range(len(agent_names))]
+    #std_dev = [[] for _ in range(len(agent_names))]
+    #percentile_25 = [[] for _ in range(len(agent_names))]
+    median = [[] for _ in range(len(agent_names))]
+    #percentile_75 = [[] for _ in range(len(agent_names))]
+    steps = [[] for _ in range(len(agent_names))]
+    times = [[] for _ in range(len(agent_names))]
 
+    if show_median==True:
+        for i in range(len(agent_names)):
+            agent_name = agent_names[i]
+            train_results_file_name = 'train_results/' + agent_name
+            infile = open(train_results_file_name, 'rb')
+            
+            _ = pickle.load(infile)
+            progress = pickle.load(infile)
+            times = pickle.load(infile)
+            steps = pickle.load(infile)
+            infile.close()
+        
+            median = np.median(progress, axis=0)
+            if xaxis=='episodes':
+                plt.plot(median)
+                plt.xlabel('Episode')
+            elif xaxis=='times':
+                plt.plot(np.cumsum(np.array(times)), median)
+                plt.xlabel('Time')
+            elif xaxis=='steps':
+                plt.plot(np.cumsum(np.array(steps)), median)
+                plt.xlabel('Steps')
+
+        plt.title('Learning curve for median progress')
+        plt.ylabel('Progress')
+        plt.legend(legend, title=legend_title, loc='lower right')
+        #plt.xlim([0,6000])
+        plt.show()
 
 def histogram_score(agent_name):
 
@@ -481,29 +519,32 @@ def graph_lap_results(agent_names):
             arch_lap_results[a_idx, m_idx] = np.average(np.array(df[np.logical_and(np.logical_and(df['architecture']==a, df['map']==m), df['success']==True)]['lap_time']))
             arch_success_results[a_idx, m_idx] = np.average(np.array(df[np.logical_and(df['architecture']==a, df['map']==m)]['success']))
 
-    x = ['circle', 'porto', 'berlin', 'torino', 'redbull ring']
+    x = ['circle', 'columbia', 'porto', 'berlin', 'torino', 'redbull ring']
     
-    w=0.25
+    w=0.2
     bar1 = np.arange(len(maps))
     bar2 = [i+w for i in bar1]
     bar3 = [i+w for i in bar2]
+    bar4 = [i+w for i in bar3]
     
     fig, axs = plt.subplots(2, sharex=True)
     
     axs[0].bar(bar1, arch_lap_results[0], w, label=archs[0])
     axs[0].bar(bar2, arch_lap_results[1], w, label=archs[1])
     axs[0].bar(bar3, arch_lap_results[2], w, label=archs[2])
+    axs[0].bar(bar4, arch_lap_results[3], w, label=archs[3])
     axs[0].set(ylabel='Lap time [s]')
-    axs[0].set_ylim([5,18])
+    axs[0].set_ylim([0,22])
     axs[0].legend(archs)
 
 
     axs[1].bar(bar1, arch_success_results[0], w, label=archs[0])
     axs[1].bar(bar2, arch_success_results[1], w, label=archs[1])
     axs[1].bar(bar3, arch_success_results[2], w, label=archs[2])
+    axs[1].bar(bar4, arch_success_results[3], w, label=archs[3])
     axs[1].set_xticks(bar1+w, x)
     axs[1].set(xlabel='Track', ylabel='Fraction successful laps')
-    axs[1].set_ylim([0.75,1])
+    axs[1].set_ylim([0,1])
     #axs[1].legend(archs)
     plt.show()
 
@@ -658,12 +699,19 @@ def graph_lap_results_mismatch(agent_names, mismatch_parameter):
 
 
 
-agent_names = [ 'ete_circle_1', 'pete_v_circle_1', 'pete_sv_circle_1',
-            'ete_new__porto', 'ete_porto', 'pete_porto',
-            'ete_berlin_1', 'pete_v_berlin_1', 'pete_sv_berlin_1', 
-            'ete_torino_1', 'pete_v_torino_2', 'pete_sv_torino_2',
-            'ete_redbull_ring_1', 'pete_v_redbull_ring_2', 'pete_sv_redbull_ring']               
+# agent_names = [ 'ete_circle_1', 'pete_v_circle_1', 'pete_sv_circle_1',
+#             'ete_new__porto', 'ete_porto', 'pete_porto',
+#             'ete_berlin_1', 'pete_v_berlin_1', 'pete_sv_berlin_1', 
+#             'ete_torino_1', 'pete_v_torino_2', 'pete_sv_torino_2',
+#             'ete_redbull_ring_1', 'pete_v_redbull_ring_2', 'pete_sv_redbull_ring']        
+# 
 
+agent_names = ['circle_pete_sv', 'circle_pete_s', 'circle_pete_v', 'circle_ete', 
+            'columbia_pete_sv', 'columbia_pete_s', 'columbia_pete_v', 'columbia_ete',
+            'porto_pete_sv', 'porto_pete_s', 'porto_pete_v', 'porto_ete',
+            'berlin_pete_sv', 'berlin_pete_s', 'berlin_pete_v', 'berlin_ete',
+            'torino_pete_sv', 'torino_pete_s', 'torino_pete_v', 'torino_ete',
+            'redbull_ring_pete_sv', 'redbull_ring_pete_s', 'redbull_ring_pete_v', 'redbull_ring_ete']      
 
 #graph_lap_results_mismatch(agent_names, 'C_Sf')
 
