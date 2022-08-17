@@ -48,6 +48,7 @@ class trainingLoop():
 
       #Initialise file names for saving data
       self.train_results_file_name = 'train_results/' + self.agent_name
+      self.evaluation_results_file_name = 'evaluation_results/' + self.agent_name
       self.environment_name = 'environments/' + self.agent_name
       self.train_parameters_name = 'train_parameters/' + self.agent_name
       self.action_durations_name = 'action_durations/' + self.agent_name + '_train'
@@ -129,6 +130,12 @@ class trainingLoop():
       times = np.zeros([self.runs, self.max_episodes])
       steps = np.zeros([self.runs, self.max_episodes])
       collisions = np.zeros([self.runs, self.max_episodes])
+
+      eval_interval = 100
+      eval_n_episodes = 10
+      eval_steps = np.zeros([self.runs, int(self.max_episodes/eval_interval)])
+      eval_lap_times = np.zeros([self.runs, int(self.max_episodes/eval_interval), eval_n_episodes])
+      eval_collisions = np.zeros([self.runs, int(self.max_episodes/eval_interval), eval_n_episodes])
 
       for n in range(self.runs):
          
@@ -254,6 +261,16 @@ class trainingLoop():
                pickle.dump(collisions, outfile)
                outfile.close()
 
+            if episode%100==0 and episode!=0:
+               eval_steps[n, int(episode/eval_interval)-1] = np.sum(steps[n,:])
+               eval_lap_times[n, int(episode/eval_interval)-1], eval_collisions[n, int(episode/eval_interval)-1] = self.evaluate(n_episodes=eval_n_episodes)
+
+               outfile=open(self.evaluation_results_file_name, 'wb')
+               pickle.dump(eval_steps, outfile)
+               pickle.dump(eval_lap_times, outfile)
+               pickle.dump(eval_collisions, outfile)
+               outfile.close()
+
 
             if episode%10==0:
                if self.learning_method=='dqn' or self.learning_method=='dueling_dqn' or self.learning_method=='dueling_ddqn' or self.learning_method=='rainbow':
@@ -273,17 +290,17 @@ class trainingLoop():
       pickle.dump(collisions, outfile)
       outfile.close()
 
+
       #outfile=open(self.action_durations_name, 'wb')
       #pickle.dump(durations, outfile)
       #outfile.close()
 
-   def test_while_train(self, n_episodes):
+   def evaluate(self, n_episodes):
       
-      print(f"{'Testing agent for '}{n_episodes}{' episodes'}")
+      print(f"{'Evaluating agent for '}{n_episodes}{' episodes'}")
       
-      
-      test_progress = []
-      test_score = []
+      lap_times = np.zeros(n_episodes)
+      collisions = np.zeros(n_episodes)
       
       for episode in range(n_episodes):
          
@@ -293,31 +310,20 @@ class trainingLoop():
          score=0
 
          while not done:
-            action = self.agent.choose_action(obs)
+            action = self.agent.choose_greedy_action(obs)
             next_obs, reward, done = self.env.take_action(action)
             score += reward
             obs = next_obs
          
-         test_progress.append(self.env.progress)
-         test_score.append(score)
-         
-      ave_progress = np.average(test_progress)
-      ave_score = np.average(test_score)
+         lap_times[episode] = self.env.steps*0.01
+         collisions[episode] = self.env.collision
 
-      if ave_progress >= self.old_ave_progress:
-         print(f"{'Average progress increased from '}{self.old_ave_progress:.2f}{' to '}{ave_progress:.2f}")
-      else:
-         print(f"{'Average progress decreased from '}{self.old_ave_progress:.2f}{' to '}{ave_progress:.2f}")
-
-      if ave_score >= self.old_ave_score:
-         print(f"{'Average score increased from '}{self.old_ave_score:.2f}{' to '}{ave_score:.2f}")
-      else:
-         print(f"{'Average score decreased from '}{self.old_ave_score:.2f}{' to '}{ave_score:.2f}")
+      lap_time = np.average(lap_times[np.where(np.logical_not(collisions))])
+      collision = np.average(collisions)
       
-      self.old_ave_progress = ave_progress 
-      self.old_ave_score = ave_score
+      print('Evaluation lap time is: ' + str(np.round(lap_time, 2)) + ', collision rate is: ' + str(np.round(collision, 2)) )
 
-      return test_score
+      return lap_times, collisions
       
 
    def save_agent(self, n):
@@ -744,7 +750,7 @@ def lap_time_test_mismatch(agent_name, n_episodes, detect_issues, initial_condit
 
 if __name__=='__main__':
 
-   agent_name = 'circle_pete_sv'
+   agent_name = 'columbia'
 
    main_dict = {'name':agent_name, 'max_episodes':50000, 'max_steps':5e6, 'learning_method':'td3', 'runs':1, 'comment':''}
 
@@ -800,7 +806,7 @@ if __name__=='__main__':
    
    env_dict = {'sim_conf': functions.load_config(sys.path[0], "config")
             , 'save_history': False
-            , 'map_name': 'circle'
+            , 'map_name': 'columbia_1'
             , 'max_steps': 3000
             , 'control_steps': 20
             , 'display': False
@@ -1233,13 +1239,16 @@ if __name__=='__main__':
 
    # display_results_multiple.graph_lap_results(agent_names)
    
-   agent_names = ['circle_pete_sv', 'circle_pete_s', 'circle_pete_v', 'circle_ete']
+   # agent_names = ['circle_pete_sv', 'circle_pete_s', 'circle_pete_v', 'circle_ete']
+   # legend = agent_names
+   # legend_title = 'agent'
+   # display_results_multiple.learning_curve_lap_time(agent_names, legend, legend_title, show_average=True, show_median=True)
+
+   agent_names = ['columbia']
    legend = agent_names
    legend_title = 'agent'
-   display_results_multiple.learning_curve_lap_time(agent_names, legend, legend_title, show_average=True, show_median=True)
+   display_results_multiple.evaluation(agent_names, legend, legend_title)
 
-
-   
    # agent_name = 'pete_sv_redbull_ring_2'
    # infile = open('train_parameters/' + agent_name, 'rb')
    # main_dict = pickle.load(infile)

@@ -102,7 +102,7 @@ def compare_learning_curves_progress(agent_names, legend, legend_title, show_ave
         plt.legend(legend, title=legend_title, loc='lower right')
         #plt.xlim([0,5000])
         plt.show()
-        
+
 
 def learning_curve_progress(agent_name, show_average=False, show_median=True):
     train_results_file_name = 'train_results/' + agent_name
@@ -137,6 +137,43 @@ def learning_curve_progress(agent_name, show_average=False, show_median=True):
         plt.ylabel('Progress')
         plt.legend(['Average progress', 'Standard deviation from mean'])
         plt.show()
+
+
+def evaluation(agent_names, legend, legend_title):
+    n = 0
+    for i in range(len(agent_names)):
+        
+        agent_name = agent_names[i]
+        train_results_file_name = 'evaluation_results/' + agent_name
+        
+        infile = open(train_results_file_name, 'rb')
+        eval_steps = pickle.load(infile)
+        eval_lap_times = pickle.load(infile)
+        eval_collisions = pickle.load(infile)
+        infile.close()
+
+        last_row = np.where(eval_lap_times[n]==0)[0][0]
+
+        eval_steps = eval_steps[n][0:last_row]
+        eval_lap_times = eval_lap_times[n][0:last_row]
+        eval_collisions = eval_collisions[n][0:last_row]
+
+        avg_lap_time = np.zeros(len(eval_lap_times))
+        avg_collision = np.zeros(len(eval_lap_times))
+
+        for i in range(len(eval_lap_times)):
+            avg_lap_time[i] = np.average(eval_lap_times[i][np.where(eval_collisions[i]==False)])
+            avg_collision[i] = np.average(eval_collisions[i])
+      
+
+        plt.figure(1)
+        plt.plot(eval_steps, avg_lap_time)
+
+        plt.figure(2)
+        plt.plot(eval_steps, avg_collision)
+        
+        plt.show()
+        
 
 def learning_curve_lap_time(agent_names, legend, legend_title, show_average=True, show_median=True):
     
@@ -178,16 +215,6 @@ def learning_curve_lap_time(agent_names, legend, legend_title, show_average=True
             else:
                 x = j-window 
             avg_steps_no_coll[i].append(np.mean(steps_no_coll[i][x:j+1]))
-
-        
-
-    
-    #coll_idx = np.where(collisions[0][0]==True)
-    #steps_x_axis=steps
-    #for k in coll_idx[0]:
-    #    steps_x_axis[0][0][k+1] = steps[0][0][k] + steps[0][0][k+1]
-    
-
     
     plt.figure(1)
     for i in range(len(agent_names)):
@@ -213,8 +240,6 @@ def learning_curve_lap_time(agent_names, legend, legend_title, show_average=True
         plt.legend(legend, title=legend_title, loc='upper right')
         #plt.xlim([0,6000])
     
-
-
     plt.show()
 
 def histogram_score(agent_name):
