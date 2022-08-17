@@ -32,21 +32,6 @@ from matplotlib.ticker import FormatStrFormatter
 import mapping
 
 
-# import matplotlib
-# matplotlib.use("pgf")
-# matplotlib.rcParams.update({
-#     "pgf.texsystem": "pdflatex",
-#     'font.family': 'serif',
-#     'text.usetex': True,
-#     'pgf.rcfonts': False,
-# })
-
-
-#from numpy import unique
-#from numpy import where
-#from sklearn.datasets import make_classification
-#from sklearn.mixture import GaussianMixture
-
 def compare_learning_curves_progress(agent_names, legend, legend_title, show_average=True, show_median=True, xaxis='episodes'):
     
     #window = 300
@@ -155,43 +140,82 @@ def learning_curve_progress(agent_name, show_average=False, show_median=True):
 
 def learning_curve_lap_time(agent_names, legend, legend_title, show_average=True, show_median=True):
     
-    progress = [[] for _ in range(len(agent_names))]
-    #avg = [[] for _ in range(len(agent_names))]
-    #std_dev = [[] for _ in range(len(agent_names))]
-    #percentile_25 = [[] for _ in range(len(agent_names))]
-    median = [[] for _ in range(len(agent_names))]
-    #percentile_75 = [[] for _ in range(len(agent_names))]
+    window = 500
     steps = [[] for _ in range(len(agent_names))]
-    times = [[] for _ in range(len(agent_names))]
+    steps_x_axis = [[] for _ in range(len(agent_names))]
+    steps_no_coll = [[] for _ in range(len(agent_names))]
+    avg_steps_no_coll = [[] for _ in range(len(agent_names))]
+    collisions = [[] for _ in range(len(agent_names))]
+    avg_time = [[] for _ in range(len(agent_names))]
+    avg_coll = [[] for _ in range(len(agent_names))]
 
-    if show_median==True:
-        for i in range(len(agent_names)):
-            agent_name = agent_names[i]
-            train_results_file_name = 'train_results/' + agent_name
-            infile = open(train_results_file_name, 'rb')
-            
-            _ = pickle.load(infile)
-            progress = pickle.load(infile)
-            times = pickle.load(infile)
-            steps = pickle.load(infile)
-            infile.close()
+    for i in range(len(agent_names)):
+        agent_name = agent_names[i]
+        train_results_file_name = 'train_results/' + agent_name
+        infile = open(train_results_file_name, 'rb')
         
-            median = np.median(progress, axis=0)
-            if xaxis=='episodes':
-                plt.plot(median)
-                plt.xlabel('Episode')
-            elif xaxis=='times':
-                plt.plot(np.cumsum(np.array(times)), median)
-                plt.xlabel('Time')
-            elif xaxis=='steps':
-                plt.plot(np.cumsum(np.array(steps)), median)
-                plt.xlabel('Steps')
+        _ = pickle.load(infile)
+        _ = pickle.load(infile)
+        _ = pickle.load(infile)
+        steps[i] = pickle.load(infile)
+        collisions[i] = pickle.load(infile)
+        infile.close()
+        
+        for j in range(len(collisions[0][0])):
+            if j <= window:
+                x = 0
+            else:
+                x = j-window 
+            avg_coll[i].append(np.mean(collisions[i][0][x:j+1]))
+            avg_time[i].append(np.mean(steps[i][0][x:j+1]))
+    
+        steps_x_axis[i] = np.cumsum(steps[i])[np.logical_not(collisions[i][0])]
+        steps_no_coll[i] = steps[i][0][np.logical_not(collisions[i][0])]
 
-        plt.title('Learning curve for median progress')
-        plt.ylabel('Progress')
-        plt.legend(legend, title=legend_title, loc='lower right')
+        for j in range(len(steps_x_axis[0])):
+            if j <= window:
+                x = 0
+            else:
+                x = j-window 
+            avg_steps_no_coll[i].append(np.mean(steps_no_coll[i][x:j+1]))
+
+        
+
+    
+    #coll_idx = np.where(collisions[0][0]==True)
+    #steps_x_axis=steps
+    #for k in coll_idx[0]:
+    #    steps_x_axis[0][0][k+1] = steps[0][0][k] + steps[0][0][k+1]
+    
+
+    
+    plt.figure(1)
+    for i in range(len(agent_names)):
+        end_episode =  np.where(steps[i][0]==0)[0][0]
+        #plt.plot(np.cumsum(steps[0]), steps[0], 'x')
+        #plt.plot(steps[0][np.where(np.logical_not(collisions[0]))], 'x')
+        plt.plot(np.cumsum(steps[0])[0:end_episode],  avg_coll[i][0:end_episode])
+        plt.xlabel('Steps')
+        plt.title('Average collision rate per episode')
+        plt.ylabel('Average collision rate per episode')
+        plt.legend(legend, title=legend_title, loc='upper right')
         #plt.xlim([0,6000])
-        plt.show()
+
+    plt.figure(2)
+    for i in range(len(agent_names)):
+        end_episode_no_coll = np.where(steps_no_coll[i]==0)[0][0]
+        #plt.plot(np.cumsum(steps[0]), steps[0], 'x')
+        #plt.plot(steps[0][np.where(np.logical_not(collisions[0]))], 'x')
+        plt.plot(steps_x_axis[i][0:end_episode_no_coll],   avg_steps_no_coll[i][0:end_episode_no_coll])
+        plt.xlabel('Steps')
+        plt.title('Average time per episode without collisions')
+        plt.ylabel('time [s]')
+        plt.legend(legend, title=legend_title, loc='upper right')
+        #plt.xlim([0,6000])
+    
+
+
+    plt.show()
 
 def histogram_score(agent_name):
 
@@ -699,19 +723,13 @@ def graph_lap_results_mismatch(agent_names, mismatch_parameter):
 
 
 
-# agent_names = [ 'ete_circle_1', 'pete_v_circle_1', 'pete_sv_circle_1',
-#             'ete_new__porto', 'ete_porto', 'pete_porto',
-#             'ete_berlin_1', 'pete_v_berlin_1', 'pete_sv_berlin_1', 
-#             'ete_torino_1', 'pete_v_torino_2', 'pete_sv_torino_2',
-#             'ete_redbull_ring_1', 'pete_v_redbull_ring_2', 'pete_sv_redbull_ring']        
-# 
 
-agent_names = ['circle_pete_sv', 'circle_pete_s', 'circle_pete_v', 'circle_ete', 
-            'columbia_pete_sv', 'columbia_pete_s', 'columbia_pete_v', 'columbia_ete',
-            'porto_pete_sv', 'porto_pete_s', 'porto_pete_v', 'porto_ete',
-            'berlin_pete_sv', 'berlin_pete_s', 'berlin_pete_v', 'berlin_ete',
-            'torino_pete_sv', 'torino_pete_s', 'torino_pete_v', 'torino_ete',
-            'redbull_ring_pete_sv', 'redbull_ring_pete_s', 'redbull_ring_pete_v', 'redbull_ring_ete']      
+# agent_names = ['circle_pete_sv', 'circle_pete_s', 'circle_pete_v', 'circle_ete', 
+#             'columbia_pete_sv', 'columbia_pete_s', 'columbia_pete_v', 'columbia_ete',
+#             'porto_pete_sv', 'porto_pete_s', 'porto_pete_v', 'porto_ete',
+#             'berlin_pete_sv', 'berlin_pete_s', 'berlin_pete_v', 'berlin_ete',
+#             'torino_pete_sv', 'torino_pete_s', 'torino_pete_v', 'torino_ete',
+#             'redbull_ring_pete_sv', 'redbull_ring_pete_s', 'redbull_ring_pete_v', 'redbull_ring_ete']      
 
 #graph_lap_results_mismatch(agent_names, 'C_Sf')
 

@@ -1224,15 +1224,22 @@ if __name__=='__main__':
    # display_results_multiple.display_path_multiple(agent_names=agent_names, ns=ns, legend_title=legend_title, 
    #             legend=legend, mismatch_parameters=mismatch_parameters, frac_vary=frac_vary)
 
-   agent_names = ['circle_pete_sv', 'circle_pete_s', 'circle_pete_v', 'circle_ete', 
-            'columbia_pete_sv', 'columbia_pete_s', 'columbia_pete_v', 'columbia_ete',
-            'porto_pete_sv', 'porto_pete_s', 'porto_pete_v', 'porto_ete',
-            'berlin_pete_sv', 'berlin_pete_s', 'berlin_pete_v', 'berlin_ete',
-            'torino_pete_sv', 'torino_pete_s', 'torino_pete_v', 'torino_ete',
-            'redbull_ring_pete_sv', 'redbull_ring_pete_s', 'redbull_ring_pete_v', 'redbull_ring_ete']   
+   # agent_names = ['circle_pete_sv', 'circle_pete_s', 'circle_pete_v', 'circle_ete', 
+   #          'columbia_pete_sv', 'columbia_pete_s', 'columbia_pete_v', 'columbia_ete',
+   #          'porto_pete_sv', 'porto_pete_s', 'porto_pete_v', 'porto_ete',
+   #          'berlin_pete_sv', 'berlin_pete_s', 'berlin_pete_v', 'berlin_ete',
+   #          'torino_pete_sv', 'torino_pete_s', 'torino_pete_v', 'torino_ete',
+   #          'redbull_ring_pete_sv', 'redbull_ring_pete_s', 'redbull_ring_pete_v', 'redbull_ring_ete']   
 
-   display_results_multiple.graph_lap_results(agent_names)
+   # display_results_multiple.graph_lap_results(agent_names)
+   
+   agent_names = ['circle_pete_sv', 'circle_pete_s', 'circle_pete_v', 'circle_ete']
+   legend = agent_names
+   legend_title = 'agent'
+   display_results_multiple.learning_curve_lap_time(agent_names, legend, legend_title, show_average=True, show_median=True)
 
+
+   
    # agent_name = 'pete_sv_redbull_ring_2'
    # infile = open('train_parameters/' + agent_name, 'rb')
    # main_dict = pickle.load(infile)
