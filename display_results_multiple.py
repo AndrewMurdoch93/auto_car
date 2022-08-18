@@ -166,11 +166,13 @@ def evaluation(agent_names, legend, legend_title):
             avg_collision[i] = np.average(eval_collisions[i])
       
 
-        plt.figure(1)
-        plt.plot(eval_steps, avg_lap_time)
+        fig, axs = plt.subplots(2, sharex=True)
+    
+        axs[0].plot(eval_steps, avg_lap_time)
+        axs[0].set(ylabel='Lap time [s]', title='Average lap time')
 
-        plt.figure(2)
-        plt.plot(eval_steps, avg_collision)
+        axs[1].plot(eval_steps, avg_collision)
+        axs[1].set(xlabel='Training simulation step', ylabel='Lap time [s]', title='Collision rate')
         
         plt.show()
         
