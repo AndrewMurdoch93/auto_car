@@ -585,7 +585,7 @@ def graph_lap_results(agent_names):
     axs[0].bar(bar3, arch_lap_results[2], w, label=archs[2])
     axs[0].bar(bar4, arch_lap_results[3], w, label=archs[3])
     axs[0].set(ylabel='Lap time [s]')
-    axs[0].set_ylim([0,22])
+    axs[0].set_ylim([0,24])
     axs[0].legend(archs)
 
 
@@ -598,8 +598,6 @@ def graph_lap_results(agent_names):
     axs[1].set_ylim([0,1])
     #axs[1].legend(archs)
     plt.show()
-
-
 
 
     #axs[0].barplot(x='map', y='lap_time', hue='architecture', capsize=.2, data=df_lap)
@@ -683,10 +681,11 @@ def graph_lap_results_mismatch(agent_names, mismatch_parameter):
 
     #x = maps
 
-    w=0.25
+    w=0.2
     bar1 = np.arange(len(maps))
     bar2 = [i+w for i in bar1]
     bar3 = [i+w for i in bar2]
+    bar4 = [i+w for i in bar3]
     
     #error bar method
     #fig, axs = plt.subplots(2, sharex=True)
@@ -732,6 +731,7 @@ def graph_lap_results_mismatch(agent_names, mismatch_parameter):
     axs[0].bar(bar1, arch_success_results[0,0], w, label=archs[0])
     axs[0].bar(bar2, arch_success_results[0,1], w, label=archs[1])
     axs[0].bar(bar3, arch_success_results[0,2], w, label=archs[2])
+    axs[0].bar(bar4, arch_success_results[0,3], w, label=archs[3])
     axs[0].set_title('(a) No model-mismatch')
     axs[0].set_ylabel('Fraction successful laps')
     axs[0].legend(archs)
@@ -740,6 +740,7 @@ def graph_lap_results_mismatch(agent_names, mismatch_parameter):
     axs[1].bar(bar1, arch_success_results[1,0], w, label=archs[0])
     axs[1].bar(bar2, arch_success_results[1,1], w, label=archs[1])
     axs[1].bar(bar3, arch_success_results[1,2], w, label=archs[2])
+    axs[1].bar(bar4, arch_success_results[1,3], w, label=archs[3])
     axs[1].set_xticks(bar1+w, x)
     axs[1].set_title('(b) C_Sf 20% higher than expected')
     axs[1].set_xlabel('Track')
@@ -758,7 +759,8 @@ def graph_lap_results_mismatch(agent_names, mismatch_parameter):
 #             'torino_pete_sv', 'torino_pete_s', 'torino_pete_v', 'torino_ete',
 #             'redbull_ring_pete_sv', 'redbull_ring_pete_s', 'redbull_ring_pete_v', 'redbull_ring_ete']      
 
-#graph_lap_results_mismatch(agent_names, 'C_Sf')
+# agent_names = ['porto_pete_sv', 'porto_pete_s', 'porto_pete_v', 'porto_ete']
+# graph_lap_results_mismatch(agent_names, 'C_Sf')
 
 
 
