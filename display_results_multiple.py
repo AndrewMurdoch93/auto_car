@@ -1,6 +1,8 @@
 from audioop import avg
+from configparser import BasicInterpolation
 from re import S
 from statistics import median
+from xmlrpc.client import ProtocolError
 import numpy as np
 import agent_dqn
 import agent_reinforce
@@ -30,6 +32,7 @@ import time
 import random
 from matplotlib.ticker import FormatStrFormatter
 import mapping
+from PIL import Image, ImageOps, ImageDraw, ImageFilter
 
 
 def compare_learning_curves_progress(agent_names, legend, legend_title, show_average=True, show_median=True, xaxis='episodes'):
@@ -141,6 +144,7 @@ def learning_curve_progress(agent_name, show_average=False, show_median=True):
 
 def evaluation(agent_names, legend, legend_title):
     n = 0
+    fig, axs = plt.subplots(2, sharex=True)
     for i in range(len(agent_names)):
         
         agent_name = agent_names[i]
@@ -165,16 +169,15 @@ def evaluation(agent_names, legend, legend_title):
             avg_lap_time[i] = np.average(eval_lap_times[i][np.where(eval_collisions[i]==False)])
             avg_collision[i] = np.average(eval_collisions[i])
       
-
-        fig, axs = plt.subplots(2, sharex=True)
     
         axs[0].plot(eval_steps, avg_lap_time)
-        axs[0].set(ylabel='Lap time [s]', title='Average lap time')
-
         axs[1].plot(eval_steps, avg_collision)
-        axs[1].set(xlabel='Training simulation step', ylabel='Lap time [s]', title='Collision rate')
-        
-        plt.show()
+
+    axs[0].set(ylabel='Lap time [s]', title='Average lap time')
+    axs[1].set(xlabel='Training simulation step', ylabel='fraction collisions', title='Collision rate')
+    axs[1].legend(legend, title=legend_title, loc='upper right')
+
+    plt.show()
         
 
 def learning_curve_lap_time(agent_names, legend, legend_title, show_average=True, show_median=True):
@@ -235,7 +238,7 @@ def learning_curve_lap_time(agent_names, legend, legend_title, show_average=True
         end_episode_no_coll = np.where(steps_no_coll[i]==0)[0][0]
         #plt.plot(np.cumsum(steps[0]), steps[0], 'x')
         #plt.plot(steps[0][np.where(np.logical_not(collisions[0]))], 'x')
-        plt.plot(steps_x_axis[i][0:end_episode_no_coll],   avg_steps_no_coll[i][0:end_episode_no_coll])
+        plt.plot(steps_x_axis[i][0:end_episode_no_coll],   np.array(avg_steps_no_coll[i][0:end_episode_no_coll])*0.01 )
         plt.xlabel('Steps')
         plt.title('Average time per episode without collisions')
         plt.ylabel('time [s]')
@@ -578,15 +581,15 @@ def graph_lap_results(agent_names):
     bar3 = [i+w for i in bar2]
     bar4 = [i+w for i in bar3]
     
+
     fig, axs = plt.subplots(2, sharex=True)
-    
     axs[0].bar(bar1, arch_lap_results[0], w, label=archs[0])
     axs[0].bar(bar2, arch_lap_results[1], w, label=archs[1])
     axs[0].bar(bar3, arch_lap_results[2], w, label=archs[2])
     axs[0].bar(bar4, arch_lap_results[3], w, label=archs[3])
     axs[0].set(ylabel='Lap time [s]')
-    axs[0].set_ylim([0,24])
-    axs[0].legend(archs)
+    #axs[0].set_ylim([0,24])
+    #axs[0].legend(archs, loc='lower right')
 
 
     axs[1].bar(bar1, arch_success_results[0], w, label=archs[0])
@@ -596,9 +599,31 @@ def graph_lap_results(agent_names):
     axs[1].set_xticks(bar1+w, x)
     axs[1].set(xlabel='Track', ylabel='Fraction successful laps')
     axs[1].set_ylim([0,1])
-    #axs[1].legend(archs)
+    axs[1].legend(archs, loc='lower right')
     plt.show()
 
+    plt.figure(1)
+    plt.bar(bar1, arch_lap_results[0], w, label=archs[0])
+    plt.bar(bar2, arch_lap_results[1], w, label=archs[1])
+    plt.bar(bar3, arch_lap_results[2], w, label=archs[2])
+    plt.bar(bar4, arch_lap_results[3], w, label=archs[3])
+    plt.ylabel('Lap time [s]')
+    plt.xlabel('Track')
+    #plt.ylim([0,24])
+    plt.xticks(bar1+w, x)
+    plt.legend(archs, loc='lower right')
+    
+    plt.figure(2)
+    plt.bar(bar1, arch_success_results[0], w, label=archs[0])
+    plt.bar(bar2, arch_success_results[1], w, label=archs[1])
+    plt.bar(bar3, arch_success_results[2], w, label=archs[2])
+    plt.bar(bar4, arch_success_results[3], w, label=archs[3])
+    plt.xticks(bar1+w, x)
+    plt.xlabel('Track')
+    plt.ylabel('Fraction successful laps')
+    plt.ylim([0,1])
+    plt.legend(archs, loc='lower right')
+    plt.show()
 
     #axs[0].barplot(x='map', y='lap_time', hue='architecture', capsize=.2, data=df_lap)
     # p.set_xlabel('% variation from original ' + param + ' value')
@@ -616,8 +641,27 @@ def graph_lap_results(agent_names):
     # plt.title('Lap success rate for ' + param + ' mismatch')
     #plt.show()
 
+agent_names = ['circle_pete_sv', 'circle_pete_s', 'circle_pete_v', 'circle_ete', 
+            'columbia_pete_sv', 'columbia_pete_s', 'columbia_pete_v', 'columbia_ete',
+            'porto_pete_sv', 'porto_pete_s', 'porto_pete_v', 'porto_ete',
+            'berlin_pete_sv', 'berlin_pete_s', 'berlin_pete_v', 'berlin_ete',
+            'torino_pete_sv', 'torino_pete_s', 'torino_pete_v', 'torino_ete',
+            'redbull_ring_pete_sv', 'redbull_ring_pete_s', 'redbull_ring_pete_v', 'redbull_ring_ete']      
 
-def graph_lap_results_mismatch(agent_names, mismatch_parameter):
+# agent_names = ['circle_pete_sv_1', 'circle_pete_s_1', 'circle_pete_v_1', 'circle_ete_1', 
+#          'columbia_pete_sv_1', 'columbia_pete_s_1', 'columbia_pete_v_1', 'columbia_ete_1',
+#          'porto_pete_sv_1', 'porto_pete_s_1', 'porto_pete_v_1', 'porto_ete_1',
+#          'berlin_pete_sv_1', 'berlin_pete_s_1', 'berlin_pete_v_1', 'berlin_ete_1',
+#          'torino_pete_sv_1', 'torino_pete_s_1', 'torino_pete_v_1', 'torino_ete_1',
+#          'redbull_ring_pete_sv_1', 'redbull_ring_pete_s_1', 'redbull_ring_pete_v_1', 'redbull_ring_ete_1']   
+
+#agent_names = ['porto_pete_sv', 'porto_pete_s', 'porto_pete_v', 'porto_ete']
+
+#graph_lap_results(agent_names)
+
+
+
+def graph_lap_results_mismatch(agent_names, mismatch_parameter, title):
     
     results_dict = {}
     results = {}
@@ -656,11 +700,12 @@ def graph_lap_results_mismatch(agent_names, mismatch_parameter):
                         'lap_time':results_dict['times_results'][0][i][j]})
 
     df = pd.DataFrame(data)
-
+    
+    s = 20
     archs = df['architecture'].unique()
     maps = df['map'].unique()
     vary = df['frac_vary'].unique()
-    vary_select = np.array([2, 4])
+    vary_select = np.array([10, s])
 
     arch_lap_results = np.zeros((len(vary_select), len(archs), len(maps)))
     arch_success_results = np.zeros((len(vary_select), len(archs), len(maps)))
@@ -674,7 +719,7 @@ def graph_lap_results_mismatch(agent_names, mismatch_parameter):
                 arch_lap_results[v_idx, a_idx, m_idx] = np.average(np.array(df[condition_time]['lap_time']))
                 arch_success_results[v_idx, a_idx, m_idx] = np.average(np.array(df[condition_succ]['success']))
 
-    x = ['circle', 'porto', 'berlin', 'torino', 'redbull ring']
+    x = ['circle', 'columbia', 'porto', 'berlin', 'torino', 'redbull ring']
     
     time_errors = arch_lap_results[1]-arch_lap_results[0]
     succ_errors = arch_success_results[1]-arch_success_results[0]
@@ -734,33 +779,51 @@ def graph_lap_results_mismatch(agent_names, mismatch_parameter):
     axs[0].bar(bar4, arch_success_results[0,3], w, label=archs[3])
     axs[0].set_title('(a) No model-mismatch')
     axs[0].set_ylabel('Fraction successful laps')
-    axs[0].legend(archs)
-    axs[0].set_ylim([0,1.8])
+    axs[0].legend(archs, loc='lower right')
+    #axs[0].set_ylim([0,1.8])
 
     axs[1].bar(bar1, arch_success_results[1,0], w, label=archs[0])
     axs[1].bar(bar2, arch_success_results[1,1], w, label=archs[1])
     axs[1].bar(bar3, arch_success_results[1,2], w, label=archs[2])
     axs[1].bar(bar4, arch_success_results[1,3], w, label=archs[3])
     axs[1].set_xticks(bar1+w, x)
-    axs[1].set_title('(b) C_Sf 20% higher than expected')
+    axs[1].set_title('(b)' + title)
     axs[1].set_xlabel('Track')
     axs[1].set_ylabel('Fraction successful laps')
-
+    #axs[1].legend(archs, loc='lower right')
     plt.show()
 
 
+    plt.bar(bar1, arch_success_results[1,0], w, label=archs[0])
+    plt.bar(bar2, arch_success_results[1,1], w, label=archs[1])
+    plt.bar(bar3, arch_success_results[1,2], w, label=archs[2])
+    plt.bar(bar4, arch_success_results[1,3], w, label=archs[3])
+    plt.xticks(bar1+w, x)
+    plt.xlabel('Track')
+    plt.ylabel('Fraction successful laps')
+    plt.ylim([0,1])
+    plt.legend(archs, loc='lower right')
+    plt.show()
 
 
+agent_names = ['circle_pete_sv', 'circle_pete_s', 'circle_pete_v', 'circle_ete', 
+            'columbia_pete_sv', 'columbia_pete_s', 'columbia_pete_v', 'columbia_ete',
+            'porto_pete_sv', 'porto_pete_s', 'porto_pete_v', 'porto_ete',
+            'berlin_pete_sv', 'berlin_pete_s', 'berlin_pete_v', 'berlin_ete',
+            'torino_pete_sv', 'torino_pete_s', 'torino_pete_v', 'torino_ete',
+            'redbull_ring_pete_sv', 'redbull_ring_pete_s', 'redbull_ring_pete_v', 'redbull_ring_ete']      
 
-# agent_names = ['circle_pete_sv', 'circle_pete_s', 'circle_pete_v', 'circle_ete', 
-#             'columbia_pete_sv', 'columbia_pete_s', 'columbia_pete_v', 'columbia_ete',
-#             'porto_pete_sv', 'porto_pete_s', 'porto_pete_v', 'porto_ete',
-#             'berlin_pete_sv', 'berlin_pete_s', 'berlin_pete_v', 'berlin_ete',
-#             'torino_pete_sv', 'torino_pete_s', 'torino_pete_v', 'torino_ete',
-#             'redbull_ring_pete_sv', 'redbull_ring_pete_s', 'redbull_ring_pete_v', 'redbull_ring_ete']      
+# agent_names = ['circle_pete_sv_1', 'circle_pete_s_1', 'circle_pete_v_1', 'circle_ete_1', 
+#          'columbia_pete_sv_1', 'columbia_pete_s_1', 'columbia_pete_v_1', 'columbia_ete_1',
+#          'porto_pete_sv_1', 'porto_pete_s_1', 'porto_pete_v_1', 'porto_ete_1',
+#          'berlin_pete_sv_1', 'berlin_pete_s_1', 'berlin_pete_v_1', 'berlin_ete_1',
+#          'torino_pete_sv_1', 'torino_pete_s_1', 'torino_pete_v_1', 'torino_ete_1',
+#          'redbull_ring_pete_sv_1', 'redbull_ring_pete_s_1', 'redbull_ring_pete_v_1', 'redbull_ring_ete_1']   
 
-# agent_names = ['porto_pete_sv', 'porto_pete_s', 'porto_pete_v', 'porto_ete']
-# graph_lap_results_mismatch(agent_names, 'C_Sf')
+#agent_names = ['porto_pete_sv', 'porto_pete_s', 'porto_pete_v', 'porto_ete']
+
+
+#graph_lap_results_mismatch(agent_names, 'C_Sf', title='Front tyre stiffness coefficient 20% higher than expected')
 
 
 
@@ -1264,37 +1327,48 @@ def display_path_multiple(agent_names, ns, legend_title, legend, mismatch_parame
     plt.xlabel('progress along centerline [%]')
     plt.ylabel('Longitudinal velocity [m/s]')
     #axs[1].set(xlabel='progress along centerline [%]', ylabel='Longitudinal velocity [m/s]')
-    plt.legend(legend, title=legend_title)
+    plt.legend(legend, title=legend_title, loc='lower right')
     #axs[1].set_ylim([0, 15])
     #plt.ylabel('Longitudinal velocity')
     #plt.xlabel('progress along centerline [%]')
 
     plt.figure(3)
     for i in range(len(agent_names)):
+        plt.plot(np.array(progress_history[i])*100, np.array(pose_history[i])[:,3], linewidth=1.5)
+        #plt.plot(np.array(pose_history[i])[:,4], linewidth=1.5)
+    plt.xlabel('progress along centerline [%]')
+    plt.ylabel('steering angle [rad]')
+    #axs[1].set(xlabel='progress along centerline [%]', ylabel='Longitudinal velocity [m/s]')
+    plt.legend(legend, title=legend_title, loc='lower right')
+    #axs[1].set_ylim([0, 15])
+    #plt.ylabel('Longitudinal velocity')
+    #plt.xlabel('progress along centerline [%]')
+
+    plt.figure(4)
+    for i in range(len(agent_names)):
         plt.plot(np.array(progress_history[i])*100, np.array(state_history[i])[:,6], linewidth=1.5)
         #plt.plot(np.array(pose_history[i])[:,4], linewidth=1.5)
     plt.xlabel('progress along centerline [%]')
     plt.ylabel('Slip angle')
     #axs[2].set(xlabel='progress along centerline [%]', ylabel='Slip angle')
-    plt.legend(legend, title=legend_title)
+    plt.legend(legend, title=legend_title, loc='lower right')
     #axs[1].set_ylim([0, 15])
     #plt.ylabel('Longitudinal velocity')
     #plt.xlabel('progress along centerline [%]')
     
-    plt.figure(4)
+    plt.figure(5)
     for i in range(len(agent_names)):
         plt.plot(np.arange(len(progress_history[i])), np.array(progress_history[i])*100, linewidth=1.5)
         #plt.plot(np.array(pose_history[i])[:,4], linewidth=1.5)
     plt.xlabel('Simulation step')
     plt.ylabel('progress along centerline [%]')
     #axs[3].set(ylabel='progress along centerline [%]', xlabel='Simulation step')
-    plt.legend(legend, title=legend_title)
+    plt.legend(legend, title=legend_title, loc='lower right')
     #axs[1].set_ylim([0, 15])
     #plt.ylabel('Longitudinal velocity')
     #plt.xlabel('progress along centerline [%]')
     
     plt.show()
-
 
 
 def display_maps():
@@ -1307,13 +1381,13 @@ def display_maps():
     redbull_ring = mapping.map('redbull_ring')
 
     fig, axs = plt.subplots(2, 3)
-    axs[0,0].imshow(circle.gray_im, extent=(0,circle.map_width,0,circle.map_height))
-    axs[0,1].imshow(redbull_ring.gray_im, extent=(0,redbull_ring.map_width,0,redbull_ring.map_height))
-    axs[0,2].imshow(berlin.gray_im, extent=(0,berlin.map_width,0,berlin.map_height))
+    axs[0,0].imshow(circle.map_array, extent=(0,circle.map_width,0,circle.map_height), cmap="gray")
+    axs[0,1].imshow(redbull_ring.map_array, extent=(0,redbull_ring.map_width,0,redbull_ring.map_height), cmap="gray")
+    axs[0,2].imshow(berlin.map_array, extent=(0,berlin.map_width,0,berlin.map_height), cmap="gray")
     
-    axs[1,0].imshow(columbia.gray_im, extent=(0,columbia.map_width,0,columbia.map_height))
-    axs[1,1].imshow(porto.gray_im, extent=(0,porto.map_width,0,porto.map_height))
-    axs[1,2].imshow(torino.gray_im, extent=(0,torino.map_width,0,torino.map_height))
+    axs[1,0].imshow(columbia.map_array, extent=(0,columbia.map_width,0,columbia.map_height), cmap="gray")
+    axs[1,1].imshow(porto.map_array, extent=(0,porto.map_width,0,porto.map_height), cmap="gray")
+    axs[1,2].imshow(torino.map_array, extent=(0,torino.map_width,0,torino.map_height), cmap="gray")
 
     for i in range(2):
         for j in range(3):
@@ -1321,6 +1395,88 @@ def display_maps():
                 axs[i,j].axis('off')
                 axs[i,j].set_title(names[j+i*3])
     plt.show()
+
+def display_all_maps_outline():
+    names = ['Circle', 'Redbull ring', 'Berlin', 'Columbia', 'Porto', 'Torino']
+    circle = mapping.map('circle')
+    columbia = mapping.map('columbia_1')
+    porto = mapping.map('porto_1')
+    berlin = mapping.map('berlin')
+    torino = mapping.map('torino')
+    redbull_ring = mapping.map('redbull_ring')
+
+    fig, axs = plt.subplots(1,6)
+    axs[0].imshow(ImageOps.invert(circle.gray_im.filter(ImageFilter.FIND_EDGES).filter(ImageFilter.MaxFilter(3))), extent=(0,circle.map_width,0,circle.map_height), cmap="gray")
+    axs[5].imshow(ImageOps.invert(redbull_ring.gray_im.filter(ImageFilter.FIND_EDGES).filter(ImageFilter.MaxFilter(1))), extent=(0,redbull_ring.map_width,0,redbull_ring.map_height), cmap="gray")
+    axs[3].imshow(ImageOps.invert(berlin.gray_im.filter(ImageFilter.FIND_EDGES).filter(ImageFilter.MaxFilter(3))), extent=(0,berlin.map_width,0,berlin.map_height), cmap="gray")
+    
+    axs[1].imshow(ImageOps.invert(columbia.gray_im.filter(ImageFilter.FIND_EDGES).filter(ImageFilter.MaxFilter(1))), extent=(0,columbia.map_width,0,columbia.map_height), cmap="gray")
+    axs[2].imshow(ImageOps.invert(porto.gray_im.filter(ImageFilter.FIND_EDGES).filter(ImageFilter.MaxFilter(1))), extent=(0,porto.map_width,0,porto.map_height), cmap="gray")
+    axs[4].imshow(ImageOps.invert(torino.gray_im.filter(ImageFilter.FIND_EDGES).filter(ImageFilter.MaxFilter(1))), extent=(0,torino.map_width,0,torino.map_height), cmap="gray")
+
+    # for i in range(2):
+    #     for j in range(3):
+    #             axs[i,j].set(ylabel='y [m]', xlabel='x [m]')
+    #             axs[i,j].axis('off')
+    #             axs[i,j].set_title(names[j+i*3])
+    # plt.show()
+
+    for i in range(6):
+        axs[i].set(ylabel='y [m]', xlabel='x [m]')
+        axs[i].axis('off')
+        axs[i].set_title(names[i])
+
+    plt.show()
+
+def display_map_outline():
+    names = ['Circle', 'Redbull ring', 'Berlin', 'Columbia', 'Porto', 'Torino']
+    circle = mapping.map('circle')
+    columbia = mapping.map('columbia_1')
+    porto = mapping.map('porto_1')
+    berlin = mapping.map('berlin')
+    torino = mapping.map('torino')
+    redbull_ring = mapping.map('redbull_ring')
+
+    
+    plt.imshow(ImageOps.invert(circle.gray_im.filter(ImageFilter.FIND_EDGES).filter(ImageFilter.MaxFilter(3))), extent=(0,circle.map_width,0,circle.map_height), cmap="gray")
+    plt.axis('off')
+    plt.show()
+    plt.imshow(ImageOps.invert(redbull_ring.gray_im.filter(ImageFilter.FIND_EDGES).filter(ImageFilter.MaxFilter(1))), extent=(0,redbull_ring.map_width,0,redbull_ring.map_height), cmap="gray")
+    plt.axis('off')
+    plt.show()
+    plt.imshow(ImageOps.invert(berlin.gray_im.filter(ImageFilter.FIND_EDGES).filter(ImageFilter.MaxFilter(3))), extent=(0,berlin.map_width,0,berlin.map_height), cmap="gray")
+    plt.axis('off')
+    plt.show()
+    plt.imshow(ImageOps.invert(columbia.gray_im.filter(ImageFilter.FIND_EDGES).filter(ImageFilter.MaxFilter(1))), extent=(0,columbia.map_width,0,columbia.map_height), cmap="gray")
+    plt.axis('off')
+    plt.show()
+    plt.imshow(ImageOps.invert(porto.gray_im.filter(ImageFilter.FIND_EDGES).filter(ImageFilter.MaxFilter(1))), extent=(0,porto.map_width,0,porto.map_height), cmap="gray")
+    plt.axis('off')
+    plt.show()
+    plt.imshow(ImageOps.invert(torino.gray_im.filter(ImageFilter.FIND_EDGES).filter(ImageFilter.MaxFilter(1))), extent=(0,torino.map_width,0,torino.map_height), cmap="gray")
+    plt.axis('off')
+    plt.show()
+    
+    # for i in range(2):
+    #     for j in range(3):
+    #             axs[i,j].set(ylabel='y [m]', xlabel='x [m]')
+    #             axs[i,j].axis('off')
+    #             axs[i,j].set_title(names[j+i*3])
+    # plt.show()
+
+    #for i in range(6):
+    #    axs[i].set(ylabel='y [m]', xlabel='x [m]')
+    #    axs[i].axis('off')
+    #    axs[i].set_title(names[i])
+    
+    plt.show()
+
+
+#display_all_maps_outline()
+display_map_outline()
+
+
+
 
 #display_maps()
 

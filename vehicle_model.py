@@ -178,6 +178,9 @@ def vehicle_dynamics_st(x, u_init, mu, C_Sf, C_Sr, lf, lr, h, m, I, s_min, s_max
 
 @njit(cache=True)
 def pid(speed, steer, current_speed, current_steer, max_sv, max_a, max_v, min_v):
+    
+    k = 2.0
+
     """
     Basic controller for speed/steer -> accl./steer vel.
 
@@ -202,21 +205,21 @@ def pid(speed, steer, current_speed, current_steer, max_sv, max_a, max_v, min_v)
     if current_speed > 0.:
         if (vel_diff > 0):
             # accelerate
-            kp = 2.0 * max_a / max_v
+            kp = k * max_a / max_v
             accl = kp * vel_diff
         else:
             # braking
-            kp = 2.0 * max_a / (min_v)
+            kp = k * max_a / (min_v)
             accl = kp * vel_diff
     # currently backwards
     else:
         if (vel_diff > 0):
             # braking
-            kp = 2.0 * max_a / max_v
+            kp = k * max_a / max_v
             accl = kp * vel_diff
         else:
             # accelerating
-            kp = 2.0 * max_a / (-min_v)
+            kp = k * max_a / (-min_v)
             accl = kp * vel_diff
 
     return accl, sv
