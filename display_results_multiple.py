@@ -1306,68 +1306,90 @@ def display_path_multiple(agent_names, ns, legend_title, legend, mismatch_parame
     # plt.show()
 
     # print('done')
+    csfont = {'fontname':'Courier'}
+    hfont = {'fontname':'Helvetica'}
     
     plt.figure(1)
     #fig, axs = plt.subplots(4) 
-    image_path = sys.path[0] + '/maps/' + env.map_name + '.png'
-    im = image.imread(image_path)
-    plt.imshow(im, extent=(0,env.map_width,0,env.map_height))
+    #image_path = sys.path[0] + '/maps/' + env.map_name + '.png'
+    #im = image.imread(image_path)
+    #plt.imshow(im, extent=(0,env.map_width,0,env.map_height))
+    track = mapping.map(env.map_name)
+    plt.imshow(ImageOps.invert(track.gray_im.filter(ImageFilter.FIND_EDGES).filter(ImageFilter.MaxFilter(1))), extent=(0,track.map_width,0,track.map_height), cmap="gray")
+    plt.plot(env.rx, env.ry, color='gray', linestyle='dashed')
+    
     for i in range(len(agent_names)):
         plt.plot(np.array(pose_history[i])[:,0], np.array(pose_history[i])[:,1], linewidth=1.5)
-    plt.xlabel('x coordinate [m]') 
-    plt.ylabel('y coordinate [m]')
+    plt.xlabel('x coordinate [m]',**csfont) 
+    plt.ylabel('y coordinate [m]',**csfont)
+    plt.axis('off')
+    plt.rc('axes',edgecolor='gray')
+    plt.tick_params(axis=u'both', which=u'both',length=0)
     #axs[0].legend(legend, title=legend_title, bbox_to_anchor=[1,1.6])
     #axs[0].legend(legend, title=legend_title)
     #axs[0].show()
 
-    plt.figure(2)
+
+    plt.figure(2, figsize=(8,4))
     for i in range(len(agent_names)):
         plt.plot(np.array(progress_history[i])*100, np.array(pose_history[i])[:,4], linewidth=1.5)
         #plt.plot(np.array(pose_history[i])[:,4], linewidth=1.5)
-    plt.xlabel('progress along centerline [%]')
-    plt.ylabel('Longitudinal velocity [m/s]')
+    plt.xlabel('progress along centerline [%]',**csfont)
+    plt.ylabel('Longitudinal velocity [m/s]',**csfont)
     #axs[1].set(xlabel='progress along centerline [%]', ylabel='Longitudinal velocity [m/s]')
     plt.legend(legend, title=legend_title, loc='lower right')
     #axs[1].set_ylim([0, 15])
     #plt.ylabel('Longitudinal velocity')
     #plt.xlabel('progress along centerline [%]')
+    plt.grid()
+    plt.rc('axes',edgecolor='gray')
+    plt.tick_params(axis=u'both', which=u'both',length=0)
 
     plt.figure(3)
     for i in range(len(agent_names)):
         plt.plot(np.array(progress_history[i])*100, np.array(pose_history[i])[:,3], linewidth=1.5)
         #plt.plot(np.array(pose_history[i])[:,4], linewidth=1.5)
-    plt.xlabel('progress along centerline [%]')
-    plt.ylabel('steering angle [rad]')
+    plt.xlabel('progress along centerline [%]',**csfont)
+    plt.ylabel('steering angle [rad]',**csfont)
     #axs[1].set(xlabel='progress along centerline [%]', ylabel='Longitudinal velocity [m/s]')
     plt.legend(legend, title=legend_title, loc='lower right')
     #axs[1].set_ylim([0, 15])
     #plt.ylabel('Longitudinal velocity')
     #plt.xlabel('progress along centerline [%]')
+    plt.grid()
+    plt.rc('axes',edgecolor='gray')
+    plt.tick_params(axis=u'both', which=u'both',length=0)
 
     plt.figure(4)
     for i in range(len(agent_names)):
         plt.plot(np.array(progress_history[i])*100, np.array(state_history[i])[:,6], linewidth=1.5)
         #plt.plot(np.array(pose_history[i])[:,4], linewidth=1.5)
-    plt.xlabel('progress along centerline [%]')
-    plt.ylabel('Slip angle')
+    plt.xlabel('progress along centerline [%]',**csfont)
+    plt.ylabel('Slip angle',**csfont)
     #axs[2].set(xlabel='progress along centerline [%]', ylabel='Slip angle')
     plt.legend(legend, title=legend_title, loc='lower right')
     #axs[1].set_ylim([0, 15])
     #plt.ylabel('Longitudinal velocity')
     #plt.xlabel('progress along centerline [%]')
-    
+    plt.grid()
+    plt.rc('axes',edgecolor='gray')
+    plt.tick_params(axis=u'both', which=u'both',length=0)
+
     plt.figure(5)
     for i in range(len(agent_names)):
         plt.plot(np.arange(len(progress_history[i])), np.array(progress_history[i])*100, linewidth=1.5)
         #plt.plot(np.array(pose_history[i])[:,4], linewidth=1.5)
-    plt.xlabel('Simulation step')
-    plt.ylabel('progress along centerline [%]')
+    plt.xlabel('Simulation step',**csfont)
+    plt.ylabel('progress along centerline [%]',**csfont)
     #axs[3].set(ylabel='progress along centerline [%]', xlabel='Simulation step')
     plt.legend(legend, title=legend_title, loc='lower right')
     #axs[1].set_ylim([0, 15])
     #plt.ylabel('Longitudinal velocity')
     #plt.xlabel('progress along centerline [%]')
-    
+    plt.grid()
+    plt.rc('axes',edgecolor='gray')
+    plt.tick_params(axis=u'both', which=u'both',length=0)
+    #plt.aspect('equal')
     plt.show()
 
 
@@ -1473,7 +1495,7 @@ def display_map_outline():
 
 
 #display_all_maps_outline()
-display_map_outline()
+#display_map_outline()
 
 
 

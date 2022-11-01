@@ -818,10 +818,10 @@ if __name__=='__main__':
             , 'action_space_dict':action_space_dict
             } 
    
-   a = trainingLoop(main_dict, agent_td3_dict, env_dict, load_agent='')
-   a.train()
-   test(agent_name=agent_name, n_episodes=100, detect_issues=False, initial_conditions=True)
-   lap_time_test(agent_name=agent_name, n_episodes=100, detect_issues=False, initial_conditions=True)
+   # a = trainingLoop(main_dict, agent_td3_dict, env_dict, load_agent='')
+   # a.train()
+   # test(agent_name=agent_name, n_episodes=100, detect_issues=False, initial_conditions=True)
+   # lap_time_test(agent_name=agent_name, n_episodes=100, detect_issues=False, initial_conditions=True)
   
    # agent_name = 'circle_pete_s_1'
    # main_dict['name'] = agent_name
@@ -1177,15 +1177,24 @@ if __name__=='__main__':
    #display_results_multiple.display_moving_agent(agent_name=agent_name, load_history=False, n=4)
 
 
-   agent_names = ['porto_pete_sv', 'porto_pete_s', 'porto_pete_v', 'porto_ete']
-   # #agent_names = ['torino_pete_sv_1', 'torino_pete_s_1', 'torino_pete_v_1', 'torino_ete_1']
+   # agent_names = ['porto_pete_sv', 'porto_pete_s', 'porto_pete_v', 'porto_ete']
+   # agent_names = ['torino_pete_sv_1', 'torino_pete_s_1', 'torino_pete_v_1', 'torino_ete_1']
+   # legend_title = 'architecture description'
+   # legend = ['Steering and velocity control', 'steering control', 'velocity control', 'no control']
+   # ns = [0, 0, 0, 0]
+   # mismatch_parameters = ['C_Sf']
+   # frac_vary = [0]
+   
+   agent_names = ['porto_ete_1']
    legend_title = 'architecture description'
-   legend = ['Steering and velocity control', 'steering control', 'velocity control', 'no control']
-   ns = [0, 0, 0, 0]
+   legend = ['no control']
+   ns = [0]
    mismatch_parameters = ['C_Sf']
-   frac_vary = [0.2]
+   frac_vary = [0]
    display_results_multiple.display_path_multiple(agent_names=agent_names, ns=ns, legend_title=legend_title, 
                legend=legend, mismatch_parameters=mismatch_parameters, frac_vary=frac_vary)
+
+
 
    
    # agent_names = ['circle_pete_sv_1', 'circle_pete_s_1', 'circle_pete_v_1', 'circle_ete_1', 
