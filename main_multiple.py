@@ -750,9 +750,9 @@ def lap_time_test_mismatch(agent_name, n_episodes, detect_issues, initial_condit
 
 if __name__=='__main__':
 
-   agent_name = 'td3_test'
+   agent_name = 'porto_ete_LiDAR'
 
-   main_dict = {'name':agent_name, 'max_episodes':50000, 'max_steps':4e6, 'learning_method':'td3', 'runs':1, 'comment':''}
+   main_dict = {'name':agent_name, 'max_episodes':50000, 'max_steps':2e6, 'learning_method':'td3', 'runs':1, 'comment':''}
 
    agent_dqn_dict = {'gamma':0.99, 'epsilon':1, 'eps_end':0.01, 'eps_dec':1/1000, 'lr':0.001, 'batch_size':64, 'max_mem_size':500000, 
                   'fc1_dims': 64, 'fc2_dims': 64, 'fc3_dims':64}
@@ -791,7 +791,7 @@ if __name__=='__main__':
    
    #action_space_dict = {'action_space': 'discrete', 'n_waypoints': 10, 'vel_select':[7], 'R_range':[6]}
 
-   steer_control_dict = {'steering_control': True, 'wpt_arc':np.pi/2}
+   steer_control_dict = {'steering_control': False, 'wpt_arc':np.pi/2}
 
    if  steer_control_dict['steering_control'] == True:
       steer_control_dict['path_strategy'] = 'circle'  #circle or linear or polynomial or gradient
@@ -806,11 +806,11 @@ if __name__=='__main__':
    
    env_dict = {'sim_conf': functions.load_config(sys.path[0], "config")
             , 'save_history': False
-            , 'map_name': 'circle'
+            , 'map_name': 'porto_1'
             , 'max_steps': 3000
             , 'control_steps': 20
             , 'display': False
-            , 'velocity_control': True
+            , 'velocity_control': False
             , 'steer_control_dict': steer_control_dict
             , 'car_params':car_params
             , 'reward_signal':reward_signal
@@ -1185,18 +1185,16 @@ if __name__=='__main__':
    # mismatch_parameters = ['C_Sf']
    # frac_vary = [0]
    
-   agent_names = ['porto_ete_1']
-   legend_title = 'architecture description'
-   legend = ['no control']
-   ns = [0]
-   mismatch_parameters = ['C_Sf']
-   frac_vary = [0]
-   display_results_multiple.display_path_multiple(agent_names=agent_names, ns=ns, legend_title=legend_title, 
-               legend=legend, mismatch_parameters=mismatch_parameters, frac_vary=frac_vary)
+   # agent_names = ['porto_ete_no_LiDAR']
+   # legend_title = 'architecture description'
+   # legend = ['no control']
+   # ns = [0]
+   # mismatch_parameters = ['C_Sf']
+   # frac_vary = [0]
+   # display_results_multiple.display_path_multiple(agent_names=agent_names, ns=ns, legend_title=legend_title, 
+   #             legend=legend, mismatch_parameters=mismatch_parameters, frac_vary=frac_vary)
 
 
-
-   
    # agent_names = ['circle_pete_sv_1', 'circle_pete_s_1', 'circle_pete_v_1', 'circle_ete_1', 
    #          'columbia_pete_sv_1', 'columbia_pete_s_1', 'columbia_pete_v_1', 'columbia_ete_1',
    #          'porto_pete_sv_1', 'porto_pete_s_1', 'porto_pete_v_1', 'porto_ete_1',
@@ -1204,7 +1202,6 @@ if __name__=='__main__':
    #          'torino_pete_sv_1', 'torino_pete_s_1', 'torino_pete_v_1', 'torino_ete_1',
    #          'redbull_ring_pete_sv_1', 'redbull_ring_pete_s_1', 'redbull_ring_pete_v_1', 'redbull_ring_ete_1']   
    
-
    # agent_names = ['circle_pete_sv', 'circle_pete_s', 'circle_pete_v', 'circle_ete', 
    #          'columbia_pete_sv', 'columbia_pete_s', 'columbia_pete_v', 'columbia_ete',
    #          'porto_pete_sv', 'porto_pete_s', 'porto_pete_v', 'porto_ete',
@@ -1215,15 +1212,19 @@ if __name__=='__main__':
    # display_results_multiple.graph_lap_results(agent_names)
    
 
-
    # agent_names = ['circle_pete_sv', 'circle_pete_s', 'circle_pete_v', 'circle_ete']
    # agent_names = ['torino_pete_sv_1', 'torino_pete_s_1', 'torino_pete_v_1', 'torino_ete_1']
    # agent_names = ['torino_pete_sv_1', 'torino_pete_s_1', 'torino_pete_v_1', 'torino_ete_1']
-   # legend = agent_names
-   # legend_title = 'agent'
-   # display_results_multiple.learning_curve_lap_time(agent_names, legend, legend_title, show_average=True, show_median=True)
+   # agent_names = ['porto_pete_sv_1', 'porto_pete_s_1', 'porto_pete_v_1', 'porto_ete_1']
+   agent_names = ['porto_ete_no_LiDAR', 'porto_ete_LiDAR']
+   #agent_names = ['porto_ete_no_LiDAR']
+   legend = agent_names
+   legend = ['no_LiDAR', 'LiDAR']
+   legend_title = ''
+   display_results_multiple.learning_curve_lap_time(agent_names, legend, legend_title, show_average=True, show_median=True)
 
-   # agent_names = ['columbia']
+   # agent_names = ['porto_pete_sv_1', 'porto_pete_s_1', 'porto_pete_v_1', 'porto_ete_1']
+   # agent_names = ['porto_ete_no_LiDAR']
    # legend = agent_names
    # legend_title = 'agent'
    # display_results_multiple.evaluation(agent_names, legend, legend_title)
