@@ -187,6 +187,7 @@ def learning_curve_lap_time(agent_names, legend, legend_title, show_average=True
     window = 500
     steps = [[] for _ in range(len(agent_names))]
     steps_x_axis = [[] for _ in range(len(agent_names))]
+    n_actions_x_axis  = [[] for _ in range(len(agent_names))]
     steps_no_coll = [[] for _ in range(len(agent_names))]
     avg_steps_no_coll = [[] for _ in range(len(agent_names))]
     std_steps_no_coll = [[] for _ in range(len(agent_names))]
@@ -201,6 +202,7 @@ def learning_curve_lap_time(agent_names, legend, legend_title, show_average=True
     upper_fill_coll = [[] for _ in range(len(agent_names))]
     lower_fill_coll = [[] for _ in range(len(agent_names))]
     
+    n_actions = [[] for _ in range(len(agent_names))]
 
     for i in range(len(agent_names)):
         agent_name = agent_names[i]
@@ -212,6 +214,8 @@ def learning_curve_lap_time(agent_names, legend, legend_title, show_average=True
         _ = pickle.load(infile)
         steps[i] = pickle.load(infile)
         collisions[i] = pickle.load(infile)
+        n_actions[i] = pickle.load(infile)
+        
         infile.close()
         
         for j in range(len(collisions[0][0])):
@@ -227,7 +231,10 @@ def learning_curve_lap_time(agent_names, legend, legend_title, show_average=True
         lower_fill_coll[i].append(np.array(avg_coll[i])-np.array(std_coll[i]))
 
         steps_x_axis[i] = np.cumsum(steps[i])[np.logical_not(collisions[i][0])]
+        n_actions_x_axis[i] = np.cumsum(n_actions[i])[np.logical_not(collisions[i][0])]
         steps_no_coll[i] = steps[i][0][np.logical_not(collisions[i][0])]
+
+
 
         for j in range(len(steps_x_axis[0])):
             if j <= window:
@@ -253,7 +260,7 @@ def learning_curve_lap_time(agent_names, legend, legend_title, show_average=True
     
     plt.hlines(y=1, xmin=0, xmax=np.cumsum(steps[0])[np.max(end_episodes)], colors='black', linestyle='dashed')
     plt.hlines(y=0, xmin=0, xmax=np.cumsum(steps[0])[np.max(end_episodes)], colors='black', linestyle='dashed')
-    plt.xlabel('Steps')
+    plt.xlabel('Simulation steps')
     #plt.title('Collision rate')
     plt.ylabel('Collision rate')
     plt.legend(legend_coll, title=legend_title, loc='upper right')
@@ -272,7 +279,7 @@ def learning_curve_lap_time(agent_names, legend, legend_title, show_average=True
         plt.fill_between(x=steps_x_axis[i][0:end_episode_no_coll], y1=upper_fill_steps_no_coll[i][0][0:end_episode_no_coll]*0.01 , y2=lower_fill_steps_no_coll[i][0][0:end_episode_no_coll]*0.01, alpha=0.3, label='_nolegend_')
     
     
-    plt.xlabel('Steps')
+    plt.xlabel('Simulation steps')
     #plt.title('Lap time')
     plt.ylabel('Lap time [s]')
     plt.legend(legend, title=legend_title, loc='upper right')
@@ -321,11 +328,41 @@ def learning_curve_lap_time(agent_names, legend, legend_title, show_average=True
     plt.tick_params(axis=u'both', which=u'both',length=0)
         #plt.xlim([0,6000])
 
-    # plt.figure(5)
-    # for i in range(len(agent_names)):
-    #     end_episode_no_coll = np.where(steps_no_coll[i]==0)[0][0]
-    #     sns.lineplot(x=np.arange(end_episode_no_coll), y=np.array(avg_steps_no_coll[i][0:end_episode_no_coll])*0.01, err_style="bars")
-    #     sns.lineplot(np.array([0,1,2,3]),np.array([0,1,2,3]))
+
+    plt.figure(5, figsize=(5,4))
+    for i in range(len(agent_names)):
+        end_episode = end_episodes[i] 
+        plt.plot(np.cumsum(n_actions[0])[0:end_episode],  avg_coll[i][0:end_episode])
+        plt.fill_between(x=np.cumsum(n_actions[0])[0:end_episode], y1=upper_fill_coll[i][0][0:end_episode], y2=lower_fill_coll[i][0][0:end_episode], alpha=0.3, label='_nolegend_')
+    
+    plt.hlines(y=1, xmin=0, xmax=np.cumsum(n_actions[0])[np.max(end_episodes)], colors='black', linestyle='dashed')
+    plt.hlines(y=0, xmin=0, xmax=np.cumsum(n_actions[0])[np.max(end_episodes)], colors='black', linestyle='dashed')
+    plt.xlabel('Steps')
+    #plt.title('Collision rate')
+    plt.ylabel('Collision rate')
+    plt.legend(legend_coll, title=legend_title, loc='upper right')
+    #plt.xlim([0,6000])
+    plt.ylim([-0.05, 1.05])
+    plt.grid(True)
+    plt.rc('axes',edgecolor='gray')
+    plt.tick_params(axis=u'both', which=u'both',length=0)
+
+    plt.figure(6, figsize=(5,4))
+    for i in range(len(agent_names)):
+        end_episode_no_coll = np.where(steps_no_coll[i]==0)[0][0]
+        plt.plot(n_actions_x_axis[i][0:end_episode_no_coll],   np.array(avg_steps_no_coll[i][0:end_episode_no_coll])*0.01 )
+        plt.fill_between(x=n_actions_x_axis[i][0:end_episode_no_coll], y1=upper_fill_steps_no_coll[i][0][0:end_episode_no_coll]*0.01 , y2=lower_fill_steps_no_coll[i][0][0:end_episode_no_coll]*0.01, alpha=0.3, label='_nolegend_')
+    
+    
+    plt.xlabel('Steps')
+    #plt.title('Lap time')
+    plt.ylabel('Lap time [s]')
+    plt.legend(legend, title=legend_title, loc='upper right')
+    #plt.xlim([0,6000])
+    plt.grid(True)
+    plt.rc('axes',edgecolor='gray')
+    plt.tick_params(axis=u'both', which=u'both',length=0)
+
     plt.show()
 
 
@@ -1369,111 +1406,137 @@ def display_path_multiple(agent_names, ns, legend_title, legend, mismatch_parame
         progress_history.append(env.progress_history)
         
         
-        # image_path = sys.path[0] + '/maps/' + env.map_name + '.png'
-        # im = image.imread(image_path)
-        # plt.imshow(im, extent=(0,env.map_width,0,env.map_height))
-        # plt.plot(np.array(env.pose_history)[:,0], np.array(env.pose_history)[:,1], linewidth=1.5)
-        # plt.legend(legend, title=legend_title)
+        
+    myfont = {'fontname':'serif'}
+    figure_size = (10,4)
+    xlims = [0,100]
 
-    #plt.legend(legend, title=legend_title)
-    #plt.xlabel('x [m]')
-    #plt.ylabel('y [m]')
-    # plt.xticks([])
-    # plt.yticks([])
-    # plt.xlim([0,env.map_width])
-    # plt.ylim([0,env.map_height])
-    # #plt.grid(True)
-    # #plt.title('Agent path')
-    # plt.show()
+    legend_new = legend.copy()
+    legend_new.insert(0, 'Min and max')
 
-    # plt.plot(np.array(env.progress_history)[:], np.array(env.pose_history)[:,4], linewidth=1.5)
-    # plt.show()
+    legend_racetrack = legend.copy()
+    legend_racetrack.insert(0, 'Track centerline')
 
-    # print('done')
-    csfont = {'fontname':'Courier'}
-    hfont = {'fontname':'Helvetica'}
+
+
+
+
+    plt.figure(1, figsize=figure_size)
+    ax = plt.subplot(111)
+
+    #plt.rc('axes',edgecolor='lightgrey')
     
-    plt.figure(1)
-    #fig, axs = plt.subplots(4) 
-    #image_path = sys.path[0] + '/maps/' + env.map_name + '.png'
-    #im = image.imread(image_path)
-    #plt.imshow(im, extent=(0,env.map_width,0,env.map_height))
+    #ax.tick_params(axis='both', colors='lightgrey')
+    ax.spines['bottom'].set_color('lightgrey')
+    ax.spines['top'].set_color('lightgrey') 
+    ax.spines['right'].set_color('lightgrey')
+    ax.spines['left'].set_color('lightgrey')
+
+    ax.tick_params(axis=u'both', which=u'both',length=0)
+    
     track = mapping.map(env.map_name)
-    plt.imshow(ImageOps.invert(track.gray_im.filter(ImageFilter.FIND_EDGES).filter(ImageFilter.MaxFilter(1))), extent=(0,track.map_width,0,track.map_height), cmap="gray")
-    plt.plot(env.rx, env.ry, color='gray', linestyle='dashed')
+    ax.imshow(ImageOps.invert(track.gray_im.filter(ImageFilter.FIND_EDGES).filter(ImageFilter.MaxFilter(1))), extent=(0,track.map_width,0,track.map_height), cmap="gray")
+    ax.plot(env.rx, env.ry, color='gray', linestyle='dashed')
     
     for i in range(len(agent_names)):
-        plt.plot(np.array(pose_history[i])[:,0], np.array(pose_history[i])[:,1], linewidth=1.5)
-    plt.xlabel('x coordinate [m]',**csfont) 
-    plt.ylabel('y coordinate [m]',**csfont)
-    plt.axis('off')
-    plt.rc('axes',edgecolor='gray')
-    plt.tick_params(axis=u'both', which=u'both',length=0)
-    #axs[0].legend(legend, title=legend_title, bbox_to_anchor=[1,1.6])
-    #axs[0].legend(legend, title=legend_title)
-    #axs[0].show()
+        ax.plot(np.array(pose_history[i])[:,0], np.array(pose_history[i])[:,1], linewidth=1.5)   
+  
+    prog = np.array([0, 0.2, 0.4, 0.6, 0.8])
+    idx =  np.zeros(len(prog), int)
+    text = ['Start', '20%', '40%', '60%', '80%']
+
+    for i in range(len(idx)):
+        idx[i] = np.mod(env.start_point+np.round(prog[i]*len(env.rx)), len(env.rx))
+    idx.astype(int)
+    
+    for i in range(len(idx)):
+        plt.text(x=env.rx[idx[i]], y=env.ry[idx[i]], s=text[i], fontsize = 'small', bbox=dict(facecolor='white', edgecolor='black',pad=0.1,boxstyle='round'))
 
 
-    plt.figure(2, figsize=(8,4))
+    ax.set_xlabel('x coordinate [m]',**myfont) 
+    ax.set_ylabel('y coordinate [m]',**myfont)
+    #ax.set_tick_params(axis=u'both', which=u'both',length=0)
+    
+    # https://stackoverflow.com/questions/4700614/how-to-put-the-legend-outside-the-plot
+
+    box = ax.get_position()
+    ax.set_position([box.x0, box.y0, box.width * 0.8, box.height])
+
+    # Put a legend to the right of the current axis
+    ax.legend(legend_new, loc='center left',  bbox_to_anchor=(1, 0.5))
+    
+    #plt.legend(legend_new, title=legend_title, loc='lower right')
+
+
+
+
+
+    plt.figure(2, figsize=figure_size)
+    plt.rc('axes', edgecolor='lightgrey')
+
+    plt.hlines(y=env_dict['action_space_dict']['vel_select'][0], xmin=0, xmax=100, colors='black', linestyle='dashed')
+    plt.hlines(y=env_dict['action_space_dict']['vel_select'][1], xmin=0, xmax=100, colors='black', linestyle='dashed', label='_nolegend_')
     for i in range(len(agent_names)):
         plt.plot(np.array(progress_history[i])*100, np.array(pose_history[i])[:,4], linewidth=1.5)
-        #plt.plot(np.array(pose_history[i])[:,4], linewidth=1.5)
-    plt.xlabel('progress along centerline [%]',**csfont)
-    plt.ylabel('Longitudinal velocity [m/s]',**csfont)
-    #axs[1].set(xlabel='progress along centerline [%]', ylabel='Longitudinal velocity [m/s]')
-    plt.legend(legend, title=legend_title, loc='lower right')
-    #axs[1].set_ylim([0, 15])
-    #plt.ylabel('Longitudinal velocity')
-    #plt.xlabel('progress along centerline [%]')
-    plt.grid()
-    plt.rc('axes',edgecolor='gray')
+
+    plt.xlabel('progress along centerline [%]',**myfont)
+    plt.ylabel('Longitudinal velocity [m/s]',**myfont)
+    plt.legend(legend_new, title=legend_title, loc='lower right')
+    plt.xlim(xlims)
+    plt.ylim([env_dict['action_space_dict']['vel_select'][0]-0.2, env_dict['action_space_dict']['vel_select'][1]+0.2])
+    plt.grid(True, color='lightgrey')
+
     plt.tick_params(axis=u'both', which=u'both',length=0)
 
-    plt.figure(3)
+
+
+    plt.figure(3, figsize=figure_size)
+    plt.rc('axes',edgecolor='lightgrey')
+
+    plt.hlines(y=env_dict['car_params']['s_min'], xmin=0, xmax=100, colors='black', linestyle='dashed')
+    plt.hlines(y=env_dict['car_params']['s_max'], xmin=0, xmax=100, colors='black', linestyle='dashed', label='_nolegend_')
     for i in range(len(agent_names)):
         plt.plot(np.array(progress_history[i])*100, np.array(pose_history[i])[:,3], linewidth=1.5)
-        #plt.plot(np.array(pose_history[i])[:,4], linewidth=1.5)
-    plt.xlabel('progress along centerline [%]',**csfont)
-    plt.ylabel('steering angle [rad]',**csfont)
-    #axs[1].set(xlabel='progress along centerline [%]', ylabel='Longitudinal velocity [m/s]')
-    plt.legend(legend, title=legend_title, loc='lower right')
-    #axs[1].set_ylim([0, 15])
-    #plt.ylabel('Longitudinal velocity')
-    #plt.xlabel('progress along centerline [%]')
-    plt.grid()
-    plt.rc('axes',edgecolor='gray')
+
+    plt.xlabel('progress along centerline [%]',**myfont)
+    plt.ylabel('steering angle [rads]',**myfont)
+    plt.legend(legend_new, title=legend_title, loc='lower right')
+    plt.xlim(xlims)
+    plt.ylim([env_dict['car_params']['s_min']-0.05, env_dict['car_params']['s_max']+0.05])
+    plt.grid(True, color='lightgrey')
     plt.tick_params(axis=u'both', which=u'both',length=0)
 
-    plt.figure(4)
+
+
+    plt.figure(4, figsize=figure_size)
+    plt.rc('axes',edgecolor='lightgrey')
     for i in range(len(agent_names)):
         plt.plot(np.array(progress_history[i])*100, np.array(state_history[i])[:,6], linewidth=1.5)
-        #plt.plot(np.array(pose_history[i])[:,4], linewidth=1.5)
-    plt.xlabel('progress along centerline [%]',**csfont)
-    plt.ylabel('Slip angle',**csfont)
-    #axs[2].set(xlabel='progress along centerline [%]', ylabel='Slip angle')
+      
+    plt.xlabel('progress along centerline [%]',**myfont)
+    plt.ylabel('Slip angle [rads]',**myfont)
     plt.legend(legend, title=legend_title, loc='lower right')
-    #axs[1].set_ylim([0, 15])
-    #plt.ylabel('Longitudinal velocity')
-    #plt.xlabel('progress along centerline [%]')
-    plt.grid()
-    plt.rc('axes',edgecolor='gray')
+    plt.xlim(xlims)
+    plt.ylim([-1,1])
+    plt.grid(True, color='lightgrey')
     plt.tick_params(axis=u'both', which=u'both',length=0)
 
-    plt.figure(5)
+
+
+    plt.figure(5, figsize=figure_size)
+    plt.rc('axes',edgecolor='lightgrey')
+
+    plt.hlines(y=100, xmin=0, xmax=len(progress_history[np.argmax(np.array(progress_history)[:,-1])]), colors='black', linestyle='dashed')
+    plt.hlines(y=0, xmin=0, xmax=len(progress_history[np.argmax(np.array(progress_history)[:,-1])]), colors='black', linestyle='dashed', label='_nolegend_')
     for i in range(len(agent_names)):
         plt.plot(np.arange(len(progress_history[i])), np.array(progress_history[i])*100, linewidth=1.5)
-        #plt.plot(np.array(pose_history[i])[:,4], linewidth=1.5)
-    plt.xlabel('Simulation step',**csfont)
-    plt.ylabel('progress along centerline [%]',**csfont)
-    #axs[3].set(ylabel='progress along centerline [%]', xlabel='Simulation step')
-    plt.legend(legend, title=legend_title, loc='lower right')
-    #axs[1].set_ylim([0, 15])
-    #plt.ylabel('Longitudinal velocity')
-    #plt.xlabel('progress along centerline [%]')
-    plt.grid()
-    plt.rc('axes',edgecolor='gray')
+
+    plt.xlabel('Simulation step',**myfont)
+    plt.ylabel('progress along centerline [%]',**myfont)
+    plt.ylim([-5,105])
+    plt.legend(legend_new, title=legend_title, loc='lower right')
+    plt.grid(True, color='lightgrey')
     plt.tick_params(axis=u'both', which=u'both',length=0)
-    #plt.aspect('equal')
     plt.show()
 
 

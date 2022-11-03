@@ -129,6 +129,10 @@ def distance_between_points(x1, x2, y1, y2):
     
     return distance
 
+def find_nearest(array, value):
+    array = np.asarray(array)
+    idx = (np.abs(array - value)).argmin()
+    return idx
 
 def generate_circle_image():
     from matplotlib import image

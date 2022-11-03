@@ -214,9 +214,11 @@ class environment():
         self.progress = 0
         self.current_distance = 0
         #self.det_prg.search_index(self.x, self.y)
-        self.old_closest_point = functions.find_closest_point(self.rx, self.ry, self.x, self.y)
+        self.old_closest_point = functions.find_correct_closest_point(self.rx, self.ry, self.x, self.y, self.occupancy_grid, self.map_res, self.map_height)
         #Initialise state and observation vector 
         self.save_pose()
+
+        self.start_point = self.old_closest_point
 
         if self.save_history==True:
             self.append_history_func()
@@ -819,7 +821,7 @@ class environment():
         self.new_angle = math.atan2(self.y-15, self.x-15)%(2*math.pi)
 
 
-        if functions.occupied_cell(self.x, self.y, self.occupancy_grid, self.map_res, self.map_height)== False:
+        if functions.occupied_cell(self.x, self.y, self.occupancy_grid, self.map_res, self.map_height) == False:
             #new_closest_point = functions.find_closest_point(self.rx, self.ry, self.x, self.y)
             new_closest_point = functions.find_correct_closest_point(self.rx, self.ry, self.x, self.y, self.occupancy_grid, self.map_res, self.map_height)
             
@@ -874,6 +876,8 @@ class environment():
         self.progress += self.current_progress
         
         self.current_distance = self.current_progress*self.d[-1]
+
+
         
 
         '''

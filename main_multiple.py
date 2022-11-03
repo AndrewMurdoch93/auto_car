@@ -130,6 +130,7 @@ class trainingLoop():
       times = np.zeros([self.runs, self.max_episodes])
       steps = np.zeros([self.runs, self.max_episodes])
       collisions = np.zeros([self.runs, self.max_episodes])
+      n_actions = np.zeros([self.runs, self.max_episodes])
 
       eval_interval = 100
       eval_n_episodes = 20
@@ -154,7 +155,8 @@ class trainingLoop():
             self.env.reset(save_history=True, start_condition=[], car_params=car_params, get_lap_time=False)  #Reset the environment every episode
             obs = self.env.observation      #Records starting state
             done = False
-            score = 0                       #Initialise score counter for every episode
+            score = 0
+            n_act = 0                       #Initialise score counter for every episode
             start_time = time.time()
             
             #For every planning time step in the episode
@@ -216,6 +218,7 @@ class trainingLoop():
             if self.learning_method == 'actor_critic_cont':
                while not done:
                   action = np.array(self.agent.choose_action(obs)).reshape((1,))
+                  n_act+=1
                   next_obs, reward, done = self.env.take_action(action)
                   self.agent.learn(obs, reward, next_obs, done)
                   obs = next_obs
@@ -225,6 +228,7 @@ class trainingLoop():
             if self.learning_method == 'ddpg' or self.learning_method == 'td3':
                while not done: 
                   action = self.agent.choose_action(obs)    #Select an action
+                  n_act+=1
                   next_obs, reward, done = self.env.take_action(action) #Environment executes action
                   self.agent.store_transition(obs, action, reward, next_obs, int(done))
                   self.agent.learn()  #Learn using state transition history
@@ -246,6 +250,7 @@ class trainingLoop():
             avg_progress = np.mean(progress[n, episode-100:episode])
 
             steps[n, episode] = self.env.steps
+            n_actions[n, episode] = n_act
 
             collisions[n, episode] = self.env.collision
 
@@ -259,6 +264,7 @@ class trainingLoop():
                pickle.dump(times, outfile)
                pickle.dump(steps, outfile)
                pickle.dump(collisions, outfile)
+               pickle.dump(n_actions, outfile)
                outfile.close()
 
             if episode%100==0 and episode!=0:
@@ -288,6 +294,7 @@ class trainingLoop():
       pickle.dump(times, outfile)
       pickle.dump(steps, outfile)
       pickle.dump(collisions, outfile)
+      pickle.dump(n_actions, outfile)
       outfile.close()
 
 
@@ -1185,15 +1192,14 @@ if __name__=='__main__':
    # mismatch_parameters = ['C_Sf']
    # frac_vary = [0]
    
-   # agent_names = ['porto_ete_no_LiDAR']
-   # legend_title = 'architecture description'
-   # legend = ['no control']
-   # ns = [0]
-   # mismatch_parameters = ['C_Sf']
-   # frac_vary = [0]
-   # display_results_multiple.display_path_multiple(agent_names=agent_names, ns=ns, legend_title=legend_title, 
-   #             legend=legend, mismatch_parameters=mismatch_parameters, frac_vary=frac_vary)
-
+   agent_names = ['porto_ete_LiDAR']
+   legend_title = 'architecture description'
+   legend = ['no control']
+   ns = [0]
+   mismatch_parameters = ['C_Sf']
+   frac_vary = [0]
+   display_results_multiple.display_path_multiple(agent_names=agent_names, ns=ns, legend_title=legend_title, 
+               legend=legend, mismatch_parameters=mismatch_parameters, frac_vary=frac_vary)
 
    # agent_names = ['circle_pete_sv_1', 'circle_pete_s_1', 'circle_pete_v_1', 'circle_ete_1', 
    #          'columbia_pete_sv_1', 'columbia_pete_s_1', 'columbia_pete_v_1', 'columbia_ete_1',
@@ -1216,12 +1222,13 @@ if __name__=='__main__':
    # agent_names = ['torino_pete_sv_1', 'torino_pete_s_1', 'torino_pete_v_1', 'torino_ete_1']
    # agent_names = ['torino_pete_sv_1', 'torino_pete_s_1', 'torino_pete_v_1', 'torino_ete_1']
    # agent_names = ['porto_pete_sv_1', 'porto_pete_s_1', 'porto_pete_v_1', 'porto_ete_1']
-   agent_names = ['porto_ete_no_LiDAR', 'porto_ete_LiDAR']
-   #agent_names = ['porto_ete_no_LiDAR']
-   legend = agent_names
-   legend = ['no_LiDAR', 'LiDAR']
-   legend_title = ''
-   display_results_multiple.learning_curve_lap_time(agent_names, legend, legend_title, show_average=True, show_median=True)
+   # agent_names = ['porto_ete_no_LiDAR', 'porto_ete_LiDAR']
+   # agent_names = ['porto_ete_LiDAR']
+   # legend = agent_names
+   # #legend = ['no_LiDAR', 'LiDAR']
+   # legend = ['LiDAR']
+   # legend_title = ''
+   # display_results_multiple.learning_curve_lap_time(agent_names, legend, legend_title, show_average=True, show_median=True)
 
    # agent_names = ['porto_pete_sv_1', 'porto_pete_s_1', 'porto_pete_v_1', 'porto_ete_1']
    # agent_names = ['porto_ete_no_LiDAR']
