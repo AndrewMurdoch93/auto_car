@@ -179,6 +179,11 @@ class environment():
         if self.lidar_dict['is_lidar']==True:
             self.lidar_dists, self.lidar_coords = self.lidar.get_scan(self.x, self.y, self.theta)
         
+        if 'only_lidar' in self.input_dict.keys():
+            self.only_lidar = self.input_dict['only_lidar']
+        else:
+            self.only_lidar=False
+
         self.current_progress = 0
         self.vel_par_line = 0
         self.dist_to_line = 0
@@ -644,15 +649,19 @@ class environment():
         #v_ref_norm = self.v_ref/self.params['v_max']
         
         #self.observation = [x_norm, y_norm, theta_norm]
-        self.observation = [x_norm, y_norm, theta_norm, v_norm]
-        
-        #self.observation = []
+        if self.only_lidar==False:
+            self.observation = [x_norm, y_norm, theta_norm, v_norm]
+        else:
+            self.observation = []
+            
         if self.lidar_dict['is_lidar']==True:
             #lidar_norm = np.array(self.lidar_dists)<0.5
+            
             lidar_norm = np.array(self.lidar_dists)/self.lidar_dict['max_range']
             for n in lidar_norm:
                 self.observation.append(n)
-            pass
+            
+            
 
 
     

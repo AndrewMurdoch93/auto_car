@@ -822,6 +822,7 @@ if __name__=='__main__':
             , 'car_params':car_params
             , 'reward_signal':reward_signal
             , 'lidar_dict':lidar_dict
+            , 'only_lidar':True
             , 'action_space_dict':action_space_dict
             } 
    
