@@ -90,9 +90,9 @@ env_dict = {'sim_conf': functions.load_config(sys.path[0], "config")
         , 'action_space_dict':action_space_dict
         } 
 
-a = main_multiple.trainingLoop(main_dict, agent_td3_dict, env_dict, load_agent='')
-a.train()
-main_multiple.lap_time_test(agent_name=agent_name, n_episodes=100, detect_issues=False, initial_conditions=True)
+# a = main_multiple.trainingLoop(main_dict, agent_td3_dict, env_dict, load_agent='')
+# a.train()
+# main_multiple.lap_time_test(agent_name=agent_name, n_episodes=100, detect_issues=False, initial_conditions=True)
 
 # agent_name = 'porto_ete_LiDAR_10'
 # main_dict['name'] = agent_name
@@ -291,11 +291,14 @@ main_multiple.lap_time_test(agent_name=agent_name, n_episodes=100, detect_issues
 #                                             start_condition=start_condition)
 
 
-# agent_names = ['porto_ete_only_LiDAR', 'porto_ete_LiDAR_20']
-# legend = ['Only LiDAR, 20 beams', '20 LiDAR beams and state']
-# legend_title = ''
-# display_results_multiple.learning_curve_lap_time_average(agent_names, legend, legend_title, show_average=True, show_median=True)
-# display_results_multiple.learning_curve_reward_average(agent_names, legend, legend_title, show_average=True, show_median=True)
+agent_names = ['porto_ete_average']
+legend = ['Only LiDAR, 20 beams']
+legend_title = ''
+ns = [2]
+#display_results_multiple.learning_curve_lap_time(agent_names, legend, legend_title, ns, show_average=True, show_median=True)
+#display_results_multiple.learning_curve_lap_time_average(agent_names, legend, legend_title, ns, show_average=True, show_median=True)
+#display_results_multiple.learning_curve_reward(agent_names, legend, legend_title, ns=ns, show_average=True, show_median=True)
+#display_results_multiple.learning_curve_reward_average(agent_names, legend, legend_title, show_average=True, show_median=True)
 
 
 
