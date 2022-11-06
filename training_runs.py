@@ -58,7 +58,7 @@ reward_signal = {'goal_reached':0, 'out_of_bounds':-1, 'max_steps':0, 'collision
                     'backwards':-0.01, 'park':-1, 'time_step':-0.01, 'progress':0, 'distance':0.3, 
                     'max_progress':0}    
 
-action_space_dict = {'action_space': 'continuous', 'vel_select':[3,7], 'R_range':[2]}
+action_space_dict = {'action_space': 'continuous', 'vel_select':[3,6], 'R_range':[2]}
 
 #action_space_dict = {'action_space': 'discrete', 'n_waypoints': 10, 'vel_select':[7], 'R_range':[6]}
 
