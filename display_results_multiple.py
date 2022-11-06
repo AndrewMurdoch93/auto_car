@@ -454,82 +454,111 @@ def learning_curve_lap_time_average(agent_names, legend, legend_title, ns, show_
     for i in range(np.size(end_episodes, axis=0)):
         for n in range(np.size(end_episodes, axis=1)):
             end_episodes[i,n] =  np.where(steps[i][n]==0)[0][0]
+            end_ep = end_episodes
     end_episodes = np.min(end_episodes, axis=1)
     
+    steps_y = steps.copy()
+    steps_y_avg_smoothed = [[] for _ in range(len(agent_names))]
+    steps_y_std = [[] for _ in range(len(agent_names))]
+    upper_fill = [[] for _ in range(len(agent_names))]
+    lower_fill = [[] for _ in range(len(agent_names))]
 
-    # plt.figure(1, figsize=(5,4))
-    # for i in range(len(agent_names)):
-    #     end_episode = end_episodes[i] 
-    #     plt.plot(np.cumsum(steps_avg_x_axis[i])[0:end_episode],  avg_coll[i][0:end_episode])
-    #     plt.fill_between(x=np.cumsum(steps_avg_x_axis[i])[0:end_episode], y1=upper_fill_coll[i][0][0:end_episode], y2=lower_fill_coll[i][0][0:end_episode], alpha=0.3, label='_nolegend_')
+    for i in range(np.size(end_ep, axis=0)):
+        for n in range(np.size(end_ep, axis=1)):
+            steps_y[i][n][collisions[i][n]==1]=np.nan
+    steps_y_avg = np.array(steps_y)
+    steps_y_avg = np.nanmean(steps_y_avg, axis=1)
+
+    for i in range(np.size(end_ep, axis=0)):
+        for j in range(len(steps_y_avg[i])):
+                if j <= window:
+                    x = 0
+                else:
+                    x = j-window 
+                steps_y_avg_smoothed[i].append(np.nanmean(steps_y_avg[i][x:j+1]))
+                steps_y_std[i].append(np.nanstd(steps_y_avg[i][x:j+1]))
+        
+        upper_fill[i].append(np.array(steps_y_avg_smoothed[i])+np.array(steps_y_std[i]))
+        lower_fill[i].append(np.array(steps_y_avg_smoothed[i])-np.array(steps_y_std[i]))
+
+
+    plt.figure(1, figsize=(5,4))
+    for i in range(len(agent_names)):
+        end_episode = end_episodes[i] 
+        plt.plot(np.cumsum(steps_avg_x_axis[i])[0:end_episode],  avg_coll[i][0:end_episode])
+        plt.fill_between(x=np.cumsum(steps_avg_x_axis[i])[0:end_episode], y1=upper_fill_coll[i][0][0:end_episode], y2=lower_fill_coll[i][0][0:end_episode], alpha=0.3, label='_nolegend_')
     
-    # plt.hlines(y=1, xmin=0, xmax=np.cumsum(steps_avg_x_axis[i])[np.max(end_episodes)], colors='black', linestyle='dashed')
-    # plt.hlines(y=0, xmin=0, xmax=np.cumsum(steps_avg_x_axis[i])[np.max(end_episodes)], colors='black', linestyle='dashed')
-    # plt.xlabel('Simulation steps')
-    # #plt.title('Collision rate')
-    # plt.ylabel('Collision rate')
-    # plt.legend(legend_coll, title=legend_title, loc='upper right')
-    # #plt.xlim([0,6000])
-    # plt.ylim([-0.05, 1.05])
-    # plt.grid(True)
-    # plt.rc('axes',edgecolor='gray')
-    # plt.tick_params(axis=u'both', which=u'both',length=0)
+    plt.hlines(y=1, xmin=0, xmax=np.cumsum(steps_avg_x_axis[i])[np.max(end_episodes)], colors='black', linestyle='dashed')
+    plt.hlines(y=0, xmin=0, xmax=np.cumsum(steps_avg_x_axis[i])[np.max(end_episodes)], colors='black', linestyle='dashed')
+    plt.xlabel('Simulation steps')
+    #plt.title('Collision rate')
+    plt.ylabel('Collision rate')
+    plt.legend(legend_coll, title=legend_title, loc='upper right')
+    #plt.xlim([0,6000])
+    plt.ylim([-0.05, 1.05])
+    plt.grid(True)
+    plt.rc('axes',edgecolor='gray')
+    plt.tick_params(axis=u'both', which=u'both',length=0)
 
-    # plt.figure(2, figsize=(5,4))
-    # for i in range(len(agent_names)):
-    #     end_episode_no_coll = np.where(steps_no_coll[i]==0)[0][0]
-    #     #plt.plot(np.cumsum(steps[0]), steps[0], 'x')
-    #     #plt.plot(steps[0][np.where(np.logical_not(collisions[0]))], 'x')
-    #     plt.plot(steps_x_axis[i][0:end_episode_no_coll],   np.array(avg_steps_no_coll[i][0:end_episode_no_coll])*0.01 )
-    #     plt.fill_between(x=steps_x_axis[i][0:end_episode_no_coll], y1=upper_fill_steps_no_coll[i][0][0:end_episode_no_coll]*0.01 , y2=lower_fill_steps_no_coll[i][0][0:end_episode_no_coll]*0.01, alpha=0.3, label='_nolegend_')
+
+    plt.figure(2, figsize=(5,4))
+
+    for i in range(len(agent_names)):
+        end_episode = end_episodes[i] 
+        #plt.plot(np.cumsum(steps[0]), steps[0], 'x')
+        #plt.plot(steps[0][np.where(np.logical_not(collisions[0]))], 'x')
+        plt.plot(np.cumsum(steps_avg_x_axis[i])[0:end_episode],   np.array(steps_y_avg_smoothed[i][0:end_episode])*0.01)
+        plt.fill_between(x=np.cumsum(steps_avg_x_axis[i])[0:end_episode], y1=upper_fill[i][0][0:end_episode]*0.01, y2=lower_fill[i][0][0:end_episode]*0.01, alpha=0.3, label='_nolegend_')
     
-    
-    # plt.xlabel('Simulation steps')
-    # #plt.title('Lap time')
-    # plt.ylabel('Lap time [s]')
-    # plt.legend(legend, title=legend_title, loc='upper right')
-    # #plt.xlim([0,6000])
-    # plt.grid(True)
-    # plt.rc('axes',edgecolor='gray')
-    # plt.tick_params(axis=u'both', which=u'both',length=0)
+    plt.xlabel('Simulation steps')
+    #plt.title('Lap time')
+    plt.ylabel('Lap time [s]')
+    plt.legend(legend, title=legend_title, loc='upper right')
+    #plt.xlim([0,6000])
+    plt.grid(True)
+    plt.rc('axes',edgecolor='gray')
+    plt.tick_params(axis=u'both', which=u'both',length=0)
 
     
-    # plt.figure(3, figsize=(5,4))
-    # for i in range(len(agent_names)):
-    #     end_episode = end_episodes[i] 
-    #     plt.plot(avg_coll[i][0:end_episode])
-    #     plt.fill_between(x=np.arange(end_episode), y1=upper_fill_coll[i][0][0:end_episode], y2=lower_fill_coll[i][0][0:end_episode], alpha=0.3, label='_nolegend_')
+
+    plt.figure(3, figsize=(5,4))
+    for i in range(len(agent_names)):
+        end_episode = end_episodes[i] 
+        plt.plot(avg_coll[i][0:end_episode])
+        plt.fill_between(x=np.arange(end_episode), y1=upper_fill_coll[i][0][0:end_episode], y2=lower_fill_coll[i][0][0:end_episode], alpha=0.3, label='_nolegend_')
     
-    # plt.hlines(y=1, xmin=0, xmax=np.max(end_episodes), colors='black', linestyle='dashed')
-    # plt.hlines(y=0, xmin=0, xmax=np.max(end_episodes), colors='black', linestyle='dashed')
-    # plt.ylim([-0.05, 1.05])
-    # plt.xlabel('Episodes')
-    # #plt.title('Collision rate')
-    # plt.ylabel('Collision rate')
-    # plt.legend(legend_coll, title=legend_title, loc='upper right')
-    # plt.grid(True)
-    # plt.rc('axes',edgecolor='gray')
-    # plt.tick_params(axis=u'both', which=u'both',length=0)
+    plt.hlines(y=1, xmin=0, xmax=np.max(end_episodes), colors='black', linestyle='dashed')
+    plt.hlines(y=0, xmin=0, xmax=np.max(end_episodes), colors='black', linestyle='dashed')
+    plt.ylim([-0.05, 1.05])
+    plt.xlabel('Episodes')
+    #plt.title('Collision rate')
+    plt.ylabel('Collision rate')
+    plt.legend(legend_coll, title=legend_title, loc='upper right')
+    plt.grid(True)
+    plt.rc('axes',edgecolor='gray')
+    plt.tick_params(axis=u'both', which=u'both',length=0)
 
 
-    # plt.figure(4, figsize=(5,4))
-    # for i in range(len(agent_names)):
-    #     end_episode_no_coll = np.where(steps_no_coll[i]==0)[0][0]
-    #     #plt.plot(np.cumsum(steps[0]), steps[0], 'x')
-    #     #plt.plot(steps[0][np.where(np.logical_not(collisions[0]))], 'x')
-    #     plt.plot(np.arange(end_episodes[i])[np.logical_not(collisions[i][ns[i]])[0:end_episodes[i]]], np.array(avg_steps_no_coll[i][0:end_episode_no_coll])*0.01)
-    #     plt.fill_between(x=np.arange(end_episodes[i])[np.logical_not(collisions[i][ns[i]])[0:end_episodes[i]]], y1=upper_fill_steps_no_coll[i][0][0:end_episode_no_coll]*0.01 , y2=lower_fill_steps_no_coll[i][0][0:end_episode_no_coll]*0.01, alpha=0.3, label='_nolegend_')
 
-    #     np.arange(len(steps[i][ns[i]]))[np.logical_not(collisions[i][ns[i]])][0:end_episodes[i]]
-    #     #plt.plot(np.array(max_steps_no_coll[i][0:end_episode_no_coll])*0.01 )
-    # plt.xlabel('Episodes')
-    # #plt.title('Average time per episode without collisions')
-    # plt.ylabel('Lap time [s]')
-    # plt.legend(legend, title=legend_title, loc='upper right')
-    # plt.grid(True)
-    # plt.rc('axes',edgecolor='gray')
-    # plt.tick_params(axis=u'both', which=u'both',length=0)
-    #     #plt.xlim([0,6000])
+    plt.figure(4, figsize=(5,4))
+
+    for i in range(np.size(end_ep, axis=0)):
+        end_episode = end_episodes[i] 
+        #plt.plot(np.cumsum(steps[0]), steps[0], 'x')
+        #plt.plot(steps[0][np.where(np.logical_not(collisions[0]))], 'x')
+        plt.plot(np.arange(end_episode), np.array(steps_y_avg_smoothed[i][0:end_episode])*0.01)
+        plt.fill_between(x=np.arange(end_episode), y1=upper_fill[i][0][0:end_episode]*0.01, y2=lower_fill[i][0][0:end_episode]*0.01, alpha=0.3, label='_nolegend_')
+
+        #np.arange(len(steps[i][ns[i]]))[np.logical_not(collisions[i][ns[i]])][0:end_episodes[i]]
+        #plt.plot(np.array(max_steps_no_coll[i][0:end_episode_no_coll])*0.01 )
+    plt.xlabel('Episodes')
+    #plt.title('Average time per episode without collisions')
+    plt.ylabel('Lap time [s]')
+    plt.legend(legend, title=legend_title, loc='upper right')
+    plt.grid(True)
+    plt.rc('axes',edgecolor='gray')
+    plt.tick_params(axis=u'both', which=u'both',length=0)
+        #plt.xlim([0,6000])
 
 
     plt.figure(5, figsize=(5,4))
@@ -550,21 +579,21 @@ def learning_curve_lap_time_average(agent_names, legend, legend_title, ns, show_
     plt.rc('axes',edgecolor='gray')
     plt.tick_params(axis=u'both', which=u'both',length=0)
 
-    # plt.figure(6, figsize=(5,4))
-    # for i in range(len(agent_names)):
-    #     end_episode_no_coll = np.where(steps_no_coll[i]==0)[0][0]
-    #     plt.plot(n_actions_x_axis[i][0:end_episode_no_coll],   np.array(avg_steps_no_coll[i][0:end_episode_no_coll])*0.01 )
-    #     plt.fill_between(x=n_actions_x_axis[i][0:end_episode_no_coll], y1=upper_fill_steps_no_coll[i][0][0:end_episode_no_coll]*0.01 , y2=lower_fill_steps_no_coll[i][0][0:end_episode_no_coll]*0.01, alpha=0.3, label='_nolegend_')
+    plt.figure(6, figsize=(5,4))
+    for i in range(len(agent_names)):
+        end_episode = end_episodes[i]
+        plt.plot(np.cumsum(avg_n_actions[i][0:end_episode]), np.array(steps_y_avg_smoothed[i][0:end_episode])*0.01)
+        plt.fill_between(x=np.cumsum(avg_n_actions[i][0:end_episode]), y1=upper_fill[i][0][0:end_episode]*0.01, y2=lower_fill[i][0][0:end_episode]*0.01, alpha=0.3, label='_nolegend_')
     
     
-    # plt.xlabel('Steps')
-    # #plt.title('Lap time')
-    # plt.ylabel('Lap time [s]')
-    # plt.legend(legend, title=legend_title, loc='upper right')
-    # #plt.xlim([0,6000])
-    # plt.grid(True)
-    # plt.rc('axes',edgecolor='gray')
-    # plt.tick_params(axis=u'both', which=u'both',length=0)
+    plt.xlabel('Steps')
+    #plt.title('Lap time')
+    plt.ylabel('Lap time [s]')
+    plt.legend(legend, title=legend_title, loc='upper right')
+    #plt.xlim([0,6000])
+    plt.grid(True)
+    plt.rc('axes',edgecolor='gray')
+    plt.tick_params(axis=u'both', which=u'both',length=0)
 
     plt.show()
 
