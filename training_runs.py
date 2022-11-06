@@ -287,14 +287,14 @@ main_multiple.lap_time_test(agent_name=agent_name, n_episodes=100, detect_issues
 #                                             start_condition=start_condition)
 
 
-agent_names = ['porto_ete_average']
-legend = ['Only LiDAR, 20 beams']
-legend_title = ''
-ns = [2]
-#display_results_multiple.learning_curve_lap_time(agent_names, legend, legend_title, ns, show_average=True, show_median=True)
-display_results_multiple.learning_curve_lap_time_average(agent_names, legend, legend_title, ns, show_average=True, show_median=True)
-#display_results_multiple.learning_curve_reward(agent_names, legend, legend_title, ns=ns, show_average=True, show_median=True)
-#display_results_multiple.learning_curve_reward_average(agent_names, legend, legend_title, show_average=True, show_median=True)
+# agent_names = ['porto_ete_average']
+# legend = ['Only LiDAR, 20 beams']
+# legend_title = ''
+# ns = [2]
+# display_results_multiple.learning_curve_lap_time(agent_names, legend, legend_title, ns, show_average=True, show_median=True)
+# display_results_multiple.learning_curve_lap_time_average(agent_names, legend, legend_title, ns, show_average=True, show_median=True)
+# display_results_multiple.learning_curve_reward(agent_names, legend, legend_title, ns=ns, show_average=True, show_median=True)
+# display_results_multiple.learning_curve_reward_average(agent_names, legend, legend_title, show_average=True, show_median=True)
 
 
 
