@@ -144,7 +144,12 @@ class trainingLoop():
          #   self.agent_dict['epsilon'] = 1
          #   self.replay_beta_0=self.agent_dict['replay_beta_0']
          #   self.replay_beta=self.replay_beta_0
-         self.agent = agent_td3.agent(self.agent_dict)
+         if self.main_dict['learning_method']=='td3':
+            self.agent = agent_td3.agent(self.agent_dict)
+         elif self.main_dict['learning_method']=='ddpg':
+            self.agent = agent_ddpg.agent(self.agent_dict)
+         if self.learning_method=='actor_critic_cont':
+            self.agent = agent_actor_critic_continuous.agent_separate(self.agent_dict) 
          
          car_params = self.env_dict['car_params']
 
@@ -317,7 +322,10 @@ class trainingLoop():
          score=0
 
          while not done:
-            action = self.agent.choose_greedy_action(obs)
+            if self.learning_method=='td3' or self.learning_method=='ddpg':
+               action = self.agent.choose_greedy_action(obs)
+            elif self.learning_method=='actor_critic_cont':
+               action = np.array(self.agent.choose_action(obs)).reshape((1,))
             next_obs, reward, done = self.env.take_action(action)
             score += reward
             obs = next_obs
@@ -417,7 +425,12 @@ def test(agent_name, n_episodes, detect_issues, initial_conditions):
 
    for n in range(runs):
       
-      a = agent_td3.agent(agent_dict)
+      if main_dict['learning_method']=='td3':
+         a = agent_td3.agent(agent_dict)
+      elif main_dict['learning_method']=='ddpg':
+         a = agent_ddpg.agent(agent_dict)
+      elif main_dict['learning_method']=='actor_critic_cont':
+         a = agent_actor_critic_continuous.agent_separate(agent_dict)
       #if main_dict['learning_method'] == 'rainbow':
       #   agent_dict['epsilon'] = 0
       #   a = agent_rainbow.agent(agent_dict)
@@ -438,8 +451,7 @@ def test(agent_name, n_episodes, detect_issues, initial_conditions):
             if main_dict['learning_method']=='ddpg' or main_dict['learning_method']=='td3':
                action = a.choose_greedy_action(obs)
             else:
-               action = a.choose_action(obs)
-            
+               action =  np.array(a.choose_action(obs)).reshape((1,))
             
             action_history.append(action)
             
@@ -554,7 +566,13 @@ def lap_time_test(agent_name, n_episodes, detect_issues, initial_conditions):
 
    for n in range(runs):
 
-      a = agent_td3.agent(agent_dict)
+      if main_dict['learning_method']=='td3':
+         a = agent_td3.agent(agent_dict)
+      elif main_dict['learning_method']=='ddpg':
+         a = agent_ddpg.agent(agent_dict)
+      if main_dict['learning_method']=='actor_critic_cont':
+         a = agent_actor_critic_continuous.agent_separate(agent_dict) 
+
       a.load_weights(agent_name, n)
       print("Testing agent " + agent_name + ", n = " + str(n))
 
@@ -702,7 +720,13 @@ def lap_time_test_mismatch(agent_name, n_episodes, detect_issues, initial_condit
    
       for n in range(runs):
 
-         a = agent_td3.agent(agent_dict) 
+         if main_dict['learning_method']=='td3':
+            a = agent_td3.agent(agent_dict)
+         elif main_dict['learning_method']=='ddpg':
+            a = agent_ddpg.agent(agent_dict)
+         if main_dict['learning_method']=='actor_critic_cont':
+            a = agent_actor_critic_continuous.agent_separate(agent_dict) 
+
          a.load_weights(agent_name, n)
          print("Testing agent " + agent_name + ", n = " + str(n) + ", parameter = " + parameter + ", variation = " + str(round(frac_vary,2)))
 

@@ -180,7 +180,7 @@ def evaluation(agent_names, legend, legend_title):
     plt.show()
         
 
-def learning_curve_lap_time(agent_names, legend, legend_title, ns, show_average=True, show_median=True):
+def learning_curve_lap_time(agent_names, legend, legend_title, ns):
 
     legend_coll = legend.copy()
     legend_coll.append('Min and max')
@@ -368,7 +368,7 @@ def learning_curve_lap_time(agent_names, legend, legend_title, ns, show_average=
     plt.show()
 
 
-def learning_curve_lap_time_average(agent_names, legend, legend_title, ns, show_average=True, show_median=True):
+def learning_curve_lap_time_average(agent_names, legend, legend_title, ns):
 
     legend_coll = legend.copy()
     legend_coll.append('Min and max')
@@ -397,6 +397,7 @@ def learning_curve_lap_time_average(agent_names, legend, legend_title, ns, show_
     avg_collisions = [[] for _ in range(len(agent_names))]
 
     steps_avg_x_axis = [[] for _ in range(len(agent_names))]
+    times = [[] for _ in range(len(agent_names))]
 
     for i in range(len(agent_names)):
         agent_name = agent_names[i]
@@ -405,7 +406,7 @@ def learning_curve_lap_time_average(agent_names, legend, legend_title, ns, show_
         
         _ = pickle.load(infile)
         _ = pickle.load(infile)
-        _ = pickle.load(infile)
+        times[i] = pickle.load(infile)
         steps[i] = pickle.load(infile)
         collisions[i] = pickle.load(infile)
         n_actions[i] = pickle.load(infile)
@@ -598,7 +599,7 @@ def learning_curve_lap_time_average(agent_names, legend, legend_title, ns, show_
     plt.show()
 
 
-def learning_curve_reward(agent_names, legend, legend_title, ns, show_average=True, show_median=True):
+def learning_curve_reward(agent_names, legend, legend_title, ns):
     
     legend_new = legend.copy()
     legend_new.append('Min and max')
@@ -692,7 +693,7 @@ def learning_curve_reward(agent_names, legend, legend_title, ns, show_average=Tr
 
     plt.show()
 
-def learning_curve_reward_average(agent_names, legend, legend_title, show_average=True, show_median=True):
+def learning_curve_reward_average(agent_names, legend, legend_title):
     
     legend_new = legend.copy()
     legend_new.append('Min and max')

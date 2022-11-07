@@ -7,8 +7,9 @@ import pickle
 
 class GenericNetwork(nn.Module):
     def __init__(self, alpha, input_dims, fc1_dims, fc2_dims,
-                 n_actions):
+                 n_actions, filename):
         super(GenericNetwork, self).__init__()
+        self.filename = filename
         self.input_dims = input_dims
         self.fc1_dims = fc1_dims
         self.fc2_dims = fc2_dims
@@ -25,9 +26,15 @@ class GenericNetwork(nn.Module):
         x = F.relu(self.fc1(state))
         x = F.relu(self.fc2(x))
         x = self.fc3(x)
-
         return x
 
+    def save_checkpoint(self, name):
+        T.save(self.state_dict(), self.filename+name)
+
+    def load_checkpoint(self, name):
+        self.load_state_dict(T.load(self.filename+name))
+
+        
 class ActorCriticNetwork(nn.Module):
     def __init__(self, alpha, input_dims, fc1_dims, fc2_dims,
                  n_actions):
@@ -56,7 +63,7 @@ class ActorCriticNetwork(nn.Module):
 class agent_separate(object):
 
     def __init__(self, agent_dict):
-        
+        self.name = agent_dict["name"]
         self.agent_dict=agent_dict
         self.name = agent_dict['name']
         self.gamma = agent_dict['gamma']
@@ -64,10 +71,10 @@ class agent_separate(object):
         self.n_outputs = 1
         
         self.actor = GenericNetwork(agent_dict['alpha'], agent_dict['input_dims'], agent_dict['fc1_dims'],
-                                           agent_dict['fc2_dims'], n_actions=2)
+                                           agent_dict['fc2_dims'], n_actions=2, filename=self.name)
         
         self.critic = GenericNetwork(agent_dict['beta'], agent_dict['input_dims'], agent_dict['fc1_dims'],
-                                           agent_dict['fc2_dims'], n_actions=1)
+                                           agent_dict['fc2_dims'], n_actions=1, filename=self.name)
         
 
     def choose_action(self, observation):
@@ -97,17 +104,21 @@ class agent_separate(object):
         self.actor.optimizer.step()
         self.critic.optimizer.step()
 
-    def save_agent(self):
-        T.save(self.actor.state_dict(), 'agents/' + self.name + '_actor_weights')
-        T.save(self.critic.state_dict(), 'agents/' + self.name + '_critic_weights')
+    def save_agent(self, name, run):
+        self.actor.save_checkpoint(name + '_actor_n_' + str(run))
         
-        outfile = open('agents/' + self.name + '_hyper_parameters', 'wb')
-        pickle.dump(self.agent_dict, outfile)
-        outfile.close()
+        #T.save(self.actor.state_dict(), 'agents/' + self.name + '_actor_weights')
+        #T.save(self.critic.state_dict(), 'agents/' + self.name + '_critic_weights')
+        
+        #outfile = open('agents/' + self.name + '_hyper_parameters', 'wb')
+        #pickle.dump(self.agent_dict, outfile)
+        #outfile.close()
 
-    def load_weights(self, name):
-        self.actor.load_state_dict(T.load('agents/' + name + '_actor_weights'))
-        self.critic.load_state_dict(T.load('agents/' + name + '_critic_weights'))
+    def load_weights(self, name, run):
+        self.actor.load_checkpoint(name + '_actor_n_' + str(run))
+
+        #self.actor.load_state_dict(T.load('agents/' + name + '_actor_weights'))
+        #self.critic.load_state_dict(T.load('agents/' + name + '_critic_weights'))
 
 
 
