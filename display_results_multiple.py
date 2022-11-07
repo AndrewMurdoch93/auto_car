@@ -18,7 +18,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 import torch.optim as optim
 import matplotlib
-matplotlib.use('pgf')
+#matplotlib.use('pgf')
 import matplotlib.pyplot as plt
 import pickle
 import functions
