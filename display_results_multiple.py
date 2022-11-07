@@ -17,6 +17,8 @@ import torch as T
 import torch.nn as nn
 import torch.nn.functional as F
 import torch.optim as optim
+import matplotlib
+matplotlib.use('pgf')
 import matplotlib.pyplot as plt
 import pickle
 import functions
@@ -482,8 +484,13 @@ def learning_curve_lap_time_average(agent_names, legend, legend_title, ns):
         upper_fill[i].append(np.array(steps_y_avg_smoothed[i])+np.array(steps_y_std[i]))
         lower_fill[i].append(np.array(steps_y_avg_smoothed[i])-np.array(steps_y_std[i]))
 
+    #font = {'family' : 'normal',
+
 
     plt.figure(1, figsize=(5,4))
+    plt.rc('axes',edgecolor='gray')
+    #plt.rc('font', **font)
+
     for i in range(len(agent_names)):
         end_episode = end_episodes[i] 
         plt.plot(np.cumsum(steps_avg_x_axis[i])[0:end_episode],  avg_coll[i][0:end_episode])
@@ -501,6 +508,7 @@ def learning_curve_lap_time_average(agent_names, legend, legend_title, ns):
     plt.rc('axes',edgecolor='gray')
     plt.tick_params(axis=u'both', which=u'both',length=0)
 
+    plt.savefig('collision_rate.pgf', format='pgf')
 
     plt.figure(2, figsize=(5,4))
 
