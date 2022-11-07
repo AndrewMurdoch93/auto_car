@@ -59,11 +59,11 @@ class ReplayBuffer(object):
         return states, actions, rewards, states_, terminal
 
 class CriticNetwork(nn.Module):
-    def __init__(self, beta, input_dims, fc1_dims, fc2_dims, n_actions, name):
+    def __init__(self, beta, input_dims, fc1_dims, fc2_dims, n_actions, filename):
         super(CriticNetwork, self).__init__()
         
-        self.name = name
-        self.file_name = 'agents/' + self.name + '_weights'
+        self.name = filename
+        self.filename = 'agents/' + filename + '/'
         
         self.input_dims = input_dims
         self.fc1_dims = fc1_dims
@@ -105,18 +105,18 @@ class CriticNetwork(nn.Module):
 
         return state_action_value
     
-    def save_checkpoint(self):
-        T.save(self.state_dict(), self.file_name)
+    def save_checkpoint(self, name):
+        T.save(self.state_dict(), self.filename+name)
 
-    def load_checkpoint(self):
-        self.load_state_dict(T.load(self.file_name))
+    def load_checkpoint(self, name):
+        self.load_state_dict(T.load(self.filename+name))
 
 
 class ActorNetwork(nn.Module):
-    def __init__(self, alpha, input_dims, fc1_dims, fc2_dims, n_actions, name):
+    def __init__(self, alpha, input_dims, fc1_dims, fc2_dims, n_actions, filename):
         super(ActorNetwork, self).__init__()
-        self.name = name
-        self.file_name = 'agents/' + self.name + '_weights'
+        self.name = filename
+        self.filename = 'agents/' + filename + '/'
         self.input_dims = input_dims
         self.fc1_dims = fc1_dims
         self.fc2_dims = fc2_dims
@@ -155,11 +155,11 @@ class ActorNetwork(nn.Module):
 
         return x
 
-    def save_checkpoint(self):
-        T.save(self.state_dict(), self.file_name)
+    def save_checkpoint(self, name):
+        T.save(self.state_dict(), self.filename+name)
 
-    def load_checkpoint(self):
-        self.load_state_dict(T.load(self.file_name))
+    def load_checkpoint(self, name):
+        self.load_state_dict(T.load(self.filename+name))
 
 
 class agent(object):
@@ -175,16 +175,16 @@ class agent(object):
         self.batch_size = agent_dict['batch_size']
 
         self.actor = ActorNetwork(agent_dict['alpha'], agent_dict['input_dims'], agent_dict['layer1_size'], agent_dict['layer2_size'], 
-                                    agent_dict['n_actions'], name=self.name+'_actor')
+                                    agent_dict['n_actions'], filename=self.name)
 
         self.critic = CriticNetwork(agent_dict['beta'], agent_dict['input_dims'], agent_dict['layer1_size'], agent_dict['layer2_size'], 
-                                    agent_dict['n_actions'], name=self.name+'_critic')
+                                    agent_dict['n_actions'], filename=self.name)
 
         self.target_actor = ActorNetwork(agent_dict['alpha'], agent_dict['input_dims'], agent_dict['layer1_size'], agent_dict['layer2_size'], 
-                                    agent_dict['n_actions'], name=self.name+'_target_actor')
+                                    agent_dict['n_actions'], filename=self.name)
 
         self.target_critic = CriticNetwork(agent_dict['beta'], agent_dict['input_dims'], agent_dict['layer1_size'], agent_dict['layer2_size'], 
-                                    agent_dict['n_actions'], name=self.name+'_target_critic')
+                                    agent_dict['n_actions'], filename=self.name)
 
         self.noise = OUActionNoise(mu=np.zeros( agent_dict['n_actions']))
 
@@ -312,21 +312,21 @@ class agent(object):
         self.target_critic.load_state_dict(T.load('agents/' + name + '_target_critic_weights'))
     '''
 
-    def save_agent(self):
-        self.actor.save_checkpoint()
-        self.target_actor.save_checkpoint()
-        self.critic.save_checkpoint()
-        self.target_critic.save_checkpoint()
+    def save_agent(self, name, run):
+        self.actor.save_checkpoint(name + '_actor_n_' + str(run))
+        # self.target_actor.save_checkpoint()
+        # self.critic.save_checkpoint()
+        # self.target_critic.save_checkpoint()
 
-        outfile = open('agents/' + self.name + '_hyper_parameters', 'wb')
-        pickle.dump(self.agent_dict, outfile)
-        outfile.close()
+        # outfile = open('agents/' + self.name + '_hyper_parameters', 'wb')
+        # pickle.dump(self.agent_dict, outfile)
+        # outfile.close()
 
-    def load_weights(self, name):
-        self.actor.load_checkpoint()
-        self.target_actor.load_checkpoint()
-        self.critic.load_checkpoint()
-        self.target_critic.load_checkpoint()
+    def load_weights(self, name, run):
+        self.actor.load_checkpoint(name + '_actor_n_' + str(run))
+        # self.target_actor.load_checkpoint()
+        # self.critic.load_checkpoint()
+        # self.target_critic.load_checkpoint()
     
     def check_actor_params(self):
         current_actor_params = self.actor.named_parameters()
