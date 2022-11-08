@@ -287,8 +287,8 @@ def learning_curve_lap_time_average(agent_names, legend, legend_title, ns, filna
     # plt.tick_params(axis=u'both', which=u'both',length=0)
 
     fig.tight_layout()
-    fig.subplots_adjust(bottom=0.35) 
-    plt.figlegend(legend, title=legend_title, loc = 'lower center', ncol=4)
+    fig.subplots_adjust(bottom=0.4) 
+    plt.figlegend(legend, title=legend_title, loc = 'lower center', ncol=3)
     
     plt.savefig('results/'+filename+'.pgf', format='pgf')
     #plt.show()
@@ -411,11 +411,12 @@ def learning_curve_reward_average(agent_names, legend, legend_title):
 # ns=[0, 0, 0, 0, 0]
 # filename='reward_dist'
 
-# agent_names = ['porto_ete_r_5', 'porto_ete_LiDAR_10', 'porto_ete_r_6']
-# legend = ['$r_{\mathrm{collision}} = -0.5$', '$r_{\mathrm{collision}} = -1$', '$r_{\mathrm{collision}} = -2$']
-# legend_title = ''
-# ns=[0, 0, 0]
-# filename = 'reward_collision'
+
+agent_names = ['porto_ete_r_7', 'porto_ete_r_5', 'porto_ete_LiDAR_10', 'porto_ete_r_6']
+legend = ['$r_{\mathrm{collision}} = 0$', '$r_{\mathrm{collision}} = -0.5$', '$r_{\mathrm{collision}} = -1$', '$r_{\mathrm{collision}} = -2$']
+legend_title = 'Collision penalty'
+ns=[0, 0, 0, 0]
+filename = 'reward_collision'
 
 # agent_names = ['porto_ete_r_0', 'porto_ete_r_1']
 # legend = ['$r_{\mathrm{t}} = 0', '$r_{\mathrm{t}} = -0.01$']
@@ -444,11 +445,11 @@ def learning_curve_reward_average(agent_names, legend, legend_title):
 # filename = 'control_steps'
 
 
-agent_names = ['porto_ete_v_5', 'porto_ete_LiDAR_10', 'porto_ete_v_7', 'porto_ete_v_8']
-legend = ['5', '6', '7', '8']
-legend_title = 'Maximum velocity [m/s]'
-ns=[0, 0, 0, 0]
-filename = 'maximum_velocity'
+# agent_names = ['porto_ete_v_5', 'porto_ete_LiDAR_10', 'porto_ete_v_7', 'porto_ete_v_8']
+# legend = ['5', '6', '7', '8']
+# legend_title = 'Maximum velocity [m/s]'
+# ns=[0, 0, 0, 0]
+# filename = 'maximum_velocity'
 
 
 
