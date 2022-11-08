@@ -41,7 +41,7 @@ from PIL import Image, ImageOps, ImageDraw, ImageFilter
 
 
 
-def learning_curve_lap_time_average(agent_names, legend, legend_title, ns, filname):
+def learning_curve_lap_time_average(agent_names, legend, legend_title, ns, filename):
 
     legend_coll = legend.copy()
     legend_coll.append('Min and max')
@@ -287,13 +287,10 @@ def learning_curve_lap_time_average(agent_names, legend, legend_title, ns, filna
     # plt.tick_params(axis=u'both', which=u'both',length=0)
 
     fig.tight_layout()
-    fig.subplots_adjust(bottom=0.4) 
+    fig.subplots_adjust(bottom=0.35) 
     plt.figlegend(legend, title=legend_title, loc = 'lower center', ncol=3)
     
     plt.savefig('results/'+filename+'.pgf', format='pgf')
-    #plt.show()
-
-
 
 
 def learning_curve_reward_average(agent_names, legend, legend_title):
@@ -403,20 +400,17 @@ def learning_curve_reward_average(agent_names, legend, legend_title):
 
 
 
-
-
 # agent_names = ['porto_ete_r_1', 'porto_ete_r_2', 'porto_ete_r_3', 'porto_ete_LiDAR_10', 'porto_ete_r_4' ]
 # legend = ['$r_{\mathrm{dist}} = 1$', '$r_{\mathrm{dist}} = 0.7$', '$r_{\mathrm{dist}} = 0.5$', '$r_{\mathrm{dist}} = 0.3$', '$r_{\mathrm{dist}} = 0.1$']
 # legend_title = 'Distance reward'
 # ns=[0, 0, 0, 0, 0]
 # filename='reward_dist'
 
-
-agent_names = ['porto_ete_r_7', 'porto_ete_r_5', 'porto_ete_LiDAR_10', 'porto_ete_r_6']
-legend = ['$r_{\mathrm{collision}} = 0$', '$r_{\mathrm{collision}} = -0.5$', '$r_{\mathrm{collision}} = -1$', '$r_{\mathrm{collision}} = -2$']
-legend_title = 'Collision penalty'
-ns=[0, 0, 0, 0]
-filename = 'reward_collision'
+# agent_names = ['porto_ete_r_7', 'porto_ete_r_5', 'porto_ete_LiDAR_10', 'porto_ete_r_6']
+# legend = ['$r_{\mathrm{collision}} = 0$', '$r_{\mathrm{collision}} = -0.5$', '$r_{\mathrm{collision}} = -1$', '$r_{\mathrm{collision}} = -2$']
+# legend_title = 'Collision penalty'
+# ns=[0, 0, 0, 0]
+# filename = 'reward_collision'
 
 # agent_names = ['porto_ete_r_0', 'porto_ete_r_1']
 # legend = ['$r_{\mathrm{t}} = 0', '$r_{\mathrm{t}} = -0.01$']
@@ -430,13 +424,11 @@ filename = 'reward_collision'
 # ns=[0, 0, 0, 0]
 # filename = observation_n_beams
 
-
 # agent_names = ['porto_ete_only_LiDAR', 'porto_ete_LiDAR_20', 'porto_ete_no_LiDAR']
 # legend = ['Only LiDAR', 'LiDAR and pose', 'Only pose']
 # legend_title = 'Observation space'
 # ns=[0, 0, 0]
 # filename = 'observation_space'
-
 
 # agent_names = ['porto_ete_cs_1', 'porto_ete_cs_5', 'porto_ete_cs_10', 'porto_ete_cs_15', 'porto_ete_LiDAR_10', 'porto_ete_cs_25']
 # legend = ['1', '5', '10', '15', '20', '25']
@@ -451,6 +443,10 @@ filename = 'reward_collision'
 # ns=[0, 0, 0, 0]
 # filename = 'maximum_velocity'
 
-
+agent_names = ['porto_ete_LiDAR_10', 'porto_ete_ddpg']
+legend = ['TD3', 'DDPG']
+legend_title = 'Learning method'
+ns=[0, 0]
+filename = 'learning_method'
 
 learning_curve_lap_time_average(agent_names, legend, legend_title, ns, filename)

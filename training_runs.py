@@ -249,34 +249,34 @@ env_dict = {'sim_conf': functions.load_config(sys.path[0], "config")
 # main_multiple.lap_time_test(agent_name=agent_name, n_episodes=100, detect_issues=False, initial_conditions=True)
 
 
-agent_name = 'porto_ete_r_7'
-main_dict['name'] = agent_name
-env_dict['only_lidar'] = False
-env_dict['lidar_dict']['is_lidar'] = True
-env_dict['lidar_dict']['n_beams'] = 10
-env_dict['control_steps'] = 20
-env_dict['action_space_dict']['vel_select'] = [3,6]
-env_dict['reward_signal']['distance'] = 0.3
-env_dict['reward_signal']['time_step'] = -0.01
-env_dict['reward_signal']['collision'] = 0
-a = main_multiple.trainingLoop(main_dict, agent_td3_dict, env_dict, load_agent='')
-a.train()
-main_multiple.lap_time_test(agent_name=agent_name, n_episodes=100, detect_issues=False, initial_conditions=True)
+# agent_name = 'porto_ete_r_7'
+# main_dict['name'] = agent_name
+# env_dict['only_lidar'] = False
+# env_dict['lidar_dict']['is_lidar'] = True
+# env_dict['lidar_dict']['n_beams'] = 10
+# env_dict['control_steps'] = 20
+# env_dict['action_space_dict']['vel_select'] = [3,6]
+# env_dict['reward_signal']['distance'] = 0.3
+# env_dict['reward_signal']['time_step'] = -0.01
+# env_dict['reward_signal']['collision'] = 0
+# a = main_multiple.trainingLoop(main_dict, agent_td3_dict, env_dict, load_agent='')
+# a.train()
+# main_multiple.lap_time_test(agent_name=agent_name, n_episodes=100, detect_issues=False, initial_conditions=True)
 
-agent_name = 'porto_ete_ddpg'
-main_dict['name'] = agent_name
-main_dict['learning_method'] = 'ddpg'
-env_dict['only_lidar'] = False
-env_dict['lidar_dict']['is_lidar'] = True
-env_dict['lidar_dict']['n_beams'] = 10
-env_dict['control_steps'] = 20
-env_dict['action_space_dict']['vel_select'] = [3,6]
-env_dict['reward_signal']['distance'] = 0.3
-env_dict['reward_signal']['time_step'] = -0.01
-env_dict['reward_signal']['collision'] = -1
-a = main_multiple.trainingLoop(main_dict, agent_ddpg_dict, env_dict, load_agent='')
-a.train()
-main_multiple.lap_time_test(agent_name=agent_name, n_episodes=100, detect_issues=False, initial_conditions=True)
+# agent_name = 'porto_ete_ddpg_test'
+# main_dict['name'] = agent_name
+# main_dict['learning_method'] = 'ddpg'
+# env_dict['only_lidar'] = False
+# env_dict['lidar_dict']['is_lidar'] = True
+# env_dict['lidar_dict']['n_beams'] = 10
+# env_dict['control_steps'] = 20
+# env_dict['action_space_dict']['vel_select'] = [3,6]
+# env_dict['reward_signal']['distance'] = 0.3
+# env_dict['reward_signal']['time_step'] = -0.01
+# env_dict['reward_signal']['collision'] = -1
+# a = main_multiple.trainingLoop(main_dict, agent_ddpg_dict, env_dict, load_agent='')
+# a.train()
+# main_multiple.lap_time_test(agent_name=agent_name, n_episodes=100, detect_issues=False, initial_conditions=True)
 
 # agent_name = 'porto_ete_actor_critic_cont'
 # main_dict['name'] = agent_name

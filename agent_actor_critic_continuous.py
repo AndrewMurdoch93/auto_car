@@ -68,6 +68,7 @@ class agent_separate(object):
         self.name = agent_dict['name']
         self.gamma = agent_dict['gamma']
         self.log_probs = None
+        #self.log_probs2 = None
         self.n_outputs = 1
         
         self.actor = GenericNetwork(agent_dict['alpha'], agent_dict['input_dims'], agent_dict['fc1_dims'],
@@ -78,14 +79,26 @@ class agent_separate(object):
         
 
     def choose_action(self, observation):
-        mu, sigma  = self.actor.forward(observation)#.to(self.actor.device)
+        x = self.actor.forward(observation)#.to(self.actor.device)
+        
+        mu=x[0]
+        sigma=x[1]
         sigma = T.exp(sigma)
         action_probs = T.distributions.Normal(mu, sigma)
         probs = action_probs.sample(sample_shape=T.Size([self.n_outputs]))
         self.log_probs = action_probs.log_prob(probs).to(self.actor.device)
         action = T.tanh(probs)
 
+        # mu2=x[2]
+        # sigma2=x[3]
+        # sigma2 = T.exp(sigma)
+        # action_probs2 = T.distributions.Normal(mu, sigma)
+        # probs2 = action_probs.sample(sample_shape=T.Size([self.n_outputs]))
+        # self.log_probs2 = action_probs.log_prob(probs).to(self.actor.device)
+        # action = T.tanh(probs)
+
         return action.item()
+
 
     def learn(self, state, reward, new_state, done):
         self.actor.optimizer.zero_grad()

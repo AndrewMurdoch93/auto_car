@@ -283,9 +283,9 @@ class environment():
 
                 # set steering reference angle
                 if act[0]<=0:
-                    delta_ref = (-self.params['s_min'])*act[0]       
+                    delta_ref = (-self.params['s_min'])*act[0]*10      
                 else:
-                    delta_ref = (self.params['s_max'])*act[0]
+                    delta_ref = (self.params['s_max'])*act[0]*10
                 
                 # get v_dot
                 if self.velocity_control==False:

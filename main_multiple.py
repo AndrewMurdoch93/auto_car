@@ -222,7 +222,7 @@ class trainingLoop():
             
             if self.learning_method == 'actor_critic_cont':
                while not done:
-                  action = np.array(self.agent.choose_action(obs)).reshape((1,))
+                  action = np.array([self.agent.choose_action(obs), 1])
                   n_act+=1
                   next_obs, reward, done = self.env.take_action(action)
                   self.agent.learn(obs, reward, next_obs, done)
@@ -325,7 +325,7 @@ class trainingLoop():
             if self.learning_method=='td3' or self.learning_method=='ddpg':
                action = self.agent.choose_greedy_action(obs)
             elif self.learning_method=='actor_critic_cont':
-               action = np.array(self.agent.choose_action(obs)).reshape((1,))
+               action = np.array([self.agent.choose_action(obs), 1])
             next_obs, reward, done = self.env.take_action(action)
             score += reward
             obs = next_obs
@@ -451,7 +451,7 @@ def test(agent_name, n_episodes, detect_issues, initial_conditions):
             if main_dict['learning_method']=='ddpg' or main_dict['learning_method']=='td3':
                action = a.choose_greedy_action(obs)
             else:
-               action =  np.array(a.choose_action(obs)).reshape((1,))
+               action = np.array([self.agent.choose_action(obs), 1])
             
             action_history.append(action)
             
@@ -590,7 +590,7 @@ def lap_time_test(agent_name, n_episodes, detect_issues, initial_conditions):
             if main_dict['learning_method']=='ddpg' or main_dict['learning_method']=='td3':
                action = a.choose_greedy_action(obs)
             else:
-               action = a.choose_action(obs)
+               action = np.array([a.choose_action(obs), 1])
 
             action_history.append(action)
             
@@ -742,7 +742,7 @@ def lap_time_test_mismatch(agent_name, n_episodes, detect_issues, initial_condit
                if main_dict['learning_method']=='ddpg' or main_dict['learning_method']=='td3':
                   action = a.choose_greedy_action(obs)
                else:
-                  action = a.choose_action(obs)
+                  action = np.array([a.choose_action(obs), 1])
 
                action_history.append(action)
                
@@ -781,7 +781,7 @@ def lap_time_test_mismatch(agent_name, n_episodes, detect_issues, initial_condit
 
 if __name__=='__main__':
 
-   agent_name = 'porto_ete_LiDAR'
+   agent_name = 'test'
 
    main_dict = {'name':agent_name, 'max_episodes':50000, 'max_steps':2e6, 'learning_method':'td3', 'runs':1, 'comment':''}
 
@@ -850,10 +850,10 @@ if __name__=='__main__':
             , 'action_space_dict':action_space_dict
             } 
    
-   # a = trainingLoop(main_dict, agent_td3_dict, env_dict, load_agent='')
-   # a.train()
-   # test(agent_name=agent_name, n_episodes=100, detect_issues=False, initial_conditions=True)
-   # lap_time_test(agent_name=agent_name, n_episodes=100, detect_issues=False, initial_conditions=True)
+   a = trainingLoop(main_dict, agent_td3_dict, env_dict, load_agent='')
+   a.train()
+   test(agent_name=agent_name, n_episodes=100, detect_issues=False, initial_conditions=True)
+   lap_time_test(agent_name=agent_name, n_episodes=100, detect_issues=False, initial_conditions=True)
      
 
    # agent_names = ['porto_pete_sv', 'porto_pete_s', 'porto_pete_v', 'porto_ete']
