@@ -1731,27 +1731,35 @@ def display_path(agent_name, load_history=False, n=0):
 
 def display_collision_distribution(agent_name):
 
-    results_file_name = 'test_results/' + agent_name
+    terminal_poses_file_name = 'terminal_poses/' + agent_name
 
     infile = open('environments/' + agent_name, 'rb')
     env_dict = pickle.load(infile)
     infile.close()
 
-    infile = open(results_file_name, 'rb')
-    test_score = pickle.load(infile)
-    test_progress = pickle.load(infile)
-    test_collision = pickle.load(infile)
-    test_max_steps = pickle.load(infile)
+    infile = open(terminal_poses_file_name, 'rb')
     terminal_poses = pickle.load(infile)
     infile.close()
 
-    image_path = sys.path[0] + '/maps/' + env_dict['map_name'] + '.png'
-    im = image.imread(image_path)
-    plt.imshow(im)
-    plt.plot(np.array(terminal_poses)[:,0], np.array(terminal_poses)[:,1], 'x')
+    end_episode = np.where(terminal_poses[0]==0)[0][0]
+    print('End episode = ', end_episode)
+    env = environment(env_dict)
+    
+    figure_size = (4,2)
+    plt.figure(1, figsize=figure_size)
+    ax = plt.subplot(111)
+
+    track = mapping.map(env.map_name)
+    ax.imshow(ImageOps.invert(track.gray_im.filter(ImageFilter.FIND_EDGES).filter(ImageFilter.MaxFilter(1))), extent=(0,track.map_width,0,track.map_height), cmap="gray")
+    ax.plot(env.rx, env.ry, color='gray', linestyle='dashed')
+    ax.plot(np.array(terminal_poses)[0,0:end_episode,0], np.array(terminal_poses)[0,0:end_episode,1], 'rx')
     #sns.jointplot(x=np.array(terminal_poses)[:,0],y=np.array(terminal_poses)[:,1], kind="hex", alpha=0.5)
+    ax.axis('off')
     plt.show()
 
+display_collision_distribution('collision_distribution_LiDAR')
+display_collision_distribution('collision_distribution_no_LiDAR')
+display_collision_distribution('collision_distribution_LiDAR_pose')
 
 def display_path_multiple(agent_names, ns, legend_title, legend, mismatch_parameters, frac_vary, start_condition):
     

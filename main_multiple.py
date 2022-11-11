@@ -52,6 +52,7 @@ class trainingLoop():
       self.environment_name = 'environments/' + self.agent_name
       self.train_parameters_name = 'train_parameters/' + self.agent_name
       self.action_durations_name = 'action_durations/' + self.agent_name + '_train'
+      self.terminal_poses_filename = 'terminal_poses/' + self.agent_name 
 
       self.parent_dir = os.path.dirname(os.path.abspath(__file__))
       self.agent_dir = self.parent_dir + '/agents/' + self.main_dict['name']
@@ -131,6 +132,7 @@ class trainingLoop():
       steps = np.zeros([self.runs, self.max_episodes])
       collisions = np.zeros([self.runs, self.max_episodes])
       n_actions = np.zeros([self.runs, self.max_episodes])
+      terminal_poses = np.zeros([self.runs, self.max_episodes, 2])
 
       eval_interval = 100
       eval_n_episodes = 20
@@ -155,7 +157,7 @@ class trainingLoop():
 
          episode=0
          
-         while np.sum(steps[n,:])<=self.max_steps and episode<=self.max_episodes:
+         while np.sum(steps[n,:])<self.max_steps and episode<self.max_episodes and ((self.env.collision==True and episode>0) or (self.env.collision==False and episode==0)):
             
             self.env.reset(save_history=True, start_condition=[], car_params=car_params, get_lap_time=False)  #Reset the environment every episode
             obs = self.env.observation      #Records starting state
@@ -232,7 +234,9 @@ class trainingLoop():
                
             if self.learning_method == 'ddpg' or self.learning_method == 'td3':
                while not done: 
+                  #t1 = time.time()
                   action = self.agent.choose_action(obs)    #Select an action
+                  #t2 = time.time()
                   n_act+=1
                   next_obs, reward, done = self.env.take_action(action) #Environment executes action
                   self.agent.store_transition(obs, action, reward, next_obs, int(done))
@@ -244,6 +248,9 @@ class trainingLoop():
             
             end_time = time.time()
             
+            terminal_poses[n, episode, 0] = self.env.x
+            terminal_poses[n, episode, 1] = self.env.y
+
             times[n, episode] = end_time-start_time
 
             scores[n, episode] = score
@@ -270,6 +277,10 @@ class trainingLoop():
                pickle.dump(steps, outfile)
                pickle.dump(collisions, outfile)
                pickle.dump(n_actions, outfile)
+               outfile.close()
+
+               outfile=open(self.terminal_poses_filename, 'wb')
+               pickle.dump(terminal_poses, outfile)
                outfile.close()
 
             if episode%100==0 and episode!=0:
@@ -301,6 +312,11 @@ class trainingLoop():
       pickle.dump(collisions, outfile)
       pickle.dump(n_actions, outfile)
       outfile.close()
+
+      outfile=open(self.terminal_poses_filename, 'wb')
+      pickle.dump(terminal_poses, outfile)
+      outfile.close()
+
 
 
       #outfile=open(self.action_durations_name, 'wb')
@@ -451,7 +467,7 @@ def test(agent_name, n_episodes, detect_issues, initial_conditions):
             if main_dict['learning_method']=='ddpg' or main_dict['learning_method']=='td3':
                action = a.choose_greedy_action(obs)
             else:
-               action = np.array([self.agent.choose_action(obs), 1])
+               action = np.array([a.choose_action(obs), 1])
             
             action_history.append(action)
             
@@ -490,6 +506,10 @@ def test(agent_name, n_episodes, detect_issues, initial_conditions):
    #pickle.dump(terminal_poses, outfile)
    outfile.close()
 
+   # outfile=open(terminal_pose_file_name, 'wb')
+   # pickle.dump(terminal_poses, outfile)
+   # outfile.close()
+   
 
 def lap_time_test(agent_name, n_episodes, detect_issues, initial_conditions):
 
@@ -781,7 +801,7 @@ def lap_time_test_mismatch(agent_name, n_episodes, detect_issues, initial_condit
 
 if __name__=='__main__':
 
-   agent_name = 'test'
+   agent_name = 'collision_distribution_LiDAR_pose'
 
    main_dict = {'name':agent_name, 'max_episodes':50000, 'max_steps':2e6, 'learning_method':'td3', 'runs':1, 'comment':''}
 
@@ -846,14 +866,14 @@ if __name__=='__main__':
             , 'car_params':car_params
             , 'reward_signal':reward_signal
             , 'lidar_dict':lidar_dict
-            , 'only_lidar':True
+            , 'only_lidar':False
             , 'action_space_dict':action_space_dict
             } 
    
    a = trainingLoop(main_dict, agent_td3_dict, env_dict, load_agent='')
    a.train()
-   test(agent_name=agent_name, n_episodes=100, detect_issues=False, initial_conditions=True)
-   lap_time_test(agent_name=agent_name, n_episodes=100, detect_issues=False, initial_conditions=True)
+   #test(agent_name=agent_name, n_episodes=100, detect_issues=False, initial_conditions=True)
+   #lap_time_test(agent_name=agent_name, n_episodes=100, detect_issues=False, initial_conditions=True)
      
 
    # agent_names = ['porto_pete_sv', 'porto_pete_s', 'porto_pete_v', 'porto_ete']

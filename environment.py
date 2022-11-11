@@ -283,9 +283,9 @@ class environment():
 
                 # set steering reference angle
                 if act[0]<=0:
-                    delta_ref = (-self.params['s_min'])*act[0]*10      
+                    delta_ref = (-self.params['s_min'])*act[0]    
                 else:
-                    delta_ref = (self.params['s_max'])*act[0]*10
+                    delta_ref = (self.params['s_max'])*act[0]
                 
                 # get v_dot
                 if self.velocity_control==False:
@@ -648,12 +648,13 @@ class environment():
         v_norm = self.v/self.params['v_max']
         #v_ref_norm = self.v_ref/self.params['v_max']
         
-        #self.observation = [x_norm, y_norm, theta_norm]
         if self.only_lidar==False:
             self.observation = [x_norm, y_norm, theta_norm, v_norm]
         else:
             self.observation = []
-            
+        
+        #self.observation = [x_norm, y_norm, theta_norm, v_norm]
+        
         if self.lidar_dict['is_lidar']==True:
             #lidar_norm = np.array(self.lidar_dists)<0.5
             

@@ -71,6 +71,11 @@ def learning_curve_lap_time_average(agent_names, legend, legend_title, ns, filen
 
     steps_avg_x_axis = [[] for _ in range(len(agent_names))]
     times = [[] for _ in range(len(agent_names))]
+    
+    avg_success = [[] for _ in range(len(agent_names))]
+    std_success = [[] for _ in range(len(agent_names))]
+    upper_fill_success = [[] for _ in range(len(agent_names))]
+    lower_fill_success = [[] for _ in range(len(agent_names))]
 
     for i in range(len(agent_names)):
         agent_name = agent_names[i]
@@ -91,6 +96,7 @@ def learning_curve_lap_time_average(agent_names, legend, legend_title, ns, filen
         avg_n_actions[i] = np.average(n_actions[i],axis=0)
         avg_collisions[i] = np.average(collisions[i],axis=0)
         steps_avg_x_axis[i] = np.average(steps[i],axis=0)
+        #avg_success[i] = np.average(np.logical_not(collisions[i]),axis=0)*100
 
         for j in range(len(collisions[i][ns[i]])):
             if j <= window:
@@ -100,9 +106,13 @@ def learning_curve_lap_time_average(agent_names, legend, legend_title, ns, filen
             avg_coll[i].append(np.mean(avg_collisions[i][x:j+1]))
             avg_time[i].append(np.mean(steps[i][ns[i]][x:j+1]))
             std_coll[i].append(np.std(avg_collisions[i][x:j+1]))
+            #std_success[i].append(np.std(avg_collisions[i][x:j+1]))
 
         upper_fill_coll[i].append(np.array(avg_coll[i])+np.array(std_coll[i]))
         lower_fill_coll[i].append(np.array(avg_coll[i])-np.array(std_coll[i]))
+
+        #upper_fill_success[i].append(np.array(avg_success[i])+np.array(std_success[i]))
+        #lower_fill_success[i].append(np.array(avg_success[i])-np.array(std_success[i]))
 
         steps_x_axis[i] = np.cumsum(steps[i][ns[i]])[np.logical_not(collisions[i][ns[i]])]
         n_actions_x_axis[i] = np.cumsum(n_actions[i][ns[i]])[np.logical_not(collisions[i][ns[i]])]
@@ -213,16 +223,16 @@ def learning_curve_lap_time_average(agent_names, legend, legend_title, ns, filen
     for i in range(len(agent_names)):
         end_episode = end_episodes[i] 
         #ax[0].plot(avg_coll[i][0:end_episode])
-        ax[0].plot(np.arange(0,end_episode,100), np.array(avg_coll[i][0:end_episode])[np.arange(0,end_episode,100)])
-        ax[0].fill_between(x=np.arange(end_episode)[np.arange(0,end_episode,100)], y1=np.array(upper_fill_coll[i][0])[np.arange(0,end_episode,100)], y2=np.array(lower_fill_coll[i][0])[np.arange(0,end_episode,100)], alpha=0.15, label='_nolegend_')
+        ax[0].plot(np.arange(0,end_episode,100), np.array(avg_coll[i][0:end_episode])[np.arange(0,end_episode,100)]*100)
+        ax[0].fill_between(x=np.arange(end_episode)[np.arange(0,end_episode,100)], y1=np.array(upper_fill_coll[i][0])[np.arange(0,end_episode,100)]*100, y2=np.array(lower_fill_coll[i][0])[np.arange(0,end_episode,100)]*100, alpha=0.15, label='_nolegend_')
     
-    ax[0].hlines(y=1, xmin=0, xmax=np.max(end_episodes), colors='black', linestyle='dashed')
+    ax[0].hlines(y=100, xmin=0, xmax=np.max(end_episodes), colors='black', linestyle='dashed')
     ax[0].hlines(y=0, xmin=0, xmax=np.max(end_episodes), colors='black', linestyle='dashed')
-    ax[0].set_ylim([-0.05, 1.05])
+    ax[0].set_ylim([-5, 105])
     #ax[0].set_xlim([0, np.max(end_episodes)])
     ax[0].set_xlabel('Episodes')
     #plt.title('Collision rate')
-    ax[0].set_ylabel('Collision rate')
+    ax[0].set_ylabel('Failure rate [%]')
     ax[0].tick_params('both', length=0)
     ax[0].grid(True)
     #ax[0].set_xlim([0,4000])
@@ -424,11 +434,11 @@ def learning_curve_reward_average(agent_names, legend, legend_title):
 # ns=[0, 0, 0, 0]
 # filename = observation_n_beams
 
-# agent_names = ['porto_ete_only_LiDAR', 'porto_ete_LiDAR_20', 'porto_ete_no_LiDAR']
-# legend = ['Only LiDAR', 'LiDAR and pose', 'Only pose']
-# legend_title = 'Observation space'
-# ns=[0, 0, 0]
-# filename = 'observation_space'
+agent_names = ['porto_ete_only_LiDAR', 'porto_ete_LiDAR_20', 'porto_ete_no_LiDAR']
+legend = ['Only LiDAR', 'LiDAR and pose', 'Only pose']
+legend_title = 'Observation space'
+ns=[0, 0, 0]
+filename = 'observation_space_1'
 
 # agent_names = ['porto_ete_cs_1', 'porto_ete_cs_5', 'porto_ete_cs_10', 'porto_ete_cs_15', 'porto_ete_LiDAR_10', 'porto_ete_cs_25']
 # legend = ['1', '5', '10', '15', '20', '25']
@@ -443,10 +453,10 @@ def learning_curve_reward_average(agent_names, legend, legend_title):
 # ns=[0, 0, 0, 0]
 # filename = 'maximum_velocity'
 
-agent_names = ['porto_ete_LiDAR_10', 'porto_ete_ddpg']
-legend = ['TD3', 'DDPG']
-legend_title = 'Learning method'
-ns=[0, 0]
-filename = 'learning_method'
+# agent_names = ['porto_ete_LiDAR_10', 'porto_ete_ddpg']
+# legend = ['TD3', 'DDPG']
+# legend_title = 'Learning method'
+# ns=[0, 0]
+# filename = 'learning_method'
 
 learning_curve_lap_time_average(agent_names, legend, legend_title, ns, filename)

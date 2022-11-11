@@ -21,9 +21,9 @@ import os
 
 
 
-agent_name = 'porto_ete_no_LiDAR'
+agent_name = 'porto_ete_LiDAR_10_2'
 
-main_dict = {'name':agent_name, 'max_episodes':50000, 'max_steps':2e6, 'learning_method':'td3', 'runs':3, 'comment':''}
+main_dict = {'name':agent_name, 'max_episodes':400, 'max_steps':2e6, 'learning_method':'td3', 'runs':1, 'comment':''}
 
 agent_dqn_dict = {'gamma':0.99, 'epsilon':1, 'eps_end':0.01, 'eps_dec':1/1000, 'lr':0.001, 'batch_size':64, 'max_mem_size':500000, 
                 'fc1_dims': 64, 'fc2_dims': 64, 'fc3_dims':64}
@@ -73,7 +73,7 @@ if  steer_control_dict['steering_control'] == True:
     if steer_control_dict['control_strategy'] == 'stanley':
         steer_control_dict['track_dict'] = {'l_front': car_params['lf'], 'k':5, 'max_steer':car_params['s_max']}
 
-lidar_dict = {'is_lidar':False, 'lidar_res':0.1, 'n_beams':20, 'max_range':20, 'fov':np.pi}
+lidar_dict = {'is_lidar':True, 'lidar_res':0.1, 'n_beams':10, 'max_range':20, 'fov':np.pi}
 
 env_dict = {'sim_conf': functions.load_config(sys.path[0], "config")
         , 'save_history': False
@@ -278,6 +278,7 @@ env_dict = {'sim_conf': functions.load_config(sys.path[0], "config")
 # a.train()
 # main_multiple.lap_time_test(agent_name=agent_name, n_episodes=100, detect_issues=False, initial_conditions=True)
 
+
 # agent_name = 'porto_ete_actor_critic_cont'
 # main_dict['name'] = agent_name
 # main_dict['learning_method'] = 'actor_critic_cont'
@@ -305,7 +306,12 @@ env_dict = {'sim_conf': functions.load_config(sys.path[0], "config")
 # legend_title = ''
 # ns=[0, 0]
 
-# agent_names = ['porto_ete_LiDAR_20']
+# agent_names = ['porto_ete_LiDAR_10']
+# legend = ['']
+# legend_title = ''
+# ns=[0]
+
+# agent_names = ['porto_ete_cs_1', 'porto_ete_cs_5', 'porto_ete_cs_10', 'porto_ete_cs_15', 'porto_ete_LiDAR_10', 'porto_ete_cs_25']
 # legend = ['']
 # legend_title = ''
 # ns=[0, 0]
