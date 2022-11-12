@@ -1042,21 +1042,23 @@ def display_lap_results(agent_name):
 
     ave_times = np.average(times[np.logical_not(np.array(collisions))])
     perc_success = np.sum(np.logical_not(np.array(collisions)))/len(np.array(collisions).flatten())
+    perc_failure = 1-perc_success
     std_dev = np.std(times[np.logical_not(np.array(collisions))])
 
-    ave_times_ = np.average(times_[np.logical_not(np.array(collisions_))])
-    perc_success_ = np.sum(np.logical_not(np.array(collisions_)))/len(np.array(collisions_).flatten())
-    std_dev_ = np.std(times_[np.logical_not(np.array(collisions_))])
+
+    # ave_times_ = np.average(times_[np.logical_not(np.array(collisions_))])
+    # perc_success_ = np.sum(np.logical_not(np.array(collisions_)))/len(np.array(collisions_).flatten())
+    # std_dev_ = np.std(times_[np.logical_not(np.array(collisions_))])
     
     print('\nLap results over all n, including failed runs:')
     print('Average lap time: ', ave_times)
     print('Lap time std deviation:', std_dev)
-    print('Fraction successful laps: ', perc_success)
-
-    print('\nLap results over all n, excluding failed runs:')
-    print('Average lap time: ', ave_times_)
-    print('Lap time std deviation:', std_dev_)
-    print('Fraction successful laps: ', perc_success_)
+    print('Success %: ', perc_success*100)
+    print('Failure %: ', perc_failure*100)
+    # print('\nLap results over all n, excluding failed runs:')
+    # print('Average lap time: ', ave_times_)
+    # print('Lap time std deviation:', std_dev_)
+    # print('Fraction successful laps: ', perc_success_)
     
     print("\nAgent lap statistics for individual runs:")
 
@@ -1994,7 +1996,6 @@ def display_path_multiple(agent_names, ns, legend_title, legend, mismatch_parame
     plt.grid(True, color='lightgrey')
     plt.tick_params(axis=u'both', which=u'both',length=0)
     plt.show()
-
 
 def display_maps():
     names = ['Circle', 'Redbull ring', 'Berlin', 'Columbia', 'Porto', 'Torino']
