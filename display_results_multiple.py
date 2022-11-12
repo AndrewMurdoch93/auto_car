@@ -1757,9 +1757,9 @@ def display_collision_distribution(agent_name):
     ax.axis('off')
     plt.show()
 
-display_collision_distribution('collision_distribution_LiDAR')
-display_collision_distribution('collision_distribution_no_LiDAR')
-display_collision_distribution('collision_distribution_LiDAR_pose')
+# display_collision_distribution('collision_distribution_LiDAR')
+# display_collision_distribution('collision_distribution_no_LiDAR')
+# display_collision_distribution('collision_distribution_LiDAR_pose')
 
 def display_path_multiple(agent_names, ns, legend_title, legend, mismatch_parameters, frac_vary, start_condition):
     

@@ -18,7 +18,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 import torch.optim as optim
 import matplotlib
-matplotlib.use('pgf')
+#matplotlib.use('pgf')
 import matplotlib.pyplot as plt
 import pickle
 import functions
@@ -35,7 +35,6 @@ import random
 from matplotlib.ticker import FormatStrFormatter
 import mapping
 from PIL import Image, ImageOps, ImageDraw, ImageFilter
-
 
 
 
@@ -302,7 +301,6 @@ def learning_curve_lap_time_average(agent_names, legend, legend_title, ns, filen
     
     plt.savefig('results/'+filename+'.pgf', format='pgf')
 
-
 def learning_curve_reward_average(agent_names, legend, legend_title):
     
     legend_new = legend.copy()
@@ -408,6 +406,261 @@ def learning_curve_reward_average(agent_names, legend, legend_title):
     #plt.show()
     plt.savefig('reward_dist.pgf', format='pgf')
 
+def display_path_multiple(agent_names, ns, legend_title, legend, mismatch_parameters, frac_vary, start_condition, filename):
+    
+    pose_history = []
+    progress_history = []
+    state_history = []
+    
+    for agent_name, n, i in zip(agent_names, ns, range(len(agent_names))):
+
+        infile = open('environments/' + agent_name, 'rb')
+        env_dict = pickle.load(infile)
+        infile.close()
+        # Compensate for changes to reward structure
+        env_dict['reward_signal']['max_progress'] = 0
+        
+        # Model mismatches
+        if mismatch_parameters:
+            for par, var in zip(mismatch_parameters, frac_vary):
+                env_dict['car_params'][par] *= 1+var 
+
+
+        env = environment(env_dict)
+        if start_condition:
+            env.reset(save_history=True, start_condition=start_condition, car_params=env_dict['car_params'])
+        else:
+            env.reset(save_history=True, start_condition=[], car_params=env_dict['car_params'])
+
+        infile = open('agents/' + agent_name + '/' + agent_name + '_params', 'rb')
+        agent_dict = pickle.load(infile)
+        infile.close()
+
+        infile = open('train_parameters/' + agent_name, 'rb')
+        main_dict = pickle.load(infile)
+        infile.close()
+          
+        if i==0 and not start_condition:
+            infile = open('test_initial_condition/' + env_dict['map_name'], 'rb')
+            start_conditions = pickle.load(infile)
+            infile.close()
+            start_condition = random.choice(start_conditions)
+
+        if main_dict['learning_method']=='dqn':
+            agent_dict['epsilon'] = 0
+            a = agent_dqn.agent(agent_dict)
+        if main_dict['learning_method']=='reinforce':
+            a = agent_reinforce.PolicyGradientAgent(agent_dict)
+        if main_dict['learning_method']=='actor_critic_sep':
+            a = agent_actor_critic.actor_critic_separated(agent_dict)
+        if  main_dict['learning_method']=='actor_critic_com':
+            a = agent_actor_critic.actor_critic_combined(agent_dict)
+        if main_dict['learning_method']=='actor_critic_cont':
+            a = agent_actor_critic_continuous.agent_separate(agent_dict)
+        if main_dict['learning_method'] == 'dueling_dqn':
+            agent_dict['epsilon'] = 0
+            a = agent_dueling_dqn.agent(agent_dict)
+        if main_dict['learning_method'] == 'dueling_ddqn':
+            agent_dict['epsilon'] = 0
+            a = agent_dueling_ddqn.agent(agent_dict)
+        if main_dict['learning_method'] == 'rainbow':
+            agent_dict['epsilon'] = 0
+            a = agent_rainbow.agent(agent_dict)
+        if main_dict['learning_method'] == 'ddpg':
+            a = agent_ddpg.agent(agent_dict)
+        if main_dict['learning_method'] == 'td3':
+            a = agent_td3.agent(agent_dict)
+            
+        a.load_weights(agent_name, n)
+
+        #start_pose = {'x':11.2, 'y':7.7, 'v':0, 'delta':0, 'theta':0, 'goal':1}
+        env.reset(save_history=True, start_condition=start_condition, car_params=env_dict['car_params'])
+        obs = env.observation
+        done = False
+        score=0
+
+        while not done:
+            if main_dict['learning_method']=='ddpg' or main_dict['learning_method']=='td3':
+                action = a.choose_greedy_action(obs)
+            else:
+                action = a.choose_action(obs)
+
+            next_obs, reward, done = env.take_action(action)
+            score += reward
+            obs = next_obs
+
+            if env.progress>=0.98:
+                done=True
+            
+
+        print('Total score = ', score)
+        print('Progress = ', env.progress)
+
+        state_history.append(env.state_history)
+        pose_history.append(env.pose_history)
+        progress_history.append(env.progress_history)
+        
+        
+        
+    
+    figure_size = (10,4)
+    xlims = [0,100]
+
+    legend_new = legend.copy()
+    legend_new.insert(0, 'Min and max')
+
+    legend_racetrack = legend.copy()
+    legend_racetrack.insert(0, 'Track centerline')
+
+    plt.rcParams.update({
+    "font.family": "serif",  # use serif/main font for text elements
+    "text.usetex": True,     # use inline math for ticks
+    "pgf.rcfonts": False,     # don't setup fonts from rc parameters
+    "font.size": 12
+    })
+
+    fig, ax = plt.subplots(2, figsize=(6,3), sharex=True)
+    plt.rc('axes', edgecolor='lightgray')
+
+    
+
+    #plt.figure(1, figsize=figure_size)
+    #ax = plt.subplot(111)
+
+    #plt.rc('axes',edgecolor='lightgrey')
+    color='gray'
+    for i in range(2):
+        #ax[i].tick_params(axis='both', colors='lightgrey')
+        ax[i].spines['bottom'].set_color(color)
+        ax[i].spines['top'].set_color(color) 
+        ax[i].spines['right'].set_color(color)
+        ax[i].spines['left'].set_color(color)
+
+    # ax.tick_params(axis=u'both', which=u'both',length=0)
+    
+    # track = mapping.map(env.map_name)
+    # ax.imshow(ImageOps.invert(track.gray_im.filter(ImageFilter.FIND_EDGES).filter(ImageFilter.MaxFilter(1))), extent=(0,track.map_width,0,track.map_height), cmap="gray")
+    # ax.plot(env.rx, env.ry, color='gray', linestyle='dashed')
+    
+    # for i in range(len(agent_names)):
+    #     ax.plot(np.array(pose_history[i])[:,0], np.array(pose_history[i])[:,1], linewidth=1.5)   
+  
+    # prog = np.array([0, 0.2, 0.4, 0.6, 0.8])
+    # idx =  np.zeros(len(prog), int)
+    # text = ['Start', '20%', '40%', '60%', '80%']
+
+    # for i in range(len(idx)):
+    #     idx[i] = np.mod(env.start_point+np.round(prog[i]*len(env.rx)), len(env.rx))
+    # idx.astype(int)
+    
+    # for i in range(len(idx)):
+    #     plt.text(x=env.rx[idx[i]], y=env.ry[idx[i]], s=text[i], fontsize = 'small', bbox=dict(facecolor='white', edgecolor='black',pad=0.1,boxstyle='round'))
+
+
+    # ax.set_xlabel('x coordinate [m]',**myfont) 
+    # ax.set_ylabel('y coordinate [m]',**myfont)
+    # #ax.set_tick_params(axis=u'both', which=u'both',length=0)
+    
+    # # https://stackoverflow.com/questions/4700614/how-to-put-the-legend-outside-the-plot
+
+    # box = ax.get_position()
+    # ax.set_position([box.x0, box.y0, box.width * 0.8, box.height])
+
+    # # Put a legend to the right of the current axis
+    # ax.legend(legend_racetrack, loc='center left',  bbox_to_anchor=(1, 0.5))
+    
+    # #plt.legend(legend_new, title=legend_title, loc='lower right')
+
+
+
+
+
+    
+
+    #ax.hlines(y=env_dict['action_space_dict']['vel_select'][0], xmin=0, xmax=100, colors='black', linestyle='dashed')
+    #ax.hlines(y=env_dict['action_space_dict']['vel_select'][1], xmin=0, xmax=100, colors='black', linestyle='dashed', label='_nolegend_')
+    for i in range(len(agent_names)):
+        ax[0].plot(np.array(progress_history[i])*100, np.array(pose_history[i])[:,4], linewidth=1.5)
+
+    #ax[0].set_xlabel('progress along centerline [%]')
+    ax[0].set_ylabel('Longitudinal \nvelocity [m/s]')
+    
+    #box = ax[0].get_position()
+    #ax[0].set_position([box.x0, box.y0, box.width * 0.7, box.height])
+
+    #ax.legend(legend, title=legend_title, bbox_to_anchor=(1.04, 0.5), loc="center left")
+    #plt.legend(legend_new, title=legend_title, loc='lower right')
+    ax[0].set_xlim(xlims)
+    ax[0].set_ylim([env_dict['action_space_dict']['vel_select'][0]-0.2, env_dict['action_space_dict']['vel_select'][1]+0.2])
+    ax[0].grid(True, color='lightgrey')
+
+    ax[0].tick_params('both', length=0)
+    
+    #plt.show()
+
+    # plt.figure(3, figsize=figure_size)
+    # plt.rc('axes',edgecolor='lightgrey')
+
+    # plt.hlines(y=env_dict['car_params']['s_min'], xmin=0, xmax=100, colors='black', linestyle='dashed')
+    # plt.hlines(y=env_dict['car_params']['s_max'], xmin=0, xmax=100, colors='black', linestyle='dashed', label='_nolegend_')
+    # for i in range(len(agent_names)):
+    #     plt.plot(np.array(progress_history[i])*100, np.array(pose_history[i])[:,3], linewidth=1.5)
+
+    # plt.xlabel('progress along centerline [%]',**myfont)
+    # plt.ylabel('steering angle [rads]',**myfont)
+    # plt.legend(legend_new, title=legend_title, loc='lower right')
+    # plt.xlim(xlims)
+    # plt.ylim([env_dict['car_params']['s_min']-0.05, env_dict['car_params']['s_max']+0.05])
+    # plt.grid(True, color='lightgrey')
+    # plt.tick_params(axis=u'both', which=u'both',length=0)
+
+
+
+    #plt.figure(4, figsize=figure_size)
+    #plt.rc('axes',edgecolor='lightgrey')
+    for i in range(len(agent_names)):
+        ax[1].plot(np.array(progress_history[i])*100, np.array(state_history[i])[:,6], linewidth=1.5)
+      
+    #box = ax[1].get_position()
+    #ax[1].set_position([box.x0, box.y0, box.width * 0.7, box.height])
+
+    ax[1].set_xlabel('progress along centerline [%]')
+    ax[1].set_ylabel('Slip angle [rads]')
+    #plt.legend(legend, title=legend_title, loc='lower right')
+    ax[1].set_xlim(xlims)
+    ax[1].set_ylim([-1,1])
+    ax[1].grid(True)
+    ax[1].tick_params(axis=u'both', which=u'both',length=0)
+    ax[1].set_yticks(np.arange(-1, 1.1, 0.5))
+    fig.tight_layout()
+    
+    fig.subplots_adjust(right=0.75) 
+    plt.figlegend(legend, title=legend_title, loc='center right', ncol=1)
+    #plt.show() 
+    plt.savefig('results/'+filename+'.pgf', format='pgf')
+
+
+    # plt.figure(5, figsize=figure_size)
+
+    # max_idx = np.zeros(len(agent_names))
+    # for i in range(len(agent_names)):
+    #     max_idx[i] = np.argmax(np.array(progress_history)[i])
+
+    # plt.rc('axes',edgecolor='lightgrey')
+    # plt.hlines(y=100, xmin=0, xmax=np.argmax(max_idx), colors='black', linestyle='dashed')
+    # plt.hlines(y=0, xmin=0, xmax=np.argmax(max_idx), colors='black', linestyle='dashed', label='_nolegend_')
+    
+    # for i in range(len(agent_names)):
+        
+    #     plt.plot(np.arange(len(progress_history[i])), np.array(progress_history[i])*100, linewidth=1.5)
+
+    # plt.xlabel('Simulation step',**myfont)
+    # plt.ylabel('progress along centerline [%]',**myfont)
+    # plt.ylim([-5,105])
+    # plt.legend(legend_new, title=legend_title, loc='lower right')
+    # plt.grid(True, color='lightgrey')
+    # plt.tick_params(axis=u'both', which=u'both',length=0)
+    # plt.show()
 
 
 # agent_names = ['porto_ete_r_1', 'porto_ete_r_2', 'porto_ete_r_3', 'porto_ete_LiDAR_10', 'porto_ete_r_4' ]
@@ -453,10 +706,28 @@ filename = 'observation_space_1'
 # ns=[0, 0, 0, 0]
 # filename = 'maximum_velocity'
 
+
 # agent_names = ['porto_ete_LiDAR_10', 'porto_ete_ddpg']
 # legend = ['TD3', 'DDPG']
 # legend_title = 'Learning method'
-# ns=[0, 0]
+# ns=[0]
 # filename = 'learning_method'
 
-learning_curve_lap_time_average(agent_names, legend, legend_title, ns, filename)
+agent_names = ['porto_ete_v_5', 'porto_ete_LiDAR_10', 'porto_ete_v_7', 'porto_ete_v_8']
+legend = ['5', '6', '7', '8']
+legend_title = 'Maximum \nvelocity [m/s]'
+ns=[0, 0, 0, 0]
+
+mismatch_parameters = ['C_Sf']
+frac_vary = [0]
+start_condition = {'x':10, 'y':4.5, 'v':3, 'theta':np.pi, 'delta':0, 'goal':0}
+#start_condition = []
+filename = 'velocity_slip_profile'
+display_path_multiple(agent_names=agent_names, ns=ns, legend_title=legend_title,          
+                        legend=legend, mismatch_parameters=mismatch_parameters, frac_vary=frac_vary, 
+                        start_condition=start_condition, filename=filename)
+
+
+
+
+#learning_curve_lap_time_average(agent_names, legend, legend_title, ns, filename)

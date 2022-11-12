@@ -870,8 +870,8 @@ if __name__=='__main__':
             , 'action_space_dict':action_space_dict
             } 
    
-   a = trainingLoop(main_dict, agent_td3_dict, env_dict, load_agent='')
-   a.train()
+   # a = trainingLoop(main_dict, agent_td3_dict, env_dict, load_agent='')
+   # a.train()
    #test(agent_name=agent_name, n_episodes=100, detect_issues=False, initial_conditions=True)
    #lap_time_test(agent_name=agent_name, n_episodes=100, detect_issues=False, initial_conditions=True)
      

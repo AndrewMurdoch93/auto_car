@@ -300,7 +300,6 @@ env_dict = {'sim_conf': functions.load_config(sys.path[0], "config")
 # legend_title = ''
 # ns=[0, 0, 0, 0, 0]
 
-
 # agent_names = ['porto_ete_r_5', 'porto_ete_r_6']
 # legend = ['-0.5', '2']
 # legend_title = ''
@@ -316,6 +315,10 @@ env_dict = {'sim_conf': functions.load_config(sys.path[0], "config")
 # legend_title = ''
 # ns=[0, 0]
 
+agent_names = ['porto_ete_v_5', 'porto_ete_LiDAR_10', 'porto_ete_v_7', 'porto_ete_v_8']
+legend = ['']
+legend_title = ''
+ns=[0, 0, 0, 0]
 
 # display_results_multiple.learning_curve_lap_time_average(agent_names, legend, legend_title,ns)
 # display_results_multiple.learning_curve_reward_average(agent_names, legend, legend_title)
@@ -324,13 +327,13 @@ env_dict = {'sim_conf': functions.load_config(sys.path[0], "config")
 #     print('------------------------------' + '\n' + agent_name + '\n' + '------------------------------')
 #     display_results_multiple.display_lap_results(agent_name=agent_name)
 
-# mismatch_parameters = ['C_Sf']
-# frac_vary = [0]
-# start_condition = {'x':10, 'y':4.5, 'v':3, 'theta':np.pi, 'delta':0, 'goal':0}
-# start_condition = []
-# display_results_multiple.display_path_multiple(agent_names=agent_names, ns=ns, legend_title=legend_title,          
-#                                              legend=legend, mismatch_parameters=mismatch_parameters, frac_vary=frac_vary, 
-#                                              start_condition=start_condition)
+mismatch_parameters = ['C_Sf']
+frac_vary = [0]
+start_condition = {'x':10, 'y':4.5, 'v':3, 'theta':np.pi, 'delta':0, 'goal':0}
+#start_condition = []
+display_results_multiple.display_path_multiple(agent_names=agent_names, ns=ns, legend_title=legend_title,          
+                                             legend=legend, mismatch_parameters=mismatch_parameters, frac_vary=frac_vary, 
+                                             start_condition=start_condition)
 
 
 
