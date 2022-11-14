@@ -23,7 +23,7 @@ import os
 
 agent_name = 'porto_ete_LiDAR_10_2'
 
-main_dict = {'name':agent_name, 'max_episodes':400, 'max_steps':2e6, 'learning_method':'td3', 'runs':1, 'comment':''}
+main_dict = {'name':agent_name, 'max_episodes':50000, 'max_steps':2e6, 'learning_method':'td3', 'runs':3, 'comment':''}
 
 agent_dqn_dict = {'gamma':0.99, 'epsilon':1, 'eps_end':0.01, 'eps_dec':1/1000, 'lr':0.001, 'batch_size':64, 'max_mem_size':500000, 
                 'fc1_dims': 64, 'fc2_dims': 64, 'fc3_dims':64}
@@ -294,6 +294,21 @@ env_dict = {'sim_conf': functions.load_config(sys.path[0], "config")
 # a.train()
 # main_multiple.lap_time_test(agent_name=agent_name, n_episodes=100, detect_issues=False, initial_conditions=True)
 
+agent_name = 'porto_ete_actor_critic_cont'
+main_dict['name'] = agent_name
+main_dict['learning_method'] = 'td3'
+env_dict['only_lidar'] = False
+env_dict['lidar_dict']['is_lidar'] = True
+env_dict['lidar_dict']['n_beams'] = 10
+env_dict['control_steps'] = 20
+env_dict['action_space_dict']['vel_select'] = [3,6]
+env_dict['reward_signal']['distance'] = 0.3
+env_dict['reward_signal']['time_step'] = -0.01
+env_dict['reward_signal']['collision'] = -9.3
+a = main_multiple.trainingLoop(main_dict, agent_td3_dict, env_dict, load_agent='')
+a.train()
+main_multiple.lap_time_test(agent_name=agent_name, n_episodes=100, detect_issues=False, initial_conditions=True)
+
 
 # agent_names = ['porto_ete_r_1', 'porto_ete_r_2', 'porto_ete_r_3', 'porto_ete_LiDAR_10', 'porto_ete_r_4']
 # legend = ['1', '0.7', '0.5', '0.3', '0.1']
@@ -310,10 +325,10 @@ env_dict = {'sim_conf': functions.load_config(sys.path[0], "config")
 # legend_title = ''
 # ns=[0]
 
-agent_names = ['porto_ete_cs_1', 'porto_ete_cs_5', 'porto_ete_cs_10', 'porto_ete_cs_15', 'porto_ete_LiDAR_10', 'porto_ete_cs_25']
-legend = ['']
-legend_title = ''
-ns=[0, 0, 0, 0, 0, 0]
+# agent_names = ['porto_ete_cs_1', 'porto_ete_cs_5', 'porto_ete_cs_10', 'porto_ete_cs_15', 'porto_ete_LiDAR_10', 'porto_ete_cs_25']
+# legend = ['']
+# legend_title = ''
+# ns=[0, 0, 0, 0, 0, 0]
 
 # agent_names = ['porto_ete_v_5', 'porto_ete_LiDAR_10', 'porto_ete_v_7', 'porto_ete_v_8']
 # legend = ['']
@@ -323,9 +338,9 @@ ns=[0, 0, 0, 0, 0, 0]
 # display_results_multiple.learning_curve_lap_time_average(agent_names, legend, legend_title,ns)
 # display_results_multiple.learning_curve_reward_average(agent_names, legend, legend_title)
 
-for agent_name in agent_names:
-    print('------------------------------' + '\n' + agent_name + '\n' + '------------------------------')
-    display_results_multiple.display_lap_results(agent_name=agent_name)
+# for agent_name in agent_names:
+#     print('------------------------------' + '\n' + agent_name + '\n' + '------------------------------')
+#     display_results_multiple.display_lap_results(agent_name=agent_name)
 
 # mismatch_parameters = ['C_Sf']
 # frac_vary = [0]
