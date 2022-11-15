@@ -157,8 +157,9 @@ class trainingLoop():
 
          episode=0
          
-         while np.sum(steps[n,:])<self.max_steps and episode<self.max_episodes and ((self.env.collision==True and episode>0) or (self.env.collision==False and episode==0)):
-            
+         # while np.sum(steps[n,:])<self.max_steps and episode<self.max_episodes and ((self.env.collision==True and episode>0) or (self.env.collision==False and episode==0)):
+         while np.sum(steps[n,:])<self.max_steps and episode<self.max_episodes:
+           
             self.env.reset(save_history=True, start_condition=[], car_params=car_params, get_lap_time=False)  #Reset the environment every episode
             obs = self.env.observation      #Records starting state
             done = False
