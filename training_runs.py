@@ -79,7 +79,7 @@ env_dict = {'sim_conf': functions.load_config(sys.path[0], "config")
         , 'save_history': False
         , 'map_name': 'porto_1'
         , 'max_steps': 3000
-        , 'control_steps': 1
+        , 'control_steps': 20
         , 'display': False
         , 'velocity_control': False
         , 'steer_control_dict': steer_control_dict
@@ -409,6 +409,32 @@ if True:
 # main_multiple.lap_time_test(agent_name=agent_name, n_episodes=100, detect_issues=False, initial_conditions=True)
 
 
+agent_name = 'porto_ete_v5_r_collision_3'
+main_dict['name'] = agent_name
+env_dict['reward_signal']['distance'] = 0.3
+env_dict['reward_signal']['time_step'] = -0.01
+env_dict['reward_signal']['collision'] = -6
+a = main_multiple.trainingLoop(main_dict, agent_td3_dict, env_dict, load_agent='')
+a.train()
+main_multiple.lap_time_test(agent_name=agent_name, n_episodes=100, detect_issues=False, initial_conditions=True)
+
+agent_name = 'porto_ete_v5_r_collision_4'
+main_dict['name'] = agent_name
+env_dict['reward_signal']['distance'] = 0.3
+env_dict['reward_signal']['time_step'] = -0.01
+env_dict['reward_signal']['collision'] = -8
+a = main_multiple.trainingLoop(main_dict, agent_td3_dict, env_dict, load_agent='')
+a.train()
+main_multiple.lap_time_test(agent_name=agent_name, n_episodes=100, detect_issues=False, initial_conditions=True)
+
+agent_name = 'porto_ete_v5_r_collision_5'
+main_dict['name'] = agent_name
+env_dict['reward_signal']['distance'] = 0.3
+env_dict['reward_signal']['time_step'] = -0.01
+env_dict['reward_signal']['collision'] = -10
+a = main_multiple.trainingLoop(main_dict, agent_td3_dict, env_dict, load_agent='')
+a.train()
+main_multiple.lap_time_test(agent_name=agent_name, n_episodes=100, detect_issues=False, initial_conditions=True)
 
 
 
@@ -438,10 +464,20 @@ if True:
 # legend_title = ''
 # ns=[0, 0, 0, 0]
 
-# agent_names = ['porto_ete_v_5', 'porto_ete_v5_r_dist']
-# legend = ['0.3', '0.4']
+# agent_names = ['porto_ete_v_5', 'porto_ete_v5_r_dist', 'porto_ete_v5_cs_10']
+# legend = ['0.3', '0.4', '10Hz']
 # legend_title = ''
-# ns=[0, 0]
+# ns=[0, 0, 0]
+
+# agent_names = ['porto_ete_v_5']
+# legend = ['0.3']
+# legend_title = ''
+# ns=[2]
+
+# agent_names = ['porto_ete_v5_r_dist']
+# legend = ['0.4']
+# legend_title = ''
+# ns=[0]
 
 # agent_names = ['porto_ete_LiDAR_10', 'porto_ete_ddpg']
 # legend = ['TD3', 'DDPG']
@@ -449,11 +485,33 @@ if True:
 # ns=[0, 0]
 # filename = 'learning_method_reward'
 
-# agent_names = ['porto_pete_sv_1']
-# legend = ['']
+# agent_names = ['porto_pete_sv_1', 'porto_ete_LiDAR_10']
+# legend = ['pete 6 m/s', 'ete 6 m/s']
 # legend_title = ''
-# ns=[0]
+# ns=[0, 0]
 #filename = 'learning_method_reward'
+
+# agent_names = ['porto_ete_v5_r_dist_1', 'porto_ete_v_5', 'porto_ete_v5_r_dist_2', 'porto_ete_v5_r_dist_4']
+# legend = ['0.1', '0.3', '0.5', '1']
+# legend_title = ''
+# ns=[0, 0, 0, 0]
+
+# agent_names = ['porto_ete_v5_cs_1', 'porto_ete_v5_cs_10', 'porto_ete_v5_cs_15', 'porto_ete_v_5', 'porto_ete_v5_cs_25']
+# legend = ['1', '10', '15', '20', '25']
+# legend_title = ''
+# ns=[0, 0, 0, 0, 0]
+
+# agent_names = ['porto_ete_v5_r_time_0', 'porto_ete_v_5']
+
+# agent_names = ['porto_ete_v5_r_collision_0', 'porto_ete_v5_r_collision_1', 'porto_ete_v_5', 'porto_ete_v5_r_collision_2']
+# legend = ['0', '-1', '-2', '-4']
+# legend_title = 'collision penalty'
+# ns=[0, 0, 0, 0]
+
+# agent_names = ['porto_ete_v5_r_collision_2']
+# legend = ['-4']
+# legend_title = 'collision penalty'
+# ns=[0]
 
 # display_results_multiple.learning_curve_lap_time_average(agent_names, legend, legend_title,ns)
 # display_results_multiple.learning_curve_reward_average(agent_names, legend, legend_title)
@@ -462,13 +520,13 @@ if True:
 #     print('------------------------------' + '\n' + agent_name + '\n' + '------------------------------')
 #     display_results_multiple.display_lap_results(agent_name=agent_name)
 
-mismatch_parameters = ['C_Sr']
-frac_vary = [0]
-start_condition = {'x':10, 'y':4.5, 'v':3, 'theta':np.pi, 'delta':0, 'goal':0}
-start_condition = []
-display_results_multiple.display_path_multiple(agent_names=agent_names, ns=ns, legend_title=legend_title,          
-                                             legend=legend, mismatch_parameters=mismatch_parameters, frac_vary=frac_vary, 
-                                             start_condition=start_condition)
+# mismatch_parameters = ['C_Sr']
+# frac_vary = [0]
+# start_condition = {'x':10, 'y':4.5, 'v':3, 'theta':np.pi, 'delta':0, 'goal':0}
+# #start_condition = []
+# display_results_multiple.display_path_multiple(agent_names=agent_names, ns=ns, legend_title=legend_title,          
+#                                              legend=legend, mismatch_parameters=mismatch_parameters, frac_vary=frac_vary, 
+#                                              start_condition=start_condition)
 
 
 

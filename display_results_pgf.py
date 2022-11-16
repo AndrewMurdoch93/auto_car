@@ -876,22 +876,29 @@ def display_path_multiple(agent_names, ns, legend_title, legend, mismatch_parame
 # ns=[0, 0]
 # filename = 'learning_method_reward'
 
-agent_names = ['porto_ete_LiDAR_10']
-legend = ['End-to-end agent']
-legend_title = ''
-ns=[0]
+# agent_names = ['porto_ete_v_5']
+# legend = ['End-to-end agent']
+# legend_title = ''
+# ns=[2]
+# filename = 'end_to_end_agent_v5'
 
-mismatch_parameters = ['C_Sf']
-frac_vary = [0]
-start_condition = {'x':10, 'y':4.5, 'v':3, 'theta':np.pi, 'delta':0, 'goal':0}
-#start_condition = []
-filename = 'end_to_end_agent'
-display_path_multiple(agent_names=agent_names, ns=ns, legend_title=legend_title,          
-                        legend=legend, mismatch_parameters=mismatch_parameters, frac_vary=frac_vary, 
-                        start_condition=start_condition, filename=filename)
+# agent_names = ['porto_ete_v5_r_dist_1', 'porto_ete_v_5', 'porto_ete_v5_r_dist_2', 'porto_ete_v5_r_dist_4']
+# legend = ['0.1', '0.3', '0.5', '1']
+# legend_title = 'Distance reward ($r_{\mathrm{dist}}$)'
+# ns=[0, 0, 0, 0]
+# filename = 'distance_reward_v5'
+
+# mismatch_parameters = ['C_Sf']
+# frac_vary = [0]
+# start_condition = {'x':10, 'y':4.5, 'v':3, 'theta':np.pi, 'delta':0, 'goal':0}
+# #start_condition = []
+# #filename = 'end_to_end_agent'
+# display_path_multiple(agent_names=agent_names, ns=ns, legend_title=legend_title,          
+#                         legend=legend, mismatch_parameters=mismatch_parameters, frac_vary=frac_vary, 
+#                         start_condition=start_condition, filename=filename)
 
 
-#learning_curve_lap_time_average(agent_names, legend, legend_title, ns, filename)
+learning_curve_lap_time_average(agent_names, legend, legend_title, ns, filename)
 
 #learning_curve_reward_average(agent_names, legend, legend_title)
 
