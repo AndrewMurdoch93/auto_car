@@ -40,6 +40,7 @@ from PIL import Image, ImageOps, ImageDraw, ImageFilter
 
 
 
+
 def learning_curve_lap_time_average(agent_names, legend, legend_title, ns, filename):
 
     legend_coll = legend.copy()
@@ -354,14 +355,14 @@ def learning_curve_reward_average(agent_names, legend, legend_title):
             end_episodes[i,n] =  np.where(steps[i][n]==0)[0][0]
     end_episodes = np.min(end_episodes, axis=1)
     
-    plt.rcParams.update({
-    "font.family": "serif",  # use serif/main font for text elements
-    "text.usetex": True,     # use inline math for ticks
-    "pgf.rcfonts": False,     # don't setup fonts from rc parameters
-    "font.size": 12
-    })
+    # plt.rcParams.update({
+    # "font.family": "serif",  # use serif/main font for text elements
+    # "text.usetex": True,     # use inline math for ticks
+    # "pgf.rcfonts": False,     # don't setup fonts from rc parameters
+    # "font.size": 12
+    # })
 
-    fig, ax = plt.subplots(1, figsize=(5,2))
+    fig, ax = plt.subplots(1, figsize=(5,2.5))
     plt.rc('axes',edgecolor='gray')
     
     
@@ -371,26 +372,281 @@ def learning_curve_reward_average(agent_names, legend, legend_title):
     ax.spines['right'].set_color(color)
     ax.spines['left'].set_color(color)
 
-
+    # [np.arange(0,end_episode,100)]
     for i in range(len(agent_names)):
         end_episode = end_episodes[i] 
-        ax.plot(np.arange(end_episode),  avg_score[i][0:end_episode])
-        ax.fill_between(x=np.arange(end_episode), y1=upper_fill[i][0][0:end_episode], y2=lower_fill[i][0][0:end_episode], alpha=0.3, label='_nolegend_')
+        ax.plot(np.arange(0,end_episode,100),  np.array(avg_score[i])[np.arange(0,end_episode,100)])
+        ax.fill_between(x=np.arange(0,end_episode,100), y1=upper_fill[i][0][np.arange(0,end_episode,100)], y2=lower_fill[i][0][np.arange(0,end_episode,100)], alpha=0.15, label='_nolegend_')
     
     ax.set_xlabel('Episode')
     ax.set_ylabel('Episode\nreward')
-    #ax.legend(legend_new, title=legend_title, loc='lower right')
+    ax.legend(legend, title=legend_title, loc='lower right')
     #plt.xlim([0,5000])
     ax.grid(True)
     ax.tick_params(axis=u'both', which=u'both',length=0)
     
     fig.tight_layout()
-    fig.subplots_adjust(right=0.75) 
-    plt.figlegend(legend, title=legend_title, loc='center right', ncol=1)
+    #fig.subplots_adjust(right=0.75) 
+    #plt.figlegend(legend, title=legend_title, loc='center right', ncol=1)
 
 
-    #plt.show()
+    plt.show()
+    # plt.savefig('results/'+filename+'.pgf', format='pgf')
+
+
+
+
+def learning_curve_all(agent_names, legend, legend_title, ns, filename, xlim, xspace):
+
+    legend_coll = legend.copy()
+    legend_coll.append('Min and max')
+    window = 500
+    steps = [[] for _ in range(len(agent_names))]
+    steps_x_axis = [[] for _ in range(len(agent_names))]
+    n_actions_x_axis  = [[] for _ in range(len(agent_names))]
+    steps_no_coll = [[] for _ in range(len(agent_names))]
+    avg_steps_no_coll = [[] for _ in range(len(agent_names))]
+    std_steps_no_coll = [[] for _ in range(len(agent_names))]
+    upper_fill_steps_no_coll = [[] for _ in range(len(agent_names))]
+    lower_fill_steps_no_coll = [[] for _ in range(len(agent_names))]
+    
+    max_steps_no_coll = [[] for _ in range(len(agent_names))]
+    collisions = [[] for _ in range(len(agent_names))]
+    avg_time = [[] for _ in range(len(agent_names))]
+    avg_coll = [[] for _ in range(len(agent_names))]
+    std_coll = [[] for _ in range(len(agent_names))]
+    upper_fill_coll = [[] for _ in range(len(agent_names))]
+    lower_fill_coll = [[] for _ in range(len(agent_names))]
+    
+    n_actions = [[] for _ in range(len(agent_names))]
+
+    avg_steps = [[] for _ in range(len(agent_names))]
+    avg_n_actions = [[] for _ in range(len(agent_names))]
+    avg_collisions = [[] for _ in range(len(agent_names))]
+
+    steps_avg_x_axis = [[] for _ in range(len(agent_names))]
+    times = [[] for _ in range(len(agent_names))]
+    
+    avg_success = [[] for _ in range(len(agent_names))]
+    std_success = [[] for _ in range(len(agent_names))]
+    upper_fill_success = [[] for _ in range(len(agent_names))]
+    lower_fill_success = [[] for _ in range(len(agent_names))]
+
+    scores = [[] for _ in range(len(agent_names))]
+    avg_scores = [[] for _ in range(len(agent_names))]
+    avg_score = [[] for _ in range(len(agent_names))]
+    std_score = [[] for _ in range(len(agent_names))]
+    score_upper_fill = [[] for _ in range(len(agent_names))]
+    score_lower_fill = [[] for _ in range(len(agent_names))]
+
+
+    for i in range(len(agent_names)):
+        agent_name = agent_names[i]
+        train_results_file_name = 'train_results/' + agent_name
+        infile = open(train_results_file_name, 'rb')
+        
+        scores[i] = pickle.load(infile)
+        _ = pickle.load(infile)
+        times[i] = pickle.load(infile)
+        steps[i] = pickle.load(infile)
+        collisions[i] = pickle.load(infile)
+        n_actions[i] = pickle.load(infile)
+        
+        infile.close()
+        
+
+        avg_steps[i] = np.average(steps[i],axis=0)
+        avg_n_actions[i] = np.average(n_actions[i],axis=0)
+        avg_collisions[i] = np.average(collisions[i],axis=0)
+        steps_avg_x_axis[i] = np.average(steps[i],axis=0)
+        avg_scores[i] = np.average(scores[i],axis=0)
+        #avg_success[i] = np.average(np.logical_not(collisions[i]),axis=0)*100
+
+        for j in range(len(collisions[i][ns[i]])):
+            if j <= window:
+                x = 0
+            else:
+                x = j-window 
+            avg_coll[i].append(np.mean(avg_collisions[i][x:j+1]))
+            avg_time[i].append(np.mean(steps[i][ns[i]][x:j+1]))
+            std_coll[i].append(np.std(avg_collisions[i][x:j+1]))
+            avg_score[i].append(np.mean(avg_scores[i][x:j+1]))
+            std_score[i].append(np.std(avg_scores[i][x:j+1]))
+            #std_success[i].append(np.std(avg_collisions[i][x:j+1]))
+
+        upper_fill_coll[i].append(np.array(avg_coll[i])+np.array(std_coll[i]))
+        lower_fill_coll[i].append(np.array(avg_coll[i])-np.array(std_coll[i]))
+
+        score_upper_fill[i].append(np.array(avg_score[i])+np.array(std_score[i]))
+        score_lower_fill[i].append(np.array(avg_score[i])-np.array(std_score[i]))
+        #upper_fill_success[i].append(np.array(avg_success[i])+np.array(std_success[i]))
+        #lower_fill_success[i].append(np.array(avg_success[i])-np.array(std_success[i]))
+
+        steps_x_axis[i] = np.cumsum(steps[i][ns[i]])[np.logical_not(collisions[i][ns[i]])]
+        n_actions_x_axis[i] = np.cumsum(n_actions[i][ns[i]])[np.logical_not(collisions[i][ns[i]])]
+        steps_no_coll[i] = steps[i][ns[i]][np.logical_not(collisions[i][ns[i]])]
+
+        for j in range(len(steps_x_axis[i])):
+            if j <= window:
+                x = 0
+            else:
+                x = j-window 
+            avg_steps_no_coll[i].append(np.mean(steps_no_coll[i][x:j+1]))
+            std_steps_no_coll[i].append(np.std(steps_no_coll[i][x:j+1]))
+            #max_steps_no_coll[i].append(np.max(steps_no_coll[i][x:j+1]))
+        
+        upper_fill_steps_no_coll[i].append(np.array(avg_steps_no_coll[i]) + np.array(std_steps_no_coll[i])) 
+        lower_fill_steps_no_coll[i].append(np.array(avg_steps_no_coll[i]) - np.array(std_steps_no_coll[i])) 
+
+
+    # end_episodes = np.zeros(len(agent_names), int)
+    # for i in range(len(agent_names)):
+    #     end_episodes[i] =  np.where(steps[i][ns[i]]==0)[0][0]
+
+    end_episodes = np.zeros((np.size(np.array(steps),axis=0), np.size(np.array(steps),axis=1)), int)
+    for i in range(np.size(end_episodes, axis=0)):
+        for n in range(np.size(end_episodes, axis=1)):
+            end_episodes[i,n] =  np.where(steps[i][n]==0)[0][0]
+            end_ep = end_episodes
+    end_episodes = np.min(end_episodes, axis=1)
+    
+    steps_y = steps.copy()
+    steps_y_avg_smoothed = [[] for _ in range(len(agent_names))]
+    steps_y_std = [[] for _ in range(len(agent_names))]
+    upper_fill = [[] for _ in range(len(agent_names))]
+    lower_fill = [[] for _ in range(len(agent_names))]
+
+    for i in range(np.size(end_ep, axis=0)):
+        for n in range(np.size(end_ep, axis=1)):
+            steps_y[i][n][collisions[i][n]==1]=np.nan
+    steps_y_avg = np.array(steps_y)
+    steps_y_avg = np.nanmean(steps_y_avg, axis=1)
+
+    for i in range(np.size(end_ep, axis=0)):
+        for j in range(len(steps_y_avg[i])):
+                if j <= window:
+                    x = 0
+                else:
+                    x = j-window 
+                steps_y_avg_smoothed[i].append(np.nanmean(steps_y_avg[i][x:j+1]))
+                steps_y_std[i].append(np.nanstd(steps_y_avg[i][x:j+1]))
+        
+        upper_fill[i].append(np.array(steps_y_avg_smoothed[i])+np.array(steps_y_std[i]))
+        lower_fill[i].append(np.array(steps_y_avg_smoothed[i])-np.array(steps_y_std[i]))
+
+    #font = {'family' : 'normal',
+
+
+
+    plt.rcParams.update({
+    "font.family": "serif",  # use serif/main font for text elements
+    "text.usetex": True,     # use inline math for ticks
+    "pgf.rcfonts": False,     # don't setup fonts from rc parameters
+    "font.size": 12
+    })
+
+    plt.rc('axes',edgecolor='gray')
+    #fig, ax = plt.subplots(1, 3, figsize=(5.5,3))
+    fig, ax = plt.subplots(1, 3, figsize=(5.5,2.1))
+    
+
+    #ax[0].ticklabel_format(style='scientific', axis='x', scilimits=(0,0), useMathText=True, useOffset=True)
+    ax[1].ticklabel_format(style='scientific', axis='x', scilimits=(0,0), useMathText=True)
+    #ax[2].ticklabel_format(style='scientific', axis='x', scilimits=(0,0), useMathText=True, useOffset=True)
+    #plt.ticklabel_format(style='scientific', axis='x', scilimits=(0,0))
+    
+ 
+    xax1000 = np.arange(0,xlim+1000,xspace)
+    xax1 = (xax1000/1000).astype(int)
+
+    ax[0].set_xticks(ticks=xax1000, labels=xax1)
+    ax[1].set_xticks(ticks=xax1000, labels=xax1)
+    ax[2].set_xticks(xax1000, labels=xax1)
+    
+    ax[0].set_yticks(ticks=[0,25,50,75,100], labels=[0,25,50,75,100])
+
+    #ax[1].ticklabel_format(style='scientific', axis='x', scilimits=(0,0), useMathText=True)
+
+    #plt.figure(3, figsize=(5,4))
+    for i in range(len(agent_names)):
+        end_episode = end_episodes[i] 
+        #ax[0].plot(avg_coll[i][0:end_episode])
+        ax[0].plot(np.arange(0,end_episode,100), np.array(avg_coll[i][0:end_episode])[np.arange(0,end_episode,100)]*100)
+        ax[0].fill_between(x=np.arange(end_episode)[np.arange(0,end_episode,100)], y1=np.array(upper_fill_coll[i][0])[np.arange(0,end_episode,100)]*100, y2=np.array(lower_fill_coll[i][0])[np.arange(0,end_episode,100)]*100, alpha=0.15, label='_nolegend_')
+    
+    ax[0].hlines(y=100, xmin=0, xmax=np.max(end_episodes), colors='black', linestyle='dashed')
+    ax[0].hlines(y=0, xmin=0, xmax=np.max(end_episodes), colors='black', linestyle='dashed')
+    ax[0].set_ylim([-5, 105])
+    #ax[0].set_xlim([0, np.max(end_episodes)])
+    #ax[0].set_xlabel('Episodes')
+    #plt.title('Collision rate')
+    #ax[0].set_ylabel('Failure rate [%]')
+    ax[0].set_title('Failure rate [%]', fontdict={'fontsize': 12})
+    ax[0].tick_params('both', length=0)
+    ax[0].grid(True)
+    ax[0].set_xlim([0,xlim])
+    #plt.rc('axes',edgecolor='gray')
+    #plt.tick_params(axis=u'both', which=u'both',length=0)
+
+
+
+    for i in range(np.size(end_ep, axis=0)):
+        end_episode = end_episodes[i] 
+        #plt.plot(np.cumsum(steps[0]), steps[0], 'x')
+        #plt.plot(steps[0][np.where(np.logical_not(collisions[0]))], 'x')
+        ax[1].plot(np.arange(0,end_episode,100), (np.array(steps_y_avg_smoothed[i])*0.01)[np.arange(0,end_episode,100)])
+        ax[1].fill_between(x=np.arange(0,end_episode,100), y1=np.array(upper_fill[i][0])[np.arange(0,end_episode,100)]*0.01, y2=np.array(lower_fill[i][0])[np.arange(0,end_episode,100)]*0.01, alpha=0.15, label='_nolegend_')
+
+        #np.arange(len(steps[i][ns[i]]))[np.logical_not(collisions[i][ns[i]])][0:end_episodes[i]]
+        #plt.plot(np.array(max_steps_no_coll[i][0:end_episode_no_coll])*0.01 )
+    ax[1].set_xlabel(r'Episodes $\times 10^3$')
+    #ax[1].set_xlim([0, np.max(end_episodes)])
+    #plt.title('Average time per episode without collisions')
+    #ax[1].set_ylabel('Lap time [s]')
+    ax[1].set_title('Lap time [s]', fontdict={'fontsize': 12})
+    #ax[1].legend(legend, title=legend_title, loc='upper right')
+    ax[1].grid(True)
+    ax[1].tick_params('both', length=0)
+    #ax[1].set_xlim([0,4000])
+    #plt.tick_params(axis=u'both', which=u'both',length=0)
+    ax[1].set_xlim([0,xlim])
+
+    for i in range(np.size(end_ep, axis=0)):
+        end_episode = end_episodes[i] 
+        #plt.plot(np.cumsum(steps[0]), steps[0], 'x')
+        #plt.plot(steps[0][np.where(np.logical_not(collisions[0]))], 'x')
+        ax[2].plot(np.arange(0,end_episode,100), np.array(avg_score[i])[np.arange(0,end_episode,100)])
+        ax[2].fill_between(x=np.arange(0,end_episode,100), y1=np.array(score_upper_fill[i][0])[np.arange(0,end_episode,100)], y2=np.array(score_lower_fill[i][0])[np.arange(0,end_episode,100)], alpha=0.15, label='_nolegend_')
+
+        #np.arange(len(steps[i][ns[i]]))[np.logical_not(collisions[i][ns[i]])][0:end_episodes[i]]
+        #plt.plot(np.array(max_steps_no_coll[i][0:end_episode_no_coll])*0.01 )
+    #ax[2].set_xlabel('Episodes')
+    #ax[1].set_xlim([0, np.max(end_episodes)])
+    #plt.title('Average time per episode without collisions')
+    #ax[2].set_ylabel('Lap time [s]')
+    ax[2].set_title('Reward', fontdict={'fontsize': 12})
+    #ax[1].legend(legend, title=legend_title, loc='upper right')
+    ax[2].grid(True)
+    ax[2].tick_params('both', length=0)
+    ax[2].set_xlim([0,xlim])
+    #plt.tick_params(axis=u'both', which=u'both',length=0)
+    #plt.xlim([0,6000])
+
+
+    fig.tight_layout()
+    #fig.subplots_adjust(bottom=0.4) 
+    #plt.figlegend(legend, title=legend_title, loc = 'lower center', ncol=5)
+    # plt.show()
     plt.savefig('results/'+filename+'.pgf', format='pgf')
+
+
+
+
+
+
+
+
+
 
 def display_velocity_slip(agent_names, ns, legend_title, legend, mismatch_parameters, frac_vary, start_condition, filename):
     
@@ -822,7 +1078,163 @@ def display_path_multiple(agent_names, ns, legend_title, legend, mismatch_parame
     plt.savefig('results/'+filename+'.pgf', format='pgf')
 
 
+def display_only_path_multiple(agent_names, ns, legend_title, legend, mismatch_parameters, frac_vary, start_condition, filename):
+    
+    pose_history = []
+    progress_history = []
+    state_history = []
+    
+    for agent_name, n, i in zip(agent_names, ns, range(len(agent_names))):
 
+        infile = open('environments/' + agent_name, 'rb')
+        env_dict = pickle.load(infile)
+        infile.close()
+        # Compensate for changes to reward structure
+        env_dict['reward_signal']['max_progress'] = 0
+        
+        # Model mismatches
+        if mismatch_parameters:
+            for par, var in zip(mismatch_parameters, frac_vary):
+                env_dict['car_params'][par] *= 1+var 
+
+
+        env = environment(env_dict)
+        if start_condition:
+            env.reset(save_history=True, start_condition=start_condition, car_params=env_dict['car_params'])
+        else:
+            env.reset(save_history=True, start_condition=[], car_params=env_dict['car_params'])
+
+        infile = open('agents/' + agent_name + '/' + agent_name + '_params', 'rb')
+        agent_dict = pickle.load(infile)
+        infile.close()
+
+        infile = open('train_parameters/' + agent_name, 'rb')
+        main_dict = pickle.load(infile)
+        infile.close()
+          
+        if i==0 and not start_condition:
+            infile = open('test_initial_condition/' + env_dict['map_name'], 'rb')
+            start_conditions = pickle.load(infile)
+            infile.close()
+            start_condition = random.choice(start_conditions)
+
+        if main_dict['learning_method']=='dqn':
+            agent_dict['epsilon'] = 0
+            a = agent_dqn.agent(agent_dict)
+        if main_dict['learning_method']=='reinforce':
+            a = agent_reinforce.PolicyGradientAgent(agent_dict)
+        if main_dict['learning_method']=='actor_critic_sep':
+            a = agent_actor_critic.actor_critic_separated(agent_dict)
+        if  main_dict['learning_method']=='actor_critic_com':
+            a = agent_actor_critic.actor_critic_combined(agent_dict)
+        if main_dict['learning_method']=='actor_critic_cont':
+            a = agent_actor_critic_continuous.agent_separate(agent_dict)
+        if main_dict['learning_method'] == 'dueling_dqn':
+            agent_dict['epsilon'] = 0
+            a = agent_dueling_dqn.agent(agent_dict)
+        if main_dict['learning_method'] == 'dueling_ddqn':
+            agent_dict['epsilon'] = 0
+            a = agent_dueling_ddqn.agent(agent_dict)
+        if main_dict['learning_method'] == 'rainbow':
+            agent_dict['epsilon'] = 0
+            a = agent_rainbow.agent(agent_dict)
+        if main_dict['learning_method'] == 'ddpg':
+            a = agent_ddpg.agent(agent_dict)
+        if main_dict['learning_method'] == 'td3':
+            a = agent_td3.agent(agent_dict)
+            
+        a.load_weights(agent_name, n)
+
+        #start_pose = {'x':11.2, 'y':7.7, 'v':0, 'delta':0, 'theta':0, 'goal':1}
+        env.reset(save_history=True, start_condition=start_condition, car_params=env_dict['car_params'])
+        obs = env.observation
+        done = False
+        score=0
+
+        while not done:
+            if main_dict['learning_method']=='ddpg' or main_dict['learning_method']=='td3':
+                action = a.choose_greedy_action(obs)
+            else:
+                action = a.choose_action(obs)
+
+            next_obs, reward, done = env.take_action(action)
+            score += reward
+            obs = next_obs
+
+            if env.progress>=0.98:
+                done=True
+            
+
+        print('Total score = ', score)
+        print('Progress = ', env.progress)
+
+        state_history.append(env.state_history)
+        pose_history.append(env.pose_history)
+        progress_history.append(env.progress_history)
+        
+        
+        
+    
+
+
+
+    legend_new = legend.copy()
+    legend_new.insert(0, 'Min and max')
+
+    legend_racetrack = legend.copy()
+    legend_racetrack.insert(0, 'Track centerline')
+
+    plt.rcParams.update({
+    "font.family": "serif",  # use serif/main font for text elements
+    "text.usetex": True,     # use inline math for ticks
+    "pgf.rcfonts": False,     # don't setup fonts from rc parameters
+    "font.size": 12
+    })
+
+    fig, ax = plt.subplots(1, figsize=(5,2.5))
+
+    color='gray'
+    #ax[i].tick_params(axis='both', colors='lightgrey')
+    ax.spines['bottom'].set_color(color)
+    ax.spines['top'].set_color(color) 
+    ax.spines['right'].set_color(color)
+    ax.spines['left'].set_color(color)
+
+    ax.tick_params(axis=u'both', which=u'both',length=0)
+    
+    track = mapping.map(env.map_name)
+    ax.imshow(ImageOps.invert(track.gray_im.filter(ImageFilter.FIND_EDGES).filter(ImageFilter.MaxFilter(1))), extent=(0,track.map_width,0,track.map_height), cmap="gray")
+    ax.plot(env.rx, env.ry, color='gray', linestyle='dashed')
+    
+    for i in range(len(agent_names)):
+        ax.plot(np.array(pose_history[i])[:,0], np.array(pose_history[i])[:,1], linewidth=1.5)   
+
+    prog = np.array([0, 0.2, 0.4, 0.6, 0.8])
+    idx =  np.zeros(len(prog), int)
+    text = ['', '20%', '40%', '60%', '80%']
+
+    for i in range(len(idx)):
+        idx[i] = np.mod(env.start_point+np.round(prog[i]*len(env.rx)), len(env.rx))
+    idx.astype(int)
+    
+    # for i in range(len(idx)):
+    #     ax.text(x=env.rx[idx[i]], y=env.ry[idx[i]], s=text[i], fontsize = 'small', bbox=dict(facecolor='white', edgecolor='black',pad=0.1,boxstyle='round'))
+    
+    ax.vlines(x=env.rx[idx[0]], ymin=env.ry[idx[0]]-1, ymax=env.ry[idx[0]]+1, linestyles='dotted', color='red')
+    ax.text(x=env.rx[idx[0]]-1.2, y=env.ry[idx[0]]+1.3, s='Start/finish', fontsize = 'small', bbox=dict(facecolor='white', edgecolor='black',pad=0.1,boxstyle='round'))
+
+    ax.axis('off')
+    # # https://stackoverflow.com/questions/4700614/how-to-put-the-legend-outside-the-plot
+
+
+
+    legend.insert(0, 'Track centerline')
+    fig.tight_layout()
+    fig.subplots_adjust(right=0.6) 
+    plt.figlegend(legend, title=legend_title, loc='center right', ncol=1)
+    
+    #plt.show() 
+    plt.savefig('results/'+filename+'.pgf', format='pgf')
 
 
 
@@ -848,13 +1260,18 @@ def display_path_multiple(agent_names, ns, legend_title, legend, mismatch_parame
 # legend = ['3', '10', '20', '50']
 # legend_title = 'Number of LiDAR beams'
 # ns=[0, 0, 0, 0]
-# filename = 'observation_n_beams'
+# filename = 'observation_n_beams_1'
+# xlim = 5000
+# xspace = 2000
+
 
 # agent_names = ['porto_ete_only_LiDAR', 'porto_ete_LiDAR_20', 'porto_ete_no_LiDAR']
 # legend = ['Only LiDAR', 'LiDAR and pose', 'Only pose']
 # legend_title = 'Observation space'
 # ns=[0, 0, 0]
-# filename = 'observation_space'
+# filename = 'observation_space_1'
+# xlim=6000
+# xspace = 2000
 
 # agent_names = ['porto_ete_cs_1', 'porto_ete_cs_5', 'porto_ete_cs_10', 'porto_ete_cs_15', 'porto_ete_LiDAR_10', 'porto_ete_cs_25']
 # legend = ['1', '5', '10', '15', '20', '25']
@@ -872,9 +1289,11 @@ def display_path_multiple(agent_names, ns, legend_title, legend, mismatch_parame
 
 # agent_names = ['porto_ete_LiDAR_10', 'porto_ete_ddpg']
 # legend = ['TD3', 'DDPG']
-# legend_title = 'Learning \nmethod'
+# legend_title = 'Learning method'
 # ns=[0, 0]
-# filename = 'learning_method_reward'
+# filename = 'learning_method_learning_curve_1'
+# xlim=7000
+# xspace = 2000
 
 # agent_names = ['porto_ete_v_5']
 # legend = ['End-to-end agent']
@@ -886,7 +1305,45 @@ def display_path_multiple(agent_names, ns, legend_title, legend, mismatch_parame
 # legend = ['0.1', '0.3', '0.5', '1']
 # legend_title = 'Distance reward ($r_{\mathrm{dist}}$)'
 # ns=[0, 0, 0, 0]
-# filename = 'distance_reward_v5'
+# filename = 'distance_reward_v5_1'
+# xlim= 4000
+# xspace = 1000
+
+# agent_names = ['porto_ete_v5_r_collision_2', 'porto_ete_v5_r_collision_5']
+# legend = ['$r_{\mathrm{collision}}=-4$', '$r_{\mathrm{collision}}=-10$']
+# legend_title = ''
+# ns=[0, 0]
+# filename = 'path_collision_penalty'
+
+# agent_names = ['porto_ete_v5_r_collision_5']
+# legend = ['End-to-end agent']
+# legend_title = ''
+# ns=[0]
+# filename = 'path_end_to_end_agent'
+
+# agent_names = ['porto_ete_v5_gamma_0', 'porto_ete_v5_gamma_1', 'porto_ete_v5_r_collision_5', 'porto_ete_v5_gamma_4']
+# legend = ['0.9', '0.95', '0.99', '1']
+# legend_title = 'Reward discount rate'
+# ns=[0, 0, 0, 0]
+# filename = 'gamma_learning_curve'
+
+# agent_names = ['porto_ete_v5_alpha_0', 'porto_ete_v5_r_collision_5', 'porto_ete_v5_alpha_1']
+# legend = ['$10^{-4}$','$10^{-3}$', '$2 \cdot 10^{-3}$']
+# legend_title = 'Learning rate'
+# ns=[0, 0, 0]
+# filename = 'alpha_learning_curve_1'
+# xlim= 3400
+# xspace = 1000
+
+agent_names = ['porto_ete_v5_r_collision_5']
+legend = ['']
+legend_title = ''
+ns=[0]
+filename = 'end_to_end_final_1'
+xlim = 3000
+xspace =1000
+
+
 
 # mismatch_parameters = ['C_Sf']
 # frac_vary = [0]
@@ -897,9 +1354,20 @@ def display_path_multiple(agent_names, ns, legend_title, legend, mismatch_parame
 #                         legend=legend, mismatch_parameters=mismatch_parameters, frac_vary=frac_vary, 
 #                         start_condition=start_condition, filename=filename)
 
+# mismatch_parameters = ['C_Sf']
+# frac_vary = [0]
+# start_condition = {'x':10, 'y':4.5, 'v':3, 'theta':np.pi, 'delta':0, 'goal':0}
+# #start_condition = []
+# #filename = 'path_collision_penalty'
+# display_only_path_multiple(agent_names=agent_names, ns=ns, legend_title=legend_title,          
+#                         legend=legend, mismatch_parameters=mismatch_parameters, frac_vary=frac_vary, 
+#                         start_condition=start_condition, filename=filename)
 
-learning_curve_lap_time_average(agent_names, legend, legend_title, ns, filename)
 
-#learning_curve_reward_average(agent_names, legend, legend_title)
+# learning_curve_lap_time_average(agent_names, legend, legend_title, ns, filename)
 
-#display_velocity_slip(agent_names, ns, legend_title, legend, mismatch_parameters, frac_vary, start_condition, filename)
+# learning_curve_reward_average(agent_names, legend, legend_title)
+
+learning_curve_all(agent_names, legend, legend_title, ns, filename, xlim, xspace)
+
+# display_velocity_slip(agent_names, ns, legend_title, legend, mismatch_parameters, frac_vary, start_condition, filename)

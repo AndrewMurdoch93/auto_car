@@ -701,6 +701,7 @@ def learning_curve_reward(agent_names, legend, legend_title, ns):
 
     plt.show()
 
+
 def learning_curve_reward_average(agent_names, legend, legend_title):
     
     legend_new = legend.copy()
