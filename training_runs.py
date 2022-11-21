@@ -21,9 +21,9 @@ import os
 
 
 
-agent_name = 'columbia_ete'
+agent_name = 'columbia_pete_s'
 
-main_dict = {'name':agent_name, 'max_episodes':50000, 'max_steps':2e6, 'learning_method':'td3', 'runs':3, 'comment':''}
+main_dict = {'name':agent_name, 'max_episodes':50000, 'max_steps':2e6, 'learning_method':'td3', 'runs':1, 'comment':''}
 
 agent_dqn_dict = {'gamma':0.99, 'epsilon':1, 'eps_end':0.01, 'eps_dec':1/1000, 'lr':0.001, 'batch_size':64, 'max_mem_size':500000, 
                 'fc1_dims': 64, 'fc2_dims': 64, 'fc3_dims':64}
@@ -62,7 +62,7 @@ action_space_dict = {'action_space': 'continuous', 'vel_select':[3,5], 'R_range'
 
 #action_space_dict = {'action_space': 'discrete', 'n_waypoints': 10, 'vel_select':[7], 'R_range':[6]}
 
-steer_control_dict = {'steering_control': False, 'wpt_arc':np.pi/2}
+steer_control_dict = {'steering_control': True, 'wpt_arc':np.pi/2}
 
 if  steer_control_dict['steering_control'] == True:
     steer_control_dict['path_strategy'] = 'circle'  #circle or linear or polynomial or gradient
@@ -89,12 +89,13 @@ env_dict = {'sim_conf': functions.load_config(sys.path[0], "config")
         , 'only_lidar':False
         , 'action_space_dict':action_space_dict
         } 
-n_test=100
-a = main_multiple.trainingLoop(main_dict, agent_td3_dict, env_dict, load_agent='')
-a.train()
-main_multiple.lap_time_test(agent_name=agent_name, n_episodes=n_test, detect_issues=False, initial_conditions=True)
 
-#Tests with
+n_test=100
+# a = main_multiple.trainingLoop(main_dict, agent_td3_dict, env_dict, load_agent='')
+# a.train()
+# main_multiple.lap_time_test(agent_name=agent_name, n_episodes=n_test, detect_issues=False, initial_conditions=True)
+
+#Training with v=6
 if True:
     # agent_name = 'porto_ete_LiDAR_3'
     # main_dict['name'] = agent_name
@@ -314,7 +315,7 @@ if True:
 
     pass
 
-#Tests with v=5 
+#training with v=5 
 if True:
     # agent_name = 'porto_ete_v5_cs_10'
     # main_dict['name'] = agent_name
@@ -490,204 +491,239 @@ if True:
 
     pass
 
+#training all tracks with v=5
+if True:
+    # agent_name = 'circle_ete'
+    # main_dict['name'] = agent_name
+    # main_dict['map_name']='circle'
+    # a = main_multiple.trainingLoop(main_dict, agent_td3_dict, env_dict, load_agent='')
+    # a.train()
+    # main_multiple.lap_time_test(agent_name=agent_name, n_episodes=n_test, detect_issues=False, initial_conditions=True)
 
-agent_name = 'circle_ete'
-main_dict['name'] = agent_name
-main_dict['map_name']='circle'
-a = main_multiple.trainingLoop(main_dict, agent_td3_dict, env_dict, load_agent='')
-a.train()
-main_multiple.lap_time_test(agent_name=agent_name, n_episodes=n_test, detect_issues=False, initial_conditions=True)
+    # agent_name = 'berlin_ete'
+    # main_dict['name'] = agent_name
+    # main_dict['map_name']='berlin'
+    # a = main_multiple.trainingLoop(main_dict, agent_td3_dict, env_dict, load_agent='')
+    # a.train()
+    # main_multiple.lap_time_test(agent_name=agent_name, n_episodes=n_test, detect_issues=False, initial_conditions=True)
 
-agent_name = 'berlin_ete'
-main_dict['name'] = agent_name
-main_dict['map_name']='berlin'
-a = main_multiple.trainingLoop(main_dict, agent_td3_dict, env_dict, load_agent='')
-a.train()
-main_multiple.lap_time_test(agent_name=agent_name, n_episodes=n_test, detect_issues=False, initial_conditions=True)
+    # agent_name = 'torino_ete'
+    # main_dict['name'] = agent_name
+    # main_dict['map_name']='torino'
+    # a = main_multiple.trainingLoop(main_dict, agent_td3_dict, env_dict, load_agent='')
+    # a.train()
+    # main_multiple.lap_time_test(agent_name=agent_name, n_episodes=n_test, detect_issues=False, initial_conditions=True)
 
-agent_name = 'torino_ete'
-main_dict['name'] = agent_name
-main_dict['map_name']='torino'
-a = main_multiple.trainingLoop(main_dict, agent_td3_dict, env_dict, load_agent='')
-a.train()
-main_multiple.lap_time_test(agent_name=agent_name, n_episodes=n_test, detect_issues=False, initial_conditions=True)
-
-agent_name = 'redbull_ring_ete'
-main_dict['name'] = agent_name
-main_dict['map_name']='redbull_ring'
-a = main_multiple.trainingLoop(main_dict, agent_td3_dict, env_dict, load_agent='')
-a.train()
-main_multiple.lap_time_test(agent_name=agent_name, n_episodes=n_test, detect_issues=False, initial_conditions=True)
-
-
-steer_control_dict['steering_control'] = True
-steer_control_dict['path_strategy'] = 'circle'  #circle or linear or polynomial or gradient
-steer_control_dict['control_strategy'] = 'pure_pursuit'  #pure_pursuit or stanley
-steer_control_dict['track_dict'] = {'k':0.1, 'Lfc':1}
-
-agent_name = 'porto_pete_s'
-main_dict['name'] = agent_name
-env_dict['steer_control_dict'] = steer_control_dict
-main_dict['map_name']='porto_1'
-a = main_multiple.trainingLoop(main_dict, agent_td3_dict, env_dict, load_agent='')
-a.train()
-main_multiple.lap_time_test(agent_name=agent_name, n_episodes=n_test, detect_issues=False, initial_conditions=True)
-
-agent_name = 'columbia_pete_s'
-main_dict['name'] = agent_name
-env_dict['steer_control_dict']['steering_control'] = True
-main_dict['map_name']='columbia_1'
-a = main_multiple.trainingLoop(main_dict, agent_td3_dict, env_dict, load_agent='')
-a.train()
-main_multiple.lap_time_test(agent_name=agent_name, n_episodes=n_test, detect_issues=False, initial_conditions=True)
-
-agent_name = 'circle_pete_s'
-main_dict['name'] = agent_name
-env_dict['steer_control_dict']['steering_control'] = True
-main_dict['map_name']='circle'
-a = main_multiple.trainingLoop(main_dict, agent_td3_dict, env_dict, load_agent='')
-a.train()
-main_multiple.lap_time_test(agent_name=agent_name, n_episodes=n_test, detect_issues=False, initial_conditions=True)
-
-agent_name = 'berlin_pete_s'
-main_dict['name'] = agent_name
-env_dict['steer_control_dict']['steering_control'] = True
-main_dict['map_name']='berlin'
-a = main_multiple.trainingLoop(main_dict, agent_td3_dict, env_dict, load_agent='')
-a.train()
-main_multiple.lap_time_test(agent_name=agent_name, n_episodes=n_test, detect_issues=False, initial_conditions=True)
-
-agent_name = 'torino_pete_s'
-main_dict['name'] = agent_name
-env_dict['steer_control_dict']['steering_control'] = True
-main_dict['map_name']='torino'
-a = main_multiple.trainingLoop(main_dict, agent_td3_dict, env_dict, load_agent='')
-a.train()
-main_multiple.lap_time_test(agent_name=agent_name, n_episodes=n_test, detect_issues=False, initial_conditions=True)
-
-agent_name = 'redbull_ring_pete_s'
-main_dict['name'] = agent_name
-env_dict['steer_control_dict']['steering_control'] = True
-main_dict['map_name']='redbull_ring'
-a = main_multiple.trainingLoop(main_dict, agent_td3_dict, env_dict, load_agent='')
-a.train()
-main_multiple.lap_time_test(agent_name=agent_name, n_episodes=n_test, detect_issues=False, initial_conditions=True)
+    # agent_name = 'redbull_ring_ete'
+    # main_dict['name'] = agent_name
+    # main_dict['map_name']='redbull_ring'
+    # a = main_multiple.trainingLoop(main_dict, agent_td3_dict, env_dict, load_agent='')
+    # a.train()
+    # main_multiple.lap_time_test(agent_name=agent_name, n_episodes=n_test, detect_issues=False, initial_conditions=True)
 
 
+    # steer_control_dict['steering_control'] = True
+    # steer_control_dict['path_strategy'] = 'circle'  #circle or linear or polynomial or gradient
+    # steer_control_dict['control_strategy'] = 'pure_pursuit'  #pure_pursuit or stanley
+    # steer_control_dict['track_dict'] = {'k':0.1, 'Lfc':1}
 
+    # agent_name = 'porto_pete_s'
+    # main_dict['name'] = agent_name
+    # env_dict['steer_control_dict'] = steer_control_dict
+    # env_dict['map_name']='porto_1'
+    # a = main_multiple.trainingLoop(main_dict, agent_td3_dict, env_dict, load_agent='')
+    # a.train()
+    # main_multiple.lap_time_test(agent_name=agent_name, n_episodes=n_test, detect_issues=False, initial_conditions=True)
 
-agent_name = 'porto_pete_v'
-main_dict['name'] = agent_name
-env_dict['steer_control_dict']['steering_control'] = False
-env_dict['velocity_control'] = True
-main_dict['map_name']='porto_1'
-a = main_multiple.trainingLoop(main_dict, agent_td3_dict, env_dict, load_agent='')
-a.train()
-main_multiple.lap_time_test(agent_name=agent_name, n_episodes=n_test, detect_issues=False, initial_conditions=True)
+    # agent_name = 'columbia_pete_s'
+    # main_dict['name'] = agent_name
+    # env_dict['steer_control_dict']['steering_control'] = True
+    # main_dict['map_name']='columbia_1'
+    # a = main_multiple.trainingLoop(main_dict, agent_td3_dict, env_dict, load_agent='')
+    # a.train()
+    # main_multiple.lap_time_test(agent_name=agent_name, n_episodes=n_test, detect_issues=False, initial_conditions=True)
 
-agent_name = 'columbia_pete_v'
-main_dict['name'] = agent_name
-env_dict['steer_control_dict']['steering_control'] = False
-env_dict['velocity_control'] = True
-main_dict['map_name']='columbia_1'
-a = main_multiple.trainingLoop(main_dict, agent_td3_dict, env_dict, load_agent='')
-a.train()
-main_multiple.lap_time_test(agent_name=agent_name, n_episodes=n_test, detect_issues=False, initial_conditions=True)
+    # agent_name = 'circle_pete_s'
+    # main_dict['name'] = agent_name
+    # env_dict['steer_control_dict']['steering_control'] = True
+    # main_dict['map_name']='circle'
+    # a = main_multiple.trainingLoop(main_dict, agent_td3_dict, env_dict, load_agent='')
+    # a.train()
+    # main_multiple.lap_time_test(agent_name=agent_name, n_episodes=n_test, detect_issues=False, initial_conditions=True)
 
-agent_name = 'circle_pete_v'
-main_dict['name'] = agent_name
-env_dict['steer_control_dict']['steering_control'] = False
-env_dict['velocity_control'] = True
-main_dict['map_name']='circle'
-a = main_multiple.trainingLoop(main_dict, agent_td3_dict, env_dict, load_agent='')
-a.train()
-main_multiple.lap_time_test(agent_name=agent_name, n_episodes=n_test, detect_issues=False, initial_conditions=True)
+    # agent_name = 'berlin_pete_s'
+    # main_dict['name'] = agent_name
+    # env_dict['steer_control_dict']['steering_control'] = True
+    # main_dict['map_name']='berlin'
+    # a = main_multiple.trainingLoop(main_dict, agent_td3_dict, env_dict, load_agent='')
+    # a.train()
+    # main_multiple.lap_time_test(agent_name=agent_name, n_episodes=n_test, detect_issues=False, initial_conditions=True)
 
-agent_name = 'berlin_pete_v'
-main_dict['name'] = agent_name
-env_dict['steer_control_dict']['steering_control'] = False
-env_dict['velocity_control'] = True
-main_dict['map_name']='berlin'
-a = main_multiple.trainingLoop(main_dict, agent_td3_dict, env_dict, load_agent='')
-a.train()
-main_multiple.lap_time_test(agent_name=agent_name, n_episodes=n_test, detect_issues=False, initial_conditions=True)
+    # agent_name = 'torino_pete_s'
+    # main_dict['name'] = agent_name
+    # env_dict['steer_control_dict']['steering_control'] = True
+    # main_dict['map_name']='torino'
+    # a = main_multiple.trainingLoop(main_dict, agent_td3_dict, env_dict, load_agent='')
+    # a.train()
+    # main_multiple.lap_time_test(agent_name=agent_name, n_episodes=n_test, detect_issues=False, initial_conditions=True)
 
-agent_name = 'torino_pete_v'
-main_dict['name'] = agent_name
-env_dict['steer_control_dict']['steering_control'] = False
-env_dict['velocity_control'] = True
-main_dict['map_name']='torino'
-a = main_multiple.trainingLoop(main_dict, agent_td3_dict, env_dict, load_agent='')
-a.train()
-main_multiple.lap_time_test(agent_name=agent_name, n_episodes=n_test, detect_issues=False, initial_conditions=True)
-
-agent_name = 'redbull_ring_pete_v'
-main_dict['name'] = agent_name
-env_dict['steer_control_dict']['steering_control'] = False
-env_dict['velocity_control'] = True
-main_dict['map_name']='redbull_ring'
-a = main_multiple.trainingLoop(main_dict, agent_td3_dict, env_dict, load_agent='')
-a.train()
-main_multiple.lap_time_test(agent_name=agent_name, n_episodes=n_test, detect_issues=False, initial_conditions=True)
-
-
-agent_name = 'porto_pete_sv'
-main_dict['name'] = agent_name
-env_dict['steer_control_dict']['steering_control'] = True
-env_dict['velocity_control'] = True
-main_dict['map_name']='porto_1'
-a = main_multiple.trainingLoop(main_dict, agent_td3_dict, env_dict, load_agent='')
-a.train()
-main_multiple.lap_time_test(agent_name=agent_name, n_episodes=n_test, detect_issues=False, initial_conditions=True)
-
-agent_name = 'columbia_pete_sv'
-main_dict['name'] = agent_name
-env_dict['steer_control_dict']['steering_control'] = True
-env_dict['velocity_control'] = True
-main_dict['map_name']='columbia_1'
-a = main_multiple.trainingLoop(main_dict, agent_td3_dict, env_dict, load_agent='')
-a.train()
-main_multiple.lap_time_test(agent_name=agent_name, n_episodes=n_test, detect_issues=False, initial_conditions=True)
-
-agent_name = 'circle_pete_sv'
-main_dict['name'] = agent_name
-env_dict['steer_control_dict']['steering_control'] = True
-env_dict['velocity_control'] = True
-main_dict['map_name']='circle'
-a = main_multiple.trainingLoop(main_dict, agent_td3_dict, env_dict, load_agent='')
-a.train()
-main_multiple.lap_time_test(agent_name=agent_name, n_episodes=n_test, detect_issues=False, initial_conditions=True)
-
-agent_name = 'berlin_pete_sv'
-main_dict['name'] = agent_name
-env_dict['steer_control_dict']['steering_control'] = True
-env_dict['velocity_control'] = True
-main_dict['map_name']='berlin'
-a = main_multiple.trainingLoop(main_dict, agent_td3_dict, env_dict, load_agent='')
-a.train()
-main_multiple.lap_time_test(agent_name=agent_name, n_episodes=n_test, detect_issues=False, initial_conditions=True)
-
-agent_name = 'torino_pete_sv'
-main_dict['name'] = agent_name
-env_dict['steer_control_dict']['steering_control'] = True
-env_dict['velocity_control'] = True
-main_dict['map_name']='torino'
-a = main_multiple.trainingLoop(main_dict, agent_td3_dict, env_dict, load_agent='')
-a.train()
-main_multiple.lap_time_test(agent_name=agent_name, n_episodes=n_test, detect_issues=False, initial_conditions=True)
-
-agent_name = 'redbull_ring_pete_sv'
-main_dict['name'] = agent_name
-env_dict['steer_control_dict']['steering_control'] = True
-env_dict['velocity_control'] = True
-main_dict['map_name']='redbull_ring'
-a = main_multiple.trainingLoop(main_dict, agent_td3_dict, env_dict, load_agent='')
-a.train()
-main_multiple.lap_time_test(agent_name=agent_name, n_episodes=n_test, detect_issues=False, initial_conditions=True)
+    # agent_name = 'redbull_ring_pete_s'
+    # main_dict['name'] = agent_name
+    # env_dict['steer_control_dict']['steering_control'] = True
+    # main_dict['map_name']='redbull_ring'
+    # a = main_multiple.trainingLoop(main_dict, agent_td3_dict, env_dict, load_agent='')
+    # a.train()
+    # main_multiple.lap_time_test(agent_name=agent_name, n_episodes=n_test, detect_issues=False, initial_conditions=True)
 
 
 
 
+    # agent_name = 'porto_pete_v'
+    # main_dict['name'] = agent_name
+    # env_dict['steer_control_dict']['steering_control'] = False
+    # env_dict['velocity_control'] = True
+    # env_dict['map_name']='porto_1'
+    # a = main_multiple.trainingLoop(main_dict, agent_td3_dict, env_dict, load_agent='')
+    # a.train()
+    # main_multiple.lap_time_test(agent_name=agent_name, n_episodes=n_test, detect_issues=False, initial_conditions=True)
+
+    # agent_name = 'columbia_pete_v'
+    # main_dict['name'] = agent_name
+    # env_dict['steer_control_dict']['steering_control'] = False
+    # env_dict['velocity_control'] = True
+    # main_dict['map_name']='columbia_1'
+    # a = main_multiple.trainingLoop(main_dict, agent_td3_dict, env_dict, load_agent='')
+    # a.train()
+    # main_multiple.lap_time_test(agent_name=agent_name, n_episodes=n_test, detect_issues=False, initial_conditions=True)
+
+    # agent_name = 'circle_pete_v'
+    # main_dict['name'] = agent_name
+    # env_dict['steer_control_dict']['steering_control'] = False
+    # env_dict['velocity_control'] = True
+    # main_dict['map_name']='circle'
+    # a = main_multiple.trainingLoop(main_dict, agent_td3_dict, env_dict, load_agent='')
+    # a.train()
+    # main_multiple.lap_time_test(agent_name=agent_name, n_episodes=n_test, detect_issues=False, initial_conditions=True)
+
+    # agent_name = 'berlin_pete_v'
+    # main_dict['name'] = agent_name
+    # env_dict['steer_control_dict']['steering_control'] = False
+    # env_dict['velocity_control'] = True
+    # main_dict['map_name']='berlin'
+    # a = main_multiple.trainingLoop(main_dict, agent_td3_dict, env_dict, load_agent='')
+    # a.train()
+    # main_multiple.lap_time_test(agent_name=agent_name, n_episodes=n_test, detect_issues=False, initial_conditions=True)
+
+    # agent_name = 'torino_pete_v'
+    # main_dict['name'] = agent_name
+    # env_dict['steer_control_dict']['steering_control'] = False
+    # env_dict['velocity_control'] = True
+    # main_dict['map_name']='torino'
+    # a = main_multiple.trainingLoop(main_dict, agent_td3_dict, env_dict, load_agent='')
+    # a.train()
+    # main_multiple.lap_time_test(agent_name=agent_name, n_episodes=n_test, detect_issues=False, initial_conditions=True)
+
+    # agent_name = 'redbull_ring_pete_v'
+    # main_dict['name'] = agent_name
+    # env_dict['steer_control_dict']['steering_control'] = False
+    # env_dict['velocity_control'] = True
+    # main_dict['map_name']='redbull_ring'
+    # a = main_multiple.trainingLoop(main_dict, agent_td3_dict, env_dict, load_agent='')
+    # a.train()
+    # main_multiple.lap_time_test(agent_name=agent_name, n_episodes=n_test, detect_issues=False, initial_conditions=True)
+
+
+    # agent_name = 'porto_pete_sv'
+    # main_dict['name'] = agent_name
+    # env_dict['steer_control_dict']['steering_control'] = True
+    # env_dict['velocity_control'] = True
+    # env_dict['map_name']='porto_1'
+    # a = main_multiple.trainingLoop(main_dict, agent_td3_dict, env_dict, load_agent='')
+    # a.train()
+    # main_multiple.lap_time_test(agent_name=agent_name, n_episodes=n_test, detect_issues=False, initial_conditions=True)
+
+    # agent_name = 'columbia_pete_sv'
+    # main_dict['name'] = agent_name
+    # env_dict['steer_control_dict']['steering_control'] = True
+    # env_dict['velocity_control'] = True
+    # main_dict['map_name']='columbia_1'
+    # a = main_multiple.trainingLoop(main_dict, agent_td3_dict, env_dict, load_agent='')
+    # a.train()
+    # main_multiple.lap_time_test(agent_name=agent_name, n_episodes=n_test, detect_issues=False, initial_conditions=True)
+
+    # agent_name = 'circle_pete_sv'
+    # main_dict['name'] = agent_name
+    # env_dict['steer_control_dict']['steering_control'] = True
+    # env_dict['velocity_control'] = True
+    # main_dict['map_name']='circle'
+    # a = main_multiple.trainingLoop(main_dict, agent_td3_dict, env_dict, load_agent='')
+    # a.train()
+    # main_multiple.lap_time_test(agent_name=agent_name, n_episodes=n_test, detect_issues=False, initial_conditions=True)
+
+    # agent_name = 'berlin_pete_sv'
+    # main_dict['name'] = agent_name
+    # env_dict['steer_control_dict']['steering_control'] = True
+    # env_dict['velocity_control'] = True
+    # main_dict['map_name']='berlin'
+    # a = main_multiple.trainingLoop(main_dict, agent_td3_dict, env_dict, load_agent='')
+    # a.train()
+    # main_multiple.lap_time_test(agent_name=agent_name, n_episodes=n_test, detect_issues=False, initial_conditions=True)
+
+    # agent_name = 'torino_pete_sv'
+    # main_dict['name'] = agent_name
+    # env_dict['steer_control_dict']['steering_control'] = True
+    # env_dict['velocity_control'] = True
+    # main_dict['map_name']='torino'
+    # a = main_multiple.trainingLoop(main_dict, agent_td3_dict, env_dict, load_agent='')
+    # a.train()
+    # main_multiple.lap_time_test(agent_name=agent_name, n_episodes=n_test, detect_issues=False, initial_conditions=True)
+
+    # agent_name = 'redbull_ring_pete_sv'
+    # main_dict['name'] = agent_name
+    # env_dict['steer_control_dict']['steering_control'] = True
+    # env_dict['velocity_control'] = True
+    # main_dict['map_name']='redbull_ring'
+    # a = main_multiple.trainingLoop(main_dict, agent_td3_dict, env_dict, load_agent='')
+    # a.train()
+    # main_multiple.lap_time_test(agent_name=agent_name, n_episodes=n_test, detect_issues=False, initial_conditions=True)
+
+    pass
+
+# Tuning parameters for steering control porto
+if True:
+    agent_name = 'porto_pete_s_r_dist_0'
+    main_dict['name'] = agent_name
+    env_dict['map_name']='porto_1'
+    env_dict['reward_signal']['collision'] = -1
+    env_dict['reward_signal']['distance'] = 0.25
+    a = main_multiple.trainingLoop(main_dict, agent_td3_dict, env_dict, load_agent='')
+    a.train()
+    main_multiple.lap_time_test(agent_name=agent_name, n_episodes=n_test, detect_issues=False, initial_conditions=True)
+
+    agent_name = 'porto_pete_s_r_dist_1'
+    main_dict['name'] = agent_name
+
+    env_dict['reward_signal']['collision'] = -1
+    env_dict['reward_signal']['distance'] = 0.4
+    a = main_multiple.trainingLoop(main_dict, agent_td3_dict, env_dict, load_agent='')
+    a.train()
+    main_multiple.lap_time_test(agent_name=agent_name, n_episodes=n_test, detect_issues=False, initial_conditions=True)
+
+    agent_name = 'porto_pete_s_r_dist_2'
+    main_dict['name'] = agent_name
+    env_dict['reward_signal']['collision'] = -1
+    env_dict['reward_signal']['distance'] = 0.5
+    a = main_multiple.trainingLoop(main_dict, agent_td3_dict, env_dict, load_agent='')
+    a.train()
+    main_multiple.lap_time_test(agent_name=agent_name, n_episodes=n_test, detect_issues=False, initial_conditions=True)
+
+    agent_name = 'porto_pete_s_r_dist_3'
+    main_dict['name'] = agent_name
+    env_dict['reward_signal']['collision'] = -1
+    env_dict['reward_signal']['distance'] = 0.6
+    a = main_multiple.trainingLoop(main_dict, agent_td3_dict, env_dict, load_agent='')
+    a.train()
+    main_multiple.lap_time_test(agent_name=agent_name, n_episodes=n_test, detect_issues=False, initial_conditions=True)
 
 
 
@@ -699,112 +735,144 @@ main_multiple.lap_time_test(agent_name=agent_name, n_episodes=n_test, detect_iss
 
 
 
-# agent_names = ['porto_ete_r_1', 'porto_ete_r_2', 'porto_ete_r_3', 'porto_ete_LiDAR_10', 'porto_ete_r_4']
-# legend = ['1', '0.7', '0.5', '0.3', '0.1']
-# legend_title = ''
-# ns=[0, 0, 0, 0, 0]
 
-# agent_names = ['porto_ete_r_5', 'porto_ete_r_6']
-# legend = ['-0.5', '2']
-# legend_title = ''
-# ns=[0, 0]
 
-# agent_names = ['porto_ete_LiDAR_10']
-# legend = ['']
-# legend_title = ''
-# ns=[0]
+#tests with v=6
+if True:
+    # agent_names = ['porto_ete_r_1', 'porto_ete_r_2', 'porto_ete_r_3', 'porto_ete_LiDAR_10', 'porto_ete_r_4']
+    # legend = ['1', '0.7', '0.5', '0.3', '0.1']
+    # legend_title = ''
+    # ns=[0, 0, 0, 0, 0]
 
-# agent_names = ['porto_ete_cs_1', 'porto_ete_cs_5', 'porto_ete_cs_10', 'porto_ete_cs_15', 'porto_ete_LiDAR_10', 'porto_ete_cs_25']
-# legend = ['']
-# legend_title = ''
-# ns=[0, 0, 0, 0, 0, 0]
+    # agent_names = ['porto_ete_r_5', 'porto_ete_r_6']
+    # legend = ['-0.5', '2']
+    # legend_title = ''
+    # ns=[0, 0]
 
-# agent_names = ['porto_ete_v_5', 'porto_ete_LiDAR_10', 'porto_ete_v_7', 'porto_ete_v_8']
-# legend = ['']
-# legend_title = ''
-# ns=[0, 0, 0, 0]
+    # agent_names = ['porto_ete_LiDAR_10']
+    # legend = ['']
+    # legend_title = ''
+    # ns=[0]
 
-# agent_names = ['porto_ete_v_5', 'porto_ete_v5_r_dist', 'porto_ete_v5_cs_10']
-# legend = ['0.3', '0.4', '10Hz']
-# legend_title = ''
-# ns=[0, 0, 0]
+    # agent_names = ['porto_ete_cs_1', 'porto_ete_cs_5', 'porto_ete_cs_10', 'porto_ete_cs_15', 'porto_ete_LiDAR_10', 'porto_ete_cs_25']
+    # legend = ['']
+    # legend_title = ''
+    # ns=[0, 0, 0, 0, 0, 0]
 
-# agent_names = ['porto_ete_v_5']
-# legend = ['0.3']
-# legend_title = ''
-# ns=[2]
+    # agent_names = ['porto_ete_v_5', 'porto_ete_LiDAR_10', 'porto_ete_v_7', 'porto_ete_v_8']
+    # legend = ['']
+    # legend_title = ''
+    # ns=[0, 0, 0, 0]
 
-# agent_names = ['porto_ete_v5_r_dist']
-# legend = ['0.4']
-# legend_title = ''
-# ns=[0]
+    # agent_names = ['porto_ete_v_5', 'porto_ete_v5_r_dist', 'porto_ete_v5_cs_10']
+    # legend = ['0.3', '0.4', '10Hz']
+    # legend_title = ''
+    # ns=[0, 0, 0]
 
-# agent_names = ['porto_ete_LiDAR_10', 'porto_ete_ddpg']
-# legend = ['TD3', 'DDPG']
-# legend_title = 'Learning \nmethod'
-# ns=[0, 0]
-# filename = 'learning_method_reward'
+    # agent_names = ['porto_ete_v_5']
+    # legend = ['0.3']
+    # legend_title = ''
+    # ns=[2]
 
-# agent_names = ['porto_pete_sv_1', 'porto_ete_LiDAR_10']
-# legend = ['pete 6 m/s', 'ete 6 m/s']
-# legend_title = ''
-# ns=[0, 0]
-#filename = 'learning_method_reward'
+    # agent_names = ['porto_ete_v5_r_dist']
+    # legend = ['0.4']
+    # legend_title = ''
+    # ns=[0]
 
-# agent_names = ['porto_ete_v5_r_dist_1', 'porto_ete_v_5', 'porto_ete_v5_r_dist_2', 'porto_ete_v5_r_dist_4']
-# legend = ['0.1', '0.3', '0.5', '1']
-# legend_title = ''
-# ns=[0, 0, 0, 0]
+    # agent_names = ['porto_ete_LiDAR_10', 'porto_ete_ddpg']
+    # legend = ['TD3', 'DDPG']
+    # legend_title = 'Learning \nmethod'
+    # ns=[0, 0]
+    # filename = 'learning_method_reward'
 
-# agent_names = ['porto_ete_v5_cs_1', 'porto_ete_v5_cs_10', 'porto_ete_v5_cs_15', 'porto_ete_v_5', 'porto_ete_v5_cs_25']
-# legend = ['1', '10', '15', '20', '25']
-# legend_title = ''
-# ns=[0, 0, 0, 0, 0]
+    # agent_names = ['porto_pete_sv_1', 'porto_ete_LiDAR_10']
+    # legend = ['pete 6 m/s', 'ete 6 m/s']
+    # legend_title = ''
+    # ns=[0, 0]
+    #filename = 'learning_method_reward'
+    pass
 
-# agent_names = ['porto_ete_v5_r_time_0', 'porto_ete_v_5']
+#Tests with v=5
+if True:
+    # agent_names = ['porto_ete_v5_r_dist_1', 'porto_ete_v_5', 'porto_ete_v5_r_dist_2', 'porto_ete_v5_r_dist_4']
+    # legend = ['0.1', '0.3', '0.5', '1']
+    # legend_title = ''
+    # ns=[0, 0, 0, 0]
 
-# agent_names = ['porto_ete_v5_r_collision_0', 'porto_ete_v5_r_collision_1', 'porto_ete_v_5', 'porto_ete_v5_r_collision_2']
-# legend = ['0', '-1', '-2', '-4']
-# legend_title = 'collision penalty'
-# ns=[0, 0, 0, 0]
+    # agent_names = ['porto_ete_v5_cs_1', 'porto_ete_v5_cs_10', 'porto_ete_v5_cs_15', 'porto_ete_v_5', 'porto_ete_v5_cs_25']
+    # legend = ['1', '10', '15', '20', '25']
+    # legend_title = ''
+    # ns=[0, 0, 0, 0, 0]
 
-# agent_names = ['porto_ete_v5_r_collision_2']
-# legend = ['-4']
-# legend_title = 'collision penalty'
-# ns=[0]
+    # agent_names = ['porto_ete_v5_r_time_0', 'porto_ete_v_5']
 
-# agent_names = ['porto_ete_v5_r_collision_3', 'porto_ete_v5_r_collision_4', 'porto_ete_v5_r_collision_5']
-# legend = ['-6', '-8', '-10']
-# legend_title = 'collision penalty'
-# ns=[0, 0, 0]
+    # agent_names = ['porto_ete_v5_r_collision_0', 'porto_ete_v5_r_collision_1', 'porto_ete_v_5', 'porto_ete_v5_r_collision_2']
+    # legend = ['0', '-1', '-2', '-4']
+    # legend_title = 'collision penalty'
+    # ns=[0, 0, 0, 0]
 
-# agent_names = ['porto_ete_v5_r_collision_2', 'porto_ete_v5_r_collision_5']
-# legend = ['-4', '-10']
-# legend_title = 'collision penalty'
-# ns=[0, 0]
+    # agent_names = ['porto_ete_v5_r_collision_2']
+    # legend = ['-4']
+    # legend_title = 'collision penalty'
+    # ns=[0]
 
-# agent_names = ['porto_ete_v5_gamma_0', 'porto_ete_v5_gamma_1', 'porto_ete_v5_gamma_2', 'porto_ete_v5_r_collision_5', 'porto_ete_v5_gamma_3', 'porto_ete_v5_gamma_4']
-# legend = ['0.9', '0.95', '0.98', '0.99', '0.999', '1']
-# legend_title = 'gamma'
-# ns=[0, 0, 0, 0, 0, 0]
+    # agent_names = ['porto_ete_v5_r_collision_3', 'porto_ete_v5_r_collision_4', 'porto_ete_v5_r_collision_5']
+    # legend = ['-6', '-8', '-10']
+    # legend_title = 'collision penalty'
+    # ns=[0, 0, 0]
 
-# agent_names = ['porto_ete_v5_gamma_0', 'porto_ete_v5_gamma_1', 'porto_ete_v5_r_collision_5', 'porto_ete_v5_gamma_4']
-# legend = ['0.9', '0.95', '0.99', '1']
-# legend_title = 'gamma'
-# ns=[0, 0, 0, 0]
+    # agent_names = ['porto_ete_v5_r_collision_2', 'porto_ete_v5_r_collision_5']
+    # legend = ['-4', '-10']
+    # legend_title = 'collision penalty'
+    # ns=[0, 0]
 
-# agent_names = ['porto_ete_v5_alpha_0', 'porto_ete_v5_r_collision_5', 'porto_ete_v5_alpha_1']
-# legend = ['$10^{-4}$','$10^{-3}$', '$2 \cdot 10^{-3}$']
-# legend_title = 'Learning rate'
-# ns=[0, 0, 0]
+    # agent_names = ['porto_ete_v5_gamma_0', 'porto_ete_v5_gamma_1', 'porto_ete_v5_gamma_2', 'porto_ete_v5_r_collision_5', 'porto_ete_v5_gamma_3', 'porto_ete_v5_gamma_4']
+    # legend = ['0.9', '0.95', '0.98', '0.99', '0.999', '1']
+    # legend_title = 'gamma'
+    # ns=[0, 0, 0, 0, 0, 0]
 
-# agent_names = ['porto_ete_v5_r_collision_5']
-# legend = ['']
-# legend_title = ''
-# ns=[0]
+    # agent_names = ['porto_ete_v5_gamma_0', 'porto_ete_v5_gamma_1', 'porto_ete_v5_r_collision_5', 'porto_ete_v5_gamma_4']
+    # legend = ['0.9', '0.95', '0.99', '1']
+    # legend_title = 'gamma'
+    # ns=[0, 0, 0, 0]
+
+    # agent_names = ['porto_ete_v5_alpha_0', 'porto_ete_v5_r_collision_5', 'porto_ete_v5_alpha_1']
+    # legend = ['$10^{-4}$','$10^{-3}$', '$2 \cdot 10^{-3}$']
+    # legend_title = 'Learning rate'
+    # ns=[0, 0, 0]
+
+    # agent_names = ['porto_ete_v5_r_collision_5']
+    # legend = ['']
+    # legend_title = ''
+    # ns=[0]
+    pass
+
+#Tests all tracks
+if True:
+    # agent_names = ['circle_ete', 'circle_pete_s', 'circle_pete_v', 'circle_pete_sv']
+    # agent_names = ['porto_ete_v5_r_collision_5', 'porto_pete_s', 'porto_pete_v', 'porto_pete_sv']
+    # agent_names = ['columbia_ete', 'columbia_pete_s', 'columbia_pete_v', 'columbia_pete_sv']
+    # agent_names = ['berlin_ete', 'berlin_pete_s', 'berlin_pete_v', 'berlin_pete_sv']
+    # agent_names = ['torino_ete', 'torino_pete_s', 'torino_pete_v', 'torino_pete_sv']
+    # agent_names = ['redbull_ring_ete', 'redbull_ring_pete_s', 'redbull_ring_pete_v', 'redbull_ring_pete_sv']
+    # agent_names = ['porto_ete_1', 'porto_pete_s_1', 'porto_pete_v_1', 'porto_pete_sv_1']
+
+
+
+    agent_names = ['porto_ete_v5_r_collision_5']
+    legend = ['None', 'Steering', 'Velocity', 'Steering and velocity']
+    legend_title = 'Controller'
+    ns=[0, 0, 0 ,0]
+
+    pass
 
 # display_results_multiple.learning_curve_lap_time_average(agent_names, legend, legend_title,ns)
 # display_results_multiple.learning_curve_reward_average(agent_names, legend, legend_title)
+
+
+# for agent_name in agent_names:
+#     print('------------------------------' + '\n' + agent_name + '\n' + '------------------------------')
+#     display_results_multiple.display_train_parameters(agent_name=agent_name)
 
 # for agent_name in agent_names:
 #     print('------------------------------' + '\n' + agent_name + '\n' + '------------------------------')
@@ -812,8 +880,11 @@ main_multiple.lap_time_test(agent_name=agent_name, n_episodes=n_test, detect_iss
 
 # mismatch_parameters = ['C_Sr']
 # frac_vary = [0]
+# Porto
 # start_condition = {'x':10, 'y':4.5, 'v':3, 'theta':np.pi, 'delta':0, 'goal':0}
-# #start_condition = []
+# Columbia
+# start_condition = {'x':5.7, 'y':7.25, 'v':3, 'theta':0, 'delta':0, 'goal':0}
+#start_condition = []
 # display_results_multiple.display_path_multiple(agent_names=agent_names, ns=ns, legend_title=legend_title,          
 #                                              legend=legend, mismatch_parameters=mismatch_parameters, frac_vary=frac_vary, 
 #                                              start_condition=start_condition)
