@@ -700,21 +700,21 @@ if True:
     # a.train()
     # main_multiple.lap_time_test(agent_name=agent_name, n_episodes=n_test, detect_issues=False, initial_conditions=True)
 
-    # agent_name = 'porto_pete_s_r_dist_1'
-    # main_dict['name'] = agent_name
-    # env_dict['reward_signal']['collision'] = -1
-    # env_dict['reward_signal']['distance'] = 0.2
-    # a = main_multiple.trainingLoop(main_dict, agent_td3_dict, env_dict, load_agent='')
-    # a.train()
-    # main_multiple.lap_time_test(agent_name=agent_name, n_episodes=n_test, detect_issues=False, initial_conditions=True)
+    agent_name = 'porto_pete_s_r_dist_1'
+    main_dict['name'] = agent_name
+    env_dict['reward_signal']['collision'] = -1
+    env_dict['reward_signal']['distance'] = 0.2
+    a = main_multiple.trainingLoop(main_dict, agent_td3_dict, env_dict, load_agent='')
+    a.train()
+    main_multiple.lap_time_test(agent_name=agent_name, n_episodes=n_test, detect_issues=False, initial_conditions=True)
 
-    # agent_name = 'porto_pete_s_r_dist_2'
-    # main_dict['name'] = agent_name
-    # env_dict['reward_signal']['collision'] = -1
-    # env_dict['reward_signal']['distance'] = 0.25
-    # a = main_multiple.trainingLoop(main_dict, agent_td3_dict, env_dict, load_agent='')
-    # a.train()
-    # main_multiple.lap_time_test(agent_name=agent_name, n_episodes=n_test, detect_issues=False, initial_conditions=True)
+    agent_name = 'porto_pete_s_r_dist_2'
+    main_dict['name'] = agent_name
+    env_dict['reward_signal']['collision'] = -1
+    env_dict['reward_signal']['distance'] = 0.25
+    a = main_multiple.trainingLoop(main_dict, agent_td3_dict, env_dict, load_agent='')
+    a.train()
+    main_multiple.lap_time_test(agent_name=agent_name, n_episodes=n_test, detect_issues=False, initial_conditions=True)
 
     # agent_name = 'porto_pete_s_r_dist_3'
     # main_dict['name'] = agent_name
@@ -733,17 +733,17 @@ if True:
     # a.train()
     # main_multiple.lap_time_test(agent_name=agent_name, n_episodes=n_test, detect_issues=False, initial_conditions=True)
     
-    # agent_name = 'porto_pete_s_r_dist_5'
-    # main_dict['name'] = agent_name
-    # env_dict['map_name']='porto_1'
-    # env_dict['reward_signal']['collision'] = -1
-    # env_dict['reward_signal']['distance'] = 0.3
-    # a = main_multiple.trainingLoop(main_dict, agent_td3_dict, env_dict, load_agent='')
-    # a.train()
-    # main_multiple.lap_time_test(agent_name=agent_name, n_episodes=n_test, detect_issues=False, initial_conditions=True)
+    agent_name = 'porto_pete_s_r_dist_5'
+    main_dict['name'] = agent_name
+    env_dict['map_name']='porto_1'
+    env_dict['reward_signal']['collision'] = -1
+    env_dict['reward_signal']['distance'] = 0.3
+    a = main_multiple.trainingLoop(main_dict, agent_td3_dict, env_dict, load_agent='')
+    a.train()
+    main_multiple.lap_time_test(agent_name=agent_name, n_episodes=n_test, detect_issues=False, initial_conditions=True)
     
 
-    
+
     # agent_name = 'porto_pete_s_r_collision_0'
     # main_dict['name'] = agent_name
     # env_dict['map_name']='porto_1'
