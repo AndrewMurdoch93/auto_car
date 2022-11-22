@@ -23,7 +23,7 @@ import os
 
 agent_name = 'columbia_pete_s'
 
-main_dict = {'name':agent_name, 'max_episodes':50000, 'max_steps':2e6, 'learning_method':'td3', 'runs':1, 'comment':''}
+main_dict = {'name':agent_name, 'max_episodes':50000, 'max_steps':2e6, 'learning_method':'td3', 'runs':3, 'comment':''}
 
 agent_dqn_dict = {'gamma':0.99, 'epsilon':1, 'eps_end':0.01, 'eps_dec':1/1000, 'lr':0.001, 'batch_size':64, 'max_mem_size':500000, 
                 'fc1_dims': 64, 'fc2_dims': 64, 'fc3_dims':64}
@@ -77,7 +77,7 @@ lidar_dict = {'is_lidar':True, 'lidar_res':0.1, 'n_beams':10, 'max_range':20, 'f
 
 env_dict = {'sim_conf': functions.load_config(sys.path[0], "config")
         , 'save_history': False
-        , 'map_name': 'columbia_1'
+        , 'map_name': 'porto_1'
         , 'max_steps': 3000
         , 'control_steps': 20
         , 'display': False
@@ -726,23 +726,51 @@ if True:
     # main_multiple.lap_time_test(agent_name=agent_name, n_episodes=n_test, detect_issues=False, initial_conditions=True)
     
     
-    agent_name = 'porto_pete_s_r_dist_4'
+    # agent_name = 'porto_pete_s_r_dist_4'
+    # main_dict['name'] = agent_name
+    # env_dict['map_name']='porto_1'
+    # env_dict['reward_signal']['collision'] = -1
+    # env_dict['reward_signal']['distance'] = 0.2
+    # a = main_multiple.trainingLoop(main_dict, agent_td3_dict, env_dict, load_agent='')
+    # a.train()
+    # main_multiple.lap_time_test(agent_name=agent_name, n_episodes=n_test, detect_issues=False, initial_conditions=True)
+
+    # agent_name = 'porto_pete_s_r_dist_5'
+    # main_dict['name'] = agent_name
+    # env_dict['reward_signal']['collision'] = -1
+    # env_dict['reward_signal']['distance'] = 0.15
+    # a = main_multiple.trainingLoop(main_dict, agent_td3_dict, env_dict, load_agent='')
+    # a.train()
+    # main_multiple.lap_time_test(agent_name=agent_name, n_episodes=n_test, detect_issues=False, initial_conditions=True)
+    
+    agent_name = 'porto_pete_s_r_collision_0'
     main_dict['name'] = agent_name
     env_dict['map_name']='porto_1'
-    env_dict['reward_signal']['collision'] = -1
+    env_dict['reward_signal']['collision'] = -2
     env_dict['reward_signal']['distance'] = 0.2
     a = main_multiple.trainingLoop(main_dict, agent_td3_dict, env_dict, load_agent='')
     a.train()
     main_multiple.lap_time_test(agent_name=agent_name, n_episodes=n_test, detect_issues=False, initial_conditions=True)
 
-    agent_name = 'porto_pete_s_r_dist_5'
+    agent_name = 'porto_pete_s_r_collision_1'
     main_dict['name'] = agent_name
-    env_dict['reward_signal']['collision'] = -1
-    env_dict['reward_signal']['distance'] = 0.15
+    env_dict['map_name']='porto_1'
+    env_dict['reward_signal']['collision'] = -4
+    env_dict['reward_signal']['distance'] = 0.2
     a = main_multiple.trainingLoop(main_dict, agent_td3_dict, env_dict, load_agent='')
     a.train()
     main_multiple.lap_time_test(agent_name=agent_name, n_episodes=n_test, detect_issues=False, initial_conditions=True)
-    
+
+
+    agent_name = 'porto_pete_s_r_collision_2'
+    main_dict['name'] = agent_name
+    env_dict['map_name']='porto_1'
+    env_dict['reward_signal']['collision'] = -8
+    env_dict['reward_signal']['distance'] = 0.2
+    a = main_multiple.trainingLoop(main_dict, agent_td3_dict, env_dict, load_agent='')
+    a.train()
+    main_multiple.lap_time_test(agent_name=agent_name, n_episodes=n_test, detect_issues=False, initial_conditions=True)
+
 
     pass
 
@@ -891,6 +919,20 @@ if True:
 
     pass
 
+# test porto pete steer
+if True:
+    agent_names = ['porto_pete_s_r_collision_0', 'porto_pete_s_r_collision_2']
+
+    legend = ['-2', '-6']
+    legend_title = 'Collision penalty'
+    ns=[0, 0, 0]
+
+
+    pass
+
+
+
+
 # display_results_multiple.learning_curve_lap_time_average(agent_names, legend, legend_title,ns)
 # display_results_multiple.learning_curve_reward_average(agent_names, legend, legend_title)
 
@@ -903,16 +945,16 @@ if True:
 #     print('------------------------------' + '\n' + agent_name + '\n' + '------------------------------')
 #     display_results_multiple.display_lap_results(agent_name=agent_name)
 
-mismatch_parameters = ['C_Sr']
-frac_vary = [0]
-# Porto
+# mismatch_parameters = ['C_Sr']
+# frac_vary = [-0.2]
+# # Porto
 # start_condition = {'x':10, 'y':4.5, 'v':3, 'theta':np.pi, 'delta':0, 'goal':0}
-# Columbia
-# start_condition = {'x':5.7, 'y':7.25, 'v':3, 'theta':0, 'delta':0, 'goal':0}
-start_condition = []
-display_results_multiple.display_path_multiple(agent_names=agent_names, ns=ns, legend_title=legend_title,          
-                                             legend=legend, mismatch_parameters=mismatch_parameters, frac_vary=frac_vary, 
-                                             start_condition=start_condition)
+# # Columbia
+# # start_condition = {'x':5.7, 'y':7.25, 'v':3, 'theta':0, 'delta':0, 'goal':0}
+# #start_condition = []
+# display_results_multiple.display_path_multiple(agent_names=agent_names, ns=ns, legend_title=legend_title,          
+#                                              legend=legend, mismatch_parameters=mismatch_parameters, frac_vary=frac_vary, 
+#                                              start_condition=start_condition)
 
 
 
