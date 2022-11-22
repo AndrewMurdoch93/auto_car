@@ -599,8 +599,8 @@ def lap_time_test(agent_name, n_episodes, detect_issues, initial_conditions):
 
       for episode in range(n_episodes):
 
-         #env.reset(save_history=True, start_condition=start_conditions[episode], get_lap_time=True, car_params=car_params)
-         env.reset(save_history=True, start_condition=[], get_lap_time=True, car_params=car_params)
+         env.reset(save_history=True, start_condition=start_conditions[episode], get_lap_time=True, car_params=car_params)
+         #env.reset(save_history=True, start_condition=[], get_lap_time=True, car_params=car_params)
          
          action_history = []
          obs = env.observation
