@@ -2,6 +2,7 @@ from audioop import avg
 from configparser import BasicInterpolation
 from re import S
 from statistics import median
+from threading import local
 from xmlrpc.client import ProtocolError
 import numpy as np
 import agent_dqn
@@ -1769,6 +1770,7 @@ def display_path_multiple(agent_names, ns, legend_title, legend, mismatch_parame
     pose_history = []
     progress_history = []
     state_history = []
+    local_path_history = []
     
     for agent_name, n, i in zip(agent_names, ns, range(len(agent_names))):
 
@@ -1857,6 +1859,7 @@ def display_path_multiple(agent_names, ns, legend_title, legend, mismatch_parame
         state_history.append(env.state_history)
         pose_history.append(env.pose_history)
         progress_history.append(env.progress_history)
+        local_path_history.append(env.local_path_history)
         
         
         
@@ -1869,8 +1872,6 @@ def display_path_multiple(agent_names, ns, legend_title, legend, mismatch_parame
 
     legend_racetrack = legend.copy()
     legend_racetrack.insert(0, 'Track centerline')
-
-
 
 
 
@@ -1892,8 +1893,14 @@ def display_path_multiple(agent_names, ns, legend_title, legend, mismatch_parame
     ax.plot(env.rx, env.ry, color='gray', linestyle='dashed')
     
     for i in range(len(agent_names)):
-        ax.plot(np.array(pose_history[i])[:,0], np.array(pose_history[i])[:,1], linewidth=1.5)   
-  
+   
+        if env_dict['steer_control_dict']['steering_control']:
+            for j in np.array(local_path_history[i])[np.arange(0,len(local_path_history[i]),40)]:
+                ax.plot(j[0], j[1], alpha=0.7, linestyle='dashdot', color='red')
+                ax.plot(j[0][0], j[1][0], alpha=0.7, color='red', marker='s')
+        # ax.plot(np.array(pose_history[i])[:,0], np.array(pose_history[i])[:,1], linewidth=1.5) 
+        ax.plot(np.array(pose_history[i])[:,0], np.array(pose_history[i])[:,1], linewidth=2)    
+
     prog = np.array([0, 0.2, 0.4, 0.6, 0.8])
     idx =  np.zeros(len(prog), int)
     text = ['Start', '20%', '40%', '60%', '80%']
