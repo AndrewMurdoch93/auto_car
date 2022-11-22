@@ -572,8 +572,13 @@ if __name__ == '__main__':
     #occupancy_grid, map_height, map_width, res = map_generator(map_name='circle')
     #a = lidar_scan(res, 3, 10, np.pi, occupancy_grid, res, 30)
     #print(a.get_scan(15,5,0))
-    generate_initial_condition('berlin', 2000, distance_offset=0.2, angle_offset=np.pi/8, vel_select=[3,6])
-
+    
+    generate_initial_condition('porto_1', 2000, distance_offset=0.2, angle_offset=np.pi/8, vel_select=[3,5])
+    generate_initial_condition('columbia_1', 2000, distance_offset=0.2, angle_offset=np.pi/8, vel_select=[3,5])
+    generate_initial_condition('circle', 2000, distance_offset=0.2, angle_offset=np.pi/8, vel_select=[3,5])
+    generate_initial_condition('berlin', 2000, distance_offset=0.2, angle_offset=np.pi/8, vel_select=[3,5])
+    generate_initial_condition('torino', 2000, distance_offset=0.2, angle_offset=np.pi/8, vel_select=[3,5])
+    generate_initial_condition('redbull_ring', 2000, distance_offset=0.2, angle_offset=np.pi/8, vel_select=[3,5])
 
     #im = image.imread(image_path)
     #plt.imshow(im, extent=(0,30,0,30))

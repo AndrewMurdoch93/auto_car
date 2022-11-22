@@ -695,16 +695,15 @@ if True:
     # main_dict['name'] = agent_name
     # env_dict['map_name']='porto_1'
     # env_dict['reward_signal']['collision'] = -1
-    # env_dict['reward_signal']['distance'] = 0.25
+    # env_dict['reward_signal']['distance'] = 0.15
     # a = main_multiple.trainingLoop(main_dict, agent_td3_dict, env_dict, load_agent='')
     # a.train()
     # main_multiple.lap_time_test(agent_name=agent_name, n_episodes=n_test, detect_issues=False, initial_conditions=True)
 
     # agent_name = 'porto_pete_s_r_dist_1'
     # main_dict['name'] = agent_name
-
     # env_dict['reward_signal']['collision'] = -1
-    # env_dict['reward_signal']['distance'] = 0.4
+    # env_dict['reward_signal']['distance'] = 0.2
     # a = main_multiple.trainingLoop(main_dict, agent_td3_dict, env_dict, load_agent='')
     # a.train()
     # main_multiple.lap_time_test(agent_name=agent_name, n_episodes=n_test, detect_issues=False, initial_conditions=True)
@@ -712,7 +711,7 @@ if True:
     # agent_name = 'porto_pete_s_r_dist_2'
     # main_dict['name'] = agent_name
     # env_dict['reward_signal']['collision'] = -1
-    # env_dict['reward_signal']['distance'] = 0.5
+    # env_dict['reward_signal']['distance'] = 0.25
     # a = main_multiple.trainingLoop(main_dict, agent_td3_dict, env_dict, load_agent='')
     # a.train()
     # main_multiple.lap_time_test(agent_name=agent_name, n_episodes=n_test, detect_issues=False, initial_conditions=True)
@@ -720,56 +719,58 @@ if True:
     # agent_name = 'porto_pete_s_r_dist_3'
     # main_dict['name'] = agent_name
     # env_dict['reward_signal']['collision'] = -1
-    # env_dict['reward_signal']['distance'] = 0.6
+    # env_dict['reward_signal']['distance'] = 0.4
     # a = main_multiple.trainingLoop(main_dict, agent_td3_dict, env_dict, load_agent='')
     # a.train()
     # main_multiple.lap_time_test(agent_name=agent_name, n_episodes=n_test, detect_issues=False, initial_conditions=True)
-    
     
     # agent_name = 'porto_pete_s_r_dist_4'
     # main_dict['name'] = agent_name
     # env_dict['map_name']='porto_1'
     # env_dict['reward_signal']['collision'] = -1
+    # env_dict['reward_signal']['distance'] = 0.5
+    # a = main_multiple.trainingLoop(main_dict, agent_td3_dict, env_dict, load_agent='')
+    # a.train()
+    # main_multiple.lap_time_test(agent_name=agent_name, n_episodes=n_test, detect_issues=False, initial_conditions=True)
+    
+    # agent_name = 'porto_pete_s_r_dist_5'
+    # main_dict['name'] = agent_name
+    # env_dict['map_name']='porto_1'
+    # env_dict['reward_signal']['collision'] = -1
+    # env_dict['reward_signal']['distance'] = 0.3
+    # a = main_multiple.trainingLoop(main_dict, agent_td3_dict, env_dict, load_agent='')
+    # a.train()
+    # main_multiple.lap_time_test(agent_name=agent_name, n_episodes=n_test, detect_issues=False, initial_conditions=True)
+    
+
+    
+    # agent_name = 'porto_pete_s_r_collision_0'
+    # main_dict['name'] = agent_name
+    # env_dict['map_name']='porto_1'
+    # env_dict['reward_signal']['collision'] = -2
     # env_dict['reward_signal']['distance'] = 0.2
     # a = main_multiple.trainingLoop(main_dict, agent_td3_dict, env_dict, load_agent='')
     # a.train()
     # main_multiple.lap_time_test(agent_name=agent_name, n_episodes=n_test, detect_issues=False, initial_conditions=True)
 
-    # agent_name = 'porto_pete_s_r_dist_5'
+    # agent_name = 'porto_pete_s_r_collision_1'
     # main_dict['name'] = agent_name
-    # env_dict['reward_signal']['collision'] = -1
-    # env_dict['reward_signal']['distance'] = 0.15
+    # env_dict['map_name']='porto_1'
+    # env_dict['reward_signal']['collision'] = -4
+    # env_dict['reward_signal']['distance'] = 0.2
     # a = main_multiple.trainingLoop(main_dict, agent_td3_dict, env_dict, load_agent='')
     # a.train()
     # main_multiple.lap_time_test(agent_name=agent_name, n_episodes=n_test, detect_issues=False, initial_conditions=True)
-    
-    agent_name = 'porto_pete_s_r_collision_0'
-    main_dict['name'] = agent_name
-    env_dict['map_name']='porto_1'
-    env_dict['reward_signal']['collision'] = -2
-    env_dict['reward_signal']['distance'] = 0.2
-    a = main_multiple.trainingLoop(main_dict, agent_td3_dict, env_dict, load_agent='')
-    a.train()
-    main_multiple.lap_time_test(agent_name=agent_name, n_episodes=n_test, detect_issues=False, initial_conditions=True)
-
-    agent_name = 'porto_pete_s_r_collision_1'
-    main_dict['name'] = agent_name
-    env_dict['map_name']='porto_1'
-    env_dict['reward_signal']['collision'] = -4
-    env_dict['reward_signal']['distance'] = 0.2
-    a = main_multiple.trainingLoop(main_dict, agent_td3_dict, env_dict, load_agent='')
-    a.train()
-    main_multiple.lap_time_test(agent_name=agent_name, n_episodes=n_test, detect_issues=False, initial_conditions=True)
 
 
-    agent_name = 'porto_pete_s_r_collision_2'
-    main_dict['name'] = agent_name
-    env_dict['map_name']='porto_1'
-    env_dict['reward_signal']['collision'] = -8
-    env_dict['reward_signal']['distance'] = 0.2
-    a = main_multiple.trainingLoop(main_dict, agent_td3_dict, env_dict, load_agent='')
-    a.train()
-    main_multiple.lap_time_test(agent_name=agent_name, n_episodes=n_test, detect_issues=False, initial_conditions=True)
+    # agent_name = 'porto_pete_s_r_collision_2'
+    # main_dict['name'] = agent_name
+    # env_dict['map_name']='porto_1'
+    # env_dict['reward_signal']['collision'] = -8
+    # env_dict['reward_signal']['distance'] = 0.2
+    # a = main_multiple.trainingLoop(main_dict, agent_td3_dict, env_dict, load_agent='')
+    # a.train()
+    # main_multiple.lap_time_test(agent_name=agent_name, n_episodes=n_test, detect_issues=False, initial_conditions=True)
 
 
     pass
@@ -921,19 +922,26 @@ if True:
 
 # test porto pete steer
 if True:
-    agent_names = ['porto_pete_s_r_collision_0', 'porto_pete_s_r_collision_2']
+    # agent_names = ['porto_pete_s_r_dist_1', 'porto_pete_s_r_collision_0', 'porto_pete_s_r_collision_1', 'porto_pete_s_r_collision_2']
+    # legend = ['-1', '-2', '-4', '-8']
+    # legend_title = 'Collision penalty'
+    # ns=[0, 0, 0, 0]
 
-    legend = ['-2', '-6']
-    legend_title = 'Collision penalty'
-    ns=[0, 0, 0]
+    # # agent_names = ['porto_pete_s_r_dist_0', 'porto_pete_s_r_dist_1', 'porto_pete_s_r_dist_2', 'porto_pete_s_r_dist_3', 'porto_pete_s_r_dist_4']
+    # legend = ['0.15', '0.2', '0.25', '0.4', '0.5']
+    # legend_title = 'Distance reward'
+    # # ns=[0, 0, 0, 0, 0]
 
+
+    # agent_names = ['porto_pete_s_r_dist_1']
+    # ns = [2]
 
     pass
 
 
 
 
-# display_results_multiple.learning_curve_lap_time_average(agent_names, legend, legend_title,ns)
+# display_results_multiple.learning_curve_lap_time_average(agent_names, legend, legend_title, ns)
 # display_results_multiple.learning_curve_reward_average(agent_names, legend, legend_title)
 
 
@@ -941,20 +949,20 @@ if True:
 #     print('------------------------------' + '\n' + agent_name + '\n' + '------------------------------')
 #     display_results_multiple.display_train_parameters(agent_name=agent_name)
 
-# for agent_name in agent_names:
-#     print('------------------------------' + '\n' + agent_name + '\n' + '------------------------------')
-#     display_results_multiple.display_lap_results(agent_name=agent_name)
+for agent_name in agent_names:
+    print('------------------------------' + '\n' + agent_name + '\n' + '------------------------------')
+    display_results_multiple.display_lap_results(agent_name=agent_name)
 
-# mismatch_parameters = ['C_Sr']
-# frac_vary = [-0.2]
-# # Porto
-# start_condition = {'x':10, 'y':4.5, 'v':3, 'theta':np.pi, 'delta':0, 'goal':0}
-# # Columbia
-# # start_condition = {'x':5.7, 'y':7.25, 'v':3, 'theta':0, 'delta':0, 'goal':0}
-# #start_condition = []
-# display_results_multiple.display_path_multiple(agent_names=agent_names, ns=ns, legend_title=legend_title,          
-#                                              legend=legend, mismatch_parameters=mismatch_parameters, frac_vary=frac_vary, 
-#                                              start_condition=start_condition)
+mismatch_parameters = ['C_Sf']
+frac_vary = [0]
+# Porto
+start_condition = {'x':10, 'y':4.5, 'v':3, 'theta':np.pi, 'delta':0, 'goal':0}
+# Columbia
+# start_condition = {'x':5.7, 'y':7.25, 'v':3, 'theta':0, 'delta':0, 'goal':0}
+start_condition = []
+display_results_multiple.display_path_multiple(agent_names=agent_names, ns=ns, legend_title=legend_title,          
+                                             legend=legend, mismatch_parameters=mismatch_parameters, frac_vary=frac_vary, 
+                                             start_condition=start_condition)
 
 
 

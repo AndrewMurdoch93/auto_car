@@ -1835,7 +1835,7 @@ def display_path_multiple(agent_names, ns, legend_title, legend, mismatch_parame
         env.reset(save_history=True, start_condition=start_condition, car_params=env_dict['car_params'])
         obs = env.observation
         done = False
-        score=0
+        score = 0
 
         while not done:
             if main_dict['learning_method']=='ddpg' or main_dict['learning_method']=='td3':
@@ -1936,7 +1936,7 @@ def display_path_multiple(agent_names, ns, legend_title, legend, mismatch_parame
     plt.ylabel('Longitudinal velocity [m/s]',**myfont)
     plt.legend(legend_new, title=legend_title, loc='lower right')
     plt.xlim(xlims)
-    plt.ylim([env_dict['action_space_dict']['vel_select'][0]-0.2, env_dict['action_space_dict']['vel_select'][1]+0.2])
+    #plt.ylim([env_dict['action_space_dict']['vel_select'][0]-0.2, env_dict['action_space_dict']['vel_select'][1]+0.2])
     plt.grid(True, color='lightgrey')
 
     plt.tick_params(axis=u'both', which=u'both',length=0)

@@ -139,12 +139,18 @@ class environment():
         
         #Inialise state variables
         if self.start_condition:
+            
             self.x = self.start_condition['x']
             self.y = self.start_condition['y']
             self.v = self.start_condition['v']
             self.theta = self.start_condition['theta']
             self.delta = self.start_condition['delta']
             self.current_goal = self.start_condition['goal']
+
+            if self.v > self.vel_select[1]:
+                print("Incorrect velocity initialisation")
+                self.v = self.vel_select[0]
+
         else:
             
             k = [i for i in range(len(self.rk)) if abs(self.rk[i])>1]
@@ -160,11 +166,17 @@ class environment():
             #self.x, self.y, self.theta, self.current_goal = functions.random_start(rx, ry, ryaw, distance_offset, angle_offset)
             self.x, self.y, self.theta, self.current_goal = functions.random_start(x, y, yaw, distance_offset, angle_offset)
             self.v = random.random()*(self.vel_select[1]-self.vel_select[0])+self.vel_select[0]
+            if self.v >self.vel_select[1]:
+                print("Incorrect velocity initialisation")
             #self.v = random.random()*7
             #self.v=0    
             #self.v = 20
             self.delta = 0
         
+        if self.v > self.vel_select[1]:
+            print("Incorrect velocity initialisation")
+            self.v = self.vel_select[0]
+
         self.theta_dot = 0      
         self.delta_dot = 0
         self.slip_angle = 0
@@ -430,6 +442,9 @@ class environment():
 
         if self.display==True:
             print(reward)        
+        
+        if self.v>self.vel_select[1]+0.5:
+            print("Incorrect velocity action")
         
         return self.observation, reward, done
     
