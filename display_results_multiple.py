@@ -1896,8 +1896,8 @@ def display_path_multiple(agent_names, ns, legend_title, legend, mismatch_parame
    
         if env_dict['steer_control_dict']['steering_control']:
             for j in np.array(local_path_history[i])[np.arange(0,len(local_path_history[i]),40)]:
-                ax.plot(j[0], j[1], alpha=0.7, linestyle='dashdot', color='red')
-                ax.plot(j[0][0], j[1][0], alpha=0.7, color='red', marker='s')
+                ax.plot(j[0], j[1], alpha=0.5, linestyle='dashdot', color='red')
+                ax.plot(j[0][0], j[1][0], alpha=0.5, color='red', marker='s')
         # ax.plot(np.array(pose_history[i])[:,0], np.array(pose_history[i])[:,1], linewidth=1.5) 
         ax.plot(np.array(pose_history[i])[:,0], np.array(pose_history[i])[:,1], linewidth=2)    
 
