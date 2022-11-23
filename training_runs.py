@@ -927,18 +927,18 @@ if True:
     # ns=[0, 0, 0, 0]
 
     # agent_names = ['porto_pete_s_r_dist_0', 'porto_pete_s_r_dist_1', 'porto_pete_s_r_dist_2', 'porto_pete_s_r_dist_3', 'porto_pete_s_r_dist_4']
-    legend = ['0.15', '0.2', '0.25', '0.4', '0.5']
-    legend_title = 'Distance reward'
-    ns=[0, 0, 0, 0, 0]
+    # legend = ['0.15', '0.2', '0.25', '0.4', '0.5']
+    # legend_title = 'Distance reward'
+    # ns=[0, 0, 0, 0, 0]
 
     # agent_names = ['porto_pete_s_r_dist_1']
-    # legend = ['0.15']
-    # legend_title = 'Distance reward'
+    legend = ['0.15']
+    legend_title = 'Distance reward'
     # ns=[2]
 
 
-    agent_names = ['porto_pete_s_r_dist_1']
-    ns = [2]
+    agent_names = ['porto_pete_s_r_collision_0']
+    ns = [1]
 
     pass
 
