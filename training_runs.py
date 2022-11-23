@@ -21,7 +21,7 @@ import os
 
 
 
-agent_name = 'columbia_pete_s'
+agent_name = 'porto_pete_s_lfc_0'
 
 main_dict = {'name':agent_name, 'max_episodes':50000, 'max_steps':2e6, 'learning_method':'td3', 'runs':3, 'comment':''}
 
@@ -55,7 +55,7 @@ car_params =   {'mu': 1.0489, 'C_Sf': 4.718, 'C_Sr': 5.4562, 'lf': 0.15875, 'lr'
                 , 'sv_max': 3.2, 'v_switch': 7.319, 'a_max': 9.51, 'v_min':-5.0, 'v_max': 20.0, 'width': 0.31, 'length': 0.58}
 
 reward_signal = {'goal_reached':0, 'out_of_bounds':-1, 'max_steps':0, 'collision':-10, 
-                    'backwards':-0.01, 'park':-1, 'time_step':-0.01, 'progress':0, 'distance':0.3, 
+                    'backwards':-0.01, 'park':-1, 'time_step':-0.01, 'progress':0, 'distance':0.2, 
                     'max_progress':0}    
 
 action_space_dict = {'action_space': 'continuous', 'vel_select':[3,5], 'R_range':[2]}
@@ -772,6 +772,35 @@ if True:
     # main_multiple.lap_time_test(agent_name=agent_name, n_episodes=n_test, detect_issues=False, initial_conditions=True)
 
 
+    # agent_name = 'porto_pete_s_lfc_0'
+    # main_dict['name'] = agent_name
+    # env_dict['steer_control_dict']['Lfc'] = 0.5
+    # a = main_multiple.trainingLoop(main_dict, agent_td3_dict, env_dict, load_agent='')
+    # a.train()
+    # main_multiple.lap_time_test(agent_name=agent_name, n_episodes=n_test, detect_issues=False, initial_conditions=True)
+
+    # agent_name = 'porto_pete_s_lfc_1'
+    # main_dict['name'] = agent_name
+    # env_dict['steer_control_dict']['Lfc'] = 1.5
+    # a = main_multiple.trainingLoop(main_dict, agent_td3_dict, env_dict, load_agent='')
+    # a.train()
+    # main_multiple.lap_time_test(agent_name=agent_name, n_episodes=n_test, detect_issues=False, initial_conditions=True)
+
+    # agent_name = 'porto_pete_s_lfc_2'
+    # main_dict['name'] = agent_name
+    # env_dict['steer_control_dict']['Lfc'] = 2
+    # a = main_multiple.trainingLoop(main_dict, agent_td3_dict, env_dict, load_agent='')
+    # a.train()
+    # main_multiple.lap_time_test(agent_name=agent_name, n_episodes=n_test, detect_issues=False, initial_conditions=True)
+
+    # agent_name = 'porto_pete_s_lfc_3'
+    # main_dict['name'] = agent_name
+    # env_dict['steer_control_dict']['Lfc'] = 2.5
+    # a = main_multiple.trainingLoop(main_dict, agent_td3_dict, env_dict, load_agent='')
+    # a.train()
+    # main_multiple.lap_time_test(agent_name=agent_name, n_episodes=n_test, detect_issues=False, initial_conditions=True)
+
+
     pass
 
 
@@ -931,14 +960,16 @@ if True:
     # legend_title = 'Distance reward'
     # ns=[0, 0, 0, 0, 0]
 
+    #agent_names = ['porto_pete_s_r_collision_3', 'porto_pete_s_r_collision_4', 'porto_pete_s_r_collision_5', 'porto_pete_s']
+
     # agent_names = ['porto_pete_s_r_dist_1']
-    legend = ['0.15']
-    legend_title = 'Distance reward'
+    # legend = ['-2', '-4', '-8', '-10']
+    # legend_title = 'Collision penalty'
     # ns=[2]
 
 
-    agent_names = ['porto_pete_s_r_collision_0']
-    ns = [1]
+    # agent_names = ['porto_pete_s_r_collision_0']
+    # ns = [1]
 
     pass
 
@@ -957,16 +988,16 @@ if True:
 #     print('------------------------------' + '\n' + agent_name + '\n' + '------------------------------')
 #     display_results_multiple.display_lap_results(agent_name=agent_name)
 
-mismatch_parameters = ['C_Sf']
-frac_vary = [0]
-# Porto
-start_condition = {'x':10, 'y':4.5, 'v':3, 'theta':np.pi, 'delta':0, 'goal':0}
-# Columbia
-# start_condition = {'x':5.7, 'y':7.25, 'v':3, 'theta':0, 'delta':0, 'goal':0}
-#start_condition = []
-display_results_multiple.display_path_multiple(agent_names=agent_names, ns=ns, legend_title=legend_title,          
-                                             legend=legend, mismatch_parameters=mismatch_parameters, frac_vary=frac_vary, 
-                                             start_condition=start_condition)
+# mismatch_parameters = ['C_Sf']
+# frac_vary = [0]
+# # Porto
+# start_condition = {'x':10, 'y':4.5, 'v':3, 'theta':np.pi, 'delta':0, 'goal':0}
+# # Columbia
+# # start_condition = {'x':5.7, 'y':7.25, 'v':3, 'theta':0, 'delta':0, 'goal':0}
+# #start_condition = []
+# display_results_multiple.display_path_multiple(agent_names=agent_names, ns=ns, legend_title=legend_title,          
+#                                              legend=legend, mismatch_parameters=mismatch_parameters, frac_vary=frac_vary, 
+#                                              start_condition=start_condition)
 
 
 
