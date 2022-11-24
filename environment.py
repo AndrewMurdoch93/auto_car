@@ -21,6 +21,8 @@ import cubic_spline_planner
 import agent_td3
 import os
 import frenet_optimal_trajectory
+from PIL import Image, ImageOps, ImageDraw, ImageFilter
+
 
 class environment():
 
@@ -89,20 +91,20 @@ class environment():
         #Initialise map and goal settings
         #self.occupancy_grid, self.map_height, c, self.map_res = functions.map_generator(map_name = self.map_name)
         
-        track = mapping.map(self.map_name)
-        self.occupancy_grid = track.occupancy_grid
-        self.map_height = track.map_height
-        self.map_width = track.map_width
-        self.map_res = track.resolution
+        self.track = mapping.map(self.map_name)
+        self.occupancy_grid = self.track.occupancy_grid
+        self.map_height = self.track.map_height
+        self.map_width = self.track.map_width
+        self.map_res = self.track.resolution
 
         self.s=2
 
         image_path = sys.path[0] + '/maps/' + input_dict['map_name'] + '.png'
         self.im = image.imread(image_path)
         
-        track.find_centerline()
-        self.goal_x = track.centerline[:,0]
-        self.goal_y = track.centerline[:,1]
+        self.track.find_centerline()
+        self.goal_x = self.track.centerline[:,0]
+        self.goal_y = self.track.centerline[:,1]
         self.goals=[]
         self.max_goals_reached=False
         for x,y in zip(self.goal_x, self.goal_y):
@@ -618,7 +620,11 @@ class environment():
         current_goal = self.goals[self.current_goal]
         plt.cla()
         plt.gcf().canvas.mpl_connect('key_release_event', lambda event: [exit(0) if event.key == 'escape' else None])
-        plt.imshow(self.im, extent=(0,self.map_width,0,self.map_height))
+        
+        plt.imshow(ImageOps.invert(self.track.gray_im.filter(ImageFilter.FIND_EDGES).filter(ImageFilter.MaxFilter(1))), extent=(0,self.track.map_width,0,self.track.map_height), cmap="gray")
+        plt.plot(self.rx, self.ry, color='gray', linestyle='dashed')
+        
+     
         
         if self.steering_control==True:
             plt.plot(self.path_tracker.cx, self.path_tracker.cy)
@@ -1013,36 +1019,42 @@ def test_environment():
     steer_control_dict = {'steering_control': True, 'wpt_arc':np.pi/2}
 
     if  steer_control_dict['steering_control'] == True:
-        steer_control_dict['path_strategy'] = 'circle'  #circle or linear or polynomial or gradient
+        steer_control_dict['path_strategy'] = 'polynomial'  #circle or linear or polynomial or gradient
         steer_control_dict['control_strategy'] = 'pure_pursuit'  #pure_pursuit or stanley
+        steer_control_dict['track_width'] = 1
+
+
     if steer_control_dict['control_strategy'] == 'pure_pursuit':
         steer_control_dict['track_dict'] = {'k':0.1, 'Lfc':1}
     if steer_control_dict['control_strategy'] == 'stanley':
         steer_control_dict['track_dict'] = {'l_front': car_params['lf'], 'k':5, 'max_steer':car_params['s_max']}
-   
-    lidar_dict = {'is_lidar':True, 'lidar_res':0.1, 'n_beams':8, 'max_range':20, 'fov':np.pi}
-   
+
+    lidar_dict = {'is_lidar':True, 'lidar_res':0.1, 'n_beams':10, 'max_range':20, 'fov':np.pi}
+
     env_dict = {'sim_conf': functions.load_config(sys.path[0], "config")
             , 'save_history': False
-            , 'map_name': 'circle'
+            , 'map_name': 'porto_1'
             , 'max_steps': 3000
             , 'control_steps': 20
             , 'display': True
-            , 'velocity_control': True
+            , 'velocity_control': False
             , 'steer_control_dict': steer_control_dict
             , 'car_params':car_params
             , 'reward_signal':reward_signal
             , 'lidar_dict':lidar_dict
+            , 'only_lidar':False
             , 'action_space_dict':action_space_dict
             } 
     
     env_dict['name'] = 'test'
     
     # initial_condition = {'x':8.18, 'y':26.24, 'v':4, 'delta':0, 'theta':np.pi, 'goal':1}
-    initial_condition = {'x':16, 'y':7, 'v':0.101, 'delta':0, 'theta':0, 'goal':1}
+    #initial_condition = {'x':16, 'y':7, 'v':0.101, 'delta':0, 'theta':0, 'goal':1}
+    
     # initial_condition = {'x':6, 'y':6.5, 'v':4, 'delta':0, 'theta':np.pi, 'goal':1}
     #initial_condition = []
     
+    initial_condition = {'x':12.13, 'y':1.60, 'v':3, 'theta':-np.pi/5, 'delta':0, 'goal':0}
 
     env = environment(env_dict)
     env.reset(save_history=True, start_condition=initial_condition, get_lap_time=False, car_params=env_dict['car_params'])
@@ -1050,7 +1062,7 @@ def test_environment():
     #a = agent_td3.agent(agent_dict)
     #a.load_weights(agent_name, n)
     
-    action_history = np.ones((1000,2))*0
+    action_history = np.ones((1000,2))*1
     action_history[:,1] = np.ones(1000)*1
 
     done=False

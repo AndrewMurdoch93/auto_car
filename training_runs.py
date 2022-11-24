@@ -1042,13 +1042,13 @@ if True:
     # agent_names = ['porto_pete_s_r_dist_5', 'porto_pete_s_r_collision_3', 'porto_pete_s_r_collision_4', 'porto_pete_s_r_collision_5', 'porto_pete_s']
 
     # agent_names = ['porto_pete_s_r_dist_1']
-    # legend = ['-1', '-2', '-4', '-8', '-10']
-    # legend_title = 'Collision penalty'
+    legend = ['-1', '-2', '-4', '-8', '-10']
+    legend_title = 'Collision penalty'
     # ns=[2]
 
 
-    # agent_names = ['porto_pete_s_r_collision_0']
-    # ns = [1]
+    agent_names = ['porto_pete_s_r_collision_0']
+    ns = [1]
 
     # agent_names = ['porto_pete_s_lfc_0', 'porto_pete_s_lfc_1', 'porto_pete_s_lfc_2', 'porto_pete_s_lfc_3']
     # legend = ['0.5', '1', '1.5', '2', '2,5']
@@ -1060,10 +1060,19 @@ if True:
     # legend_title = 'Path tracker'
 
     agent_names = ['porto_pete_s_polynomial']
-    ns = [2]
+    ns = [1]
     legend = ['Polynomial']
     legend_title = 'Path'
 
+    # agent_names = ['porto_pete_s_lfc_0', 'porto_pete_s_lfc_3']
+    # ns = [0,0]
+    # legend = ['circle']
+    # legend_title = 'Path'
+
+    # agent_names = ['porto_pete_s_r_collision_0', 'porto_pete_s_polynomial']
+    # ns = [2, 0]
+    # legend = ['circle', 'polynomial']
+    # legend_title = 'Path'
 
 
     pass
@@ -1077,20 +1086,21 @@ if True:
 #     print('------------------------------' + '\n' + agent_name + '\n' + '------------------------------')
 #     display_results_multiple.display_train_parameters(agent_name=agent_name)
 
-for agent_name in agent_names:
-    print('------------------------------' + '\n' + agent_name + '\n' + '------------------------------')
-    display_results_multiple.display_lap_results(agent_name=agent_name)
+# for agent_name in agent_names:
+#     print('------------------------------' + '\n' + agent_name + '\n' + '------------------------------')
+#     display_results_multiple.display_lap_results(agent_name=agent_name)
 
-# mismatch_parameters = ['C_Sf']
-# frac_vary = [0]
-# # Porto
-# # start_condition = {'x':10, 'y':4.5, 'v':3, 'theta':np.pi, 'delta':0, 'goal':0}
-# # Columbia
-# # start_condition = {'x':5.7, 'y':7.25, 'v':3, 'theta':0, 'delta':0, 'goal':0}
-# start_condition = []
-# display_results_multiple.display_path_multiple(agent_names=agent_names, ns=ns, legend_title=legend_title,          
-#                                              legend=legend, mismatch_parameters=mismatch_parameters, frac_vary=frac_vary, 
-#                                              start_condition=start_condition)
+mismatch_parameters = ['C_Sf']
+frac_vary = [0]
+# Porto
+#start_condition = {'x':10, 'y':4.5, 'v':3, 'theta':np.pi, 'delta':0, 'goal':0}
+start_condition = {'x':12.13, 'y':1.60, 'v':5, 'theta':-np.pi/3, 'delta':0, 'goal':0}
+# Columbia
+# start_condition = {'x':5.7, 'y':7.25, 'v':3, 'theta':0, 'delta':0, 'goal':0}
+#start_condition = []
+display_results_multiple.display_path_multiple(agent_names=agent_names, ns=ns, legend_title=legend_title,          
+                                             legend=legend, mismatch_parameters=mismatch_parameters, frac_vary=frac_vary, 
+                                             start_condition=start_condition)
 
 
 
