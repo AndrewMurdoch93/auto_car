@@ -848,6 +848,7 @@ if __name__=='__main__':
    if  steer_control_dict['steering_control'] == True:
       steer_control_dict['path_strategy'] = 'circle'  #circle or linear or polynomial or gradient
       steer_control_dict['control_strategy'] = 'pure_pursuit'  #pure_pursuit or stanley
+      steer_control_dict['track_width'] = 1
    
       if steer_control_dict['control_strategy'] == 'pure_pursuit':
          steer_control_dict['track_dict'] = {'k':0.1, 'Lfc':1}

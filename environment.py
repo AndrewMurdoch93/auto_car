@@ -125,7 +125,8 @@ class environment():
                         , occupancy_grid=self.occupancy_grid, map_res=self.map_res, map_height=self.map_height)
         
         self.episode = 0
-
+        if self.steering_control==True and self.path_strategy=='polynomial':
+            self.track_width = self.input_dict['steer_control_dict']['track_width']
 
     def reset(self, save_history, start_condition, car_params ,get_lap_time=False):
         self.max_progress=1
@@ -446,6 +447,7 @@ class environment():
         if self.v>self.vel_select[1]+0.5:
             print("Incorrect velocity action")
         
+
         return self.observation, reward, done
     
     
@@ -476,7 +478,7 @@ class environment():
         return np.array(cx), np.array(cy), np.array(cyaw)
     
     def define_path_polynomial(self, param):
-        track_width = 3
+        track_width = self.track_width
         ds=0.1
         s_0, s_0_ind, n_0 = functions.convert_xy_to_sn(self.rx, self.ry, self.ryaw, self.x, self.y, ds)
         s_1 = s_0 + 3
