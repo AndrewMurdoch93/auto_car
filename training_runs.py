@@ -772,33 +772,33 @@ if True:
     # main_multiple.lap_time_test(agent_name=agent_name, n_episodes=n_test, detect_issues=False, initial_conditions=True)
 
 
-    # agent_name = 'porto_pete_s_lfc_0'
-    # main_dict['name'] = agent_name
-    # env_dict['steer_control_dict']['Lfc'] = 0.5
-    # a = main_multiple.trainingLoop(main_dict, agent_td3_dict, env_dict, load_agent='')
-    # a.train()
-    # main_multiple.lap_time_test(agent_name=agent_name, n_episodes=n_test, detect_issues=False, initial_conditions=True)
+    agent_name = 'porto_pete_s_lfc_0'
+    main_dict['name'] = agent_name
+    env_dict['steer_control_dict']['track_dict']['Lfc'] = 0.5
+    a = main_multiple.trainingLoop(main_dict, agent_td3_dict, env_dict, load_agent='')
+    a.train()
+    main_multiple.lap_time_test(agent_name=agent_name, n_episodes=n_test, detect_issues=False, initial_conditions=True)
 
-    # agent_name = 'porto_pete_s_lfc_1'
-    # main_dict['name'] = agent_name
-    # env_dict['steer_control_dict']['Lfc'] = 1.5
-    # a = main_multiple.trainingLoop(main_dict, agent_td3_dict, env_dict, load_agent='')
-    # a.train()
-    # main_multiple.lap_time_test(agent_name=agent_name, n_episodes=n_test, detect_issues=False, initial_conditions=True)
+    agent_name = 'porto_pete_s_lfc_1'
+    main_dict['name'] = agent_name
+    env_dict['steer_control_dict']['track_dict']['Lfc'] = 1.5
+    a = main_multiple.trainingLoop(main_dict, agent_td3_dict, env_dict, load_agent='')
+    a.train()
+    main_multiple.lap_time_test(agent_name=agent_name, n_episodes=n_test, detect_issues=False, initial_conditions=True)
 
-    # agent_name = 'porto_pete_s_lfc_2'
-    # main_dict['name'] = agent_name
-    # env_dict['steer_control_dict']['Lfc'] = 2
-    # a = main_multiple.trainingLoop(main_dict, agent_td3_dict, env_dict, load_agent='')
-    # a.train()
-    # main_multiple.lap_time_test(agent_name=agent_name, n_episodes=n_test, detect_issues=False, initial_conditions=True)
+    agent_name = 'porto_pete_s_lfc_2'
+    main_dict['name'] = agent_name
+    env_dict['steer_control_dict']['track_dict']['Lfc'] = 2
+    a = main_multiple.trainingLoop(main_dict, agent_td3_dict, env_dict, load_agent='')
+    a.train()
+    main_multiple.lap_time_test(agent_name=agent_name, n_episodes=n_test, detect_issues=False, initial_conditions=True)
 
-    # agent_name = 'porto_pete_s_lfc_3'
-    # main_dict['name'] = agent_name
-    # env_dict['steer_control_dict']['Lfc'] = 2.5
-    # a = main_multiple.trainingLoop(main_dict, agent_td3_dict, env_dict, load_agent='')
-    # a.train()
-    # main_multiple.lap_time_test(agent_name=agent_name, n_episodes=n_test, detect_issues=False, initial_conditions=True)
+    agent_name = 'porto_pete_s_lfc_3'
+    main_dict['name'] = agent_name
+    env_dict['steer_control_dict']['track_dict']['Lfc'] = 2.5
+    a = main_multiple.trainingLoop(main_dict, agent_td3_dict, env_dict, load_agent='')
+    a.train()
+    main_multiple.lap_time_test(agent_name=agent_name, n_episodes=n_test, detect_issues=False, initial_conditions=True)
 
 
     pass
@@ -978,7 +978,7 @@ if True:
     legend = ['polynomial']
     legend_title = 'circle'
 
-    agent_names = ['porto_pete_s_lfc_1']
+    agent_names = ['porto_pete_s_lfc_4']
     ns = [0]
     legend = ['polynomial']
     legend_title = 'circle'
