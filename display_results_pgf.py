@@ -1083,6 +1083,8 @@ def display_only_path_multiple(agent_names, ns, legend_title, legend, mismatch_p
     pose_history = []
     progress_history = []
     state_history = []
+    local_path_history = []
+
     
     for agent_name, n, i in zip(agent_names, ns, range(len(agent_names))):
 
@@ -1171,7 +1173,7 @@ def display_only_path_multiple(agent_names, ns, legend_title, legend, mismatch_p
         state_history.append(env.state_history)
         pose_history.append(env.pose_history)
         progress_history.append(env.progress_history)
-        
+        local_path_history.append(env.local_path_history)
         
         
     
@@ -1207,6 +1209,9 @@ def display_only_path_multiple(agent_names, ns, legend_title, legend, mismatch_p
     ax.plot(env.rx, env.ry, color='gray', linestyle='dashed')
     
     for i in range(len(agent_names)):
+        for j in np.array(local_path_history[i])[np.arange(0,len(local_path_history[i]),40)]:
+            ax.plot(j[0], j[1], alpha=0.5, linestyle='dashdot', color='red')
+            ax.plot(j[0][0], j[1][0], alpha=0.5, color='red', marker='s')
         ax.plot(np.array(pose_history[i])[:,0], np.array(pose_history[i])[:,1], linewidth=1.5)   
 
     prog = np.array([0, 0.2, 0.4, 0.6, 0.8])
@@ -1335,13 +1340,13 @@ def display_only_path_multiple(agent_names, ns, legend_title, legend, mismatch_p
 # xlim= 3400
 # xspace = 1000
 
-agent_names = ['porto_ete_v5_r_collision_5']
-legend = ['']
-legend_title = ''
-ns=[0]
-filename = 'end_to_end_final_1'
-xlim = 3000
-xspace =1000
+# agent_names = ['porto_ete_v5_r_collision_5']
+# legend = ['']
+# legend_title = ''
+# ns=[0]
+# filename = 'end_to_end_final_1'
+# xlim = 3000
+# xspace =1000
 
 
 
@@ -1368,6 +1373,6 @@ xspace =1000
 
 # learning_curve_reward_average(agent_names, legend, legend_title)
 
-learning_curve_all(agent_names, legend, legend_title, ns, filename, xlim, xspace)
+# learning_curve_all(agent_names, legend, legend_title, ns, filename, xlim, xspace)
 
 # display_velocity_slip(agent_names, ns, legend_title, legend, mismatch_parameters, frac_vary, start_condition, filename)

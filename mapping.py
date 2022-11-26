@@ -102,8 +102,13 @@ class map:
         self.centerline[:,0] = self.centerline[:,0]-self.origin[0]
         self.centerline[:,1] = self.centerline[:,1]-self.origin[1]
         
-        self.centerline = self.centerline[1:-1,:]
-        self.centerline = np.reshape(np.append(self.centerline, self.centerline[0,:]), (int(len(np.append(self.centerline, self.centerline[0,:]))/2), 2)) 
+        self.centerline_1 = self.centerline[1:-1,:].copy()
+        self.centerline_1 = self.centerline_1[:][np.arange(0,len(self.centerline_1[:]),2)]
+        self.centerline_1 = np.append(self.centerline_1, self.centerline_1[0]+np.array([-0.01,0]))
+        # self.centerline_1 = np.append(self.centerline_1, self.centerline_1[-1])
+
+        self.centerline_1 = np.reshape(self.centerline_1, (int(len(self.centerline_1)/2), 2) )
+        self.centerline = self.centerline_1.copy()
         
         #plt.imshow(self.gray_im, extent=(0,self.map_width,0,self.map_height))
         #plt.plot(self.centerline[:,0], self.centerline[:,1], 'x')

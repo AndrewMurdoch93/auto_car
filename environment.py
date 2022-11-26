@@ -476,7 +476,7 @@ class environment():
         return np.array(cx), np.array(cy), np.array(cyaw)
     
     def define_path_polynomial(self, param):
-        track_width = 3
+        track_width = self.steer_control_dict['track_width']
         ds=0.1
         s_0, s_0_ind, n_0 = functions.convert_xy_to_sn(self.rx, self.ry, self.ryaw, self.x, self.y, ds)
         s_1 = s_0 + 3

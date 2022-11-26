@@ -899,6 +899,7 @@ def density_plot_progress(agent_names, legend, legend_title):
     #plt.xlim([0.8, 1.4])
     plt.show()
 
+
 def density_plot_action_duration(agent_names, legend, legend_title):
     
     durations = []

@@ -62,7 +62,7 @@ action_space_dict = {'action_space': 'continuous', 'vel_select':[3,5], 'R_range'
 
 #action_space_dict = {'action_space': 'discrete', 'n_waypoints': 10, 'vel_select':[7], 'R_range':[6]}
 
-steer_control_dict = {'steering_control': True, 'wpt_arc':np.pi/2}
+steer_control_dict = {'steering_control': True, 'wpt_arc':np.pi/2, 'track_width':1.2}
 
 if  steer_control_dict['steering_control'] == True:
     steer_control_dict['path_strategy'] = 'circle'  #circle or linear or polynomial or gradient
@@ -968,8 +968,21 @@ if True:
     # ns=[2]
 
 
-    # agent_names = ['porto_pete_s_r_collision_0']
-    # ns = [1]
+    agent_names = ['porto_pete_s_polynomial']
+    ns = [1]
+    legend = ['polynomial']
+    legend_title = 'path'
+
+    agent_names = ['porto_pete_s_r_collision_0']
+    ns = [1]
+    legend = ['polynomial']
+    legend_title = 'circle'
+
+    agent_names = ['porto_pete_s_lfc_1']
+    ns = [0]
+    legend = ['polynomial']
+    legend_title = 'circle'
+
 
     pass
 
@@ -980,24 +993,24 @@ if True:
 # display_results_multiple.learning_curve_reward_average(agent_names, legend, legend_title)
 
 
-# for agent_name in agent_names:
-#     print('------------------------------' + '\n' + agent_name + '\n' + '------------------------------')
-#     display_results_multiple.display_train_parameters(agent_name=agent_name)
+for agent_name in agent_names:
+    print('------------------------------' + '\n' + agent_name + '\n' + '------------------------------')
+    display_results_multiple.display_train_parameters(agent_name=agent_name)
 
-# for agent_name in agent_names:
-#     print('------------------------------' + '\n' + agent_name + '\n' + '------------------------------')
-#     display_results_multiple.display_lap_results(agent_name=agent_name)
+for agent_name in agent_names:
+    print('------------------------------' + '\n' + agent_name + '\n' + '------------------------------')
+    display_results_multiple.display_lap_results(agent_name=agent_name)
 
-# mismatch_parameters = ['C_Sf']
-# frac_vary = [0]
-# # Porto
-# start_condition = {'x':10, 'y':4.5, 'v':3, 'theta':np.pi, 'delta':0, 'goal':0}
-# # Columbia
-# # start_condition = {'x':5.7, 'y':7.25, 'v':3, 'theta':0, 'delta':0, 'goal':0}
-# #start_condition = []
-# display_results_multiple.display_path_multiple(agent_names=agent_names, ns=ns, legend_title=legend_title,          
-#                                              legend=legend, mismatch_parameters=mismatch_parameters, frac_vary=frac_vary, 
-#                                              start_condition=start_condition)
+mismatch_parameters = ['C_Sf']
+frac_vary = [0]
+# Porto
+start_condition = {'x':10, 'y':4.5, 'v':3, 'theta':np.pi, 'delta':0, 'goal':0}
+# Columbia
+# start_condition = {'x':5.7, 'y':7.25, 'v':3, 'theta':0, 'delta':0, 'goal':0}
+#start_condition = []
+display_results_multiple.display_path_multiple(agent_names=agent_names, ns=ns, legend_title=legend_title,          
+                                             legend=legend, mismatch_parameters=mismatch_parameters, frac_vary=frac_vary, 
+                                             start_condition=start_condition)
 
 
 
