@@ -626,22 +626,22 @@ class environment():
         
      
         
-        if self.steering_control==True:
-            plt.plot(self.path_tracker.cx, self.path_tracker.cy)
+        # if self.steering_control==True:
+        #     plt.plot(self.path_tracker.cx, self.path_tracker.cy)
         
-        plt.arrow(self.x, self.y, 0.5*math.cos(self.theta), 0.5*math.sin(self.theta), head_length=0.5, head_width=0.5, shape='full', ec='None', fc='blue')
-        plt.arrow(self.x, self.y, 0.5*math.cos(self.theta+self.delta), 0.5*math.sin(self.theta+self.delta), head_length=0.5, head_width=0.5, shape='full',ec='None', fc='red')
+        # plt.arrow(self.x, self.y, 0.5*math.cos(self.theta), 0.5*math.sin(self.theta), head_length=0.5, head_width=0.5, shape='full', ec='None', fc='blue')
+        # plt.arrow(self.x, self.y, 0.5*math.cos(self.theta+self.delta), 0.5*math.sin(self.theta+self.delta), head_length=0.5, head_width=0.5, shape='full',ec='None', fc='red')
         
-        plt.plot(self.x, self.y, 'o')
+        plt.plot(self.x, self.y, 'o', markersize=1)
         #plt.plot(waypoint[0], waypoint[1], 'x')
 
         #plt.plot([current_goal[0]-self.s, current_goal[0]+self.s, current_goal[0]+self.s, current_goal[0]-self.s, 
         #current_goal[0]-self.s], [current_goal[1]-self.s, current_goal[1]-self.s, current_goal[1]+self.s, 
         #current_goal[1]+self.s, current_goal[1]-self.s], 'r')
 
-        if self.lidar_dict['is_lidar']==True:
-            for coord in self.lidar_coords:
-                plt.plot(coord[0], coord[1], 'xb')
+        # if self.lidar_dict['is_lidar']==True:
+        #     for coord in self.lidar_coords:
+        #         plt.plot(coord[0], coord[1], 'xb')
             
         plt.plot(np.array(self.pose_history)[0:self.steps,0], np.array(self.pose_history)[0:self.steps,1])
         
@@ -1064,6 +1064,8 @@ def test_environment():
     
     action_history = np.ones((1000,2))*1
     action_history[:,1] = np.ones(1000)*1
+
+    plt.figure(figsize=(15,10))
 
     done=False
     score=0

@@ -19,6 +19,8 @@ from numba.experimental import jitclass
 import pickle
 import mapping
 import cubic_spline_planner
+from matplotlib import rc
+import matplotlib.font_manager as font_manager
 
 def load_config(path, fname):
     full_path = path + '/config/' + fname + '.yaml'
@@ -530,17 +532,37 @@ if __name__ == '__main__':
     s_1 = s_0+1
     s_2 = s_1+0.5
     theta = 0.5
-    n_0 = 0.8
+    n_0 = 0.25
     
-    plt.plot(s_0,n_0, 'x')
-    plt.plot([0,s_2], [1,1])
-    plt.plot([0,s_2], [-1,-1])
-    
-    for n_1 in np.linspace(-1,1,10): 
-        #n_1 = 1
-        
+    ns = [[] for _ in range(3)]
+
+
+  
+
+    fig, ax = plt.subplots(1, figsize=(5,4.2))
+    ax.set_xticks(ticks=[s_0, s_1], labels=['$s_0$', '$s_1$'],)
+    ax.set_yticks(ticks=[n_0, 0.7], labels=['$n_0$', '$n_1$'])
+
+    font_legend = font_manager.FontProperties(family='Serif',
+                                   style='normal', size=12)
+
+    font_dict = {'family': 'serif',
+        'size': 12,
+        }
+
+
+    ax.plot(s_0,n_0, 'x', label='Vehicle position')
+    ax.grid(True)
+
+    for i in range(3): 
+        # n_1 = 1
+        # n_1=0.7    
+        n_1s = [0.9,-0.9,0.7]
+        #colors = ['orange','orange','red']
+        #alphas = [0.8,0.8,1]
+
         A = np.array([[3*s_1**2, 2*s_1, 1, 0], [3*s_0**2, 2*s_0, 1, 0], [s_0**3, s_0**2, s_0, 1], [s_1**3, s_1**2, s_1, 1]])
-        B = np.array([0, theta, n_0, n_1])
+        B = np.array([0, theta, n_0, n_1s[i]])
         x = np.linalg.solve(A, B)
         #print(x)
 
@@ -552,14 +574,32 @@ if __name__ == '__main__':
         s = np.linspace(s_0, s_1)
         n = a*s**3 + b*s**2 + c*s + d
         s = np.concatenate((s, np.linspace(s_1, s_2)))
-        n = np.concatenate((n, np.ones(len(np.linspace(s_1, s_2)))*n_1))
-        plt.plot(s, n)
+        n = np.concatenate((n, np.ones(len(np.linspace(s_1, s_2)))*n_1s[i]))
+        ns[i].append(n)
 
-    plt.plot(np.linspace(s_1, s_2), np.ones(len(np.linspace(s_1, s_2)))*n_1)
-    plt.legend(['vehicle position', 'upper track boundary', 'lower track boundary'])
-    plt.xlim([s_0, s_2])
-    plt.xlabel('s [m], distance along centerline')
-    plt.ylabel('n [m], distance perpendicular to centerline')
+    
+    ax.plot(s, ns[2][0], color='dodgerblue', label='Sample path')
+    #plt.plot(s, ns[1][0])
+    #plt.plot(s, ns[2][0])
+
+    ax.fill_between(x=s, y1=ns[1][0], y2=ns[0][0], alpha=0.2, color='dodgerblue', label='Range of paths')
+
+    #plt.plot(np.linspace(s_1, s_2), np.ones(len(np.linspace(s_1, s_2)))*n_1s[i], color=colors[i],alpha=alphas[i])
+    xlims = [s_0-0.2, s_2+0.2]
+    ax.hlines(y=1, xmin=xlims[0], xmax=xlims[1], linestyle='solid',color='black',label='Track boundaries')
+    ax.hlines(y=-1, xmin=xlims[0], xmax=xlims[1], linestyle='solid',color='black',label='_nolegend_')
+    ax.hlines(y=0, xmin=xlims[0], xmax=xlims[1], linestyle='--',color='grey',label='Centerline')
+   
+    ax.set_xlim(xlims)
+    ax.set_xlabel('s [m]', fontdict=font_dict)
+    ax.set_ylabel('n [m]', fontdict=font_dict)
+    #ax.legend(loc='lower left')
+    
+    fig.tight_layout()
+    fig.subplots_adjust(bottom=0.35)
+    fig.subplots_adjust(right=0.8)
+    fig.subplots_adjust(left=0.2)
+    plt.figlegend(loc = 'lower center', ncol=2, prop=font_legend)
     plt.show()
     
     

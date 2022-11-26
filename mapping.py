@@ -102,9 +102,16 @@ class map:
         self.centerline[:,0] = self.centerline[:,0]-self.origin[0]
         self.centerline[:,1] = self.centerline[:,1]-self.origin[1]
         
-        self.centerline = self.centerline[1:-1,:]
-        self.centerline = np.reshape(np.append(self.centerline, self.centerline[0,:]), (int(len(np.append(self.centerline, self.centerline[0,:]))/2), 2)) 
+        self.centerline_1 = self.centerline[1:-1,:].copy()
+        self.centerline_1 = self.centerline_1[:][np.arange(0,len(self.centerline_1[:]),2)]
+        self.centerline_1 = np.append(self.centerline_1, self.centerline_1[0]+np.array([-0.01,0]))
+        # self.centerline_1 = np.append(self.centerline_1, self.centerline_1[-1])
+
+        self.centerline_1 = np.reshape(self.centerline_1, (int(len(self.centerline_1)/2), 2) )
+        self.centerline = self.centerline_1.copy()
         
+        #self.centerline = np.reshape(np.append(self.centerline, self.centerline[0,:]), (int(len(np.append(self.centerline, self.centerline[0,:]))/2), 2)) 
+        print('debug')
         #plt.imshow(self.gray_im, extent=(0,self.map_width,0,self.map_height))
         #plt.plot(self.centerline[:,0], self.centerline[:,1], 'x')
         #plt.show()
@@ -142,8 +149,10 @@ class map:
     #def generate_line(self)
 
 def test_map():
-    m = map('torino')
+    m = map('redbull_ring')
     m.find_centerline(False)
+    
+    #x, ry, ryaw, rk, d = cubic_spline_planner.calc_spline_course(m.centerline[:,0][np.arange(0,len(m.centerline[:,0]),1)], m.centerline[:,1][np.arange(0,len(m.centerline[:,1]),1)])
     rx, ry, ryaw, rk, d = cubic_spline_planner.calc_spline_course(m.centerline[:,0], m.centerline[:,1])
     plt.imshow(m.gray_im, extent=(0,m.map_width,0,m.map_height))
     

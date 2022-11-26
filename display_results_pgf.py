@@ -302,6 +302,9 @@ def learning_curve_lap_time_average(agent_names, legend, legend_title, ns, filen
     
     plt.savefig('results/'+filename+'.pgf', format='pgf')
 
+
+
+
 def learning_curve_reward_average(agent_names, legend, legend_title):
     
     legend_new = legend.copy()
@@ -1083,6 +1086,7 @@ def display_only_path_multiple(agent_names, ns, legend_title, legend, mismatch_p
     pose_history = []
     progress_history = []
     state_history = []
+    local_path_history = []
     
     for agent_name, n, i in zip(agent_names, ns, range(len(agent_names))):
 
@@ -1171,7 +1175,7 @@ def display_only_path_multiple(agent_names, ns, legend_title, legend, mismatch_p
         state_history.append(env.state_history)
         pose_history.append(env.pose_history)
         progress_history.append(env.progress_history)
-        
+        local_path_history.append(env.local_path_history)
         
         
     
@@ -1191,7 +1195,7 @@ def display_only_path_multiple(agent_names, ns, legend_title, legend, mismatch_p
     "font.size": 12
     })
 
-    fig, ax = plt.subplots(1, figsize=(5,2.5))
+    fig, ax = plt.subplots(1, figsize=(5,3))
 
     color='gray'
     #ax[i].tick_params(axis='both', colors='lightgrey')
@@ -1204,10 +1208,20 @@ def display_only_path_multiple(agent_names, ns, legend_title, legend, mismatch_p
     
     track = mapping.map(env.map_name)
     ax.imshow(ImageOps.invert(track.gray_im.filter(ImageFilter.FIND_EDGES).filter(ImageFilter.MaxFilter(1))), extent=(0,track.map_width,0,track.map_height), cmap="gray")
-    ax.plot(env.rx, env.ry, color='gray', linestyle='dashed')
+    ax.plot(env.rx, env.ry, color='gray', linestyle='dashed',label='Track centerline')
     
     for i in range(len(agent_names)):
-        ax.plot(np.array(pose_history[i])[:,0], np.array(pose_history[i])[:,1], linewidth=1.5)   
+        if env_dict['steer_control_dict']['steering_control']:
+            for idx, j in enumerate(np.array(local_path_history[i])[np.arange(0,len(local_path_history[i]),40)]):
+                if idx==0:
+                    ax.plot(j[0], j[1], alpha=0.5, linestyle='dashdot', color='red', label='Planned paths')
+                    ax.plot(j[0][0], j[1][0], alpha=0.5, color='red', marker='s', markersize=5,  label='Coordinates at action sample time')
+
+                else:
+                    ax.plot(j[0], j[1], alpha=0.5, linestyle='dashdot', color='red', label='_nolegend_')
+                    ax.plot(j[0][0], j[1][0], alpha=0.5, color='red', marker='s', markersize=5, label='_nolegend_')
+
+        ax.plot(np.array(pose_history[i])[:,0], np.array(pose_history[i])[:,1], linewidth=1.5, label='Vehicle path history')   
 
     prog = np.array([0, 0.2, 0.4, 0.6, 0.8])
     idx =  np.zeros(len(prog), int)
@@ -1230,8 +1244,8 @@ def display_only_path_multiple(agent_names, ns, legend_title, legend, mismatch_p
 
     legend.insert(0, 'Track centerline')
     fig.tight_layout()
-    fig.subplots_adjust(right=0.6) 
-    plt.figlegend(legend, title=legend_title, loc='center right', ncol=1)
+    #fig.subplots_adjust(bottom=0.2) 
+    plt.figlegend(loc='lower center', ncol=2)
     
     #plt.show() 
     plt.savefig('results/'+filename+'.pgf', format='pgf')
@@ -1335,13 +1349,36 @@ def display_only_path_multiple(agent_names, ns, legend_title, legend, mismatch_p
 # xlim= 3400
 # xspace = 1000
 
-agent_names = ['porto_ete_v5_r_collision_5']
+# agent_names = ['porto_ete_v5_r_collision_5']
+# legend = ['']
+# legend_title = ''
+# ns=[0]
+# filename = 'end_to_end_final_1'
+# xlim = 3000
+# xspace =1000
+
+
+agent_names = ['porto_pete_s_polynomial']
 legend = ['']
 legend_title = ''
-ns=[0]
-filename = 'end_to_end_final_1'
-xlim = 3000
-xspace =1000
+ns=[1]
+filename = 'polynomial_path'
+
+
+# agent_names = ['porto_pete_s_r_collision_0']
+# legend = ['']
+# legend_title = ''
+# ns=[1]
+# filename = 'circle_path'
+
+
+# agent_names = ['porto_pete_s_r_collision_0', 'porto_pete_s_polynomial']
+# legend = ['Circular arc', 'Polynomial']
+# legend_title = 'Path'
+# ns=[1,2]
+# filename = 'path_learning_curves'
+# xlim = 4000
+# xspace = 1000
 
 
 
@@ -1354,20 +1391,20 @@ xspace =1000
 #                         legend=legend, mismatch_parameters=mismatch_parameters, frac_vary=frac_vary, 
 #                         start_condition=start_condition, filename=filename)
 
-# mismatch_parameters = ['C_Sf']
-# frac_vary = [0]
-# start_condition = {'x':10, 'y':4.5, 'v':3, 'theta':np.pi, 'delta':0, 'goal':0}
-# #start_condition = []
-# #filename = 'path_collision_penalty'
-# display_only_path_multiple(agent_names=agent_names, ns=ns, legend_title=legend_title,          
-#                         legend=legend, mismatch_parameters=mismatch_parameters, frac_vary=frac_vary, 
-#                         start_condition=start_condition, filename=filename)
+mismatch_parameters = ['C_Sf']
+frac_vary = [0]
+start_condition = {'x':10, 'y':4.5, 'v':3, 'theta':np.pi, 'delta':0, 'goal':0}
+#start_condition = []
+#filename = 'path_collision_penalty'
+display_only_path_multiple(agent_names=agent_names, ns=ns, legend_title=legend_title,          
+                        legend=legend, mismatch_parameters=mismatch_parameters, frac_vary=frac_vary, 
+                        start_condition=start_condition, filename=filename)
 
 
 # learning_curve_lap_time_average(agent_names, legend, legend_title, ns, filename)
 
 # learning_curve_reward_average(agent_names, legend, legend_title)
 
-learning_curve_all(agent_names, legend, legend_title, ns, filename, xlim, xspace)
+# learning_curve_all(agent_names, legend, legend_title, ns, filename, xlim, xspace)
 
 # display_velocity_slip(agent_names, ns, legend_title, legend, mismatch_parameters, frac_vary, start_condition, filename)
