@@ -1085,7 +1085,7 @@ def display_only_path_multiple(agent_names, ns, legend_title, legend, mismatch_p
     state_history = []
     local_path_history = []
 
-    
+
     for agent_name, n, i in zip(agent_names, ns, range(len(agent_names))):
 
         infile = open('environments/' + agent_name, 'rb')
@@ -1203,16 +1203,20 @@ def display_only_path_multiple(agent_names, ns, legend_title, legend, mismatch_p
     ax.spines['left'].set_color(color)
 
     ax.tick_params(axis=u'both', which=u'both',length=0)
-    
+    ax.set_xticklabels([])
+    ax.set_yticklabels([])
+
     track = mapping.map(env.map_name)
     ax.imshow(ImageOps.invert(track.gray_im.filter(ImageFilter.FIND_EDGES).filter(ImageFilter.MaxFilter(1))), extent=(0,track.map_width,0,track.map_height), cmap="gray")
-    ax.plot(env.rx, env.ry, color='gray', linestyle='dashed')
+    ax.plot(env.rx, env.ry, color='gray', linestyle='dashed', label='Track centerline')
     
     for i in range(len(agent_names)):
-        for j in np.array(local_path_history[i])[np.arange(0,len(local_path_history[i]),40)]:
-            ax.plot(j[0], j[1], alpha=0.5, linestyle='dashdot', color='red')
-            ax.plot(j[0][0], j[1][0], alpha=0.5, color='red', marker='s')
-        ax.plot(np.array(pose_history[i])[:,0], np.array(pose_history[i])[:,1], linewidth=1.5)   
+        for idx, j in enumerate(np.array(local_path_history[i])[np.arange(0,len(local_path_history[i]),40)]):
+            if idx == 11:
+                ax.plot(j[0], j[1], alpha=0.5, linestyle='dashdot', color='red', label='Planned path')
+                ax.plot(j[0][0], j[1][0], alpha=0.5, color='red', marker='s', label='Coordinate at \naction sampling time')
+
+        ax.plot(np.array(pose_history[i])[:,0], np.array(pose_history[i])[:,1], linewidth=1.5, label='Vehicle path history')   
 
     prog = np.array([0, 0.2, 0.4, 0.6, 0.8])
     idx =  np.zeros(len(prog), int)
@@ -1225,20 +1229,21 @@ def display_only_path_multiple(agent_names, ns, legend_title, legend, mismatch_p
     # for i in range(len(idx)):
     #     ax.text(x=env.rx[idx[i]], y=env.ry[idx[i]], s=text[i], fontsize = 'small', bbox=dict(facecolor='white', edgecolor='black',pad=0.1,boxstyle='round'))
     
-    ax.vlines(x=env.rx[idx[0]], ymin=env.ry[idx[0]]-1, ymax=env.ry[idx[0]]+1, linestyles='dotted', color='red')
-    ax.text(x=env.rx[idx[0]]-1.2, y=env.ry[idx[0]]+1.3, s='Start/finish', fontsize = 'small', bbox=dict(facecolor='white', edgecolor='black',pad=0.1,boxstyle='round'))
+    #ax.vlines(x=env.rx[idx[0]], ymin=env.ry[idx[0]]-1, ymax=env.ry[idx[0]]+1, linestyles='dotted', color='red')
+    #ax.text(x=env.rx[idx[0]]-1.2, y=env.ry[idx[0]]+1.3, s='Start/finish', fontsize = 'small', bbox=dict(facecolor='white', edgecolor='black',pad=0.1,boxstyle='round'))
 
-    ax.axis('off')
+    # ax.axis('off')
     # # https://stackoverflow.com/questions/4700614/how-to-put-the-legend-outside-the-plot
 
-
+    ax.set_xlim([12,15.5])
+    ax.set_ylim([0.5,4])
 
     legend.insert(0, 'Track centerline')
     fig.tight_layout()
     fig.subplots_adjust(right=0.6) 
-    plt.figlegend(legend, title=legend_title, loc='center right', ncol=1)
+    plt.figlegend(loc='center right', ncol=1, labelspacing=0.7)
     
-    #plt.show() 
+    # plt.show() 
     plt.savefig('results/'+filename+'.pgf', format='pgf')
 
 
@@ -1348,6 +1353,15 @@ def display_only_path_multiple(agent_names, ns, legend_title, legend, mismatch_p
 # xlim = 3000
 # xspace =1000
 
+# agent_names = ['porto_pete_s_r_collision_0']
+# legend = ['']
+# legend_title = ''
+# ns=[0]
+# filename = 'understeer_path'
+# xlim = 3000
+# xspace =1000
+
+
 
 
 # mismatch_parameters = ['C_Sf']
@@ -1359,14 +1373,13 @@ def display_only_path_multiple(agent_names, ns, legend_title, legend, mismatch_p
 #                         legend=legend, mismatch_parameters=mismatch_parameters, frac_vary=frac_vary, 
 #                         start_condition=start_condition, filename=filename)
 
-# mismatch_parameters = ['C_Sf']
-# frac_vary = [0]
-# start_condition = {'x':10, 'y':4.5, 'v':3, 'theta':np.pi, 'delta':0, 'goal':0}
-# #start_condition = []
-# #filename = 'path_collision_penalty'
-# display_only_path_multiple(agent_names=agent_names, ns=ns, legend_title=legend_title,          
-#                         legend=legend, mismatch_parameters=mismatch_parameters, frac_vary=frac_vary, 
-#                         start_condition=start_condition, filename=filename)
+mismatch_parameters = ['C_Sf']
+frac_vary = [0]
+start_condition = {'x':10, 'y':4.5, 'v':3, 'theta':np.pi, 'delta':0, 'goal':0}
+#start_condition = []
+display_only_path_multiple(agent_names=agent_names, ns=ns, legend_title=legend_title,          
+                        legend=legend, mismatch_parameters=mismatch_parameters, frac_vary=frac_vary, 
+                        start_condition=start_condition, filename=filename)
 
 
 # learning_curve_lap_time_average(agent_names, legend, legend_title, ns, filename)

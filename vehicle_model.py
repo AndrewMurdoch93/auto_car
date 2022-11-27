@@ -177,9 +177,9 @@ def vehicle_dynamics_st(x, u_init, mu, C_Sf, C_Sr, lf, lr, h, m, I, s_min, s_max
     return f
 
 @njit(cache=True)
-def pid(speed, steer, current_speed, current_steer, max_sv, max_a, max_v, min_v):
+def pid(speed, steer, current_speed, current_steer, max_sv, max_a, max_v, min_v, k):
     
-    k = 2.0
+    # k = 2.0
 
     """
     Basic controller for speed/steer -> accl./steer vel.

@@ -54,7 +54,11 @@ class environment():
         #Initialise car parameters
         self.wheelbase = self.params['lf'] + self.params['lr'] 
         
+        if 'velocity_gain' not in self.input_dict:
+            self.input_dict['velocity_gain'] = 2
+
         
+
         if self.steering_control==True:
             self.path_strategy = self.steer_control_dict['path_strategy']
             self.track_dict = self.steer_control_dict['track_dict']
@@ -310,11 +314,11 @@ class environment():
                     v_ref = self.convert_action_to_vel_ref(param=act[1])
                     self.v_ref = v_ref
                     v_dot, _ = vehicle_model.pid(v_ref, delta_ref, self.state[3], self.state[2], self.params['sv_max'], 
-                                self.params['a_max'], self.vel_select[0], self.vel_select[1])
+                                self.params['a_max'], self.vel_select[0], self.vel_select[1], self.input_dict['velocity_gain'])
                 
                 # get delta_dot
                 _, delta_dot = vehicle_model.pid(v_ref, delta_ref, self.state[3], self.state[2], self.params['sv_max'], 
-                                self.params['a_max'], self.params['v_max'], self.params['v_min'])
+                                self.params['a_max'], self.params['v_max'], self.params['v_min'], self.input_dict['velocity_gain'])
                 #Constrain delta_dot and v_dot
                 delta_dot = vehicle_model.steering_constraint(self.delta, delta_dot, self.params['s_min'], 
                     self.params['s_max'], self.params['sv_min'], self.params['sv_max'])
@@ -391,11 +395,11 @@ class environment():
                     v_ref = self.convert_action_to_vel_ref(param=act[1])
                     self.v_ref = v_ref
                     v_dot, _ = vehicle_model.pid(v_ref, delta_ref, self.state[3], self.state[2], self.params['sv_max'], 
-                                self.params['a_max'], self.vel_select[0], self.vel_select[1])
+                                self.params['a_max'], self.vel_select[0], self.vel_select[1], self.input_dict['velocity_gain'])
                 
                  # get delta_dot
                 _, delta_dot = vehicle_model.pid(v_ref, delta_ref, self.state[3], self.state[2], self.params['sv_max'], 
-                                self.params['a_max'], self.params['v_max'], self.params['v_min'])
+                                self.params['a_max'], self.params['v_max'], self.params['v_min'], self.input_dict['velocity_gain'])
                 
                 #Constrain delta_dot and v_dot
                 delta_dot = vehicle_model.steering_constraint(self.delta, delta_dot, self.params['s_min'], 
