@@ -801,7 +801,11 @@ if True:
     # a.train()
     # main_multiple.lap_time_test(agent_name=agent_name, n_episodes=n_test, detect_issues=False, initial_conditions=True)
 
+    pass
 
+#Tune parameters for velocity control
+if True:
+    
     # agent_name = 'porto_pete_v_k_0'
     # main_dict['name'] = agent_name
     # env_dict['velocity_control'] = True
@@ -818,120 +822,114 @@ if True:
     # a.train()
     # main_multiple.lap_time_test(agent_name=agent_name, n_episodes=n_test, detect_issues=False, initial_conditions=True)
 
-    agent_name = 'porto_pete_v_r_dist_025'
-    main_dict['name'] = agent_name
-    env_dict['steer_control_dict']['steering_control'] = False
-    env_dict['velocity_control'] = True
-    env_dict['velocity_gain'] = 1
-    env_dict['reward_signal']['distance'] = 0.25
-    env_dict['reward_signal']['collision'] = -2
-    a = main_multiple.trainingLoop(main_dict, agent_td3_dict, env_dict, load_agent='')
-    a.train()
-    main_multiple.lap_time_test(agent_name=agent_name, n_episodes=n_test, detect_issues=False, initial_conditions=True)
+
+    # agent_name = 'porto_pete_v_r_dist_025'
+    # main_dict['name'] = agent_name
+    # env_dict['steer_control_dict']['steering_control'] = False
+    # env_dict['velocity_control'] = True
+    # env_dict['velocity_gain'] = 1
+    # env_dict['reward_signal']['distance'] = 0.25
+    # env_dict['reward_signal']['collision'] = -2
+    # a = main_multiple.trainingLoop(main_dict, agent_td3_dict, env_dict, load_agent='')
+    # a.train()
+    # main_multiple.lap_time_test(agent_name=agent_name, n_episodes=n_test, detect_issues=False, initial_conditions=True)
 
 
-    agent_name = 'porto_pete_v_r_dist_03'
-    main_dict['name'] = agent_name
-    env_dict['steer_control_dict']['steering_control'] = False
-    env_dict['velocity_control'] = True
-    env_dict['velocity_gain'] = 1
-    env_dict['reward_signal']['distance'] = 0.3
-    env_dict['reward_signal']['collision'] = -2
-    a = main_multiple.trainingLoop(main_dict, agent_td3_dict, env_dict, load_agent='')
-    a.train()
-    main_multiple.lap_time_test(agent_name=agent_name, n_episodes=n_test, detect_issues=False, initial_conditions=True)
+    # agent_name = 'porto_pete_v_r_dist_03'
+    # main_dict['name'] = agent_name
+    # env_dict['steer_control_dict']['steering_control'] = False
+    # env_dict['velocity_control'] = True
+    # env_dict['velocity_gain'] = 1
+    # env_dict['reward_signal']['distance'] = 0.3
+    # env_dict['reward_signal']['collision'] = -2
+    # a = main_multiple.trainingLoop(main_dict, agent_td3_dict, env_dict, load_agent='')
+    # a.train()
+    # main_multiple.lap_time_test(agent_name=agent_name, n_episodes=n_test, detect_issues=False, initial_conditions=True)
 
-    agent_name = 'porto_pete_v_r_collision_0'
-    main_dict['name'] = agent_name
-    env_dict['steer_control_dict']['steering_control'] = False
-    env_dict['velocity_control'] = True
-    env_dict['velocity_gain'] = 1
-    env_dict['reward_signal']['distance'] = 0.2
-    env_dict['reward_signal']['collision'] = -4
-    a = main_multiple.trainingLoop(main_dict, agent_td3_dict, env_dict, load_agent='')
-    a.train()
-    main_multiple.lap_time_test(agent_name=agent_name, n_episodes=n_test, detect_issues=False, initial_conditions=True)
-
-
-    agent_name = 'porto_pete_v_r_collision_1'
-    main_dict['name'] = agent_name
-    env_dict['steer_control_dict']['steering_control'] = False
-    env_dict['velocity_control'] = True
-    env_dict['velocity_gain'] = 1
-    env_dict['reward_signal']['distance'] = 0.2
-    env_dict['reward_signal']['collision'] = -6
-    a = main_multiple.trainingLoop(main_dict, agent_td3_dict, env_dict, load_agent='')
-    a.train()
-    main_multiple.lap_time_test(agent_name=agent_name, n_episodes=n_test, detect_issues=False, initial_conditions=True)
-
-    agent_name = 'porto_pete_v_r_collision_2'
-    main_dict['name'] = agent_name
-    env_dict['steer_control_dict']['steering_control'] = False
-    env_dict['velocity_control'] = True
-    env_dict['velocity_gain'] = 1
-    env_dict['reward_signal']['distance'] = 0.2
-    env_dict['reward_signal']['collision'] = -8
-    a = main_multiple.trainingLoop(main_dict, agent_td3_dict, env_dict, load_agent='')
-    a.train()
-    main_multiple.lap_time_test(agent_name=agent_name, n_episodes=n_test, detect_issues=False, initial_conditions=True)
+    # agent_name = 'porto_pete_v_r_collision_0'
+    # main_dict['name'] = agent_name
+    # env_dict['steer_control_dict']['steering_control'] = False
+    # env_dict['velocity_control'] = True
+    # env_dict['velocity_gain'] = 1
+    # env_dict['reward_signal']['distance'] = 0.2
+    # env_dict['reward_signal']['collision'] = -4
+    # a = main_multiple.trainingLoop(main_dict, agent_td3_dict, env_dict, load_agent='')
+    # a.train()
+    # main_multiple.lap_time_test(agent_name=agent_name, n_episodes=n_test, detect_issues=False, initial_conditions=True)
 
 
-    agent_name = 'porto_pete_v_r_collision_3'
-    main_dict['name'] = agent_name
-    env_dict['steer_control_dict']['steering_control'] = False
-    env_dict['velocity_control'] = True
-    env_dict['velocity_gain'] = 1
-    env_dict['reward_signal']['distance'] = 0.25
-    env_dict['reward_signal']['collision'] = -4
-    a = main_multiple.trainingLoop(main_dict, agent_td3_dict, env_dict, load_agent='')
-    a.train()
-    main_multiple.lap_time_test(agent_name=agent_name, n_episodes=n_test, detect_issues=False, initial_conditions=True)
+    # agent_name = 'porto_pete_v_r_collision_1'
+    # main_dict['name'] = agent_name
+    # env_dict['steer_control_dict']['steering_control'] = False
+    # env_dict['velocity_control'] = True
+    # env_dict['velocity_gain'] = 1
+    # env_dict['reward_signal']['distance'] = 0.2
+    # env_dict['reward_signal']['collision'] = -6
+    # a = main_multiple.trainingLoop(main_dict, agent_td3_dict, env_dict, load_agent='')
+    # a.train()
+    # main_multiple.lap_time_test(agent_name=agent_name, n_episodes=n_test, detect_issues=False, initial_conditions=True)
 
-    agent_name = 'porto_pete_v_r_collision_4'
-    main_dict['name'] = agent_name
-    env_dict['steer_control_dict']['steering_control'] = False
-    env_dict['velocity_control'] = True
-    env_dict['velocity_gain'] = 1
-    env_dict['reward_signal']['distance'] = 0.25
-    env_dict['reward_signal']['collision'] = -8
-    a = main_multiple.trainingLoop(main_dict, agent_td3_dict, env_dict, load_agent='')
-    a.train()
-    main_multiple.lap_time_test(agent_name=agent_name, n_episodes=n_test, detect_issues=False, initial_conditions=True)
+    # agent_name = 'porto_pete_v_r_collision_2'
+    # main_dict['name'] = agent_name
+    # env_dict['steer_control_dict']['steering_control'] = False
+    # env_dict['velocity_control'] = True
+    # env_dict['velocity_gain'] = 1
+    # env_dict['reward_signal']['distance'] = 0.2
+    # env_dict['reward_signal']['collision'] = -8
+    # a = main_multiple.trainingLoop(main_dict, agent_td3_dict, env_dict, load_agent='')
+    # a.train()
+    # main_multiple.lap_time_test(agent_name=agent_name, n_episodes=n_test, detect_issues=False, initial_conditions=True)
 
 
+    # agent_name = 'porto_pete_v_r_collision_3'
+    # main_dict['name'] = agent_name
+    # env_dict['steer_control_dict']['steering_control'] = False
+    # env_dict['velocity_control'] = True
+    # env_dict['velocity_gain'] = 1
+    # env_dict['reward_signal']['distance'] = 0.25
+    # env_dict['reward_signal']['collision'] = -4
+    # a = main_multiple.trainingLoop(main_dict, agent_td3_dict, env_dict, load_agent='')
+    # a.train()
+    # main_multiple.lap_time_test(agent_name=agent_name, n_episodes=n_test, detect_issues=False, initial_conditions=True)
 
-    agent_name = 'porto_pete_v_r_collision_5'
-    main_dict['name'] = agent_name
-    env_dict['steer_control_dict']['steering_control'] = False
-    env_dict['velocity_control'] = True
-    env_dict['velocity_gain'] = 1
-    env_dict['reward_signal']['distance'] = 0.3
-    env_dict['reward_signal']['collision'] = -4
-    a = main_multiple.trainingLoop(main_dict, agent_td3_dict, env_dict, load_agent='')
-    a.train()
-    main_multiple.lap_time_test(agent_name=agent_name, n_episodes=n_test, detect_issues=False, initial_conditions=True)
+    # agent_name = 'porto_pete_v_r_collision_4'
+    # main_dict['name'] = agent_name
+    # env_dict['steer_control_dict']['steering_control'] = False
+    # env_dict['velocity_control'] = True
+    # env_dict['velocity_gain'] = 1
+    # env_dict['reward_signal']['distance'] = 0.25
+    # env_dict['reward_signal']['collision'] = -8
+    # a = main_multiple.trainingLoop(main_dict, agent_td3_dict, env_dict, load_agent='')
+    # a.train()
+    # main_multiple.lap_time_test(agent_name=agent_name, n_episodes=n_test, detect_issues=False, initial_conditions=True)
 
 
 
-    agent_name = 'porto_pete_v_r_collision_6'
-    main_dict['name'] = agent_name
-    env_dict['steer_control_dict']['steering_control'] = False
-    env_dict['velocity_control'] = True
-    env_dict['velocity_gain'] = 1
-    env_dict['reward_signal']['distance'] = 0.3
-    env_dict['reward_signal']['collision'] = -8
-    a = main_multiple.trainingLoop(main_dict, agent_td3_dict, env_dict, load_agent='')
-    a.train()
-    main_multiple.lap_time_test(agent_name=agent_name, n_episodes=n_test, detect_issues=False, initial_conditions=True)
+    # agent_name = 'porto_pete_v_r_collision_5'
+    # main_dict['name'] = agent_name
+    # env_dict['steer_control_dict']['steering_control'] = False
+    # env_dict['velocity_control'] = True
+    # env_dict['velocity_gain'] = 1
+    # env_dict['reward_signal']['distance'] = 0.3
+    # env_dict['reward_signal']['collision'] = -4
+    # a = main_multiple.trainingLoop(main_dict, agent_td3_dict, env_dict, load_agent='')
+    # a.train()
+    # main_multiple.lap_time_test(agent_name=agent_name, n_episodes=n_test, detect_issues=False, initial_conditions=True)
 
 
 
-
+    # agent_name = 'porto_pete_v_r_collision_6'
+    # main_dict['name'] = agent_name
+    # env_dict['steer_control_dict']['steering_control'] = False
+    # env_dict['velocity_control'] = True
+    # env_dict['velocity_gain'] = 1
+    # env_dict['reward_signal']['distance'] = 0.3
+    # env_dict['reward_signal']['collision'] = -8
+    # a = main_multiple.trainingLoop(main_dict, agent_td3_dict, env_dict, load_agent='')
+    # a.train()
+    # main_multiple.lap_time_test(agent_name=agent_name, n_episodes=n_test, detect_issues=False, initial_conditions=True)
 
     pass
-
-
-
 
 
 
@@ -1109,16 +1107,30 @@ if True:
     # legend = ['polynomial']
     # legend_title = 'path'
 
-    # agent_names = ['porto_pete_s_r_collision_0', 'porto_ete_v5_r_collision_5']
-    # ns = [1, 0]
-    # legend = ['pete', 'ete']
-    # legend_title = 'Architecture'
+    agent_names = ['porto_ete_v5_r_collision_5', 'porto_pete_s_r_collision_0', 'porto_pete_s_polynomial']
+    ns = [0, 0, 0]
+    legend = ['No path', 'Circular path', 'Polynomial path']
+    legend_title = ''
+
+
+
 
     # agent_names = ['porto_pete_s_lfc_4']
     # ns = [0]
     # legend = ['polynomial']
     # legend_title = 'circle'
 
+
+    #lfc
+    # agent_names = ['porto_pete_s_lfc_4', 'porto_pete_s_lfc_0', 'porto_pete_s_r_collision_0', 'porto_pete_s_lfc_1', 'porto_pete_s_lfc_2',  'porto_pete_s_lfc_3']
+    # legend = ['0.3', '0.5', '1', '1.5', '2', '2.5']
+    # legend_title = 'L_fc'
+    # ns=[0,0,0,0,0,0]
+
+    # agent_names = ['porto_pete_s_lfc_0', 'porto_pete_s_r_collision_0', 'porto_pete_s_lfc_2']
+    # legend = ['0.5', '1', '2']
+    # legend_title = 'L_fc'
+    # ns=[0, 0, 0]
 
     pass
 
@@ -1129,10 +1141,40 @@ if True:
     # legend = ['']
     # legend_title = ''
     # ns=[0]
+    
+    
+    # agent_names = ['porto_pete_v_k_0', 'porto_pete_v_r_dist_025', 'porto_pete_v_r_dist_03']
+    # legend = ['0.2', '0.25', '0.3']
+    # legend_title = 'rdist'
+    # ns=[0,0,0]
+    
+    # #rdist=0.2, vary r_collision
+    # agent_names = ['porto_pete_v_k_0', 'porto_pete_v_r_collision_0',  'porto_pete_v_r_collision_1',  'porto_pete_v_r_collision_2']
+    # legend = ['-2', '-4', '-6', '-8']
+    # legend_title = 'r_collision'
+    # ns=[0,0,0,0]
+
+    # #r_dist=0.25, vary r_collision
+    # agent_names = ['porto_pete_v_r_dist_025', 'porto_pete_v_r_collision_3',  'porto_pete_v_r_collision_4']
+    # legend = ['-2', '-4', '-6', '-8']
+    # legend_title = 'r_collision'
+    # ns=[0,0,0]
+
+
+    # #r_dist=0.3, vary r_collision
+    # agent_names = ['porto_pete_v_r_dist_03', 'porto_pete_v_r_collision_5',  'porto_pete_v_r_collision_6']
+    # legend = ['-2', '-4', '-8']
+    # legend_title = 'r_collision'
+    # ns=[0,0,0]
+
+    #successful agent = 'porto_pete_v_r_collision_6'
+
+
+    
     pass
 
 
-# display_results_multiple.learning_curve_lap_time_average(agent_names, legend, legend_title, ns)
+display_results_multiple.learning_curve_lap_time_average(agent_names, legend, legend_title, ns)
 # display_results_multiple.learning_curve_reward_average(agent_names, legend, legend_title)
 
 

@@ -41,7 +41,7 @@ from PIL import Image, ImageOps, ImageDraw, ImageFilter
 
 
 
-def learning_curve_lap_time_average(agent_names, legend, legend_title, ns, filename):
+def learning_curve_lap_time_average(agent_names, legend, legend_title, ns, filename, xlim, xspace):
 
     legend_coll = legend.copy()
     legend_coll.append('Min and max')
@@ -217,7 +217,22 @@ def learning_curve_lap_time_average(agent_names, legend, legend_title, ns, filen
     })
 
     plt.rc('axes',edgecolor='gray')
-    fig, ax = plt.subplots(1, 2, figsize=(5.5,3))
+    fig, ax = plt.subplots(1, 2, figsize=(5.5,2.8))
+
+
+    #ax[0].ticklabel_format(style='scientific', axis='x', scilimits=(0,0), useMathText=True, useOffset=True)
+    ax[1].ticklabel_format(style='scientific', axis='x', scilimits=(0,0), useMathText=True)
+    #ax[2].ticklabel_format(style='scientific', axis='x', scilimits=(0,0), useMathText=True, useOffset=True)
+    #plt.ticklabel_format(style='scientific', axis='x', scilimits=(0,0))
+    
+ 
+    xax1000 = np.arange(0,xlim+1000,xspace)
+    xax1 = (xax1000/1000).astype(int)
+
+    ax[0].set_xticks(ticks=xax1000, labels=xax1)
+    ax[1].set_xticks(ticks=xax1000, labels=xax1)
+
+    #ax[0].set_yticks(ticks=[0,25,50,75,100], labels=[0,25,50,75,100])
 
     #plt.figure(3, figsize=(5,4))
     for i in range(len(agent_names)):
@@ -230,12 +245,12 @@ def learning_curve_lap_time_average(agent_names, legend, legend_title, ns, filen
     ax[0].hlines(y=0, xmin=0, xmax=np.max(end_episodes), colors='black', linestyle='dashed')
     ax[0].set_ylim([-5, 105])
     #ax[0].set_xlim([0, np.max(end_episodes)])
-    ax[0].set_xlabel('Episodes')
+    ax[0].set_xlabel(r'Episodes $\times 10^3$')
     #plt.title('Collision rate')
     ax[0].set_ylabel('Failure rate [%]')
     ax[0].tick_params('both', length=0)
     ax[0].grid(True)
-    ax[0].set_xlim([0,4000])
+    ax[0].set_xlim([0,xlim])
     #plt.rc('axes',edgecolor='gray')
     #plt.tick_params(axis=u'both', which=u'both',length=0)
 
@@ -250,14 +265,14 @@ def learning_curve_lap_time_average(agent_names, legend, legend_title, ns, filen
 
         #np.arange(len(steps[i][ns[i]]))[np.logical_not(collisions[i][ns[i]])][0:end_episodes[i]]
         #plt.plot(np.array(max_steps_no_coll[i][0:end_episode_no_coll])*0.01 )
-    ax[1].set_xlabel('Episodes')
+    ax[1].set_xlabel(r'Episodes $\times 10^3$')
     #ax[1].set_xlim([0, np.max(end_episodes)])
     #plt.title('Average time per episode without collisions')
     ax[1].set_ylabel('Lap time [s]')
     #ax[1].legend(legend, title=legend_title, loc='upper right')
     ax[1].grid(True)
     ax[1].tick_params('both', length=0)
-    ax[1].set_xlim([0,4000])
+    ax[1].set_xlim([0,xlim])
     #plt.tick_params(axis=u'both', which=u'both',length=0)
     #plt.xlim([0,6000])
 
@@ -297,7 +312,7 @@ def learning_curve_lap_time_average(agent_names, legend, legend_title, ns, filen
     # plt.tick_params(axis=u'both', which=u'both',length=0)
 
     fig.tight_layout()
-    fig.subplots_adjust(bottom=0.37) 
+    fig.subplots_adjust(bottom=0.33) 
     plt.figlegend(legend, title=legend_title, loc = 'lower center', ncol=5)
     
     plt.savefig('results/'+filename+'.pgf', format='pgf')
@@ -1362,6 +1377,13 @@ def display_only_path_multiple(agent_names, ns, legend_title, legend, mismatch_p
 # xspace =1000
 
 
+agent_names = ['porto_ete_v5_r_collision_5', 'porto_pete_s_r_collision_0', 'porto_pete_s_polynomial']
+ns = [0, 0, 0]
+legend = ['No path', 'Circular path', 'Polynomial path']
+legend_title = ''
+filename = 'steer_learning_curve'
+xlim = 3000
+xspace = 1000
 
 
 # mismatch_parameters = ['C_Sf']
@@ -1373,16 +1395,16 @@ def display_only_path_multiple(agent_names, ns, legend_title, legend, mismatch_p
 #                         legend=legend, mismatch_parameters=mismatch_parameters, frac_vary=frac_vary, 
 #                         start_condition=start_condition, filename=filename)
 
-mismatch_parameters = ['C_Sf']
-frac_vary = [0]
-start_condition = {'x':10, 'y':4.5, 'v':3, 'theta':np.pi, 'delta':0, 'goal':0}
-#start_condition = []
-display_only_path_multiple(agent_names=agent_names, ns=ns, legend_title=legend_title,          
-                        legend=legend, mismatch_parameters=mismatch_parameters, frac_vary=frac_vary, 
-                        start_condition=start_condition, filename=filename)
+# mismatch_parameters = ['C_Sf']
+# frac_vary = [0]
+# start_condition = {'x':10, 'y':4.5, 'v':3, 'theta':np.pi, 'delta':0, 'goal':0}
+# #start_condition = []
+# display_only_path_multiple(agent_names=agent_names, ns=ns, legend_title=legend_title,          
+#                         legend=legend, mismatch_parameters=mismatch_parameters, frac_vary=frac_vary, 
+#                         start_condition=start_condition, filename=filename)
 
 
-# learning_curve_lap_time_average(agent_names, legend, legend_title, ns, filename)
+learning_curve_lap_time_average(agent_names, legend, legend_title, ns, filename, xlim, xspace)
 
 # learning_curve_reward_average(agent_names, legend, legend_title)
 
