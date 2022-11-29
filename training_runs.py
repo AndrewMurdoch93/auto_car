@@ -814,17 +814,17 @@ if True:
     # a.train()
     # main_multiple.lap_time_test(agent_name=agent_name, n_episodes=n_test, detect_issues=False, initial_conditions=True)
 
-    agent_name = 'porto_pete_v_k_1_attempt_2'
-    main_dict['name'] = agent_name
-    main_dict['max_steps'] = 3e6 
-    env_dict['steer_control_dict']['steering_control'] = False
-    env_dict['velocity_control'] = True
-    env_dict['velocity_gain'] = 2
-    env_dict['reward_signal']['distance'] = 0.2
-    env_dict['reward_signal']['collision'] = -2
-    a = main_multiple.trainingLoop(main_dict, agent_td3_dict, env_dict, load_agent='')
-    a.train()
-    main_multiple.lap_time_test(agent_name=agent_name, n_episodes=n_test, detect_issues=False, initial_conditions=True)
+    # agent_name = 'porto_pete_v_k_1_attempt_2'
+    # main_dict['name'] = agent_name
+    # main_dict['max_steps'] = 3e6 
+    # env_dict['steer_control_dict']['steering_control'] = False
+    # env_dict['velocity_control'] = True
+    # env_dict['velocity_gain'] = 2
+    # env_dict['reward_signal']['distance'] = 0.2
+    # env_dict['reward_signal']['collision'] = -2
+    # a = main_multiple.trainingLoop(main_dict, agent_td3_dict, env_dict, load_agent='')
+    # a.train()
+    # main_multiple.lap_time_test(agent_name=agent_name, n_episodes=n_test, detect_issues=False, initial_conditions=True)
 
 
 
