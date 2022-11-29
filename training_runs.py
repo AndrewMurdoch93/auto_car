@@ -453,6 +453,18 @@ if True:
     a.train()
     main_multiple.lap_time_test(agent_name=agent_name, n_episodes=100, detect_issues=False, initial_conditions=True)
 
+    agent_name = 'porto_ete_v5_r_dist_02_attempt_2'
+    main_dict['name'] = agent_name
+    main_dict['max_steps'] = 3e6
+    env_dict['velocity_control'] = False
+    env_dict['steer_control_dict']['steering_control'] = False
+    env_dict['reward_signal']['distance'] = 0.2
+    env_dict['reward_signal']['time_step'] = -0.01
+    env_dict['reward_signal']['collision'] = -2
+    a = main_multiple.trainingLoop(main_dict, agent_td3_dict, env_dict, load_agent='')
+    a.train()
+    main_multiple.lap_time_test(agent_name=agent_name, n_episodes=100, detect_issues=False, initial_conditions=True)
+
 
     # agent_name = 'porto_ete_v5_gamma_0'
     # main_dict['name'] = agent_name
