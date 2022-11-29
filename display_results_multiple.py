@@ -1772,6 +1772,7 @@ def display_path_multiple(agent_names, ns, legend_title, legend, mismatch_parame
     progress_history = []
     state_history = []
     local_path_history = []
+    action_step_history = []
     
     for agent_name, n, i in zip(agent_names, ns, range(len(agent_names))):
 
@@ -1861,7 +1862,7 @@ def display_path_multiple(agent_names, ns, legend_title, legend, mismatch_parame
         pose_history.append(env.pose_history)
         progress_history.append(env.progress_history)
         local_path_history.append(env.local_path_history)
-        
+        action_step_history.append(env.action_step_history)
         
         
     myfont = {'fontname':'serif'}
@@ -1892,15 +1893,16 @@ def display_path_multiple(agent_names, ns, legend_title, legend, mismatch_parame
     track = mapping.map(env.map_name)
     ax.imshow(ImageOps.invert(track.gray_im.filter(ImageFilter.FIND_EDGES).filter(ImageFilter.MaxFilter(1))), extent=(0,track.map_width,0,track.map_height), cmap="gray")
     ax.plot(env.rx, env.ry, color='gray', linestyle='dashed')
-    
+    alpha=0.8
+
     for i in range(len(agent_names)):
    
-        # if env_dict['steer_control_dict']['steering_control']:
-        #     for j in np.array(local_path_history[i])[np.arange(0,len(local_path_history[i]),40)]:
-        #         ax.plot(j[0], j[1], alpha=0.5, linestyle='dashdot', color='red')
-        #         ax.plot(j[0][0], j[1][0], alpha=0.5, color='red', marker='s')
+        if env_dict['steer_control_dict']['steering_control']:
+            for j in np.array(local_path_history[i])[np.arange(0,len(local_path_history[i]),40)]:
+                ax.plot(j[0], j[1], alpha=0.5, linestyle='dashdot', color='red')
+                ax.plot(j[0][0], j[1][0], alpha=0.5, color='red', marker='s')
         # ax.plot(np.array(pose_history[i])[:,0], np.array(pose_history[i])[:,1], linewidth=1.5) 
-        ax.plot(np.array(pose_history[i])[:,0], np.array(pose_history[i])[:,1], linewidth=2)    
+        ax.plot(np.array(pose_history[i])[:,0], np.array(pose_history[i])[:,1], linewidth=1.5, alpha=alpha)    
 
     prog = np.array([0, 0.2, 0.4, 0.6, 0.8])
     idx =  np.zeros(len(prog), int)
@@ -1938,7 +1940,7 @@ def display_path_multiple(agent_names, ns, legend_title, legend, mismatch_parame
     plt.hlines(y=env_dict['action_space_dict']['vel_select'][0], xmin=0, xmax=100, colors='black', linestyle='dashed')
     plt.hlines(y=env_dict['action_space_dict']['vel_select'][1], xmin=0, xmax=100, colors='black', linestyle='dashed', label='_nolegend_')
     for i in range(len(agent_names)):
-        plt.plot(np.array(progress_history[i])*100, np.array(pose_history[i])[:,4], linewidth=1.5)
+        plt.plot(np.array(progress_history[i])*100, np.array(pose_history[i])[:,4], linewidth=1.5, alpha=alpha)
 
     plt.xlabel('progress along centerline [%]',**myfont)
     plt.ylabel('Longitudinal velocity [m/s]',**myfont)
@@ -1957,7 +1959,7 @@ def display_path_multiple(agent_names, ns, legend_title, legend, mismatch_parame
     plt.hlines(y=env_dict['car_params']['s_min'], xmin=0, xmax=100, colors='black', linestyle='dashed')
     plt.hlines(y=env_dict['car_params']['s_max'], xmin=0, xmax=100, colors='black', linestyle='dashed', label='_nolegend_')
     for i in range(len(agent_names)):
-        plt.plot(np.array(progress_history[i])*100, np.array(pose_history[i])[:,3], linewidth=1.5)
+        plt.plot(np.array(progress_history[i])*100, np.array(pose_history[i])[:,3], linewidth=1.5, alpha=alpha)
 
     plt.xlabel('progress along centerline [%]',**myfont)
     plt.ylabel('steering angle [rads]',**myfont)
@@ -1972,7 +1974,7 @@ def display_path_multiple(agent_names, ns, legend_title, legend, mismatch_parame
     plt.figure(4, figsize=figure_size)
     plt.rc('axes',edgecolor='lightgrey')
     for i in range(len(agent_names)):
-        plt.plot(np.array(progress_history[i])*100, np.array(state_history[i])[:,6], linewidth=1.5)
+        plt.plot(np.array(progress_history[i])*100, np.array(state_history[i])[:,6], linewidth=1.5, alpha=alpha)
       
     plt.xlabel('progress along centerline [%]',**myfont)
     plt.ylabel('Slip angle [rads]',**myfont)
@@ -1996,15 +1998,53 @@ def display_path_multiple(agent_names, ns, legend_title, legend, mismatch_parame
     
     for i in range(len(agent_names)):
         
-        plt.plot(np.arange(len(progress_history[i])), np.array(progress_history[i])*100, linewidth=1.5)
-
+        plt.plot(np.arange(len(progress_history[i])), np.array(progress_history[i])*100, linewidth=1.5, alpha=alpha)
+    
     plt.xlabel('Simulation step',**myfont)
     plt.ylabel('progress along centerline [%]',**myfont)
     plt.ylim([-5,105])
     plt.legend(legend_new, title=legend_title, loc='lower right')
     plt.grid(True, color='lightgrey')
     plt.tick_params(axis=u'both', which=u'both',length=0)
+
+
+
+    plt.figure(6, figsize=figure_size)
+    plt.rc('axes',edgecolor='lightgrey')
+    plt.hlines(y=1, xmin=0, xmax=100, colors='black', linestyle='dashed')
+    plt.hlines(y=-1, xmin=0, xmax=100, colors='black', linestyle='dashed', label='_nolegend_')
+    
+    for i in range(len(agent_names)):
+        plt.plot(np.array(progress_history[i])[0:len(np.array(action_step_history[i])[:,0])]*100, np.array(action_step_history[i])[:,0], linewidth=1.5, alpha=alpha)
+    
+    plt.xlabel('Simulation step',**myfont)
+    plt.ylabel('Latitude action',**myfont)
+    plt.ylim([-1,1])
+    plt.legend(legend_new, title=legend_title, loc='lower right')
+    plt.grid(True, color='lightgrey')
+    plt.tick_params(axis=u'both', which=u'both',length=0)
+
+
+
+    plt.figure(7, figsize=figure_size)
+    plt.rc('axes',edgecolor='lightgrey')
+    plt.hlines(y=1, xmin=0, xmax=100, colors='black', linestyle='dashed')
+    plt.hlines(y=-1, xmin=0, xmax=100, colors='black', linestyle='dashed', label='_nolegend_')
+    
+    for i in range(len(agent_names)):
+        plt.plot(np.array(progress_history[i])[0:len(np.array(action_step_history[i])[:,1])]*100, np.array(action_step_history[i])[:,1], linewidth=1.5, alpha=alpha)
+    
+    plt.xlabel('Simulation step',**myfont)
+    plt.ylabel('Longitude action',**myfont)
+    plt.ylim([-1,1])
+    plt.legend(legend_new, title=legend_title, loc='lower right')
+    plt.grid(True, color='lightgrey')
+    plt.tick_params(axis=u'both', which=u'both',length=0)
     plt.show()
+
+
+
+
 
 def display_maps():
     names = ['Circle', 'Redbull ring', 'Berlin', 'Columbia', 'Porto', 'Torino']

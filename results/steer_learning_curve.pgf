@@ -1305,16 +1305,16 @@
 \pgfsetstrokecolor{currentstroke}%
 \pgfsetstrokeopacity{0.800000}%
 \pgfsetdash{}{0pt}%
-\pgfpathmoveto{\pgfqpoint{0.319750in}{0.083333in}}%
-\pgfpathlineto{\pgfqpoint{5.180250in}{0.083333in}}%
-\pgfpathquadraticcurveto{\pgfqpoint{5.213583in}{0.083333in}}{\pgfqpoint{5.213583in}{0.116667in}}%
-\pgfpathlineto{\pgfqpoint{5.213583in}{0.334666in}}%
-\pgfpathquadraticcurveto{\pgfqpoint{5.213583in}{0.368000in}}{\pgfqpoint{5.180250in}{0.368000in}}%
-\pgfpathlineto{\pgfqpoint{0.319750in}{0.368000in}}%
-\pgfpathquadraticcurveto{\pgfqpoint{0.286417in}{0.368000in}}{\pgfqpoint{0.286417in}{0.334666in}}%
-\pgfpathlineto{\pgfqpoint{0.286417in}{0.116667in}}%
-\pgfpathquadraticcurveto{\pgfqpoint{0.286417in}{0.083333in}}{\pgfqpoint{0.319750in}{0.083333in}}%
-\pgfpathlineto{\pgfqpoint{0.319750in}{0.083333in}}%
+\pgfpathmoveto{\pgfqpoint{0.212167in}{0.083333in}}%
+\pgfpathlineto{\pgfqpoint{5.287833in}{0.083333in}}%
+\pgfpathquadraticcurveto{\pgfqpoint{5.321167in}{0.083333in}}{\pgfqpoint{5.321167in}{0.116667in}}%
+\pgfpathlineto{\pgfqpoint{5.321167in}{0.334666in}}%
+\pgfpathquadraticcurveto{\pgfqpoint{5.321167in}{0.368000in}}{\pgfqpoint{5.287833in}{0.368000in}}%
+\pgfpathlineto{\pgfqpoint{0.212167in}{0.368000in}}%
+\pgfpathquadraticcurveto{\pgfqpoint{0.178833in}{0.368000in}}{\pgfqpoint{0.178833in}{0.334666in}}%
+\pgfpathlineto{\pgfqpoint{0.178833in}{0.116667in}}%
+\pgfpathquadraticcurveto{\pgfqpoint{0.178833in}{0.083333in}}{\pgfqpoint{0.212167in}{0.083333in}}%
+\pgfpathlineto{\pgfqpoint{0.212167in}{0.083333in}}%
 \pgfpathclose%
 \pgfusepath{stroke,fill}%
 \end{pgfscope}%
@@ -1325,16 +1325,16 @@
 \definecolor{currentstroke}{rgb}{0.121569,0.466667,0.705882}%
 \pgfsetstrokecolor{currentstroke}%
 \pgfsetdash{}{0pt}%
-\pgfpathmoveto{\pgfqpoint{0.353083in}{0.242333in}}%
-\pgfpathlineto{\pgfqpoint{0.519750in}{0.242333in}}%
-\pgfpathlineto{\pgfqpoint{0.686417in}{0.242333in}}%
+\pgfpathmoveto{\pgfqpoint{0.245500in}{0.242333in}}%
+\pgfpathlineto{\pgfqpoint{0.412167in}{0.242333in}}%
+\pgfpathlineto{\pgfqpoint{0.578833in}{0.242333in}}%
 \pgfusepath{stroke}%
 \end{pgfscope}%
 \begin{pgfscope}%
 \definecolor{textcolor}{rgb}{0.000000,0.000000,0.000000}%
 \pgfsetstrokecolor{textcolor}%
 \pgfsetfillcolor{textcolor}%
-\pgftext[x=0.819750in,y=0.184000in,left,base]{\color{textcolor}\rmfamily\fontsize{12.000000}{14.400000}\selectfont No path}%
+\pgftext[x=0.712167in,y=0.184000in,left,base]{\color{textcolor}\rmfamily\fontsize{12.000000}{14.400000}\selectfont End-to-end}%
 \end{pgfscope}%
 \begin{pgfscope}%
 \pgfsetrectcap%
@@ -1343,16 +1343,16 @@
 \definecolor{currentstroke}{rgb}{1.000000,0.498039,0.054902}%
 \pgfsetstrokecolor{currentstroke}%
 \pgfsetdash{}{0pt}%
-\pgfpathmoveto{\pgfqpoint{1.737917in}{0.242333in}}%
-\pgfpathlineto{\pgfqpoint{1.904583in}{0.242333in}}%
-\pgfpathlineto{\pgfqpoint{2.071250in}{0.242333in}}%
+\pgfpathmoveto{\pgfqpoint{1.845500in}{0.242333in}}%
+\pgfpathlineto{\pgfqpoint{2.012167in}{0.242333in}}%
+\pgfpathlineto{\pgfqpoint{2.178833in}{0.242333in}}%
 \pgfusepath{stroke}%
 \end{pgfscope}%
 \begin{pgfscope}%
 \definecolor{textcolor}{rgb}{0.000000,0.000000,0.000000}%
 \pgfsetstrokecolor{textcolor}%
 \pgfsetfillcolor{textcolor}%
-\pgftext[x=2.204583in,y=0.184000in,left,base]{\color{textcolor}\rmfamily\fontsize{12.000000}{14.400000}\selectfont Circular path}%
+\pgftext[x=2.312167in,y=0.184000in,left,base]{\color{textcolor}\rmfamily\fontsize{12.000000}{14.400000}\selectfont Circular path}%
 \end{pgfscope}%
 \begin{pgfscope}%
 \pgfsetrectcap%
@@ -1361,16 +1361,16 @@
 \definecolor{currentstroke}{rgb}{0.172549,0.627451,0.172549}%
 \pgfsetstrokecolor{currentstroke}%
 \pgfsetdash{}{0pt}%
-\pgfpathmoveto{\pgfqpoint{3.499083in}{0.242333in}}%
-\pgfpathlineto{\pgfqpoint{3.665750in}{0.242333in}}%
-\pgfpathlineto{\pgfqpoint{3.832417in}{0.242333in}}%
+\pgfpathmoveto{\pgfqpoint{3.606667in}{0.242333in}}%
+\pgfpathlineto{\pgfqpoint{3.773333in}{0.242333in}}%
+\pgfpathlineto{\pgfqpoint{3.940000in}{0.242333in}}%
 \pgfusepath{stroke}%
 \end{pgfscope}%
 \begin{pgfscope}%
 \definecolor{textcolor}{rgb}{0.000000,0.000000,0.000000}%
 \pgfsetstrokecolor{textcolor}%
 \pgfsetfillcolor{textcolor}%
-\pgftext[x=3.965750in,y=0.184000in,left,base]{\color{textcolor}\rmfamily\fontsize{12.000000}{14.400000}\selectfont Polynomial path}%
+\pgftext[x=4.073333in,y=0.184000in,left,base]{\color{textcolor}\rmfamily\fontsize{12.000000}{14.400000}\selectfont Polynomial path}%
 \end{pgfscope}%
 \end{pgfpicture}%
 \makeatother%

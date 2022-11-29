@@ -602,16 +602,16 @@
 \pgfsetstrokecolor{currentstroke}%
 \pgfsetstrokeopacity{0.800000}%
 \pgfsetdash{}{0pt}%
-\pgfpathmoveto{\pgfqpoint{2.503885in}{0.663500in}}%
+\pgfpathmoveto{\pgfqpoint{2.572847in}{0.663500in}}%
 \pgfpathlineto{\pgfqpoint{3.703333in}{0.663500in}}%
 \pgfpathquadraticcurveto{\pgfqpoint{3.736667in}{0.663500in}}{\pgfqpoint{3.736667in}{0.696833in}}%
-\pgfpathlineto{\pgfqpoint{3.736667in}{1.898919in}}%
-\pgfpathquadraticcurveto{\pgfqpoint{3.736667in}{1.932252in}}{\pgfqpoint{3.703333in}{1.932252in}}%
-\pgfpathlineto{\pgfqpoint{2.503885in}{1.932252in}}%
-\pgfpathquadraticcurveto{\pgfqpoint{2.470551in}{1.932252in}}{\pgfqpoint{2.470551in}{1.898919in}}%
-\pgfpathlineto{\pgfqpoint{2.470551in}{0.696833in}}%
-\pgfpathquadraticcurveto{\pgfqpoint{2.470551in}{0.663500in}}{\pgfqpoint{2.503885in}{0.663500in}}%
-\pgfpathlineto{\pgfqpoint{2.503885in}{0.663500in}}%
+\pgfpathlineto{\pgfqpoint{3.736667in}{1.841832in}}%
+\pgfpathquadraticcurveto{\pgfqpoint{3.736667in}{1.875166in}}{\pgfqpoint{3.703333in}{1.875166in}}%
+\pgfpathlineto{\pgfqpoint{2.572847in}{1.875166in}}%
+\pgfpathquadraticcurveto{\pgfqpoint{2.539514in}{1.875166in}}{\pgfqpoint{2.539514in}{1.841832in}}%
+\pgfpathlineto{\pgfqpoint{2.539514in}{0.696833in}}%
+\pgfpathquadraticcurveto{\pgfqpoint{2.539514in}{0.663500in}}{\pgfqpoint{2.572847in}{0.663500in}}%
+\pgfpathlineto{\pgfqpoint{2.572847in}{0.663500in}}%
 \pgfpathclose%
 \pgfusepath{stroke,fill}%
 \end{pgfscope}%
@@ -622,16 +622,16 @@
 \definecolor{currentstroke}{rgb}{0.121569,0.466667,0.705882}%
 \pgfsetstrokecolor{currentstroke}%
 \pgfsetdash{}{0pt}%
-\pgfpathmoveto{\pgfqpoint{2.537218in}{1.807252in}}%
-\pgfpathlineto{\pgfqpoint{2.703885in}{1.807252in}}%
-\pgfpathlineto{\pgfqpoint{2.870551in}{1.807252in}}%
+\pgfpathmoveto{\pgfqpoint{2.606181in}{1.750166in}}%
+\pgfpathlineto{\pgfqpoint{2.772847in}{1.750166in}}%
+\pgfpathlineto{\pgfqpoint{2.939514in}{1.750166in}}%
 \pgfusepath{stroke}%
 \end{pgfscope}%
 \begin{pgfscope}%
 \definecolor{textcolor}{rgb}{0.000000,0.000000,0.000000}%
 \pgfsetstrokecolor{textcolor}%
 \pgfsetfillcolor{textcolor}%
-\pgftext[x=3.003885in,y=1.748919in,left,base]{\color{textcolor}\rmfamily\fontsize{12.000000}{14.400000}\selectfont path}%
+\pgftext[x=3.072847in,y=1.691832in,left,base]{\color{textcolor}\rmfamily\fontsize{12.000000}{14.400000}\selectfont path}%
 \end{pgfscope}%
 \begin{pgfscope}%
 \pgfsetbuttcap%
@@ -641,16 +641,16 @@
 \pgfsetstrokecolor{currentstroke}%
 \pgfsetstrokeopacity{0.800000}%
 \pgfsetdash{{5.550000pt}{2.400000pt}}{0.000000pt}%
-\pgfpathmoveto{\pgfqpoint{2.537218in}{1.574919in}}%
-\pgfpathlineto{\pgfqpoint{2.703885in}{1.574919in}}%
-\pgfpathlineto{\pgfqpoint{2.870551in}{1.574919in}}%
+\pgfpathmoveto{\pgfqpoint{2.606181in}{1.517833in}}%
+\pgfpathlineto{\pgfqpoint{2.772847in}{1.517833in}}%
+\pgfpathlineto{\pgfqpoint{2.939514in}{1.517833in}}%
 \pgfusepath{stroke}%
 \end{pgfscope}%
 \begin{pgfscope}%
 \definecolor{textcolor}{rgb}{0.000000,0.000000,0.000000}%
 \pgfsetstrokecolor{textcolor}%
 \pgfsetfillcolor{textcolor}%
-\pgftext[x=3.003885in,y=1.516586in,left,base]{\color{textcolor}\rmfamily\fontsize{12.000000}{14.400000}\selectfont \(\displaystyle L_{fc}=0.2\)}%
+\pgftext[x=3.072847in,y=1.459499in,left,base]{\color{textcolor}\rmfamily\fontsize{12.000000}{14.400000}\selectfont \(\displaystyle L_{c}=0.2\)}%
 \end{pgfscope}%
 \begin{pgfscope}%
 \pgfsetbuttcap%
@@ -660,16 +660,16 @@
 \pgfsetstrokecolor{currentstroke}%
 \pgfsetstrokeopacity{0.800000}%
 \pgfsetdash{{5.550000pt}{2.400000pt}}{0.000000pt}%
-\pgfpathmoveto{\pgfqpoint{2.537218in}{1.328314in}}%
-\pgfpathlineto{\pgfqpoint{2.703885in}{1.328314in}}%
-\pgfpathlineto{\pgfqpoint{2.870551in}{1.328314in}}%
+\pgfpathmoveto{\pgfqpoint{2.606181in}{1.285499in}}%
+\pgfpathlineto{\pgfqpoint{2.772847in}{1.285499in}}%
+\pgfpathlineto{\pgfqpoint{2.939514in}{1.285499in}}%
 \pgfusepath{stroke}%
 \end{pgfscope}%
 \begin{pgfscope}%
 \definecolor{textcolor}{rgb}{0.000000,0.000000,0.000000}%
 \pgfsetstrokecolor{textcolor}%
 \pgfsetfillcolor{textcolor}%
-\pgftext[x=3.003885in,y=1.269981in,left,base]{\color{textcolor}\rmfamily\fontsize{12.000000}{14.400000}\selectfont \(\displaystyle L_{fc}=0.5\)}%
+\pgftext[x=3.072847in,y=1.227166in,left,base]{\color{textcolor}\rmfamily\fontsize{12.000000}{14.400000}\selectfont \(\displaystyle L_{c}=0.5\)}%
 \end{pgfscope}%
 \begin{pgfscope}%
 \pgfsetbuttcap%
@@ -679,16 +679,16 @@
 \pgfsetstrokecolor{currentstroke}%
 \pgfsetstrokeopacity{0.800000}%
 \pgfsetdash{{5.550000pt}{2.400000pt}}{0.000000pt}%
-\pgfpathmoveto{\pgfqpoint{2.537218in}{1.081709in}}%
-\pgfpathlineto{\pgfqpoint{2.703885in}{1.081709in}}%
-\pgfpathlineto{\pgfqpoint{2.870551in}{1.081709in}}%
+\pgfpathmoveto{\pgfqpoint{2.606181in}{1.053166in}}%
+\pgfpathlineto{\pgfqpoint{2.772847in}{1.053166in}}%
+\pgfpathlineto{\pgfqpoint{2.939514in}{1.053166in}}%
 \pgfusepath{stroke}%
 \end{pgfscope}%
 \begin{pgfscope}%
 \definecolor{textcolor}{rgb}{0.000000,0.000000,0.000000}%
 \pgfsetstrokecolor{textcolor}%
 \pgfsetfillcolor{textcolor}%
-\pgftext[x=3.003885in,y=1.023376in,left,base]{\color{textcolor}\rmfamily\fontsize{12.000000}{14.400000}\selectfont \(\displaystyle L_{fc}=1\)}%
+\pgftext[x=3.072847in,y=0.994833in,left,base]{\color{textcolor}\rmfamily\fontsize{12.000000}{14.400000}\selectfont \(\displaystyle L_{c}=1\)}%
 \end{pgfscope}%
 \begin{pgfscope}%
 \pgfsetbuttcap%
@@ -698,16 +698,16 @@
 \pgfsetstrokecolor{currentstroke}%
 \pgfsetstrokeopacity{0.800000}%
 \pgfsetdash{{5.550000pt}{2.400000pt}}{0.000000pt}%
-\pgfpathmoveto{\pgfqpoint{2.537218in}{0.835105in}}%
-\pgfpathlineto{\pgfqpoint{2.703885in}{0.835105in}}%
-\pgfpathlineto{\pgfqpoint{2.870551in}{0.835105in}}%
+\pgfpathmoveto{\pgfqpoint{2.606181in}{0.820833in}}%
+\pgfpathlineto{\pgfqpoint{2.772847in}{0.820833in}}%
+\pgfpathlineto{\pgfqpoint{2.939514in}{0.820833in}}%
 \pgfusepath{stroke}%
 \end{pgfscope}%
 \begin{pgfscope}%
 \definecolor{textcolor}{rgb}{0.000000,0.000000,0.000000}%
 \pgfsetstrokecolor{textcolor}%
 \pgfsetfillcolor{textcolor}%
-\pgftext[x=3.003885in,y=0.776771in,left,base]{\color{textcolor}\rmfamily\fontsize{12.000000}{14.400000}\selectfont \(\displaystyle L_{fc}=2\)}%
+\pgftext[x=3.072847in,y=0.762500in,left,base]{\color{textcolor}\rmfamily\fontsize{12.000000}{14.400000}\selectfont \(\displaystyle L_{c}=2\)}%
 \end{pgfscope}%
 \end{pgfpicture}%
 \makeatother%
