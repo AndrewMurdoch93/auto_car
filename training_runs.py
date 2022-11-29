@@ -441,6 +441,19 @@ if True:
     # a.train()
     # main_multiple.lap_time_test(agent_name=agent_name, n_episodes=100, detect_issues=False, initial_conditions=True)
 
+    agent_name = 'porto_ete_v5_r_collision_5_attempt_2'
+    main_dict['name'] = agent_name
+    main_dict['max_steps'] = 3e6
+    env_dict['velocity_control'] = False
+    env_dict['steer_control_dict']['steering_control'] = False
+    env_dict['reward_signal']['distance'] = 0.3
+    env_dict['reward_signal']['time_step'] = -0.01
+    env_dict['reward_signal']['collision'] = -10
+    a = main_multiple.trainingLoop(main_dict, agent_td3_dict, env_dict, load_agent='')
+    a.train()
+    main_multiple.lap_time_test(agent_name=agent_name, n_episodes=100, detect_issues=False, initial_conditions=True)
+
+
     # agent_name = 'porto_ete_v5_gamma_0'
     # main_dict['name'] = agent_name
     # agent_td3_dict['gamma'] = 0.9
@@ -828,8 +841,6 @@ if True:
 
 
 
-
-
     # agent_name = 'porto_pete_v_r_dist_025'
     # main_dict['name'] = agent_name
     # env_dict['steer_control_dict']['steering_control'] = False
@@ -929,17 +940,17 @@ if True:
     # a.train()
     # main_multiple.lap_time_test(agent_name=agent_name, n_episodes=n_test, detect_issues=False, initial_conditions=True)
 
-    agent_name = 'porto_pete_v_r_collision_6_attempt_2'
-    main_dict['name'] = agent_name
-    main_dict['max_steps'] = 3e6 
-    env_dict['steer_control_dict']['steering_control'] = False
-    env_dict['velocity_control'] = True
-    env_dict['velocity_gain'] = 1
-    env_dict['reward_signal']['distance'] = 0.3
-    env_dict['reward_signal']['collision'] = -8
-    a = main_multiple.trainingLoop(main_dict, agent_td3_dict, env_dict, load_agent='')
-    a.train()
-    main_multiple.lap_time_test(agent_name=agent_name, n_episodes=n_test, detect_issues=False, initial_conditions=True)
+    # agent_name = 'porto_pete_v_r_collision_6_attempt_2'
+    # main_dict['name'] = agent_name
+    # main_dict['max_steps'] = 3e6 
+    # env_dict['steer_control_dict']['steering_control'] = False
+    # env_dict['velocity_control'] = True
+    # env_dict['velocity_gain'] = 1
+    # env_dict['reward_signal']['distance'] = 0.3
+    # env_dict['reward_signal']['collision'] = -8
+    # a = main_multiple.trainingLoop(main_dict, agent_td3_dict, env_dict, load_agent='')
+    # a.train()
+    # main_multiple.lap_time_test(agent_name=agent_name, n_episodes=n_test, detect_issues=False, initial_conditions=True)
 
 
 
@@ -1327,11 +1338,32 @@ if True:
     # legend_title = 'k'
     # ns=[1,0]
 
-    agent_names = ['porto_pete_v_k_1']
-    legend = ['2']
-    legend_title = 'k'
-    ns=[1]
+    # 2nd attempts with max_steps=3e6
+    # agent_names = ['porto_pete_v_k_1', 'porto_pete_v_k_1_attempt_2']
+    # legend = ['1', '2']
+    # legend_title = 'attempt'
+    # ns=[0, 0]
+
+    # agent_names = [ 'porto_pete_v_r_collision_6', 'porto_pete_v_r_collision_6_attempt_2']
+    # legend = ['1', '2']
+    # legend_title = 'attempt'
+    # ns=[0, 0]
+
+
+    # agent_names = [ 'porto_pete_v_r_collision_6_attempt_2',  'porto_pete_v_k_1_attempt_2']
+    # legend = ['1', '2']
+    # legend_title = 'attempt'
+    # ns=[0, 0]
     
+    # agent_names = ['porto_pete_v_k_1_attempt_2']
+    # legend = ['1']
+    # legend_title = 'attempt'
+    # ns=[0]
+    
+    # agent_names = ['porto_pete_v_k_1_attempt_2', 'porto_ete_v5_r_collision_5']
+    # legend = ['True', 'False']
+    # legend_title = 'Velocity controller'
+    # ns=[0,0]
     
     pass
 
