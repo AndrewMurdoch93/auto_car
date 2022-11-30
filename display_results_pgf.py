@@ -405,8 +405,8 @@ def learning_curve_reward_average(agent_names, legend, legend_title):
     #plt.figlegend(legend, title=legend_title, loc='center right', ncol=1)
 
 
-    plt.show()
-    # plt.savefig('results/'+filename+'.pgf', format='pgf')
+    # plt.show()
+    plt.savefig('results/'+filename+'.pgf', format='pgf')
 
 
 
@@ -564,13 +564,11 @@ def learning_curve_all(agent_names, legend, legend_title, ns, filename, xlim, xs
     #fig, ax = plt.subplots(1, 3, figsize=(5.5,3))
     fig, ax = plt.subplots(1, 3, figsize=(5.5,2.4))
     
-
     #ax[0].ticklabel_format(style='scientific', axis='x', scilimits=(0,0), useMathText=True, useOffset=True)
     ax[1].ticklabel_format(style='scientific', axis='x', scilimits=(0,0), useMathText=True)
     #ax[2].ticklabel_format(style='scientific', axis='x', scilimits=(0,0), useMathText=True, useOffset=True)
     #plt.ticklabel_format(style='scientific', axis='x', scilimits=(0,0))
     
- 
     xax1000 = np.arange(0,xlim+1000,xspace)
     xax1 = (xax1000/1000).astype(int)
 
@@ -579,6 +577,9 @@ def learning_curve_all(agent_names, legend, legend_title, ns, filename, xlim, xs
     ax[2].set_xticks(xax1000, labels=xax1)
     
     ax[0].set_yticks(ticks=[0,25,50,75,100], labels=[0,25,50,75,100])
+    
+    ax[1].set_yticks(ticks=[5,6,7,8,9,10], labels=[5,6,7,8,9,10])
+    ax[2].set_yticks(ticks=[-10, -5, 0, 5], labels=[-10, -5, 0, 5])
 
     #ax[1].ticklabel_format(style='scientific', axis='x', scilimits=(0,0), useMathText=True)
 
@@ -1371,12 +1372,12 @@ def display_only_path_multiple(agent_names, ns, legend_title, legend, mismatch_p
     legend_racetrack = legend.copy()
     legend_racetrack.insert(0, 'Track centerline')
 
-    plt.rcParams.update({
-    "font.family": "serif",  # use serif/main font for text elements
-    "text.usetex": True,     # use inline math for ticks
-    "pgf.rcfonts": False,     # don't setup fonts from rc parameters
-    "font.size": 12
-    })
+    # plt.rcParams.update({
+    # "font.family": "serif",  # use serif/main font for text elements
+    # "text.usetex": True,     # use inline math for ticks
+    # "pgf.rcfonts": False,     # don't setup fonts from rc parameters
+    # "font.size": 12
+    # })
 
     fig, ax = plt.subplots(1, figsize=(5,2.5))
 
@@ -1396,20 +1397,15 @@ def display_only_path_multiple(agent_names, ns, legend_title, legend, mismatch_p
     ax.plot(env.rx, env.ry, color='gray', linestyle='dashed', label='Track centerline')
     
     for i in range(len(agent_names)):
-        for idx, j in enumerate(np.array(local_path_history[i])[np.arange(0,len(local_path_history[i]),40)]):
-            if idx == 11:
-                ax.plot(j[0], j[1], alpha=0.5, linestyle='dashdot', color='red', label='Planned path')
-                ax.plot(j[0][0], j[1][0], alpha=0.5, color='red', marker='s', label='Coordinate at \naction sampling time')
-
         ax.plot(np.array(pose_history[i])[:,0], np.array(pose_history[i])[:,1], linewidth=1.5, label='Vehicle path history')   
 
-    prog = np.array([0, 0.2, 0.4, 0.6, 0.8])
-    idx =  np.zeros(len(prog), int)
-    text = ['', '20%', '40%', '60%', '80%']
 
-    for i in range(len(idx)):
-        idx[i] = np.mod(env.start_point+np.round(prog[i]*len(env.rx)), len(env.rx))
-    idx.astype(int)
+    #prog = np.array([0, 0.2, 0.4, 0.6, 0.8])
+    #idx =  np.zeros(len(prog), int)
+    #text = ['', '20%', '40%', '60%', '80%']
+    # for i in range(len(idx)):
+    #     idx[i] = np.mod(env.start_point+np.round(prog[i]*len(env.rx)), len(env.rx))
+    # idx.astype(int)
     
     # for i in range(len(idx)):
     #     ax.text(x=env.rx[idx[i]], y=env.ry[idx[i]], s=text[i], fontsize = 'small', bbox=dict(facecolor='white', edgecolor='black',pad=0.1,boxstyle='round'))
@@ -1420,16 +1416,714 @@ def display_only_path_multiple(agent_names, ns, legend_title, legend, mismatch_p
     # ax.axis('off')
     # # https://stackoverflow.com/questions/4700614/how-to-put-the-legend-outside-the-plot
 
-    ax.set_xlim([12,15.5])
-    ax.set_ylim([0.5,4])
 
     legend.insert(0, 'Track centerline')
     fig.tight_layout()
-    fig.subplots_adjust(right=0.6) 
+    #fig.subplots_adjust(right=0.6) 
     plt.figlegend(loc='center right', ncol=1, labelspacing=0.7)
+    
+    plt.show() 
+    # plt.savefig('results/'+filename+'.pgf', format='pgf')
+    pass
+
+
+def display_path_two_multiple(agent_names, ns, legend_title, legend, mismatch_parameters, frac_vary, start_condition, filename):
+    
+    pose_history = []
+    progress_history = []
+    state_history = []
+    local_path_history = []
+
+
+    for agent_name, n, i in zip(agent_names, ns, range(len(agent_names))):
+
+        infile = open('environments/' + agent_name, 'rb')
+        env_dict = pickle.load(infile)
+        infile.close()
+        # Compensate for changes to reward structure
+        env_dict['reward_signal']['max_progress'] = 0
+        
+        # Model mismatches
+        if mismatch_parameters:
+            for par, var in zip(mismatch_parameters, frac_vary):
+                env_dict['car_params'][par] *= 1+var 
+
+
+        env = environment(env_dict)
+        if start_condition:
+            env.reset(save_history=True, start_condition=start_condition, car_params=env_dict['car_params'])
+        else:
+            env.reset(save_history=True, start_condition=[], car_params=env_dict['car_params'])
+
+        infile = open('agents/' + agent_name + '/' + agent_name + '_params', 'rb')
+        agent_dict = pickle.load(infile)
+        infile.close()
+
+        infile = open('train_parameters/' + agent_name, 'rb')
+        main_dict = pickle.load(infile)
+        infile.close()
+          
+        if i==0 and not start_condition:
+            infile = open('test_initial_condition/' + env_dict['map_name'], 'rb')
+            start_conditions = pickle.load(infile)
+            infile.close()
+            start_condition = random.choice(start_conditions)
+
+        if main_dict['learning_method']=='dqn':
+            agent_dict['epsilon'] = 0
+            a = agent_dqn.agent(agent_dict)
+        if main_dict['learning_method']=='reinforce':
+            a = agent_reinforce.PolicyGradientAgent(agent_dict)
+        if main_dict['learning_method']=='actor_critic_sep':
+            a = agent_actor_critic.actor_critic_separated(agent_dict)
+        if  main_dict['learning_method']=='actor_critic_com':
+            a = agent_actor_critic.actor_critic_combined(agent_dict)
+        if main_dict['learning_method']=='actor_critic_cont':
+            a = agent_actor_critic_continuous.agent_separate(agent_dict)
+        if main_dict['learning_method'] == 'dueling_dqn':
+            agent_dict['epsilon'] = 0
+            a = agent_dueling_dqn.agent(agent_dict)
+        if main_dict['learning_method'] == 'dueling_ddqn':
+            agent_dict['epsilon'] = 0
+            a = agent_dueling_ddqn.agent(agent_dict)
+        if main_dict['learning_method'] == 'rainbow':
+            agent_dict['epsilon'] = 0
+            a = agent_rainbow.agent(agent_dict)
+        if main_dict['learning_method'] == 'ddpg':
+            a = agent_ddpg.agent(agent_dict)
+        if main_dict['learning_method'] == 'td3':
+            a = agent_td3.agent(agent_dict)
+            
+        a.load_weights(agent_name, n)
+
+        #start_pose = {'x':11.2, 'y':7.7, 'v':0, 'delta':0, 'theta':0, 'goal':1}
+        env.reset(save_history=True, start_condition=start_condition, car_params=env_dict['car_params'])
+        obs = env.observation
+        done = False
+        score=0
+
+        while not done:
+            if main_dict['learning_method']=='ddpg' or main_dict['learning_method']=='td3':
+                action = a.choose_greedy_action(obs)
+            else:
+                action = a.choose_action(obs)
+
+            next_obs, reward, done = env.take_action(action)
+            score += reward
+            obs = next_obs
+
+            if env.progress>=0.98:
+                done=True
+            
+
+        print('Total score = ', score)
+        print('Progress = ', env.progress)
+
+        state_history.append(env.state_history)
+        pose_history.append(env.pose_history)
+        progress_history.append(env.progress_history)
+        local_path_history.append(env.local_path_history)
+        
+        
+    
+
+
+
+    legend_new = legend.copy()
+    legend_new.insert(0, 'Min and max')
+
+    legend_racetrack = legend.copy()
+    legend_racetrack.insert(0, 'Track centerline')
+
+    plt.rcParams.update({
+    "font.family": "serif",  # use serif/main font for text elements
+    "text.usetex": True,     # use inline math for ticks
+    "pgf.rcfonts": False,     # don't setup fonts from rc parameters
+    "font.size": 12
+    })
+
+    fig, ax = plt.subplots(2, figsize=(5,2))
+
+    for i in range(2):
+        ax[i].axis('off')
+
+    track = mapping.map(env.map_name)
+    for i in range(2):
+        ax[i].imshow(ImageOps.invert(track.gray_im.filter(ImageFilter.FIND_EDGES).filter(ImageFilter.MaxFilter(1))), extent=(0,track.map_width,0,track.map_height), cmap="gray")
+        #ax[i].plot(env.rx, env.ry, color='gray', linestyle='dashed', label='Track centerline')
+    
+    prop_cycle = plt.rcParams['axes.prop_cycle']
+    colors = prop_cycle.by_key()['color']
+
+    for i in [0,1]:
+        ax[0].plot(np.array(pose_history[i])[:,0], np.array(pose_history[i])[:,1], linewidth=1.5, color=colors[i])   
+
+    for i in [2,3]:
+        ax[1].plot(np.array(pose_history[i])[:,0], np.array(pose_history[i])[:,1], linewidth=1.5, color=colors[i])   
+
+
+    #prog = np.array([0, 0.2, 0.4, 0.6, 0.8])
+    #idx =  np.zeros(len(prog), int)
+    #text = ['', '20%', '40%', '60%', '80%']
+    # for i in range(len(idx)):
+    #     idx[i] = np.mod(env.start_point+np.round(prog[i]*len(env.rx)), len(env.rx))
+    # idx.astype(int)
+    
+    # for i in range(len(idx)):
+    #     ax.text(x=env.rx[idx[i]], y=env.ry[idx[i]], s=text[i], fontsize = 'small', bbox=dict(facecolor='white', edgecolor='black',pad=0.1,boxstyle='round'))
+    
+    #ax.vlines(x=env.rx[idx[0]], ymin=env.ry[idx[0]]-1, ymax=env.ry[idx[0]]+1, linestyles='dotted', color='red')
+    #ax.text(x=env.rx[idx[0]]-1.2, y=env.ry[idx[0]]+1.3, s='Start/finish', fontsize = 'small', bbox=dict(facecolor='white', edgecolor='black',pad=0.1,boxstyle='round'))
+
+    # ax.axis('off')
+    # # https://stackoverflow.com/questions/4700614/how-to-put-the-legend-outside-the-plot
+
+
+    #legend.insert(0, 'Track centerline')
+    fig.tight_layout()
+    fig.subplots_adjust(right=0.5) 
+    plt.figlegend(legend, title=legend_title, loc='center right', ncol=1, labelspacing=0.7)
     
     # plt.show() 
     plt.savefig('results/'+filename+'.pgf', format='pgf')
+    pass
+
+
+
+def display_path_velocity_multiple(agent_names, ns, legend_title, legend, mismatch_parameters, frac_vary, start_condition, filename):
+    
+    pose_history = []
+    progress_history = []
+    state_history = []
+    
+    for agent_name, n, i in zip(agent_names, ns, range(len(agent_names))):
+
+        infile = open('environments/' + agent_name, 'rb')
+        env_dict = pickle.load(infile)
+        infile.close()
+        # Compensate for changes to reward structure
+        env_dict['reward_signal']['max_progress'] = 0
+        
+        # Model mismatches
+        if mismatch_parameters:
+            for par, var in zip(mismatch_parameters, frac_vary):
+                env_dict['car_params'][par] *= 1+var 
+
+
+        env = environment(env_dict)
+        if start_condition:
+            env.reset(save_history=True, start_condition=start_condition, car_params=env_dict['car_params'])
+        else:
+            env.reset(save_history=True, start_condition=[], car_params=env_dict['car_params'])
+
+        infile = open('agents/' + agent_name + '/' + agent_name + '_params', 'rb')
+        agent_dict = pickle.load(infile)
+        infile.close()
+
+        infile = open('train_parameters/' + agent_name, 'rb')
+        main_dict = pickle.load(infile)
+        infile.close()
+          
+        if i==0 and not start_condition:
+            infile = open('test_initial_condition/' + env_dict['map_name'], 'rb')
+            start_conditions = pickle.load(infile)
+            infile.close()
+            start_condition = random.choice(start_conditions)
+
+        if main_dict['learning_method']=='dqn':
+            agent_dict['epsilon'] = 0
+            a = agent_dqn.agent(agent_dict)
+        if main_dict['learning_method']=='reinforce':
+            a = agent_reinforce.PolicyGradientAgent(agent_dict)
+        if main_dict['learning_method']=='actor_critic_sep':
+            a = agent_actor_critic.actor_critic_separated(agent_dict)
+        if  main_dict['learning_method']=='actor_critic_com':
+            a = agent_actor_critic.actor_critic_combined(agent_dict)
+        if main_dict['learning_method']=='actor_critic_cont':
+            a = agent_actor_critic_continuous.agent_separate(agent_dict)
+        if main_dict['learning_method'] == 'dueling_dqn':
+            agent_dict['epsilon'] = 0
+            a = agent_dueling_dqn.agent(agent_dict)
+        if main_dict['learning_method'] == 'dueling_ddqn':
+            agent_dict['epsilon'] = 0
+            a = agent_dueling_ddqn.agent(agent_dict)
+        if main_dict['learning_method'] == 'rainbow':
+            agent_dict['epsilon'] = 0
+            a = agent_rainbow.agent(agent_dict)
+        if main_dict['learning_method'] == 'ddpg':
+            a = agent_ddpg.agent(agent_dict)
+        if main_dict['learning_method'] == 'td3':
+            a = agent_td3.agent(agent_dict)
+            
+        a.load_weights(agent_name, n)
+
+        #start_pose = {'x':11.2, 'y':7.7, 'v':0, 'delta':0, 'theta':0, 'goal':1}
+        env.reset(save_history=True, start_condition=start_condition, car_params=env_dict['car_params'])
+        obs = env.observation
+        done = False
+        score=0
+
+        while not done:
+            if main_dict['learning_method']=='ddpg' or main_dict['learning_method']=='td3':
+                action = a.choose_greedy_action(obs)
+            else:
+                action = a.choose_action(obs)
+
+            next_obs, reward, done = env.take_action(action)
+            score += reward
+            obs = next_obs
+
+            if env.progress>=0.98:
+                done=True
+            
+
+        print('Total score = ', score)
+        print('Progress = ', env.progress)
+
+        state_history.append(env.state_history)
+        pose_history.append(env.pose_history)
+        progress_history.append(env.progress_history)
+        
+        
+        
+    
+
+    xlims = [0,100]
+
+    legend_new = legend.copy()
+    legend_new.insert(0, 'Min and max')
+
+    legend_racetrack = legend.copy()
+    legend_racetrack.insert(0, 'Track centerline')
+
+    plt.rcParams.update({
+    "font.family": "serif",  # use serif/main font for text elements
+    "text.usetex": True,     # use inline math for ticks
+    "pgf.rcfonts": False,     # don't setup fonts from rc parameters
+    "font.size": 12
+    })
+
+    fig, ax = plt.subplots(4, figsize=(5,7))
+
+    color='gray'
+    for i in range(4):
+        #ax[i].tick_params(axis='both', colors='lightgrey')
+        ax[i].spines['bottom'].set_color(color)
+        ax[i].spines['top'].set_color(color) 
+        ax[i].spines['right'].set_color(color)
+        ax[i].spines['left'].set_color(color)
+
+    ax[0].tick_params(axis=u'both', which=u'both',length=0)
+    
+    track = mapping.map(env.map_name)
+    ax[0].imshow(ImageOps.invert(track.gray_im.filter(ImageFilter.FIND_EDGES).filter(ImageFilter.MaxFilter(1))), extent=(0,track.map_width,0,track.map_height), cmap="gray")
+    ax[0].plot(env.rx, env.ry, color='gray', linestyle='dashed')
+    
+    for i in range(len(agent_names)):
+        ax[0].plot(np.array(pose_history[i])[:,0], np.array(pose_history[i])[:,1], linewidth=1.5)   
+
+    prog = np.array([0, 0.2, 0.4, 0.6, 0.8])
+    idx =  np.zeros(len(prog), int)
+    text = ['', '20%', '40%', '60%', '80%']
+
+    for i in range(len(idx)):
+        idx[i] = np.mod(env.start_point+np.round(prog[i]*len(env.rx)), len(env.rx))
+    idx.astype(int)
+    
+    for i in range(len(idx)):
+        ax[0].text(x=env.rx[idx[i]], y=env.ry[idx[i]], s=text[i], fontsize = 'small', bbox=dict(facecolor='white', edgecolor='black',pad=0.1,boxstyle='round'))
+    
+    ax[0].vlines(x=env.rx[idx[0]], ymin=env.ry[idx[0]]-1, ymax=env.ry[idx[0]]+1, linestyles='dotted', color='red')
+    ax[0].text(x=env.rx[idx[0]]-1.2, y=env.ry[idx[0]]+1.3, s='Start/finish', fontsize = 'small', bbox=dict(facecolor='white', edgecolor='black',pad=0.1,boxstyle='round'))
+
+    ax[0].axis('off')
+    # # https://stackoverflow.com/questions/4700614/how-to-put-the-legend-outside-the-plot
+
+
+
+    ax[1].hlines(y=env_dict['action_space_dict']['vel_select'][0], xmin=0, xmax=100, colors='black', linestyle='dashed')
+    ax[1].hlines(y=env_dict['action_space_dict']['vel_select'][1], xmin=0, xmax=100, colors='black', linestyle='dashed', label='_nolegend_')
+    for i in range(len(agent_names)):
+        ax[1].plot(np.array(progress_history[i])*100, np.array(pose_history[i])[:,4], linewidth=1.5)
+    ax[1].set_ylabel('Longitudinal\nvelocity [m/s]')
+    ax[1].set_xlim(xlims)
+    ax[1].set_ylim([env_dict['action_space_dict']['vel_select'][0]-0.2, env_dict['action_space_dict']['vel_select'][1]+0.2])
+    ax[1].grid(True, color='lightgrey')
+    ax[1].tick_params('both', length=0)
+    ax[1].set_xticklabels([])
+
+    ax[2].hlines(y=env_dict['car_params']['s_min'], xmin=0, xmax=100, colors='black', linestyle='dashed')
+    ax[2].hlines(y=env_dict['car_params']['s_max'], xmin=0, xmax=100, colors='black', linestyle='dashed', label='_nolegend_')
+    for i in range(len(agent_names)):
+        ax[2].plot(np.array(progress_history[i])*100, np.array(pose_history[i])[:,3], linewidth=1.5)
+
+    ax[2].set_ylabel('steering\nangle [rads]')
+    ax[2].set_xlim(xlims)
+    ax[2].set_ylim([env_dict['car_params']['s_min']-0.05, env_dict['car_params']['s_max']+0.05])
+    ax[2].grid(True, color='lightgrey')
+    ax[2].tick_params(axis=u'both', which=u'both',length=0)
+    ax[2].set_xticklabels([])
+
+
+    for i in range(len(agent_names)):
+        ax[3].plot(np.array(progress_history[i])*100, np.array(state_history[i])[:,6], linewidth=1.5)
+    
+    ax[3].set_xlabel('Progress along centerline [%]')
+    ax[3].set_ylabel('Slip\nangle [rads]')
+    ax[3].set_xlim(xlims)
+    ax[3].set_ylim([-1,1])
+    ax[3].grid(True, color='lightgrey')
+    ax[3].tick_params(axis=u'both', which=u'both',length=0)
+    ax[3].set_yticks(np.arange(-1, 1.1, 0.5))
+
+
+    legend.insert(0, 'Track centerline')
+    fig.tight_layout()
+    fig.subplots_adjust(bottom=0.12) 
+    plt.figlegend(legend, title=legend_title, loc='lower center', ncol=2)
+    
+    # plt.show() 
+    plt.savefig('results/'+filename+'.pgf', format='pgf')
+
+
+
+def display_path_actions_multiple(agent_names, ns, legend_title, legend, mismatch_parameters, frac_vary, start_condition, filename):
+    
+    pose_history = []
+    progress_history = []
+    state_history = []
+    action_step_history = []
+
+    for agent_name, n, i in zip(agent_names, ns, range(len(agent_names))):
+
+        infile = open('environments/' + agent_name, 'rb')
+        env_dict = pickle.load(infile)
+        infile.close()
+        # Compensate for changes to reward structure
+        env_dict['reward_signal']['max_progress'] = 0
+        
+        # Model mismatches
+        if mismatch_parameters:
+            for par, var in zip(mismatch_parameters, frac_vary):
+                env_dict['car_params'][par] *= 1+var 
+
+
+        env = environment(env_dict)
+        if start_condition:
+            env.reset(save_history=True, start_condition=start_condition, car_params=env_dict['car_params'])
+        else:
+            env.reset(save_history=True, start_condition=[], car_params=env_dict['car_params'])
+
+        infile = open('agents/' + agent_name + '/' + agent_name + '_params', 'rb')
+        agent_dict = pickle.load(infile)
+        infile.close()
+
+        infile = open('train_parameters/' + agent_name, 'rb')
+        main_dict = pickle.load(infile)
+        infile.close()
+          
+        if i==0 and not start_condition:
+            infile = open('test_initial_condition/' + env_dict['map_name'], 'rb')
+            start_conditions = pickle.load(infile)
+            infile.close()
+            start_condition = random.choice(start_conditions)
+
+        if main_dict['learning_method']=='dqn':
+            agent_dict['epsilon'] = 0
+            a = agent_dqn.agent(agent_dict)
+        if main_dict['learning_method']=='reinforce':
+            a = agent_reinforce.PolicyGradientAgent(agent_dict)
+        if main_dict['learning_method']=='actor_critic_sep':
+            a = agent_actor_critic.actor_critic_separated(agent_dict)
+        if  main_dict['learning_method']=='actor_critic_com':
+            a = agent_actor_critic.actor_critic_combined(agent_dict)
+        if main_dict['learning_method']=='actor_critic_cont':
+            a = agent_actor_critic_continuous.agent_separate(agent_dict)
+        if main_dict['learning_method'] == 'dueling_dqn':
+            agent_dict['epsilon'] = 0
+            a = agent_dueling_dqn.agent(agent_dict)
+        if main_dict['learning_method'] == 'dueling_ddqn':
+            agent_dict['epsilon'] = 0
+            a = agent_dueling_ddqn.agent(agent_dict)
+        if main_dict['learning_method'] == 'rainbow':
+            agent_dict['epsilon'] = 0
+            a = agent_rainbow.agent(agent_dict)
+        if main_dict['learning_method'] == 'ddpg':
+            a = agent_ddpg.agent(agent_dict)
+        if main_dict['learning_method'] == 'td3':
+            a = agent_td3.agent(agent_dict)
+            
+        a.load_weights(agent_name, n)
+
+        #start_pose = {'x':11.2, 'y':7.7, 'v':0, 'delta':0, 'theta':0, 'goal':1}
+        env.reset(save_history=True, start_condition=start_condition, car_params=env_dict['car_params'])
+        obs = env.observation
+        done = False
+        score=0
+
+        while not done:
+            if main_dict['learning_method']=='ddpg' or main_dict['learning_method']=='td3':
+                action = a.choose_greedy_action(obs)
+            else:
+                action = a.choose_action(obs)
+
+            next_obs, reward, done = env.take_action(action)
+            score += reward
+            obs = next_obs
+
+            if env.progress>=0.98:
+                done=True
+            
+
+        print('Total score = ', score)
+        print('Progress = ', env.progress)
+
+        state_history.append(env.state_history)
+        pose_history.append(env.pose_history)
+        progress_history.append(env.progress_history)
+        action_step_history.append(env.action_step_history)
+        
+        
+    
+
+    xlims = [0,100]
+
+    legend_new = legend.copy()
+    legend_new.insert(0, 'Min and max')
+
+    legend_racetrack = legend.copy()
+    legend_racetrack.insert(0, 'Track centerline')
+
+    plt.rcParams.update({
+    "font.family": "serif",  # use serif/main font for text elements
+    "text.usetex": True,     # use inline math for ticks
+    "pgf.rcfonts": False,     # don't setup fonts from rc parameters
+    "font.size": 12
+    })
+
+    fig, ax = plt.subplots(3, figsize=(5,5))
+    alpha = 0.8
+    color='gray'
+    for i in range(3):
+        #ax[i].tick_params(axis='both', colors='lightgrey')
+        ax[i].spines['bottom'].set_color(color)
+        ax[i].spines['top'].set_color(color) 
+        ax[i].spines['right'].set_color(color)
+        ax[i].spines['left'].set_color(color)
+
+    ax[0].tick_params(axis=u'both', which=u'both',length=0)
+    
+    track = mapping.map(env.map_name)
+    ax[0].imshow(ImageOps.invert(track.gray_im.filter(ImageFilter.FIND_EDGES).filter(ImageFilter.MaxFilter(1))), extent=(0,track.map_width,0,track.map_height), cmap="gray")
+    # ax[0].plot(env.rx, env.ry, color='gray', linestyle='dashed')
+    
+    for i in range(len(agent_names)):
+        ax[0].plot(np.array(pose_history[i])[:,0], np.array(pose_history[i])[:,1], linewidth=1.5)   
+
+    prog = np.array([0, 0.2, 0.4, 0.6, 0.8])
+    idx =  np.zeros(len(prog), int)
+    text = ['', '20%', '40%', '60%', '80%']
+
+    for i in range(len(idx)):
+        idx[i] = np.mod(env.start_point+np.round(prog[i]*len(env.rx)), len(env.rx))
+    idx.astype(int)
+    
+    for i in range(len(idx)):
+        ax[0].text(x=env.rx[idx[i]], y=env.ry[idx[i]], s=text[i], fontsize = 'small', bbox=dict(facecolor='white', edgecolor='black',pad=0.1,boxstyle='round'))
+    
+    ax[0].vlines(x=env.rx[idx[0]], ymin=env.ry[idx[0]]-1, ymax=env.ry[idx[0]]+1, linestyles='dotted', color='red')
+    ax[0].text(x=env.rx[idx[0]]-1.2, y=env.ry[idx[0]]+1.3, s='Start/finish', fontsize = 'small', bbox=dict(facecolor='white', edgecolor='black',pad=0.1,boxstyle='round'))
+
+    ax[0].axis('off')
+    # # https://stackoverflow.com/questions/4700614/how-to-put-the-legend-outside-the-plot
+
+
+
+    ax[1].hlines(y=env_dict['action_space_dict']['vel_select'][0], xmin=0, xmax=100, colors='black', linestyle='dashed')
+    ax[1].hlines(y=env_dict['action_space_dict']['vel_select'][1], xmin=0, xmax=100, colors='black', linestyle='dashed', label='_nolegend_')
+    for i in range(len(agent_names)):
+        ax[1].plot(np.array(progress_history[i])*100, np.array(pose_history[i])[:,4], linewidth=1.5)
+    ax[1].set_ylabel('Longitudinal\nvelocity [m/s]')
+    ax[1].set_xlim(xlims)
+    ax[1].set_ylim([env_dict['action_space_dict']['vel_select'][0]-0.2, env_dict['action_space_dict']['vel_select'][1]+0.2])
+    ax[1].grid(True, color='lightgrey')
+    ax[1].tick_params('both', length=0)
+    ax[1].set_xticklabels([])
+
+
+    ax[2].hlines(y=1, xmin=0, xmax=100, colors='black', linestyle='dashed')
+    ax[2].hlines(y=-1, xmin=0, xmax=100, colors='black', linestyle='dashed', label='_nolegend_')
+    for i in range(len(agent_names)):
+        plt.plot(np.array(progress_history[i])[0:len(np.array(action_step_history[i])[:,1])]*100, np.array(action_step_history[i])[:,1], linewidth=1.5, alpha=alpha)
+    ax[2].set_ylabel('Longitudinal\naction')
+    ax[2].set_xlim(xlims)
+    # ax[2].set_ylim([env_dict['action_space_dict']['vel_select'][0]-0.2, env_dict['action_space_dict']['vel_select'][1]+0.2])
+    ax[2].grid(True, color='lightgrey')
+    ax[2].tick_params('both', length=0)
+    #ax[2].set_xticklabels([])
+    ax[2].set_xlabel('Progress along centerline [%]')
+
+   
+
+
+    # legend.insert(0, 'Track centerline')
+    fig.tight_layout()
+    fig.subplots_adjust(bottom=0.17) 
+    plt.figlegend(legend, title=legend_title, loc='lower center', ncol=5)
+    
+    # plt.show() 
+    plt.savefig('results/'+filename+'.pgf', format='pgf')
+
+
+def display_velocity_profile(agent_names, ns, legend_title, legend, mismatch_parameters, frac_vary, start_condition, filename):
+    
+    pose_history = []
+    progress_history = []
+    state_history = []
+    
+    for agent_name, n, i in zip(agent_names, ns, range(len(agent_names))):
+
+        infile = open('environments/' + agent_name, 'rb')
+        env_dict = pickle.load(infile)
+        infile.close()
+        # Compensate for changes to reward structure
+        env_dict['reward_signal']['max_progress'] = 0
+        
+        # Model mismatches
+        if mismatch_parameters:
+            for par, var in zip(mismatch_parameters, frac_vary):
+                env_dict['car_params'][par] *= 1+var 
+
+
+        env = environment(env_dict)
+        if start_condition:
+            env.reset(save_history=True, start_condition=start_condition, car_params=env_dict['car_params'])
+        else:
+            env.reset(save_history=True, start_condition=[], car_params=env_dict['car_params'])
+
+        infile = open('agents/' + agent_name + '/' + agent_name + '_params', 'rb')
+        agent_dict = pickle.load(infile)
+        infile.close()
+
+        infile = open('train_parameters/' + agent_name, 'rb')
+        main_dict = pickle.load(infile)
+        infile.close()
+          
+        if i==0 and not start_condition:
+            infile = open('test_initial_condition/' + env_dict['map_name'], 'rb')
+            start_conditions = pickle.load(infile)
+            infile.close()
+            start_condition = random.choice(start_conditions)
+
+        if main_dict['learning_method']=='dqn':
+            agent_dict['epsilon'] = 0
+            a = agent_dqn.agent(agent_dict)
+        if main_dict['learning_method']=='reinforce':
+            a = agent_reinforce.PolicyGradientAgent(agent_dict)
+        if main_dict['learning_method']=='actor_critic_sep':
+            a = agent_actor_critic.actor_critic_separated(agent_dict)
+        if  main_dict['learning_method']=='actor_critic_com':
+            a = agent_actor_critic.actor_critic_combined(agent_dict)
+        if main_dict['learning_method']=='actor_critic_cont':
+            a = agent_actor_critic_continuous.agent_separate(agent_dict)
+        if main_dict['learning_method'] == 'dueling_dqn':
+            agent_dict['epsilon'] = 0
+            a = agent_dueling_dqn.agent(agent_dict)
+        if main_dict['learning_method'] == 'dueling_ddqn':
+            agent_dict['epsilon'] = 0
+            a = agent_dueling_ddqn.agent(agent_dict)
+        if main_dict['learning_method'] == 'rainbow':
+            agent_dict['epsilon'] = 0
+            a = agent_rainbow.agent(agent_dict)
+        if main_dict['learning_method'] == 'ddpg':
+            a = agent_ddpg.agent(agent_dict)
+        if main_dict['learning_method'] == 'td3':
+            a = agent_td3.agent(agent_dict)
+            
+        a.load_weights(agent_name, n)
+
+        #start_pose = {'x':11.2, 'y':7.7, 'v':0, 'delta':0, 'theta':0, 'goal':1}
+        env.reset(save_history=True, start_condition=start_condition, car_params=env_dict['car_params'])
+        obs = env.observation
+        done = False
+        score=0
+
+        while not done:
+            if main_dict['learning_method']=='ddpg' or main_dict['learning_method']=='td3':
+                action = a.choose_greedy_action(obs)
+            else:
+                action = a.choose_action(obs)
+
+            next_obs, reward, done = env.take_action(action)
+            score += reward
+            obs = next_obs
+
+            if env.progress>=0.98:
+                done=True
+            
+
+        print('Total score = ', score)
+        print('Progress = ', env.progress)
+
+        state_history.append(env.state_history)
+        pose_history.append(env.pose_history)
+        progress_history.append(env.progress_history)
+        
+        
+        
+    
+
+    xlims = [0,100]
+
+    legend_new = legend.copy()
+    legend_new.insert(0, 'Min and max')
+
+    legend_racetrack = legend.copy()
+    legend_racetrack.insert(0, 'Track centerline')
+
+    plt.rcParams.update({
+    "font.family": "serif",  # use serif/main font for text elements
+    "text.usetex": True,     # use inline math for ticks
+    "pgf.rcfonts": False,     # don't setup fonts from rc parameters
+    "font.size": 12
+    })
+
+    fig, ax = plt.subplots(1, figsize=(5,2))
+
+    color='gray'
+    ax.spines['bottom'].set_color(color)
+    ax.spines['top'].set_color(color) 
+    ax.spines['right'].set_color(color)
+    ax.spines['left'].set_color(color)
+
+  
+
+
+    ax.hlines(y=env_dict['action_space_dict']['vel_select'][0], xmin=0, xmax=100, colors='black', linestyle='dashed', label='_nolegend_')
+    ax.hlines(y=env_dict['action_space_dict']['vel_select'][1], xmin=0, xmax=100, colors='black', linestyle='dashed', label='_nolegend_')
+    for i in range(len(agent_names)):
+        ax.plot(np.array(progress_history[i])*100, np.array(pose_history[i])[:,4], linewidth=1.5)
+    ax.set_ylabel('Longitudinal\nvelocity [m/s]')
+    ax.set_xlim(xlims)
+    ax.set_ylim([env_dict['action_space_dict']['vel_select'][0]-0.2, env_dict['action_space_dict']['vel_select'][1]+0.2])
+    ax.grid(True, color='lightgrey')
+
+
+    ax.set_xlabel('Progress along centerline [%]')
+    ax.grid(True, color='lightgrey')
+    ax.tick_params(axis=u'both', which=u'both',length=0)
+    # ax[0].set_yticks(np.arange(-1, 1.1, 0.5))
+
+
+    # legend.insert(0, 'Track centerline')
+    fig.tight_layout()
+    fig.subplots_adjust(right=0.8) 
+    plt.figlegend(legend, title=legend_title, loc='center right', ncol=1)
+    
+    # plt.show() 
+    plt.savefig('results/'+filename+'.pgf', format='pgf')
+
+
 
 
 
@@ -1547,7 +2241,6 @@ def display_only_path_multiple(agent_names, ns, legend_title, legend, mismatch_p
 # xspace =1000
 
 
-
 # agent_names = ['porto_ete_v5_r_collision_5', 'porto_pete_s_r_collision_0', 'porto_pete_s_polynomial']
 # ns = [0, 0, 0]
 # legend = ['End-to-end', 'Circular path', 'Polynomial path']
@@ -1570,6 +2263,37 @@ def display_only_path_multiple(agent_names, ns, legend_title, legend, mismatch_p
 # filename = 'path_tracker_comparison_learning_curve'
 # xlim = 4000
 # xspace = 1000
+
+
+#tune k
+# agent_names = [ 'porto_pete_v_r_collision_6_attempt_2',  'porto_pete_v_k_1_attempt_2']
+# legend = ['1', '2']
+# legend_title = 'attempt'
+# ns=[0, 0]
+
+
+# agent_names = ['porto_pete_v_r_dist_03', 'porto_pete_v_r_collision_6', 'porto_pete_v_k_0',  'porto_pete_v_r_collision_2']
+# legend = ['$r_{\mathrm{dist}}=0.3, r_{\mathrm{collision}}=-2$', '$r_{\mathrm{dist}}=0.3, r_{\mathrm{collision}}=-8$', '$r_{\mathrm{dist}}=0.2, r_{\mathrm{collision}}=-2$', '$r_{\mathrm{dist}}=0.2, r_{\mathrm{collision}}=-8$']
+# legend_title = 'Reward signal'
+# ns=[0,0,0,0]
+# filename = 'reward_velocity_controller'
+
+
+# agent_names = ['porto_pete_v_k_1_attempt_2', 'porto_ete_v5_r_collision_5']
+# legend = ['Velocity control', 'End-to-end']
+# legend_title = ''
+# ns=[0,0]
+# filename = 'velocity_control_learning_curves'
+# xlim = 5000
+# xspace = 1000
+
+
+agent_names = ['porto_pete_v_k_0', 'porto_pete_v_r_collision_6']
+legend = ['-2', '-8']
+legend_title = '$r_{\mathrm{collision}}$'
+ns=[0,0]
+filename = 'velocity_reward_collision'
+
 
 # mismatch_parameters = ['C_Sf']
 # frac_vary = [0]
@@ -1597,11 +2321,36 @@ def display_only_path_multiple(agent_names, ns, legend_title, legend, mismatch_p
 #                         legend=legend, mismatch_parameters=mismatch_parameters, frac_vary=frac_vary, 
 #                         start_condition=start_condition, filename=filename)
 
+# mismatch_parameters = ['C_Sf']
+# frac_vary = [0]
+# start_condition = {'x':10, 'y':4.5, 'v':3, 'theta':np.pi, 'delta':0, 'goal':0}
+# #start_condition = []
+# display_path_actions_multiple(agent_names=agent_names, ns=ns, legend_title=legend_title,          
+#                         legend=legend, mismatch_parameters=mismatch_parameters, frac_vary=frac_vary, 
+#                         start_condition=start_condition, filename=filename)
+
+
+# mismatch_parameters = ['C_Sf']
+# frac_vary = [0]
+# start_condition = {'x':10, 'y':4.5, 'v':3, 'theta':np.pi, 'delta':0, 'goal':0}
+# #start_condition = []
+# display_path_two_multiple(agent_names=agent_names, ns=ns, legend_title=legend_title,          
+#                         legend=legend, mismatch_parameters=mismatch_parameters, frac_vary=frac_vary, 
+#                         start_condition=start_condition, filename=filename)
+
+mismatch_parameters = ['C_Sf']
+frac_vary = [0]
+start_condition = {'x':10, 'y':4.5, 'v':3, 'theta':np.pi, 'delta':0, 'goal':0}
+#start_condition = []
+display_velocity_profile(agent_names=agent_names, ns=ns, legend_title=legend_title,          
+                        legend=legend, mismatch_parameters=mismatch_parameters, frac_vary=frac_vary, 
+                        start_condition=start_condition, filename=filename)
+
 
 # learning_curve_lap_time_average(agent_names, legend, legend_title, ns, filename, xlim, xspace)
 
 # learning_curve_reward_average(agent_names, legend, legend_title)
 
-learning_curve_all(agent_names, legend, legend_title, ns, filename, xlim, xspace)
+# learning_curve_all(agent_names, legend, legend_title, ns, filename, xlim, xspace)
 
 # display_velocity_slip(agent_names, ns, legend_title, legend, mismatch_parameters, frac_vary, start_condition, filename)
