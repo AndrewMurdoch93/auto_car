@@ -1766,7 +1766,7 @@ def display_collision_distribution(agent_name):
 # display_collision_distribution('collision_distribution_no_LiDAR')
 # display_collision_distribution('collision_distribution_LiDAR_pose')
 
-def display_path_multiple(agent_names, ns, legend_title, legend, mismatch_parameters, frac_vary, start_condition):
+def display_path_multiple(agent_names, ns, legend_title, legend, mismatch_parameters, frac_vary, start_condition, agent_episodes):
     
     pose_history = []
     progress_history = []
@@ -1832,8 +1832,9 @@ def display_path_multiple(agent_names, ns, legend_title, legend, mismatch_parame
             a = agent_ddpg.agent(agent_dict)
         if main_dict['learning_method'] == 'td3':
             a = agent_td3.agent(agent_dict)
-            
-        a.load_weights(agent_name, n)
+        
+        name = main_dict['name'] + '_' + str(agent_episodes[i])
+        a.load_weights(name, n)
 
         #start_pose = {'x':11.2, 'y':7.7, 'v':0, 'delta':0, 'theta':0, 'goal':1}
         env.reset(save_history=True, start_condition=start_condition, car_params=env_dict['car_params'])

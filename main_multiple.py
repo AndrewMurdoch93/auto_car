@@ -58,6 +58,7 @@ class trainingLoop():
       self.agent_dir = self.parent_dir + '/agents/' + self.main_dict['name']
 
       self.agent_params_file = self.agent_dir + '/' + self.agent_name + '_params'
+      self.name = self.main_dict['name']
 
       try:
          os.mkdir(self.agent_dir)
@@ -267,6 +268,10 @@ class trainingLoop():
 
             collisions[n, episode] = self.env.collision
 
+            if episode==0 or episode%250==0:
+               name = self.main_dict['name'] + '_' + str(episode)
+               self.save_progress_agent(name, n)
+
             if episode%100==0 and episode!=0:
 
                self.save_agent(n)
@@ -284,7 +289,7 @@ class trainingLoop():
                pickle.dump(terminal_poses, outfile)
                outfile.close()
 
-            if episode%100==0 and episode!=0:
+            if episode%250==0 and episode!=0:
                eval_steps[n, int(episode/eval_interval)-1] = np.sum(steps[n,:])
                eval_lap_times[n, int(episode/eval_interval)-1], eval_collisions[n, int(episode/eval_interval)-1] = self.evaluate(n_episodes=eval_n_episodes)
 
@@ -362,7 +367,11 @@ class trainingLoop():
       self.agent.save_agent(self.main_dict['name'], n)
       print("Agent " + self.main_dict['name'] + ", n = " + str(n) + " was saved")
 
+   def save_progress_agent(self, name, n):
+      self.agent.save_agent(name, n)
+      print("Agent " + name + ", n = " + str(n) + " was saved")
    
+
 def test(agent_name, n_episodes, detect_issues, initial_conditions):
 
    results_file_name = 'test_results/' + agent_name 
