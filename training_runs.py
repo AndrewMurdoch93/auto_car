@@ -64,7 +64,7 @@ action_space_dict = {'action_space': 'continuous', 'vel_select':[3,5], 'R_range'
 
 steer_control_dict = {'steering_control': True, 'wpt_arc':np.pi/2, 'track_width':1.2}
 
-if  steer_control_dict['steering_control'] == False:
+if  steer_control_dict['steering_control'] == True:
     steer_control_dict['path_strategy'] = 'circle'  #circle or linear or polynomial or gradient
     steer_control_dict['control_strategy'] = 'pure_pursuit'  #pure_pursuit or stanley
 
