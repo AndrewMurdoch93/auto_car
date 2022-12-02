@@ -1174,6 +1174,59 @@ if True:
     # a.train()
     # main_multiple.lap_time_test(agent_name=agent_name, n_episodes=n_test, detect_issues=False, initial_conditions=True)
 
+    agent_name = 'porto_pete_sv_c_r_3'
+    main_dict['name'] = agent_name
+    main_dict['max_steps'] = 5e6
+    env_dict['steer_control_dict']['steering_control'] = True
+    env_dict['steer_control_dict']['path_strategy'] = 'circle'
+    env_dict['velocity_control'] = True
+    env_dict['velocity_gain'] = 2
+    env_dict['reward_signal']['distance'] = 0.2
+    env_dict['reward_signal']['collision'] = -2
+    a = main_multiple.trainingLoop(main_dict, agent_td3_dict, env_dict, load_agent='')
+    a.train()
+    main_multiple.lap_time_test(agent_name=agent_name, n_episodes=n_test, detect_issues=False, initial_conditions=True)
+
+    agent_name = 'porto_pete_sv_c_r_4'
+    main_dict['name'] = agent_name
+    main_dict['max_steps'] = 5e6
+    env_dict['steer_control_dict']['steering_control'] = True
+    env_dict['steer_control_dict']['path_strategy'] = 'circle'
+    env_dict['velocity_control'] = True
+    env_dict['velocity_gain'] = 2
+    env_dict['reward_signal']['distance'] = 0.2
+    env_dict['reward_signal']['collision'] = -4
+    a = main_multiple.trainingLoop(main_dict, agent_td3_dict, env_dict, load_agent='')
+    a.train()
+    main_multiple.lap_time_test(agent_name=agent_name, n_episodes=n_test, detect_issues=False, initial_conditions=True)
+
+    agent_name = 'porto_pete_sv_c_r_5'
+    main_dict['name'] = agent_name
+    main_dict['max_steps'] = 5e6
+    env_dict['steer_control_dict']['steering_control'] = True
+    env_dict['steer_control_dict']['path_strategy'] = 'circle'
+    env_dict['velocity_control'] = True
+    env_dict['velocity_gain'] = 2
+    env_dict['reward_signal']['distance'] = 0.2
+    env_dict['reward_signal']['collision'] = -6
+    a = main_multiple.trainingLoop(main_dict, agent_td3_dict, env_dict, load_agent='')
+    a.train()
+    main_multiple.lap_time_test(agent_name=agent_name, n_episodes=n_test, detect_issues=False, initial_conditions=True)
+
+    agent_name = 'porto_pete_sv_c_r_6'
+    main_dict['name'] = agent_name
+    main_dict['max_steps'] = 5e6
+    env_dict['steer_control_dict']['steering_control'] = True
+    env_dict['steer_control_dict']['path_strategy'] = 'circle'
+    env_dict['velocity_control'] = True
+    env_dict['velocity_gain'] = 2
+    env_dict['reward_signal']['distance'] = 0.2
+    env_dict['reward_signal']['collision'] = -8
+    a = main_multiple.trainingLoop(main_dict, agent_td3_dict, env_dict, load_agent='')
+    a.train()
+    main_multiple.lap_time_test(agent_name=agent_name, n_episodes=n_test, detect_issues=False, initial_conditions=True)
+
+
     pass
 
 
@@ -1526,23 +1579,33 @@ if True:
     # legend_title = '$r_{collision}$'
     # ns=[0]
 
-    agent_names = ['porto_pete_v_k_1_attempt_2', 'porto_pete_s_r_collision_0', 'porto_ete_v5_r_collision_5']
-    legend = ['Only velocity control', 'Only steering control', 'End-to-end']
-    legend_title = ''
-    ns=[0,2,0]
-    filename = 'velocity_control_learning_curves'
+    # agent_names = ['porto_pete_v_k_1_attempt_2', 'porto_pete_s_r_collision_0', 'porto_ete_v5_r_collision_5']
+    # legend = ['Only velocity control', 'Only steering control', 'End-to-end']
+    # legend_title = ''
+    # ns=[0,2,0]
+    # filename = 'velocity_control_learning_curves'
     # xlim = 5000
     # xspace = 1000
+
+
+
+    # agent_names = ['porto_pete_sv_c_0']
+    # legend = ['']
+    # legend_title = ''
+    # ns=[0]
 
 
     pass
 
 
 if True:
-    # agent_names = ['porto_pete_sv']
+    # agent_names = ['porto_pete_sv_c_r_0']
     # legend = ['pete sv']
     # legend_title = 'Architecture'
     # ns=[0]
+
+
+
     pass
 
 
@@ -1558,16 +1621,16 @@ if True:
 #     print('------------------------------' + '\n' + agent_name + '\n' + '------------------------------')
 #     display_results_multiple.display_lap_results(agent_name=agent_name)
 
-mismatch_parameters = ['C_Sf']
-frac_vary = [0]
-# Porto
-start_condition = {'x':10, 'y':4.5, 'v':3, 'theta':np.pi, 'delta':0, 'goal':0}
-# Columbia
-# start_condition = {'x':5.7, 'y':7.25, 'v':3, 'theta':0, 'delta':0, 'goal':0}
-# start_condition = []
-display_results_multiple.display_path_multiple(agent_names=agent_names, ns=ns, legend_title=legend_title,          
-                                             legend=legend, mismatch_parameters=mismatch_parameters, frac_vary=frac_vary, 
-                                             start_condition=start_condition)
+# mismatch_parameters = ['C_Sf']
+# frac_vary = [0]
+# # Porto
+# start_condition = {'x':10, 'y':4.5, 'v':3, 'theta':np.pi, 'delta':0, 'goal':0}
+# # Columbia
+# # start_condition = {'x':5.7, 'y':7.25, 'v':3, 'theta':0, 'delta':0, 'goal':0}
+# # start_condition = []
+# display_results_multiple.display_path_multiple(agent_names=agent_names, ns=ns, legend_title=legend_title,          
+#                                              legend=legend, mismatch_parameters=mismatch_parameters, frac_vary=frac_vary, 
+#                                              start_condition=start_condition)
 
 
 
