@@ -21,9 +21,9 @@ import os
 
 
 
-agent_name = 'porto_pete_v'
+agent_name = 'porto_pete_sv'
 
-main_dict = {'name':agent_name, 'max_episodes':50000, 'max_steps':2e6, 'learning_method':'td3', 'runs':3, 'comment':''}
+main_dict = {'name':agent_name, 'max_episodes':50000, 'max_steps':3e6, 'learning_method':'td3', 'runs':3, 'comment':''}
 
 agent_dqn_dict = {'gamma':0.99, 'epsilon':1, 'eps_end':0.01, 'eps_dec':1/1000, 'lr':0.001, 'batch_size':64, 'max_mem_size':500000, 
                 'fc1_dims': 64, 'fc2_dims': 64, 'fc3_dims':64}
@@ -62,7 +62,7 @@ action_space_dict = {'action_space': 'continuous', 'vel_select':[3,5], 'R_range'
 
 #action_space_dict = {'action_space': 'discrete', 'n_waypoints': 10, 'vel_select':[7], 'R_range':[6]}
 
-steer_control_dict = {'steering_control': False, 'wpt_arc':np.pi/2, 'track_width':1.2}
+steer_control_dict = {'steering_control': True, 'wpt_arc':np.pi/2, 'track_width':1.2}
 
 if  steer_control_dict['steering_control'] == False:
     steer_control_dict['path_strategy'] = 'circle'  #circle or linear or polynomial or gradient
@@ -1116,11 +1116,66 @@ if True:
     # a.train()
     # main_multiple.lap_time_test(agent_name=agent_name, n_episodes=n_test, detect_issues=False, initial_conditions=True)
 
-
     pass
 
 
+#Tune parameters for steering and velocity control
+if True:
 
+    agent_name = 'porto_pete_sv_c_r_0'
+    main_dict['name'] = agent_name
+    main_dict['max_steps'] = 3e6
+    env_dict['steer_control_dict']['steering_control'] = True
+    env_dict['steer_control_dict']['path_strategy'] = 'circle'
+    env_dict['velocity_control'] = True
+    env_dict['velocity_gain'] = 2
+    env_dict['reward_signal']['distance'] = 0.2
+    env_dict['reward_signal']['collision'] = -2
+    a = main_multiple.trainingLoop(main_dict, agent_td3_dict, env_dict, load_agent='')
+    a.train()
+    main_multiple.lap_time_test(agent_name=agent_name, n_episodes=n_test, detect_issues=False, initial_conditions=True)
+
+    agent_name = 'porto_pete_sv_c_r_1'
+    main_dict['name'] = agent_name
+    main_dict['max_steps'] = 3e6
+    env_dict['steer_control_dict']['steering_control'] = True
+    env_dict['steer_control_dict']['path_strategy'] = 'circle'
+    env_dict['velocity_control'] = True
+    env_dict['velocity_gain'] = 2
+    env_dict['reward_signal']['distance'] = 0.3
+    env_dict['reward_signal']['collision'] = -8
+    a = main_multiple.trainingLoop(main_dict, agent_td3_dict, env_dict, load_agent='')
+    a.train()
+    main_multiple.lap_time_test(agent_name=agent_name, n_episodes=n_test, detect_issues=False, initial_conditions=True)
+
+    agent_name = 'porto_pete_sv_p_r_0'
+    main_dict['name'] = agent_name
+    main_dict['max_steps'] = 3e6
+    env_dict['steer_control_dict']['steering_control'] = True
+    env_dict['steer_control_dict']['path_strategy'] = 'polynomial'
+    env_dict['velocity_control'] = True
+    env_dict['velocity_gain'] = 2
+    env_dict['reward_signal']['distance'] = 0.2
+    env_dict['reward_signal']['collision'] = -2
+    a = main_multiple.trainingLoop(main_dict, agent_td3_dict, env_dict, load_agent='')
+    a.train()
+    main_multiple.lap_time_test(agent_name=agent_name, n_episodes=n_test, detect_issues=False, initial_conditions=True)
+
+    agent_name = 'porto_pete_sv_p_r_1'
+    main_dict['name'] = agent_name
+    main_dict['max_steps'] = 3e6
+    env_dict['steer_control_dict']['steering_control'] = True
+    env_dict['steer_control_dict']['path_strategy'] = 'polynomial'
+    env_dict['velocity_control'] = True
+    env_dict['velocity_gain'] = 2
+    env_dict['reward_signal']['distance'] = 0.3
+    env_dict['reward_signal']['collision'] = -8
+    a = main_multiple.trainingLoop(main_dict, agent_td3_dict, env_dict, load_agent='')
+    a.train()
+    main_multiple.lap_time_test(agent_name=agent_name, n_episodes=n_test, detect_issues=False, initial_conditions=True)
+
+
+    pass
 
 
 
@@ -1463,19 +1518,29 @@ if True:
     # legend_title = '$r_{collision}$'
     # ns=[0,0,0,0]
 
-
     # agent_names = [ 'porto_ete_v5_r_dist_3']
     # legend = ['-2', '-8']
     # legend_title = '$r_{collision}$'
     # ns=[0]
 
+    # agent_names = ['porto_ete_v5_r_collision_7']
+    # legend = ['-2', '-8']
+    # legend_title = '$r_{collision}$'
+    # ns=[0]
 
     pass
 
 
+if True:
+    agent_names = ['porto_pete_sv']
+    legend = ['pete sv']
+    legend_title = 'Architecture'
+    ns=[0]
+    pass
 
 
-display_results_multiple.learning_curve_lap_time_average(agent_names, legend, legend_title, ns)
+
+# display_results_multiple.learning_curve_lap_time_average(agent_names, legend, legend_title, ns)
 # display_results_multiple.learning_curve_reward_average(agent_names, legend, legend_title)
 
 # for agent_name in agent_names:
@@ -1486,16 +1551,16 @@ display_results_multiple.learning_curve_lap_time_average(agent_names, legend, le
 #     print('------------------------------' + '\n' + agent_name + '\n' + '------------------------------')
 #     display_results_multiple.display_lap_results(agent_name=agent_name)
 
-mismatch_parameters = ['C_Sf']
-frac_vary = [0]
-# Porto
-start_condition = {'x':10, 'y':4.5, 'v':3, 'theta':np.pi, 'delta':0, 'goal':0}
-# Columbia
-# start_condition = {'x':5.7, 'y':7.25, 'v':3, 'theta':0, 'delta':0, 'goal':0}
-# start_condition = []
-display_results_multiple.display_path_multiple(agent_names=agent_names, ns=ns, legend_title=legend_title,          
-                                             legend=legend, mismatch_parameters=mismatch_parameters, frac_vary=frac_vary, 
-                                             start_condition=start_condition)
+# mismatch_parameters = ['C_Sf']
+# frac_vary = [0]
+# # Porto
+# start_condition = {'x':10, 'y':4.5, 'v':3, 'theta':np.pi, 'delta':0, 'goal':0}
+# # Columbia
+# # start_condition = {'x':5.7, 'y':7.25, 'v':3, 'theta':0, 'delta':0, 'goal':0}
+# # start_condition = []
+# display_results_multiple.display_path_multiple(agent_names=agent_names, ns=ns, legend_title=legend_title,          
+#                                              legend=legend, mismatch_parameters=mismatch_parameters, frac_vary=frac_vary, 
+#                                              start_condition=start_condition)
 
 
 
