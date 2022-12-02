@@ -2288,11 +2288,11 @@ def display_velocity_profile(agent_names, ns, legend_title, legend, mismatch_par
 # xspace = 1000
 
 
-agent_names = ['porto_pete_v_k_0', 'porto_pete_v_r_collision_6']
-legend = ['-2', '-8']
-legend_title = '$r_{\mathrm{collision}}$'
-ns=[0,0]
-filename = 'velocity_reward_collision'
+# agent_names = ['porto_pete_v_k_0', 'porto_pete_v_r_collision_6']
+# legend = ['-2', '-8']
+# legend_title = '$r_{\mathrm{collision}}$'
+# ns=[0,0]
+# filename = 'velocity_reward_collision'
 
 
 # mismatch_parameters = ['C_Sf']

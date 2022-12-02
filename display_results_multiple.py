@@ -1892,15 +1892,15 @@ def display_path_multiple(agent_names, ns, legend_title, legend, mismatch_parame
     
     track = mapping.map(env.map_name)
     ax.imshow(ImageOps.invert(track.gray_im.filter(ImageFilter.FIND_EDGES).filter(ImageFilter.MaxFilter(1))), extent=(0,track.map_width,0,track.map_height), cmap="gray")
-    ax.plot(env.rx, env.ry, color='gray', linestyle='dashed')
-    alpha=0.8
+    # ax.plot(env.rx, env.ry, color='gray', linestyle='dashed')
+    alpha=0.7
 
     for i in range(len(agent_names)):
    
-        if env_dict['steer_control_dict']['steering_control']:
-            for j in np.array(local_path_history[i])[np.arange(0,len(local_path_history[i]),40)]:
-                ax.plot(j[0], j[1], alpha=0.5, linestyle='dashdot', color='red')
-                ax.plot(j[0][0], j[1][0], alpha=0.5, color='red', marker='s')
+        # if env_dict['steer_control_dict']['steering_control']:
+            # for j in np.array(local_path_history[i])[np.arange(0,len(local_path_history[i]),40)]:
+            #     ax.plot(j[0], j[1], alpha=0.5, linestyle='dashdot', color='red')
+            #     ax.plot(j[0][0], j[1][0], alpha=0.5, color='red', marker='s')
         # ax.plot(np.array(pose_history[i])[:,0], np.array(pose_history[i])[:,1], linewidth=1.5) 
         ax.plot(np.array(pose_history[i])[:,0], np.array(pose_history[i])[:,1], linewidth=1.5, alpha=alpha)    
 
