@@ -538,10 +538,11 @@ if __name__ == '__main__':
 
     plt.rcParams['font.family'] = 'serif'
     plt.rcParams['font.serif'] = ['Times New Roman'] + plt.rcParams['font.serif']
+    plt.rcParams.update({'font.size': 8})
 
     # font = {'fontname':'Times New Roman'}
     # font = {'fontname':'Times New Roman'}
-    fig, ax = plt.subplots(1, figsize=(5,3))
+    fig, ax = plt.subplots(1, figsize=(5,2.5))
     color='grey'
     ax.tick_params(axis=u'both', which=u'both',length=0)
     ax.spines['bottom'].set_color(color)
@@ -596,8 +597,8 @@ if __name__ == '__main__':
     ax.set_xlim([s_0-0.2, s_2+0.2])
     fig.tight_layout()
     fig.subplots_adjust(bottom=0.4)
-    fig.subplots_adjust(left=0.35)
-    fig.subplots_adjust(right=0.7)
+    fig.subplots_adjust(left=0.4)
+    fig.subplots_adjust(right=0.65)
     plt.figlegend(loc='lower center', ncol=2)
     plt.show()
 
