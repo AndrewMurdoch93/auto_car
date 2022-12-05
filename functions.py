@@ -530,14 +530,35 @@ if __name__ == '__main__':
     s_1 = s_0+1
     s_2 = s_1+0.5
     theta = 0.5
-    n_0 = 0.8
+    n_0 = 0.25
+    n_1s = [0.7, 0.9, -0.9]
     
-    plt.plot(s_0,n_0, 'x')
-    plt.plot([0,s_2], [1,1])
-    plt.plot([0,s_2], [-1,-1])
+    s_ = [[] for _ in range(3)]
+    n_ = [[] for _ in range(3)]
+
+    plt.rcParams['font.family'] = 'serif'
+    plt.rcParams['font.serif'] = ['Times New Roman'] + plt.rcParams['font.serif']
+
+    # font = {'fontname':'Times New Roman'}
+    # font = {'fontname':'Times New Roman'}
+    fig, ax = plt.subplots(1, figsize=(5,3))
+    color='grey'
+    ax.tick_params(axis=u'both', which=u'both',length=0)
+    ax.spines['bottom'].set_color(color)
+    ax.spines['top'].set_color(color) 
+    ax.spines['right'].set_color(color)
+    ax.spines['left'].set_color(color)
+
+    ax.set_xticks(ticks=[s_0, s_1], labels=['$s_0$', '$s_1$'])
+    ax.set_yticks(ticks=[n_0, n_1s[0]], labels=['$n_0$', '$n_1$'])
+   
+    ax.plot(s_0,n_0, 'x')
+    ax.plot([0,s_2], [1,1])
+    ax.plot([0,s_2], [-1,-1])
     
-    for n_1 in np.linspace(-1,1,10): 
-        #n_1 = 1
+
+    for idx, n_1 in enumerate(n_1s): 
+       
         
         A = np.array([[3*s_1**2, 2*s_1, 1, 0], [3*s_0**2, 2*s_0, 1, 0], [s_0**3, s_0**2, s_0, 1], [s_1**3, s_1**2, s_1, 1]])
         B = np.array([0, theta, n_0, n_1])
@@ -553,16 +574,34 @@ if __name__ == '__main__':
         n = a*s**3 + b*s**2 + c*s + d
         s = np.concatenate((s, np.linspace(s_1, s_2)))
         n = np.concatenate((n, np.ones(len(np.linspace(s_1, s_2)))*n_1))
-        plt.plot(s, n)
+        
+        s_[idx].append(s)
+        n_[idx].append(n)
+        
+        
+    
+    plt.plot(s_[0][0], n_[0][0], color='#1f77b4', label='Sampled path')
+    plt.fill_between(x=s_[1][0], y1=n_[1][0], y2=n_[2][0], color='#1f77b4', alpha=0.3, label='Range of selectable paths')
 
-    plt.plot(np.linspace(s_1, s_2), np.ones(len(np.linspace(s_1, s_2)))*n_1)
-    plt.legend(['vehicle position', 'upper track boundary', 'lower track boundary'])
-    plt.xlim([s_0, s_2])
-    plt.xlabel('s [m], distance along centerline')
-    plt.ylabel('n [m], distance perpendicular to centerline')
+    # plt.plot(np.linspace(s_1, s_2), np.ones(len(np.linspace(s_1, s_2)))*n_1)
+    ax.hlines(y=1, xmin=s_0-0.2, xmax=s_2+0.2, color='k', label='Track boundaries')
+    ax.hlines(y=-1, xmin=s_0-0.2, xmax=s_2+0.2, color='k', label='_nolegend_')
+    ax.hlines(y=0, xmin=s_0-0.2, xmax=s_2+0.2, color='grey', linestyle='--', label='Track centerline')
+    # plt.vlines(x=s_0, ymin=-1, ymax=1 ,color='grey', linestyle='--', label='Track centerline')
+    # plt.vlines(x=s_1, ymin=-1, ymax=1)
+    ax.grid(True)
+    #plt.xlim([s_0, s_2])
+    ax.set_xlabel('Distance along \ncenterline, $s$ [m]')
+    ax.set_ylabel('Distance perpendicular \nto centerline, $n$ [m]')
+    ax.set_xlim([s_0-0.2, s_2+0.2])
+    fig.tight_layout()
+    fig.subplots_adjust(bottom=0.4)
+    fig.subplots_adjust(left=0.35)
+    fig.subplots_adjust(right=0.7)
+    plt.figlegend(loc='lower center', ncol=2)
     plt.show()
 
-    
+
     # def velocity_along_line(theta, velocity, ryaw, )
     
 
