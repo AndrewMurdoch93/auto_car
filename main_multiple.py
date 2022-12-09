@@ -646,6 +646,8 @@ def lap_time_test(agent_name, n_episodes, detect_issues, initial_conditions):
    pickle.dump(collisions, outfile)
    outfile.close()
 
+
+
 def lap_time_test_mismatch(agent_name, n_episodes, detect_issues, initial_conditions, parameter,  frac_variation):
 
    results_dir = 'lap_results_mismatch/' + agent_name
@@ -682,6 +684,8 @@ def lap_time_test_mismatch(agent_name, n_episodes, detect_issues, initial_condit
    #env = environment(env_dict, start_condition={'x':15,'y':5,'theta':0,'goal':0})
    
    #env_dict['architecture'] = 'pete'
+   noise = {'x':0, 'y':0, 'theta':0, 'v':0, 'lidar':0}
+
    env = environment(env_dict)
    env.reset(save_history=False, start_condition=[], car_params=init_car_params, noise=noise, get_lap_time=True)
    
@@ -752,7 +756,7 @@ def lap_time_test_mismatch(agent_name, n_episodes, detect_issues, initial_condit
 
          for episode in range(n_episodes):
 
-            env.reset(save_history=True, start_condition=start_conditions[episode], get_lap_time=True, car_params=car_params)
+            env.reset(save_history=True, start_condition=start_conditions[episode], get_lap_time=True, car_params=car_params, noise=noise)
             action_history = []
             obs = env.observation
             done = False
@@ -895,7 +899,7 @@ def lap_time_test_noise(agent_name, n_episodes, detect_issues, initial_condition
                next_obs, reward, done = env.take_action(action)
                score += reward
                obs = next_obs
-               
+
             time = env.steps*0.01
             collision = env.collision or env.park or env.backwards
             

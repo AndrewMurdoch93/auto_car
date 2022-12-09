@@ -1469,7 +1469,7 @@ def display_lap_mismatch_results(agent_names, parameters, legend_title, legend, 
 def display_lap_noise_results(agent_names, noise_params, legend_title, legend):
     
     
-    fig, axs = plt.subplots(len(noise_params), sharex=True)
+    fig, axs = plt.subplots(len(noise_params))
     numbering = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p']
 
     for j, parameter in enumerate(noise_params):
@@ -1494,7 +1494,7 @@ def display_lap_noise_results(agent_names, noise_params, legend_title, legend):
                 dev[i] = np.sqrt(n_episodes*(successes/n_episodes)*((failures)/n_episodes))/(n_episodes*n_runs)
 
             axs[j].grid()
-            # axs[j].set_ylim([0,1.1])
+            # axs[j].set_ylim([0,1.05])
             axs[j].yaxis.set_major_formatter(FormatStrFormatter('%.2f'))
             axs[j].plot(results_dict['noise_std_values'], avg)
             axs[j].fill_between(results_dict['noise_std_values'], avg-dev, avg+dev, alpha=0.25)
@@ -1808,7 +1808,7 @@ def display_collision_distribution(agent_name):
 # display_collision_distribution('collision_distribution_no_LiDAR')
 # display_collision_distribution('collision_distribution_LiDAR_pose')
 
-def display_path_multiple(agent_names, ns, legend_title, legend, mismatch_parameters, frac_vary, start_condition):
+def display_path_multiple(agent_names, ns, legend_title, legend, mismatch_parameters, frac_vary, noise_dicts, start_condition):
     
     pose_history = []
     progress_history = []
@@ -1826,15 +1826,16 @@ def display_path_multiple(agent_names, ns, legend_title, legend, mismatch_parame
         
         # Model mismatches
         if mismatch_parameters:
-            for par, var in zip(mismatch_parameters, frac_vary):
+            for par, var in zip(mismatch_parameters[i], frac_vary[i]):
                 env_dict['car_params'][par] *= 1+var 
 
+        noise_dict = noise_dicts[i]
 
         env = environment(env_dict)
         if start_condition:
-            env.reset(save_history=True, start_condition=start_condition, car_params=env_dict['car_params'])
+            env.reset(save_history=True, start_condition=start_condition, car_params=env_dict['car_params'], noise=noise_dict)
         else:
-            env.reset(save_history=True, start_condition=[], car_params=env_dict['car_params'])
+            env.reset(save_history=True, start_condition=[], car_params=env_dict['car_params'], noise=noise_dict)
 
         infile = open('agents/' + agent_name + '/' + agent_name + '_params', 'rb')
         agent_dict = pickle.load(infile)
@@ -1878,7 +1879,7 @@ def display_path_multiple(agent_names, ns, legend_title, legend, mismatch_parame
         a.load_weights(agent_name, n)
 
         #start_pose = {'x':11.2, 'y':7.7, 'v':0, 'delta':0, 'theta':0, 'goal':1}
-        env.reset(save_history=True, start_condition=start_condition, car_params=env_dict['car_params'])
+        env.reset(save_history=True, start_condition=start_condition, car_params=env_dict['car_params'], noise=noise_dict)
         obs = env.observation
         done = False
         score = 0

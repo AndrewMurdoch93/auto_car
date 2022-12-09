@@ -236,18 +236,15 @@ class environment():
         #self.save_pose()
 
         self.start_point = self.old_closest_point
-
-        if self.save_history==True:
-            self.append_history_func()
-
      
-        
         self.params = car_params
         
         self.noise_dict = noise
         self.generate_noise()
         self.save_pose()
         self.initial_condition_dict = {'x':self.x, 'y':self.y, 'theta':self.theta, 'v':self.v, 'delta':self.delta, 'goal': self.current_goal}
+        if self.save_history==True:
+            self.append_history_func()
 
 
     def take_action(self, act):
@@ -296,9 +293,11 @@ class environment():
                 elif self.velocity_control==True:
                     v_ref = self.convert_action_to_vel_ref(param=act[1])
                     self.v_ref = v_ref
-                    v_dot, _ = vehicle_model.pid(v_ref, delta_ref, self.state[3], self.state[2], self.params['sv_max'], 
+                    # v_dot, _ = vehicle_model.pid(v_ref, delta_ref, self.state[3], self.state[2], self.params['sv_max'], 
+                    #             self.params['a_max'], self.vel_select[0], self.vel_select[1], self.input_dict['velocity_gain'])
+                    v_dot, _ = vehicle_model.pid(v_ref, delta_ref, self.pose[4], self.state[2], self.params['sv_max'], 
                                 self.params['a_max'], self.vel_select[0], self.vel_select[1], self.input_dict['velocity_gain'])
-                
+
                 # get delta_dot
                 _, delta_dot = vehicle_model.pid(v_ref, delta_ref, self.state[3], self.state[2], self.params['sv_max'], 
                                 self.params['a_max'], self.params['v_max'], self.params['v_min'], self.input_dict['velocity_gain'])
@@ -377,7 +376,7 @@ class environment():
                 elif self.velocity_control==True:
                     v_ref = self.convert_action_to_vel_ref(param=act[1])
                     self.v_ref = v_ref
-                    v_dot, _ = vehicle_model.pid(v_ref, delta_ref, self.state[3], self.state[2], self.params['sv_max'], 
+                    v_dot, _ = vehicle_model.pid(v_ref, delta_ref, self.pose[4], self.state[2], self.params['sv_max'], 
                                 self.params['a_max'], self.vel_select[0], self.vel_select[1], self.input_dict['velocity_gain'])
                 
                  # get delta_dot
@@ -465,11 +464,11 @@ class environment():
     def define_path_polynomial(self, param):
         track_width = self.steer_control_dict['track_width']
         ds=0.1
-        s_0, s_0_ind, n_0 = functions.convert_xy_to_sn(self.rx, self.ry, self.ryaw, self.x, self.y, ds)
+        s_0, s_0_ind, n_0 = functions.convert_xy_to_sn(self.rx, self.ry, self.ryaw, self.pose[0], self.pose[1], ds)
         s_1 = s_0 + 3
         s_2 = s_1 + 2
         n_1 = param*track_width/2
-        theta = functions.sub_angles_complex(self.theta, self.ryaw[s_0_ind])
+        theta = functions.sub_angles_complex(self.pose[2], self.ryaw[s_0_ind])
         A = np.array([[3*s_1**2, 2*s_1, 1, 0], [3*s_0**2, 2*s_0, 1, 0], [s_0**3, s_0**2, s_0, 1], [s_1**3, s_1**2, s_1, 1]])
         B = np.array([0, theta, n_0, n_1])
         x = np.linalg.solve(A, B)
@@ -506,8 +505,8 @@ class environment():
         R = self.R_range[-1]
         
         if np.pi/2-0.01 < wpt_angle < np.pi/2+0.01:
-            cx = (((np.arange(0.1, 1, 0.01))*(waypoint[0] - self.x)) + self.x)
-            cy = ((np.arange(0.1, 1, 0.01))*(waypoint[1] - self.y) + self.y)
+            cx = (((np.arange(0.1, 1, 0.01))*(waypoint[0] - self.pose[0])) + self.pose[0])
+            cy = ((np.arange(0.1, 1, 0.01))*(waypoint[1] - self.pose[1]) + self.pose[1])
         
         else:
             if wpt_angle>np.pi-0.01:
@@ -561,9 +560,9 @@ class environment():
         if self.action_space=='continuous':
             wpt_action=action
             R = self.R_range[-1]
-            waypoint_relative_angle = self.theta + self.wpt_arc*(wpt_action)
-            waypoint = [self.x + R*math.cos(waypoint_relative_angle), self.y + R*math.sin(waypoint_relative_angle)]
-            wpt_angle =  waypoint_relative_angle-(self.theta-np.pi/2) #angle in cars reference frame
+            waypoint_relative_angle = self.pose[2] + self.wpt_arc*(wpt_action)
+            waypoint = [self.pose[0] + R*math.cos(waypoint_relative_angle), self.pose[1] + R*math.sin(waypoint_relative_angle)]
+            wpt_angle =  waypoint_relative_angle-(self.pose[2]-np.pi/2) #angle in cars reference frame
             #return waypoint, wpt_angle, R, self.v_ref
         
         return waypoint, wpt_angle
@@ -666,8 +665,8 @@ class environment():
             
             
     def generate_noise(self):
-        self.x_noise = np.random.normal(loc=0, scale=self.noise_dict['x'])
-        self.y_noise = np.random.normal(loc=0, scale=self.noise_dict['y'])
+        self.x_noise = np.random.normal(loc=0, scale=self.noise_dict['xy'])
+        self.y_noise = np.random.normal(loc=0, scale=self.noise_dict['xy'])
         self.theta_noise = np.random.normal(loc=0, scale=self.noise_dict['theta'])
         self.v_noise = np.random.normal(loc=0, scale=self.noise_dict['v'])
         self.lidar_noise = np.random.normal(loc=0, scale=self.noise_dict['lidar'], size = self.lidar_dict['n_beams'])
