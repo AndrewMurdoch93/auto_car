@@ -49,15 +49,12 @@ class environment():
         self.reward_signal = input_dict['reward_signal']
         self.lidar_dict = input_dict['lidar_dict']
         self.action_space_dict = input_dict['action_space_dict']
-
         
         #Initialise car parameters
         self.wheelbase = self.params['lf'] + self.params['lr'] 
         
         if 'velocity_gain' not in self.input_dict:
             self.input_dict['velocity_gain'] = 2
-
-        
 
         if self.steering_control==True:
             self.path_strategy = self.steer_control_dict['path_strategy']
@@ -131,10 +128,9 @@ class environment():
         self.episode = 0
 
 
-    def reset(self, save_history, start_condition, car_params ,get_lap_time=False):
+    def reset(self, save_history, start_condition, car_params, noise, get_lap_time=False):
         self.max_progress=1
         self.max_progress_reached=False
-
         
         self.episode+=1
         self.save_history=save_history
@@ -237,37 +233,22 @@ class environment():
         #self.det_prg.search_index(self.x, self.y)
         self.old_closest_point = functions.find_correct_closest_point(self.rx, self.ry, self.x, self.y, self.occupancy_grid, self.map_res, self.map_height)
         #Initialise state and observation vector 
-        self.save_pose()
+        #self.save_pose()
 
         self.start_point = self.old_closest_point
 
         if self.save_history==True:
             self.append_history_func()
 
-        self.initial_condition_dict = {'x':self.x, 'y':self.y, 'theta':self.theta, 'v':self.v, 'delta':self.delta, 'goal': self.current_goal}
+     
         
         self.params = car_params
         
-        #change_params = {}
-        #for i in self.params:
-        #    if i not in ['v_min', 'v_max', 'width']:
-        #        change_params[i] = self.params[i]
-        
-        #for i in random.sample(list(change_params), 2):
-        #    self.params[i] *= random.uniform(0.95,1.05)
+        self.noise_dict = noise
+        self.generate_noise()
+        self.save_pose()
+        self.initial_condition_dict = {'x':self.x, 'y':self.y, 'theta':self.theta, 'v':self.v, 'delta':self.delta, 'goal': self.current_goal}
 
-        # self.params['mu'] *= random.uniform(0.95,1.05)
-        # self.params['C_Sf'] *= random.uniform(0.95,1.05)
-        # self.params['C_Sr'] *= random.uniform(0.95,1.05)
-        # self.params['lr'] *= random.uniform(0.95,1.05)
-        # self.params['sv_min'] *= random.uniform(0.95,1.05)
-        # self.params['sv_max'] *= random.uniform(0.95,1.05)
-        # self.params['s_min'] *= random.uniform(0.95,1.05)
-        # self.params['s_max'] *= random.uniform(0.95,1.05)
-        # self.params['a_max'] *= random.uniform(0.95,1.05)
-        # self.params['v_max'] *= random.uniform(0.95,1.05)
-        # self.params['m'] *= random.uniform(0.95,1.05)
-        # self.params['I'] *= random.uniform(0.95,1.05)
 
     def take_action(self, act):
         self.action_history.append(act)
@@ -280,6 +261,8 @@ class environment():
         #R = 3
         #v_ref = 4
         
+        self.generate_noise()
+
         if self.steering_control==False:
 
             for step in range(self.control_steps):
@@ -661,10 +644,10 @@ class environment():
         
         self.pose = [self.x, self.y, self.theta, self.delta, self.v]
         
-        x_norm = self.x/self.map_width
-        y_norm = self.y/self.map_height
-        theta_norm = (self.theta)/(2*math.pi)
-        v_norm = self.v/self.params['v_max']
+        x_norm = (self.x + self.x_noise)/self.map_width
+        y_norm = (self.y + self.y_noise)/self.map_height
+        theta_norm = (self.theta + self.theta_noise)/(2*math.pi)
+        v_norm = (self.v + self.v_noise)/self.params['v_max']
         #v_ref_norm = self.v_ref/self.params['v_max']
         
         if self.only_lidar==False:
@@ -677,12 +660,17 @@ class environment():
         if self.lidar_dict['is_lidar']==True:
             #lidar_norm = np.array(self.lidar_dists)<0.5
             
-            lidar_norm = np.array(self.lidar_dists)/self.lidar_dict['max_range']
+            lidar_norm = np.array(self.lidar_dists+self.lidar_noise)/self.lidar_dict['max_range']
             for n in lidar_norm:
                 self.observation.append(n)
             
             
-
+    def generate_noise(self):
+        self.x_noise = np.random.normal(loc=0, scale=self.noise_dict['x'])
+        self.y_noise = np.random.normal(loc=0, scale=self.noise_dict['y'])
+        self.theta_noise = np.random.normal(loc=0, scale=self.noise_dict['theta'])
+        self.v_noise = np.random.normal(loc=0, scale=self.noise_dict['v'])
+        self.lidar_noise = np.random.normal(loc=0, scale=self.noise_dict['lidar'], size = self.lidar_dict['n_beams'])
 
     
     def save_history_func(self):

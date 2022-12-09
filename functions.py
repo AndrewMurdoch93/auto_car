@@ -514,8 +514,7 @@ def generate_initial_condition(name, episodes, distance_offset, angle_offset, ve
     outfile.close()
 
 
-if __name__ == '__main__':
-    
+def plot_frenet_polynomial():
     ds = 0.1
     x_sparse = np.array([0,10])
     y_sparse = [0,0]
@@ -603,9 +602,49 @@ if __name__ == '__main__':
     plt.show()
 
 
-    # def velocity_along_line(theta, velocity, ryaw, )
+
+class OUActionNoise(object):
+    def __init__(self, mu, sigma=0.15, theta=.2, dt=1e-2, x0=None):
+        self.theta = theta
+        self.mu = mu
+        self.sigma = sigma
+        self.dt = dt
+        self.x0 = x0
+        self.reset()
+
+    def __call__(self):
+        x = self.x_prev + self.theta * (self.mu - self.x_prev) * self.dt + \
+            self.sigma * np.sqrt(self.dt) * np.random.normal(size=self.mu.shape)
+        self.x_prev = x
+        return x
+
+    def reset(self):
+        self.x_prev = self.x0 if self.x0 is not None else np.zeros_like(self.mu)
+
+    def __repr__(self):
+        return 'OrnsteinUhlenbeckActionNoise(mu={}, sigma={})'.format(
+                                                            self.mu, self.sigma)
+
+
+if __name__ == '__main__':
     
 
+    # num = 1
+    # noise = OUActionNoise(mu=np.zeros(num), sigma=0.03, theta=1, dt=0.01, x0=None)
+    # y = np.zeros((600, num))
+    # for i in range(len(y)):
+    #     y[i,:] = noise()
+
+    # for i in range(num):
+    #     plt.plot(y[:,i])
+    
+    # plt.show()
+
+
+
+
+    # def velocity_along_line(theta, velocity, ryaw, )
+    
     #generate_berlin_goals()
     #x, y, rx, ry, ryaw, rk, s = generate_circle_goals()
     #start_x, start_y, start_theta, next_goal = random_start(x, y, rx, ry, ryaw, rk, s)
@@ -631,4 +670,5 @@ if __name__ == '__main__':
     #plt.plot(x[next_goal], y[next_goal], 'o')
     #plt.show()
     
+    pass
 

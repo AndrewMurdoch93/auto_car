@@ -75,6 +75,8 @@ if  steer_control_dict['steering_control'] == True:
 
 lidar_dict = {'is_lidar':True, 'lidar_res':0.1, 'n_beams':10, 'max_range':20, 'fov':np.pi}
 
+noise_dict = {'x':0, 'y':0, 'theta':0, 'v':0, 'lidar':0}
+
 env_dict = {'sim_conf': functions.load_config(sys.path[0], "config")
         , 'save_history': False
         , 'map_name': 'porto_1'
@@ -89,6 +91,7 @@ env_dict = {'sim_conf': functions.load_config(sys.path[0], "config")
         , 'lidar_dict':lidar_dict
         , 'only_lidar':False
         , 'action_space_dict':action_space_dict
+        , 'noise_dict':noise_dict
         } 
 
 n_test=100
@@ -1638,7 +1641,7 @@ if True:
 
     pass
 
-
+# tests porto pete steer and velocity control tests 
 if True:
     # agent_names = ['porto_pete_sv_c_r_0']
     # legend = ['pete sv']
@@ -1653,6 +1656,36 @@ if True:
 
     pass
 
+# Test run with noise
+if True:
+
+    agent_name = 'porto_ete_v5_r_collision_5'
+    n_episodes = 100
+    detect_issues = False
+    initial_conditions = True
+    noise_param = 'x'
+    noise_std = np.arange(0,0.5,0.1)
+    main_multiple.lap_time_test_noise(agent_name, n_episodes, detect_issues, initial_conditions, noise_param, noise_std)
+    noise_param = 'y'
+    noise_std = np.arange(0,0.5,0.1)
+    main_multiple.lap_time_test_noise(agent_name, n_episodes, detect_issues, initial_conditions, noise_param, noise_std)
+    noise_param = 'theta'
+    noise_std = np.arange(0, 10*np.pi/180, 2*np.pi/180)
+    main_multiple.lap_time_test_noise(agent_name, n_episodes, detect_issues, initial_conditions, noise_param, noise_std)
+    noise_param = 'v'
+    noise_std = np.arange(0,0.5,0.1)
+    main_multiple.lap_time_test_noise(agent_name, n_episodes, detect_issues, initial_conditions, noise_param, noise_std)
+    noise_param = 'lidar'
+    noise_std = np.arange(0,0.1,0.025)
+    main_multiple.lap_time_test_noise(agent_name, n_episodes, detect_issues, initial_conditions, noise_param, noise_std)
+    pass
+
+agent_names = ['porto_ete_v5_r_collision_5']
+noise_params = ['x', 'y']
+legend_title = ''
+legend = ''
+display_results_multiple.display_lap_noise_results(agent_names, noise_params, legend_title, legend)
+    
 
 
 # display_results_multiple.learning_curve_lap_time_average(agent_names, legend, legend_title, ns)

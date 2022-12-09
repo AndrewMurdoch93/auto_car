@@ -1225,7 +1225,7 @@ agent_names = ['circle_pete_sv', 'circle_pete_s', 'circle_pete_v', 'circle_ete',
 #graph_lap_results(agent_names)
 
 
-
+#graphs mistmatch results for all tracks
 def graph_lap_results_mismatch(agent_names, mismatch_parameter, title):
     
     results_dict = {}
@@ -1466,6 +1466,47 @@ def display_lap_mismatch_results(agent_names, parameters, legend_title, legend, 
     # plt.show()
 
     
+def display_lap_noise_results(agent_names, noise_params, legend_title, legend):
+    
+    
+    fig, axs = plt.subplots(len(noise_params), sharex=True)
+    numbering = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p']
+
+    for j, parameter in enumerate(noise_params):
+        for agent in agent_names:
+            
+            #infile = open('lap_results_mismatch/' + agent + '_new/' + parameter, 'rb')
+            infile = open('lap_results_noise/' + agent + '/' + parameter, 'rb')
+            results_dict = pickle.load(infile)
+            infile.close() 
+
+            n_episodes = len(results_dict['collision_results'][0,0,:])
+            n_param = len(results_dict['collision_results'][0,:,0])
+            n_runs = len(results_dict['collision_results'][:,0,0])
+
+            avg = np.zeros(n_param)
+            dev = np.zeros(n_param)
+
+            for i in range(n_param):
+                avg[i] = np.round(np.sum(np.logical_not(results_dict['collision_results'][:,i,:]))/(n_episodes*n_runs), 2)
+                failures = np.count_nonzero(results_dict['collision_results'][:,0,:].flatten())
+                successes = n_episodes - failures
+                dev[i] = np.sqrt(n_episodes*(successes/n_episodes)*((failures)/n_episodes))/(n_episodes*n_runs)
+
+            axs[j].grid()
+            # axs[j].set_ylim([0,1.1])
+            axs[j].yaxis.set_major_formatter(FormatStrFormatter('%.2f'))
+            axs[j].plot(results_dict['noise_std_values'], avg)
+            axs[j].fill_between(results_dict['noise_std_values'], avg-dev, avg+dev, alpha=0.25)
+            axs[j].set(ylabel='fraction successful laps')
+            #axs.yaxis.set_major_formatter(plt.ticker.FormatStrFormatter('%.2f'))
+
+        #axs[j].set_title('(' + numbering[j] + ') ' + plot_titles[j])
+    axs[j].set(xlabel='standard deviation')
+    axs[j].legend(legend, title=legend_title, loc='lower right')
+    plt.show()
+
+
 
 def display_lap_mismatch_results_box(agent_names, parameters, legend_title, legend):
 
@@ -1648,6 +1689,7 @@ def display_moving_agent(agent_name, load_history=False, n=0):
         plt.title('Episode history')
         #print('Progress = ', ph)
         plt.pause(0.001)
+
 
 def display_path(agent_name, load_history=False, n=0):
     

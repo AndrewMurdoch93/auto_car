@@ -2338,13 +2338,13 @@ def display_velocity_profile(agent_names, ns, legend_title, legend, mismatch_par
 #                         legend=legend, mismatch_parameters=mismatch_parameters, frac_vary=frac_vary, 
 #                         start_condition=start_condition, filename=filename)
 
-mismatch_parameters = ['C_Sf']
-frac_vary = [0]
-start_condition = {'x':10, 'y':4.5, 'v':3, 'theta':np.pi, 'delta':0, 'goal':0}
-#start_condition = []
-display_velocity_profile(agent_names=agent_names, ns=ns, legend_title=legend_title,          
-                        legend=legend, mismatch_parameters=mismatch_parameters, frac_vary=frac_vary, 
-                        start_condition=start_condition, filename=filename)
+# mismatch_parameters = ['C_Sf']
+# frac_vary = [0]
+# start_condition = {'x':10, 'y':4.5, 'v':3, 'theta':np.pi, 'delta':0, 'goal':0}
+# #start_condition = []
+# display_velocity_profile(agent_names=agent_names, ns=ns, legend_title=legend_title,          
+#                         legend=legend, mismatch_parameters=mismatch_parameters, frac_vary=frac_vary, 
+#                         start_condition=start_condition, filename=filename)
 
 
 # learning_curve_lap_time_average(agent_names, legend, legend_title, ns, filename, xlim, xspace)
