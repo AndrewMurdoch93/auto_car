@@ -1469,7 +1469,7 @@ def display_lap_mismatch_results(agent_names, parameters, legend_title, legend, 
 def display_lap_noise_results(agent_names, noise_params, legend_title, legend):
     
     
-    fig, axs = plt.subplots(len(noise_params))
+    fig, axs = plt.subplots(len(noise_params),2)
     numbering = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p']
 
     for j, parameter in enumerate(noise_params):
@@ -1484,27 +1484,57 @@ def display_lap_noise_results(agent_names, noise_params, legend_title, legend):
             n_param = len(results_dict['collision_results'][0,:,0])
             n_runs = len(results_dict['collision_results'][:,0,0])
 
-            avg = np.zeros(n_param)
+            avg_col = np.zeros(n_param)
+            avg_time = np.zeros(n_param)
             dev = np.zeros(n_param)
 
-            for i in range(n_param):
-                avg[i] = np.round(np.sum(np.logical_not(results_dict['collision_results'][:,i,:]))/(n_episodes*n_runs), 2)
-                failures = np.count_nonzero(results_dict['collision_results'][:,0,:].flatten())
-                successes = n_episodes - failures
-                dev[i] = np.sqrt(n_episodes*(successes/n_episodes)*((failures)/n_episodes))/(n_episodes*n_runs)
 
-            axs[j].grid()
-            # axs[j].set_ylim([0,1.05])
-            axs[j].yaxis.set_major_formatter(FormatStrFormatter('%.2f'))
-            axs[j].plot(results_dict['noise_std_values'], avg)
-            axs[j].fill_between(results_dict['noise_std_values'], avg-dev, avg+dev, alpha=0.25)
-            axs[j].set(ylabel='fraction successful laps')
-            #axs.yaxis.set_major_formatter(plt.ticker.FormatStrFormatter('%.2f'))
+
+            # for i in range(n_param):
+            #     avg_col[i] = np.sum(np.logical_not(results_dict['collision_results'][:,i,:]))/(n_episodes*n_runs)
+            #     avg_time[i] =  np.ma.mean((results_dict['times_results'][:,i,:]))
+            #     # failures = np.count_nonzero(results_dict['collision_results'][:,0,:].flatten())
+            #     # successes = n_episodes - failures
+            #     # dev[i] = np.sqrt(n_episodes*(successes/n_episodes)*((failures)/n_episodes))/(n_episodes*n_runs)
+            
+            avg_cols = np.mean(np.mean(np.logical_not(results_dict['collision_results']),axis=2),axis=0)*100
+            avg_times = np.mean(np.ma.array(results_dict['times_results'], mask=results_dict['collision_results'].astype(bool)).mean(axis=2),axis=0)
+                
+
+
+
+            axs[j,0].grid(True)
+            axs[j,0].set_ylim([90,101])
+            axs[j,0].yaxis.set_major_formatter(FormatStrFormatter('%.0f'))
+            axs[j,0].tick_params('both', length=0)
+            axs[j,0].plot(results_dict['noise_std_values'], avg_cols)
+            # axs[j].fill_between(results_dict['noise_std_values'], avg-dev, avg+dev, alpha=0.25)
+            axs[j,0].set(ylabel='Successful laps [%]')
+            # axs.yaxis.set_major_formatter(plt.ticker.FormatStrFormatter('%.2f'))
+            
+
+            axs[j,1].grid(True)
+            axs[j,1].set_ylim([5,7])
+            axs[j,1].yaxis.set_major_formatter(FormatStrFormatter('%.1f'))
+            axs[j,1].tick_params('both', length=0)
+            axs[j,1].plot(results_dict['noise_std_values'], avg_times)
+            # axs[j].fill_between(results_dict['noise_std_values'], avg-dev, avg+dev, alpha=0.25)
+            axs[j,1].set(ylabel='Lap time [s]')
 
         #axs[j].set_title('(' + numbering[j] + ') ' + plot_titles[j])
-    axs[j].set(xlabel='standard deviation')
-    axs[j].legend(legend, title=legend_title, loc='lower right')
+    # axs[j].set(xlabel='standard deviation')
+    # axs[j].legend(legend, title=legend_title, loc='lower right')
+    axs[0,0].set_xlabel('$x$ and $y$ coordinates')
+    axs[0,1].set_xlabel('$x$ and $y$ coordinates')
+
+    axs[1,0].set_xlabel('Vehicle heading')
+    axs[1,1].set_xlabel('Vehicle heading')
+
+
+    fig.tight_layout()
     plt.show()
+
+
 
 
 

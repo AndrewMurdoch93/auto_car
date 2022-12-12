@@ -838,7 +838,7 @@ def lap_time_test_noise(agent_name, n_episodes, detect_issues, initial_condition
    #env = environment(env_dict, start_condition={'x':15,'y':5,'theta':0,'goal':0})
    
    #env_dict['architecture'] = 'pete'
-   init_noise = {'x':0, 'y':0, 'theta':0, 'v':0, 'lidar':0}
+   init_noise = {'xy':0, 'theta':0, 'v':0, 'lidar':0}
    
    env = environment(env_dict)
    env.reset(save_history=False, start_condition=[], car_params=car_params, noise=init_noise, get_lap_time=True)
