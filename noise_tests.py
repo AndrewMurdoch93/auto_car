@@ -26,8 +26,9 @@ import os
 # agent_names = ['porto_pete_sv_c_r_8']
 # agent_names = ['porto_pete_sv_p_r_0']
 
-agent_names = ['porto_ete_v5_r_collision_5', 'porto_pete_s_r_collision_0', 'porto_pete_s_polynomial', 
-                'porto_pete_v_k_1_attempt_2', 'porto_pete_sv_c_r_8', 'porto_pete_sv_p_r_0']
+agent_names = ['porto_ete_v5_r_collision_5', 'porto_pete_s_r_collision_0', 'porto_pete_s_polynomial']
+agent_names = ['porto_pete_v_k_1_attempt_2', 'porto_pete_sv_c_r_8', 'porto_pete_sv_p_r_0']
+
 n_episodes = 100
 detect_issues = False
 initial_conditions = True
