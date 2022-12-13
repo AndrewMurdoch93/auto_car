@@ -1988,13 +1988,14 @@ def display_path_multiple(agent_names, ns, legend_title, legend, mismatch_parame
 
     for i in range(len(agent_names)):
    
-        # if env_dict['steer_control_dict']['steering_control']:
-            # for j in np.array(local_path_history[i])[np.arange(0,len(local_path_history[i]),40)]:
-            #     ax.plot(j[0], j[1], alpha=0.5, linestyle='dashdot', color='red')
-            #     ax.plot(j[0][0], j[1][0], alpha=0.5, color='red', marker='s')
+        if env_dict['steer_control_dict']['steering_control']:
+            for j in np.array(local_path_history[i])[np.arange(0,len(local_path_history[i]),40)]:
+                ax.plot(j[0], j[1], alpha=0.5, linestyle='dashdot', color='red')
+                ax.plot(j[0][0], j[1][0], alpha=0.5, color='red', marker='s')
+
+        ax.plot(np.array(state_history[i])[:,0], np.array(state_history[i])[:,1], linewidth=1.5, alpha=alpha)   
         ax.plot(np.array(pose_history[i])[:,0][np.arange(0,len(local_path_history[i]),40)], np.array(pose_history[i])[:,1][np.arange(0,len(local_path_history[i]),40)], 'x')
         
-        ax.plot(np.array(state_history[i])[:,0], np.array(state_history[i])[:,1], linewidth=1.5, alpha=alpha)   
         #ax.plot(np.array(pose_history[i])[:,0], np.array(pose_history[i])[:,1], linewidth=1.5, alpha=alpha)    
 
     prog = np.array([0, 0.2, 0.4, 0.6, 0.8])

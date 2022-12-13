@@ -525,8 +525,8 @@ class environment():
                 a_arc = np.arctan(np.true_divide(y_arc[1:-1], x_arc[1:-1]))
             if wpt_angle>np.pi/2:
                 a_arc = np.arctan(np.true_divide(y_arc[1:-1], x_arc[1:-1]))+np.pi
-            cx = d_arc*np.cos(a_arc+a) + self.x
-            cy = d_arc*np.sin(a_arc+a) + self.y
+            cx = d_arc*np.cos(a_arc+a) + self.pose[0]
+            cy = d_arc*np.sin(a_arc+a) + self.pose[1]
 
         cx = cx.flatten().tolist()
         cy = cy.flatten().tolist()
@@ -1033,15 +1033,15 @@ def test_environment():
     initial_condition = {'x':16, 'y':7, 'v':0.101, 'delta':0, 'theta':0, 'goal':1}
     # initial_condition = {'x':6, 'y':6.5, 'v':4, 'delta':0, 'theta':np.pi, 'goal':1}
     #initial_condition = []
-    
+    noise_dict = {'xy':0.1, 'theta':0, 'v':0, 'lidar':0}
 
     env = environment(env_dict)
-    env.reset(save_history=True, start_condition=initial_condition, get_lap_time=False, car_params=env_dict['car_params'])
+    env.reset(save_history=True, start_condition=initial_condition, get_lap_time=False, car_params=env_dict['car_params'], noise=noise_dict)
 
     #a = agent_td3.agent(agent_dict)
     #a.load_weights(agent_name, n)
     
-    action_history = np.ones((1000,2))*0
+    action_history = np.ones((1000,2))*0.2
     action_history[:,1] = np.ones(1000)*1
 
     done=False

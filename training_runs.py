@@ -1697,8 +1697,8 @@ if True:
 
 #Final porto agents!!!
 # agent_names = ['porto_ete_v5_r_collision_5']    
-# agent_names = ['porto_pete_s_r_collision_0']
-agent_names = ['porto_pete_s_polynomial']   
+agent_names = ['porto_pete_s_r_collision_0']
+# agent_names = ['porto_pete_s_polynomial']   
 # agent_names = ['porto_pete_v_k_1_attempt_2']
 # agent_names = ['porto_pete_sv_c_r_8']
 # agent_names = ['porto_pete_sv_p_r_0']
@@ -1721,7 +1721,7 @@ ns=[0]
 
 mismatch_parameters = [['C_Sf']]
 frac_vary = [[0]]
-noise_dicts = [{'xy':0, 'theta':0, 'v':0, 'lidar':0}]
+noise_dicts = [{'xy':0.5, 'theta':0.1, 'v':0.1, 'lidar':0.01}]
 
 
 # Porto
