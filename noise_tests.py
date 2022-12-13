@@ -35,17 +35,17 @@ detect_issues = False
 initial_conditions = True
 
 for agent_name in agent_names:
-    noise_param = 'xy'
-    noise_std = np.arange(0,2.05,0.1)
+    # noise_param = 'xy'
+    # noise_std = np.arange(0,2.05,0.1)
+    # main_multiple.lap_time_test_noise(agent_name, n_episodes, detect_issues, initial_conditions, noise_param, noise_std)
+    noise_param = 'theta'
+    noise_std = np.arange(0, 40*np.pi/180, 4*np.pi/180)
     main_multiple.lap_time_test_noise(agent_name, n_episodes, detect_issues, initial_conditions, noise_param, noise_std)
-    # noise_param = 'theta'
-    # noise_std = np.arange(0, 40*np.pi/180, np.pi/180)
-    # main_multiple.lap_time_test_noise(agent_name, n_episodes, detect_issues, initial_conditions, noise_param, noise_std)
-    # noise_param = 'v'
-    # noise_std = np.arange(0,2,0.05)
-    # main_multiple.lap_time_test_noise(agent_name, n_episodes, detect_issues, initial_conditions, noise_param, noise_std)
-    # noise_param = 'lidar'
-    # noise_std = np.arange(0,1,0.025)
-    # main_multiple.lap_time_test_noise(agent_name, n_episodes, detect_issues, initial_conditions, noise_param, noise_std)
+    noise_param = 'v'
+    noise_std = np.arange(0,2,0.2)
+    main_multiple.lap_time_test_noise(agent_name, n_episodes, detect_issues, initial_conditions, noise_param, noise_std)
+    noise_param = 'lidar'
+    noise_std = np.arange(0,1,0.1)
+    main_multiple.lap_time_test_noise(agent_name, n_episodes, detect_issues, initial_conditions, noise_param, noise_std)
 
 

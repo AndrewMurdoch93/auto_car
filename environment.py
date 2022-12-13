@@ -956,44 +956,44 @@ class environment():
 def test_environment():
     
     
-    # agent_name = 'torino_sv_test_3'
-    # parent_dir = os.path.dirname(os.path.abspath(__file__))
-    # agent_dir = parent_dir + '/agents/' + agent_name
-    # agent_params_file = agent_dir + '/' + agent_name + '_params'
-    # replay_episode_name = 'replay_episodes/' + agent_name
+    agent_name = 'porto_pete_s_r_collision_0'
+    parent_dir = os.path.dirname(os.path.abspath(__file__))
+    agent_dir = parent_dir + '/agents/' + agent_name
+    agent_params_file = agent_dir + '/' + agent_name + '_params'
+    replay_episode_name = 'replay_episodes/' + agent_name
     
-    # infile=open(replay_episode_name, 'rb')
-    # action_history = pickle.load(infile)
-    # initial_condition = pickle.load(infile)
-    # n = pickle.load(infile)
-    # infile.close()
+    infile=open(replay_episode_name, 'rb')
+    action_history = pickle.load(infile)
+    initial_condition = pickle.load(infile)
+    n = pickle.load(infile)
+    infile.close()
     
-    # infile = open('environments/' + agent_name, 'rb')
-    # env_dict = pickle.load(infile)
-    # infile.close()
-    # env_dict['display']=True
+    infile = open('environments/' + agent_name, 'rb')
+    env_dict = pickle.load(infile)
+    infile.close()
+    env_dict['display']=True
 
 
-    # infile = open(agent_params_file, 'rb')
-    # agent_dict = pickle.load(infile)
-    # infile.close()
-    # agent_dict['layer3_size'] = 300
+    infile = open(agent_params_file, 'rb')
+    agent_dict = pickle.load(infile)
+    infile.close()
+    agent_dict['layer3_size'] = 300
+    noise_dict = {'xy':0, 'theta':0, 'v':0, 'lidar':0}
+    env = environment(env_dict)
+    env.reset(save_history=True, start_condition=initial_condition, car_params=env_dict['car_params'], get_lap_time=False, noise=noise_dict)
+    
+    a = agent_td3.agent(agent_dict)
+    a.load_weights(agent_name, n)
+    
 
-    # env = environment(env_dict)
-    # env.reset(save_history=True, start_condition=initial_condition, car_params=env_dict['car_params'], get_lap_time=False)
     
-    # a = agent_td3.agent(agent_dict)
-    # a.load_weights(agent_name, n)
-    
-
-    
-    car_params =   {'mu': 1.0489, 'C_Sf': 4.718, 'C_Sr': 5.4562, 'lf': 0.15875, 'lr': 0.17145
-                  , 'h': 0.074, 'm': 3.74, 'I': 0.04712, 's_min': -0.4189, 's_max': 0.4189, 'sv_min': -3.2
-                  , 'sv_max': 3.2, 'v_switch': 7.319, 'a_max': 9.51, 'v_min':-5.0, 'v_max': 20.0, 'width': 0.31, 'length': 0.58}
+    # car_params =   {'mu': 1.0489, 'C_Sf': 4.718, 'C_Sr': 5.4562, 'lf': 0.15875, 'lr': 0.17145
+    #               , 'h': 0.074, 'm': 3.74, 'I': 0.04712, 's_min': -0.4189, 's_max': 0.4189, 'sv_min': -3.2
+    #               , 'sv_max': 3.2, 'v_switch': 7.319, 'a_max': 9.51, 'v_min':-5.0, 'v_max': 20.0, 'width': 0.31, 'length': 0.58}
    
-    reward_signal = {'goal_reached':0, 'out_of_bounds':-1, 'max_steps':0, 'collision':-1, 'backwards':-1, 'park':-1, 'time_step':-0.01, 'progress':0, 'distance':0.3}    
+    # reward_signal = {'goal_reached':0, 'out_of_bounds':-1, 'max_steps':0, 'collision':-1, 'backwards':-1, 'park':-1, 'time_step':-0.01, 'progress':0, 'distance':0.3}    
    
-    action_space_dict = {'action_space': 'continuous', 'vel_select':[3,7], 'R_range':[2]}
+    # action_space_dict = {'action_space': 'continuous', 'vel_select':[3,7], 'R_range':[2]}
    
     #action_space_dict = {'action_space': 'discrete', 'n_waypoints': 10, 'vel_select':[7], 'R_range':[6]}
 
@@ -1001,39 +1001,39 @@ def test_environment():
     
     #if path_dict['local_path'] == True: #True or false
     
-    steer_control_dict = {'steering_control': True, 'wpt_arc':np.pi/2}
+    # steer_control_dict = {'steering_control': True, 'wpt_arc':np.pi/2}
 
-    if  steer_control_dict['steering_control'] == True:
-        steer_control_dict['path_strategy'] = 'circle'  #circle or linear or polynomial or gradient
-        steer_control_dict['control_strategy'] = 'pure_pursuit'  #pure_pursuit or stanley
-    if steer_control_dict['control_strategy'] == 'pure_pursuit':
-        steer_control_dict['track_dict'] = {'k':0.1, 'Lfc':1}
-    if steer_control_dict['control_strategy'] == 'stanley':
-        steer_control_dict['track_dict'] = {'l_front': car_params['lf'], 'k':5, 'max_steer':car_params['s_max']}
+    # if  steer_control_dict['steering_control'] == True:
+    #     steer_control_dict['path_strategy'] = 'circle'  #circle or linear or polynomial or gradient
+    #     steer_control_dict['control_strategy'] = 'pure_pursuit'  #pure_pursuit or stanley
+    # if steer_control_dict['control_strategy'] == 'pure_pursuit':
+    #     steer_control_dict['track_dict'] = {'k':0.1, 'Lfc':1}
+    # if steer_control_dict['control_strategy'] == 'stanley':
+    #     steer_control_dict['track_dict'] = {'l_front': car_params['lf'], 'k':5, 'max_steer':car_params['s_max']}
    
-    lidar_dict = {'is_lidar':True, 'lidar_res':0.1, 'n_beams':8, 'max_range':20, 'fov':np.pi}
+    # lidar_dict = {'is_lidar':True, 'lidar_res':0.1, 'n_beams':8, 'max_range':20, 'fov':np.pi}
    
-    env_dict = {'sim_conf': functions.load_config(sys.path[0], "config")
-            , 'save_history': False
-            , 'map_name': 'circle'
-            , 'max_steps': 3000
-            , 'control_steps': 20
-            , 'display': True
-            , 'velocity_control': True
-            , 'steer_control_dict': steer_control_dict
-            , 'car_params':car_params
-            , 'reward_signal':reward_signal
-            , 'lidar_dict':lidar_dict
-            , 'action_space_dict':action_space_dict
-            } 
+    # env_dict = {'sim_conf': functions.load_config(sys.path[0], "config")
+    #         , 'save_history': False
+    #         , 'map_name': 'circle'
+    #         , 'max_steps': 3000
+    #         , 'control_steps': 20
+    #         , 'display': True
+    #         , 'velocity_control': True
+    #         , 'steer_control_dict': steer_control_dict
+    #         , 'car_params':car_params
+    #         , 'reward_signal':reward_signal
+    #         , 'lidar_dict':lidar_dict
+    #         , 'action_space_dict':action_space_dict
+    #         } 
     
-    env_dict['name'] = 'test'
+    # env_dict['name'] = 'test'
     
     # initial_condition = {'x':8.18, 'y':26.24, 'v':4, 'delta':0, 'theta':np.pi, 'goal':1}
-    initial_condition = {'x':16, 'y':7, 'v':0.101, 'delta':0, 'theta':0, 'goal':1}
+    # initial_condition = {'x':16, 'y':7, 'v':0.101, 'delta':0, 'theta':0, 'goal':1}
     # initial_condition = {'x':6, 'y':6.5, 'v':4, 'delta':0, 'theta':np.pi, 'goal':1}
     #initial_condition = []
-    noise_dict = {'xy':0.1, 'theta':0, 'v':0, 'lidar':0}
+    
 
     env = environment(env_dict)
     env.reset(save_history=True, start_condition=initial_condition, get_lap_time=False, car_params=env_dict['car_params'], noise=noise_dict)

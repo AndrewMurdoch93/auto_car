@@ -1393,7 +1393,7 @@ agent_names = ['circle_pete_sv', 'circle_pete_s', 'circle_pete_v', 'circle_ete',
 
 
 
-def display_lap_mismatch_results(agent_names, parameters, legend_title, legend, plot_titles):
+def display_lap_mismatch_results_multiple(agent_names, parameters, legend_title, legend, plot_titles):
     
     fig, axs = plt.subplots(len(parameters), sharex=True)
     numbering = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p']
@@ -1432,6 +1432,7 @@ def display_lap_mismatch_results(agent_names, parameters, legend_title, legend, 
     axs[j].legend(legend, title=legend_title, loc='lower right')
     plt.show()
 
+
     # results = []
     # data = []
 
@@ -1466,7 +1467,7 @@ def display_lap_mismatch_results(agent_names, parameters, legend_title, legend, 
     # plt.show()
 
     
-def display_lap_noise_results(agent_names, noise_params, legend_title, legend):
+def display_lap_noise_results_multiple(agent_names, noise_param, legend_title, legend):
     
     
     fig, axs = plt.subplots(len(noise_params), 2, figsize=(5.5,7))
@@ -1552,6 +1553,82 @@ def display_lap_noise_results(agent_names, noise_params, legend_title, legend):
     plt.figlegend(legend, title=legend_title, loc = 'lower center', ncol=2)
     plt.show()
 
+
+def display_lap_noise_results_single(agent_names, noise_param, legend_title, legend):
+    
+    
+    fig, axs = plt.subplots(1, 2, figsize=(5.5,4))
+    numbering = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p']
+
+    parameter=noise_param[0]
+    for agent in agent_names:
+        
+        #infile = open('lap_results_mismatch/' + agent + '_new/' + parameter, 'rb')
+        infile = open('lap_results_noise/' + agent + '/' + parameter, 'rb')
+        results_dict = pickle.load(infile)
+        infile.close() 
+
+        n_episodes = len(results_dict['collision_results'][0,0,:])
+        n_param = len(results_dict['collision_results'][0,:,0])
+        n_runs = len(results_dict['collision_results'][:,0,0])
+
+        avg_col = np.zeros(n_param)
+        avg_time = np.zeros(n_param)
+        dev = np.zeros(n_param)
+
+
+
+        # for i in range(n_param):
+        #     avg_col[i] = np.sum(np.logical_not(results_dict['collision_results'][:,i,:]))/(n_episodes*n_runs)
+        #     avg_time[i] =  np.ma.mean((results_dict['times_results'][:,i,:]))
+        #     # failures = np.count_nonzero(results_dict['collision_results'][:,0,:].flatten())
+        #     # successes = n_episodes - failures
+        #     # dev[i] = np.sqrt(n_episodes*(successes/n_episodes)*((failures)/n_episodes))/(n_episodes*n_runs)
+        
+        avg_cols = np.mean(np.mean(np.logical_not(results_dict['collision_results']),axis=2),axis=0)*100
+        avg_times = np.mean(np.ma.array(results_dict['times_results'], mask=results_dict['collision_results'].astype(bool)).mean(axis=2),axis=0)
+        
+        # kernel_size = 2
+        # kernel = np.ones(kernel_size) / kernel_size
+        # avg_cols_convolved = np.convolve(avg_cols, kernel, mode='same')
+        # avg_times_convolved = np.convolve(avg_times, kernel, mode='same')
+
+        avg_cols_filter = functions.savitzky_golay(avg_cols, 9, 2)
+        avg_times_filter = functions.savitzky_golay(avg_times, 9, 2)
+
+        axs[0].grid(True)
+        axs[0].set_ylim([0,101])
+        axs[0].yaxis.set_major_formatter(FormatStrFormatter('%.0f'))
+        axs[0].tick_params('both', length=0)
+        axs[0].plot(results_dict['noise_std_values'], avg_cols_filter)
+        # axs[j].fill_between(results_dict['noise_std_values'], avg-dev, avg+dev, alpha=0.25)
+        axs[0].set(ylabel='Successful\nlaps [%]')
+        # axs.yaxis.set_major_formatter(plt.ticker.FormatStrFormatter('%.2f'))
+        
+
+        axs[1].grid(True)
+        # axs[j,1].set_ylim([5,7])
+        axs[1].yaxis.set_major_formatter(FormatStrFormatter('%.1f'))
+        axs[1].tick_params('both', length=0)
+        axs[1].plot(results_dict['noise_std_values'], avg_times_filter)
+        # axs[j].fill_between(results_dict['noise_std_values'], avg-dev, avg+dev, alpha=0.25)
+        axs[1].set(ylabel='Lap time [s]')
+
+    #axs[j].set_title('(' + numbering[j] + ') ' + plot_titles[j])
+    # axs[j].set(xlabel='standard deviation')
+    # axs[j].legend(legend, title=legend_title, loc='lower right')
+
+    axs[0].set_title('$x$ and $y$ coordinates')
+    axs[0].set_xlabel('m')
+    axs[1].set_xlabel('m')
+    
+    axs[0].set_xlim([0,0.3])
+    axs[1].set_xlim([0,0.3])
+
+    fig.tight_layout()
+    fig.subplots_adjust(bottom=0.4) 
+    plt.figlegend(legend, title=legend_title, loc = 'lower center', ncol=2)
+    plt.show()
 
 
 
@@ -1948,6 +2025,7 @@ def display_path_multiple(agent_names, ns, legend_title, legend, mismatch_parame
 
         print('Total score = ', score)
         print('Progress = ', env.progress)
+        print('Collision = ', env.collision)
 
         state_history.append(env.state_history)
         pose_history.append(env.pose_history)
@@ -1989,7 +2067,7 @@ def display_path_multiple(agent_names, ns, legend_title, legend, mismatch_parame
     for i in range(len(agent_names)):
    
         if env_dict['steer_control_dict']['steering_control']:
-            for j in np.array(local_path_history[i])[np.arange(0,len(local_path_history[i]),40)]:
+            for j in np.array(local_path_history[i])[np.arange(0,len(local_path_history[i]),20)]:
                 ax.plot(j[0], j[1], alpha=0.5, linestyle='dashdot', color='red')
                 ax.plot(j[0][0], j[1][0], alpha=0.5, color='red', marker='s')
 

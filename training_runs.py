@@ -1680,12 +1680,17 @@ if True:
     # noise_param = 'lidar'
     # noise_std = np.arange(0,0.1,0.025)
     # main_multiple.lap_time_test_noise(agent_name, n_episodes, detect_issues, initial_conditions, noise_param, noise_std)
+    
+    agent_name = 'porto_pete_s_r_collision_1'
+    # noise = {'xy':2, 'theta':0, 'v':0, 'lidar':0.01}
+    # main_multiple.lap_time_test(agent_name=agent_name, n_episodes=n_test, detect_issues=False, initial_conditions=True, noise=noise)
+    
     pass
 
 # agent_names = ['porto_ete_v5_r_collision_5', 'porto_pete_s_r_collision_0', 'porto_pete_s_polynomial', 
 #                 'porto_pete_v_k_1_attempt_2', 'porto_pete_sv_c_r_8', 'porto_pete_sv_p_r_0']
-# ns = [0,0]
-# noise_params = ['xy', 'theta', 'v', 'lidar']
+# # noise_params = ['xy', 'theta', 'v', 'lidar']
+# noise_params = ['xy']
 # legend_title = 'Agent architecture'
 # legend = ['End-to-end',
 #             'Steering control, circle path',
@@ -1693,19 +1698,22 @@ if True:
 #             'Velocity control',
 #             'Steering and velocity control, circle path',
 #             'Steering and velocity control, polynomial path']
-# display_results_multiple.display_lap_noise_results(agent_names, noise_params, legend_title, legend)
+# # display_results_multiple.display_lap_noise_results(agent_names, noise_params, legend_title, legend)
+# display_results_multiple.display_lap_noise_results_single(agent_names, noise_params, legend_title, legend)
 
-#Final porto agents!!!
+# Final porto agents!!!
 # agent_names = ['porto_ete_v5_r_collision_5']    
-agent_names = ['porto_pete_s_r_collision_0']
+# agent_names = ['porto_pete_s_r_collision_0']
 # agent_names = ['porto_pete_s_polynomial']   
 # agent_names = ['porto_pete_v_k_1_attempt_2']
 # agent_names = ['porto_pete_sv_c_r_8']
 # agent_names = ['porto_pete_sv_p_r_0']
 
-legend = ['']
-legend_title = ''
-ns=[0]
+# agent_names = ['porto_pete_s_r_collision_1']
+
+# legend = ['']
+# legend_title = ''
+# ns=[0]
 
 
 # display_results_multiple.learning_curve_lap_time_average(agent_names, legend, legend_title, ns)
@@ -1719,19 +1727,19 @@ ns=[0]
 #     print('------------------------------' + '\n' + agent_name + '\n' + '------------------------------')
 #     display_results_multiple.display_lap_results(agent_name=agent_name)
 
-mismatch_parameters = [['C_Sf']]
-frac_vary = [[0]]
-noise_dicts = [{'xy':0.05, 'theta':0.05, 'v':0.05, 'lidar':0.01}]
+# mismatch_parameters = [['C_Sf']]
+# frac_vary = [[0]]
+# noise_dicts = [{'xy':2, 'theta':1, 'v':2, 'lidar':1}]
 
 
-# Porto
-start_condition = {'x':10, 'y':4.5, 'v':3, 'theta':np.pi, 'delta':0, 'goal':0}
-# Columbia
-# start_condition = {'x':5.7, 'y':7.25, 'v':3, 'theta':0, 'delta':0, 'goal':0}
-# start_condition = []
-display_results_multiple.display_path_multiple(agent_names=agent_names, ns=ns, legend_title=legend_title,          
-                                             legend=legend, mismatch_parameters=mismatch_parameters, frac_vary=frac_vary, noise_dicts=noise_dicts,
-                                             start_condition=start_condition)
+# # Porto
+# start_condition = {'x':10, 'y':4.5, 'v':3, 'theta':np.pi, 'delta':0, 'goal':0}
+# # Columbia
+# # start_condition = {'x':5.7, 'y':7.25, 'v':3, 'theta':0, 'delta':0, 'goal':0}
+# # start_condition = []
+# display_results_multiple.display_path_multiple(agent_names=agent_names, ns=ns, legend_title=legend_title,          
+#                                              legend=legend, mismatch_parameters=mismatch_parameters, frac_vary=frac_vary, noise_dicts=noise_dicts,
+#                                              start_condition=start_condition)
 
 
 

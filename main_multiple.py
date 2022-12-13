@@ -512,7 +512,7 @@ def test(agent_name, n_episodes, detect_issues, initial_conditions):
    # outfile.close()
    
 
-def lap_time_test(agent_name, n_episodes, detect_issues, initial_conditions):
+def lap_time_test(agent_name, n_episodes, detect_issues, initial_conditions, noise):
 
    results_file_name = 'lap_results/' + agent_name
    parent_dir = os.path.dirname(os.path.abspath(__file__))
@@ -537,12 +537,12 @@ def lap_time_test(agent_name, n_episodes, detect_issues, initial_conditions):
 
    env_dict['max_steps'] = 2000
    
-
+   
    #env = environment(env_dict, start_condition={'x':15,'y':5,'theta':0,'goal':0})
    
    #env_dict['architecture'] = 'pete'
    env = environment(env_dict)
-   env.reset(save_history=False, start_condition=[], car_params=car_params, get_lap_time=True)
+   env.reset(save_history=False, start_condition=[], car_params=car_params, get_lap_time=True, noise=noise)
    
    action_history = []
    
@@ -599,7 +599,7 @@ def lap_time_test(agent_name, n_episodes, detect_issues, initial_conditions):
 
       for episode in range(n_episodes):
 
-         env.reset(save_history=True, start_condition=start_conditions[episode], get_lap_time=True, car_params=car_params)
+         env.reset(save_history=True, start_condition=start_conditions[episode], get_lap_time=True, car_params=car_params, noise=noise)
          #env.reset(save_history=True, start_condition=[], get_lap_time=True, car_params=car_params)
          
          action_history = []
@@ -622,7 +622,7 @@ def lap_time_test(agent_name, n_episodes, detect_issues, initial_conditions):
          time = env.steps*0.01
          collision = env.collision or env.park or env.backwards
          
-         if detect_issues==True and (collision==True):
+         if detect_issues==True and (collision==False and time<4):
             print('Stop condition met')
             print('Progress = ', env.progress)
             print('score = ', score)
@@ -648,7 +648,7 @@ def lap_time_test(agent_name, n_episodes, detect_issues, initial_conditions):
 
 
 
-def lap_time_test_mismatch(agent_name, n_episodes, detect_issues, initial_conditions, parameter,  frac_variation):
+def lap_time_test_mismatch(agent_name, n_episodes, detect_issues, initial_conditions, parameter, frac_variation):
 
    results_dir = 'lap_results_mismatch/' + agent_name
    results_file = results_dir + '/' + parameter
