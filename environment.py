@@ -258,7 +258,7 @@ class environment():
         #R = 3
         #v_ref = 4
         
-        self.generate_noise()
+        
 
         if self.steering_control==False:
 
@@ -641,8 +641,10 @@ class environment():
     
     def save_pose(self):
         
-        self.pose = [self.x, self.y, self.theta, self.delta, self.v]
+        self.generate_noise()
+        self.pose = [self.x+self.x_noise, self.y+self.y_noise, self.theta+self.theta_noise, self.delta, self.v+self.v_noise]
         
+        # self.pose = [self.x, self.y, self.theta, self.delta, self.v]
         x_norm = (self.x + self.x_noise)/self.map_width
         y_norm = (self.y + self.y_noise)/self.map_height
         theta_norm = (self.theta + self.theta_noise)/(2*math.pi)

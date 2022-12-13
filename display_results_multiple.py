@@ -1469,7 +1469,7 @@ def display_lap_mismatch_results(agent_names, parameters, legend_title, legend, 
 def display_lap_noise_results(agent_names, noise_params, legend_title, legend):
     
     
-    fig, axs = plt.subplots(len(noise_params),2)
+    fig, axs = plt.subplots(len(noise_params), 2, figsize=(5.5,7))
     numbering = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p']
 
     for j, parameter in enumerate(noise_params):
@@ -1499,39 +1499,57 @@ def display_lap_noise_results(agent_names, noise_params, legend_title, legend):
             
             avg_cols = np.mean(np.mean(np.logical_not(results_dict['collision_results']),axis=2),axis=0)*100
             avg_times = np.mean(np.ma.array(results_dict['times_results'], mask=results_dict['collision_results'].astype(bool)).mean(axis=2),axis=0)
-                
+            
+            # kernel_size = 2
+            # kernel = np.ones(kernel_size) / kernel_size
+            # avg_cols_convolved = np.convolve(avg_cols, kernel, mode='same')
+            # avg_times_convolved = np.convolve(avg_times, kernel, mode='same')
 
-
+            avg_cols_filter = functions.savitzky_golay(avg_cols, 9, 2)
+            avg_times_filter = functions.savitzky_golay(avg_times, 9, 2)
 
             axs[j,0].grid(True)
-            axs[j,0].set_ylim([90,101])
+            axs[j,0].set_ylim([0,101])
             axs[j,0].yaxis.set_major_formatter(FormatStrFormatter('%.0f'))
             axs[j,0].tick_params('both', length=0)
-            axs[j,0].plot(results_dict['noise_std_values'], avg_cols)
+            axs[j,0].plot(results_dict['noise_std_values'], avg_cols_filter)
             # axs[j].fill_between(results_dict['noise_std_values'], avg-dev, avg+dev, alpha=0.25)
-            axs[j,0].set(ylabel='Successful laps [%]')
+            axs[j,0].set(ylabel='Successful\nlaps [%]')
             # axs.yaxis.set_major_formatter(plt.ticker.FormatStrFormatter('%.2f'))
             
 
             axs[j,1].grid(True)
-            axs[j,1].set_ylim([5,7])
+            # axs[j,1].set_ylim([5,7])
             axs[j,1].yaxis.set_major_formatter(FormatStrFormatter('%.1f'))
             axs[j,1].tick_params('both', length=0)
-            axs[j,1].plot(results_dict['noise_std_values'], avg_times)
+            axs[j,1].plot(results_dict['noise_std_values'], avg_times_filter)
             # axs[j].fill_between(results_dict['noise_std_values'], avg-dev, avg+dev, alpha=0.25)
             axs[j,1].set(ylabel='Lap time [s]')
 
         #axs[j].set_title('(' + numbering[j] + ') ' + plot_titles[j])
     # axs[j].set(xlabel='standard deviation')
     # axs[j].legend(legend, title=legend_title, loc='lower right')
-    axs[0,0].set_xlabel('$x$ and $y$ coordinates')
-    axs[0,1].set_xlabel('$x$ and $y$ coordinates')
+    
+    axs[0,0].set_title('$x$ and $y$ coordinates')
+    axs[1,0].set_title('Vehicle heading')
+    axs[2,0].set_title('Velocity')
+    axs[3,0].set_title('LiDAR')
 
-    axs[1,0].set_xlabel('Vehicle heading')
-    axs[1,1].set_xlabel('Vehicle heading')
+    
+    axs[0,0].set_xlabel('m')
+    axs[0,1].set_xlabel('m')
+    axs[1,0].set_xlabel('rads')
+    axs[1,1].set_xlabel('rads')
+    axs[2,0].set_xlabel('m/s')
+    axs[2,1].set_xlabel('m/s')
+    axs[3,0].set_xlabel('m')
+    axs[3,1].set_xlabel('m')
+
 
 
     fig.tight_layout()
+    fig.subplots_adjust(bottom=0.2) 
+    plt.figlegend(legend, title=legend_title, loc = 'lower center', ncol=2)
     plt.show()
 
 
@@ -1974,8 +1992,10 @@ def display_path_multiple(agent_names, ns, legend_title, legend, mismatch_parame
             # for j in np.array(local_path_history[i])[np.arange(0,len(local_path_history[i]),40)]:
             #     ax.plot(j[0], j[1], alpha=0.5, linestyle='dashdot', color='red')
             #     ax.plot(j[0][0], j[1][0], alpha=0.5, color='red', marker='s')
-        # ax.plot(np.array(pose_history[i])[:,0], np.array(pose_history[i])[:,1], linewidth=1.5) 
-        ax.plot(np.array(pose_history[i])[:,0], np.array(pose_history[i])[:,1], linewidth=1.5, alpha=alpha)    
+        ax.plot(np.array(pose_history[i])[:,0][np.arange(0,len(local_path_history[i]),40)], np.array(pose_history[i])[:,1][np.arange(0,len(local_path_history[i]),40)], 'x')
+        
+        ax.plot(np.array(state_history[i])[:,0], np.array(state_history[i])[:,1], linewidth=1.5, alpha=alpha)   
+        #ax.plot(np.array(pose_history[i])[:,0], np.array(pose_history[i])[:,1], linewidth=1.5, alpha=alpha)    
 
     prog = np.array([0, 0.2, 0.4, 0.6, 0.8])
     idx =  np.zeros(len(prog), int)
@@ -2013,7 +2033,8 @@ def display_path_multiple(agent_names, ns, legend_title, legend, mismatch_parame
     plt.hlines(y=env_dict['action_space_dict']['vel_select'][0], xmin=0, xmax=100, colors='black', linestyle='dashed')
     plt.hlines(y=env_dict['action_space_dict']['vel_select'][1], xmin=0, xmax=100, colors='black', linestyle='dashed', label='_nolegend_')
     for i in range(len(agent_names)):
-        plt.plot(np.array(progress_history[i])*100, np.array(pose_history[i])[:,4], linewidth=1.5, alpha=alpha)
+        plt.plot(np.array(progress_history[i])*100, np.array(state_history[i])[:,3], linewidth=1.5, alpha=alpha)
+        # plt.plot(np.array(progress_history[i])*100, np.array(pose_history[i])[:,4], linewidth=1.5, alpha=alpha)
 
     plt.xlabel('progress along centerline [%]',**myfont)
     plt.ylabel('Longitudinal velocity [m/s]',**myfont)
@@ -2032,7 +2053,8 @@ def display_path_multiple(agent_names, ns, legend_title, legend, mismatch_parame
     plt.hlines(y=env_dict['car_params']['s_min'], xmin=0, xmax=100, colors='black', linestyle='dashed')
     plt.hlines(y=env_dict['car_params']['s_max'], xmin=0, xmax=100, colors='black', linestyle='dashed', label='_nolegend_')
     for i in range(len(agent_names)):
-        plt.plot(np.array(progress_history[i])*100, np.array(pose_history[i])[:,3], linewidth=1.5, alpha=alpha)
+        plt.plot(np.array(progress_history[i])*100, np.array(state_history[i])[:,2], linewidth=1.5, alpha=alpha)
+        # plt.plot(np.array(progress_history[i])*100, np.array(pose_history[i])[:,3], linewidth=1.5, alpha=alpha)
 
     plt.xlabel('progress along centerline [%]',**myfont)
     plt.ylabel('steering angle [rads]',**myfont)
