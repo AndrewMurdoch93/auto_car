@@ -1721,7 +1721,7 @@ ns=[0]
 
 mismatch_parameters = [['C_Sf']]
 frac_vary = [[0]]
-noise_dicts = [{'xy':0.5, 'theta':0.1, 'v':0.1, 'lidar':0.01}]
+noise_dicts = [{'xy':0.05, 'theta':0.05, 'v':0.05, 'lidar':0.01}]
 
 
 # Porto
