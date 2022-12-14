@@ -59,6 +59,8 @@ class trainingLoop():
 
       self.agent_params_file = self.agent_dir + '/' + self.agent_name + '_params'
 
+      self.noise = env_dict['noise_dict']
+
       try:
          os.mkdir(self.agent_dir)
       except OSError as error:
@@ -74,7 +76,7 @@ class trainingLoop():
 
       #self.env = environment(self.env_dict, start_condition={'x':15,'y':5,'theta':0,'goal':0})
       self.env = environment(self.env_dict)
-      self.env.reset(save_history=False, start_condition=[], car_params=self.env_dict['car_params'], get_lap_time=False)
+      self.env.reset(save_history=False, start_condition=[], car_params=self.env_dict['car_params'], get_lap_time=False, noise=self.noise)
       
       self.agent_dict['name'] = self.main_dict['name']
       self.agent_dict['input_dims'] = len(self.env.observation)
@@ -160,7 +162,7 @@ class trainingLoop():
          # while np.sum(steps[n,:])<self.max_steps and episode<self.max_episodes and ((self.env.collision==True and episode>0) or (self.env.collision==False and episode==0)):
          while np.sum(steps[n,:])<self.max_steps and episode<self.max_episodes:
            
-            self.env.reset(save_history=True, start_condition=[], car_params=car_params, get_lap_time=False)  #Reset the environment every episode
+            self.env.reset(save_history=True, start_condition=[], car_params=car_params, get_lap_time=False, noise=self.noise)  #Reset the environment every episode
             obs = self.env.observation      #Records starting state
             done = False
             score = 0
@@ -512,9 +514,147 @@ def test(agent_name, n_episodes, detect_issues, initial_conditions):
    # outfile.close()
    
 
-def lap_time_test(agent_name, n_episodes, detect_issues, initial_conditions, noise):
+def lap_time_test(agent_name, n_episodes, detect_issues, initial_conditions):
 
    results_file_name = 'lap_results/' + agent_name
+   parent_dir = os.path.dirname(os.path.abspath(__file__))
+   agent_dir = parent_dir + '/agents/' + agent_name
+   agent_params_file = agent_dir + '/' + agent_name + '_params'
+   replay_episode_name = 'replay_episodes/' + agent_name
+
+   infile = open('environments/' + agent_name, 'rb')
+   env_dict = pickle.load(infile)
+   infile.close()
+   car_params = env_dict['car_params']
+   
+
+   if initial_conditions==True:
+      start_condition_file_name = 'test_initial_condition/' + env_dict['map_name']
+   else:
+      start_condition_file_name = 'test_initial_condition/none' 
+   
+   infile = open(start_condition_file_name, 'rb')
+   start_conditions = pickle.load(infile)
+   infile.close()
+
+   env_dict['max_steps'] = 2000
+   
+   
+   #env = environment(env_dict, start_condition={'x':15,'y':5,'theta':0,'goal':0})
+   
+   #env_dict['architecture'] = 'pete'
+   noise = {'xy':0, 'theta':0, 'v':0, 'lidar':0}
+   env = environment(env_dict)
+   env.reset(save_history=False, start_condition=[], car_params=car_params, get_lap_time=True, noise=noise)
+   
+   action_history = []
+   
+   infile = open(agent_params_file, 'rb')
+   agent_dict = pickle.load(infile)
+   infile.close()
+   agent_dict['layer3_size']=300
+
+   infile = open('train_parameters/' + agent_name, 'rb')
+   main_dict = pickle.load(infile)
+   infile.close()
+
+   runs = main_dict['runs']
+
+   if main_dict['learning_method']=='dqn':
+      agent_dict['epsilon'] = 0
+      a = agent_dqn.agent(agent_dict)
+   if main_dict['learning_method']=='reinforce':
+      a = agent_reinforce.PolicyGradientAgent(agent_dict)
+   if main_dict['learning_method']=='actor_critic_sep':
+      a = agent_actor_critic.actor_critic_separated(agent_dict)
+   if main_dict['learning_method']=='actor_critic_com':
+      a = agent_actor_critic.actor_critic_combined(agent_dict)
+   if main_dict['learning_method']=='actor_critic_cont':
+      a = agent_actor_critic_continuous.agent_separate(agent_dict) 
+   if main_dict['learning_method'] == 'dueling_dqn':
+      agent_dict['epsilon'] = 0
+      a = agent_dueling_dqn.agent(agent_dict)
+   if main_dict['learning_method'] == 'dueling_ddqn':
+      agent_dict['epsilon'] = 0
+      a = agent_dueling_ddqn.agent(agent_dict)
+   if main_dict['learning_method'] == 'rainbow':
+      agent_dict['epsilon'] = 0
+      a = agent_rainbow.agent(agent_dict)
+   if main_dict['learning_method'] == 'ddpg':
+      a = agent_ddpg.agent(agent_dict)
+   if main_dict['learning_method'] == 'td3':
+      a = agent_td3.agent(agent_dict)
+   
+   times = np.zeros([runs, n_episodes])
+   collisions = np.zeros([runs, n_episodes])
+
+   for n in range(runs):
+
+      if main_dict['learning_method']=='td3':
+         a = agent_td3.agent(agent_dict)
+      elif main_dict['learning_method']=='ddpg':
+         a = agent_ddpg.agent(agent_dict)
+      if main_dict['learning_method']=='actor_critic_cont':
+         a = agent_actor_critic_continuous.agent_separate(agent_dict) 
+
+      a.load_weights(agent_name, n)
+      print("Testing agent " + agent_name + ", n = " + str(n))
+
+      for episode in range(n_episodes):
+
+         env.reset(save_history=True, start_condition=start_conditions[episode], get_lap_time=True, car_params=car_params, noise=noise)
+         #env.reset(save_history=True, start_condition=[], get_lap_time=True, car_params=car_params)
+         
+         action_history = []
+         obs = env.observation
+         done = False
+         score = 0
+
+         while not done:
+            if main_dict['learning_method']=='ddpg' or main_dict['learning_method']=='td3':
+               action = a.choose_greedy_action(obs)
+            else:
+               action = np.array([a.choose_action(obs), 1])
+
+            action_history.append(action)
+            
+            next_obs, reward, done = env.take_action(action)
+            score += reward
+            obs = next_obs
+            
+         time = env.steps*0.01
+         collision = env.collision or env.park or env.backwards
+         
+         if detect_issues==True and (collision==False and time<4):
+            print('Stop condition met')
+            print('Progress = ', env.progress)
+            print('score = ', score)
+
+            outfile = open(replay_episode_name, 'wb')
+            pickle.dump(action_history, outfile)
+            pickle.dump(env.initial_condition_dict, outfile)
+            pickle.dump(n, outfile)
+            pickle.dump(env_dict, outfile)
+            outfile.close()
+            break
+
+         times[n, episode] = time
+         collisions[n, episode] = collision 
+            
+         if episode%10==0:
+            print('Lap test episode', episode, '| Lap time = %.2f' % time, '| Score = %.2f' % score)
+
+   outfile=open(results_file_name, 'wb')
+   pickle.dump(times, outfile)
+   pickle.dump(collisions, outfile)
+   outfile.close()
+
+
+
+
+def lap_time_test_with_noise(agent_name, n_episodes, detect_issues, initial_conditions, noise):
+
+   results_file_name = 'lap_results_with_noise/' + agent_name
    parent_dir = os.path.dirname(os.path.abspath(__file__))
    agent_dir = parent_dir + '/agents/' + agent_name
    agent_params_file = agent_dir + '/' + agent_name + '_params'
@@ -645,6 +785,8 @@ def lap_time_test(agent_name, n_episodes, detect_issues, initial_conditions, noi
    pickle.dump(times, outfile)
    pickle.dump(collisions, outfile)
    outfile.close()
+
+
 
 
 

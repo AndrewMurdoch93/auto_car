@@ -1177,6 +1177,21 @@ if True:
     # a.train()
     # main_multiple.lap_time_test(agent_name=agent_name, n_episodes=n_test, detect_issues=False, initial_conditions=True)
 
+    # agent_name = 'porto_pete_s_p'
+    # main_dict['name'] = agent_name
+    # main_dict['max_steps'] = 3e6
+    # env_dict['steer_control_dict']['steering_control'] = True
+    # env_dict['steer_control_dict']['path_strategy'] = 'polynomial'
+    # env_dict['velocity_control'] = False
+    # env_dict['velocity_gain'] = 2
+    # env_dict['reward_signal']['distance'] = 0.2
+    # env_dict['reward_signal']['collision'] = -2
+    # a = main_multiple.trainingLoop(main_dict, agent_td3_dict, env_dict, load_agent='')
+    # a.train()
+    # noise = {'xy':0, 'theta':0, 'v':0, 'lidar':0}
+    # main_multiple.lap_time_test(agent_name=agent_name, n_episodes=n_test, detect_issues=False, initial_conditions=True, noise=noise)
+
+
     # agent_name = 'porto_pete_sv_c_r_3'
     # main_dict['name'] = agent_name
     # main_dict['max_steps'] = 5e6
@@ -1267,11 +1282,106 @@ if True:
     # a = main_multiple.trainingLoop(main_dict, agent_td3_dict, env_dict, load_agent='')
     # a.train()
     # main_multiple.lap_time_test(agent_name=agent_name, n_episodes=n_test, detect_issues=False, initial_conditions=True)
+    pass
 
+
+# Training with noise
+if True:
+    agent_name = 'porto_ete_v5_r_collision_5_noise'
+    main_dict['name'] = agent_name
+    main_dict['max_steps'] = 3e6
+    env_dict['steer_control_dict']['steering_control'] = False
+    env_dict['steer_control_dict']['path_strategy'] = 'circle'
+    env_dict['velocity_control'] = False
+    env_dict['velocity_gain'] = 2
+    env_dict['reward_signal']['distance'] = 0.3
+    env_dict['reward_signal']['collision'] = -10
+    env_dict['noise'] = {'xy':0.025, 'theta':0.05, 'v':0.1, 'lidar':0.01}
+    a = main_multiple.trainingLoop(main_dict, agent_td3_dict, env_dict, load_agent='')
+    a.train()
+    main_multiple.lap_time_test(agent_name=agent_name, n_episodes=n_test, detect_issues=False, initial_conditions=True)
+    main_multiple.lap_time_test_with_noise(agent_name=agent_name, n_episodes=n_test, detect_issues=False, initial_conditions=True, noise=env_dict['noise'])
+
+    agent_name = 'porto_pete_s_r_collision_0_noise'
+    main_dict['name'] = agent_name
+    main_dict['max_steps'] = 3e6
+    env_dict['steer_control_dict']['steering_control'] = True
+    env_dict['steer_control_dict']['path_strategy'] = 'circle'
+    env_dict['velocity_control'] = False
+    env_dict['velocity_gain'] = 2
+    env_dict['reward_signal']['distance'] = 0.2
+    env_dict['reward_signal']['collision'] = -2
+    env_dict['noise'] = {'xy':0.025, 'theta':0.05, 'v':0.1, 'lidar':0.01}
+    a = main_multiple.trainingLoop(main_dict, agent_td3_dict, env_dict, load_agent='')
+    a.train()
+    main_multiple.lap_time_test(agent_name=agent_name, n_episodes=n_test, detect_issues=False, initial_conditions=True)
+    main_multiple.lap_time_test_with_noise(agent_name=agent_name, n_episodes=n_test, detect_issues=False, initial_conditions=True, noise=env_dict['noise'])
+
+    agent_name = 'porto_pete_s_polynomial_noise'
+    main_dict['name'] = agent_name
+    main_dict['max_steps'] = 3e6
+    env_dict['steer_control_dict']['steering_control'] = True
+    env_dict['steer_control_dict']['path_strategy'] = 'polynomial'
+    env_dict['velocity_control'] = False
+    env_dict['velocity_gain'] = 2
+    env_dict['reward_signal']['distance'] = 0.2
+    env_dict['reward_signal']['collision'] = -2
+    env_dict['noise'] = {'xy':0.025, 'theta':0.05, 'v':0.1, 'lidar':0.01}
+    a = main_multiple.trainingLoop(main_dict, agent_td3_dict, env_dict, load_agent='')
+    a.train()
+    main_multiple.lap_time_test(agent_name=agent_name, n_episodes=n_test, detect_issues=False, initial_conditions=True)
+    main_multiple.lap_time_test_with_noise(agent_name=agent_name, n_episodes=n_test, detect_issues=False, initial_conditions=True, noise=env_dict['noise'])
+
+    agent_name = 'porto_pete_v_k_1_attempt_2_noise'
+    main_dict['name'] = agent_name
+    main_dict['max_steps'] = 3e6
+    env_dict['steer_control_dict']['steering_control'] = False
+    env_dict['steer_control_dict']['path_strategy'] = 'circle'
+    env_dict['velocity_control'] = True
+    env_dict['velocity_gain'] = 2
+    env_dict['reward_signal']['distance'] = 0.2
+    env_dict['reward_signal']['collision'] = -2
+    env_dict['noise'] = {'xy':0.025, 'theta':0.05, 'v':0.1, 'lidar':0.01}
+    a = main_multiple.trainingLoop(main_dict, agent_td3_dict, env_dict, load_agent='')
+    a.train()
+    main_multiple.lap_time_test(agent_name=agent_name, n_episodes=n_test, detect_issues=False, initial_conditions=True)
+    main_multiple.lap_time_test_with_noise(agent_name=agent_name, n_episodes=n_test, detect_issues=False, initial_conditions=True, noise=env_dict['noise'])
+
+    agent_name = 'porto_pete_sv_c_r_8_noise'
+    main_dict['name'] = agent_name
+    main_dict['max_steps'] = 5e6
+    env_dict['steer_control_dict']['steering_control'] = True
+    env_dict['steer_control_dict']['path_strategy'] = 'circle'
+    env_dict['velocity_control'] = True
+    env_dict['velocity_gain'] = 2
+    env_dict['reward_signal']['distance'] = 0.3
+    env_dict['reward_signal']['collision'] = -8
+    env_dict['noise'] = {'xy':0.025, 'theta':0.05, 'v':0.1, 'lidar':0.01}
+    a = main_multiple.trainingLoop(main_dict, agent_td3_dict, env_dict, load_agent='')
+    a.train()
+    main_multiple.lap_time_test(agent_name=agent_name, n_episodes=n_test, detect_issues=False, initial_conditions=True)
+    main_multiple.lap_time_test_with_noise(agent_name=agent_name, n_episodes=n_test, detect_issues=False, initial_conditions=True, noise=env_dict['noise'])
+
+    agent_name = 'porto_pete_sv_p_r_0_noise'
+    main_dict['name'] = agent_name
+    main_dict['max_steps'] = 3e6
+    env_dict['steer_control_dict']['steering_control'] = True
+    env_dict['steer_control_dict']['path_strategy'] = 'polynomial'
+    env_dict['velocity_control'] = True
+    env_dict['velocity_gain'] = 2
+    env_dict['reward_signal']['distance'] = 0.2
+    env_dict['reward_signal']['collision'] = -2
+    env_dict['noise'] = {'xy':0.025, 'theta':0.05, 'v':0.1, 'lidar':0.01}
+    a = main_multiple.trainingLoop(main_dict, agent_td3_dict, env_dict, load_agent='')
+    a.train()
+    main_multiple.lap_time_test(agent_name=agent_name, n_episodes=n_test, detect_issues=False, initial_conditions=True)
+    main_multiple.lap_time_test_with_noise(agent_name=agent_name, n_episodes=n_test, detect_issues=False, initial_conditions=True, noise=env_dict['noise'])
 
 
 
     pass
+
+
 
 
 #tests with v=6
@@ -1681,16 +1791,38 @@ if True:
     # noise_std = np.arange(0,0.1,0.025)
     # main_multiple.lap_time_test_noise(agent_name, n_episodes, detect_issues, initial_conditions, noise_param, noise_std)
     
-    agent_name = 'porto_pete_s_r_collision_1'
-    # noise = {'xy':2, 'theta':0, 'v':0, 'lidar':0.01}
-    # main_multiple.lap_time_test(agent_name=agent_name, n_episodes=n_test, detect_issues=False, initial_conditions=True, noise=noise)
+
+    # agent_name = 'porto_ete_v5_r_collision_5'
+    # noise = {'xy':0.025, 'theta':0.05, 'v':0.1, 'lidar':0.01}
+    # main_multiple.lap_time_test_with_noise(agent_name=agent_name, n_episodes=n_test, detect_issues=False, initial_conditions=True, noise=noise)
+
+    # agent_name = 'porto_pete_s_r_collision_0'
+    # noise = {'xy':0.025, 'theta':0.05, 'v':0.1, 'lidar':0.01}
+    # main_multiple.lap_time_test_with_noise(agent_name=agent_name, n_episodes=n_test, detect_issues=False, initial_conditions=True, noise=noise)
+
+    # agent_name = 'porto_pete_s_polynomial'
+    # noise = {'xy':0.025, 'theta':0.05, 'v':0.1, 'lidar':0.01}
+    # main_multiple.lap_time_test_with_noise(agent_name=agent_name, n_episodes=n_test, detect_issues=False, initial_conditions=True, noise=noise)
+
+    # agent_name = 'porto_pete_v_k_1_attempt_2'
+    # noise = {'xy':0.025, 'theta':0.05, 'v':0.1, 'lidar':0.01}
+    # main_multiple.lap_time_test_with_noise(agent_name=agent_name, n_episodes=n_test, detect_issues=False, initial_conditions=True, noise=noise)
+
+    # agent_name = 'porto_pete_sv_c_r_8'
+    # noise = {'xy':0.025, 'theta':0.05, 'v':0.1, 'lidar':0.01}
+    # main_multiple.lap_time_test_with_noise(agent_name=agent_name, n_episodes=n_test, detect_issues=False, initial_conditions=True, noise=noise)
+
+    # agent_name = 'porto_pete_sv_p_r_0'
+    # noise = {'xy':0.025, 'theta':0.05, 'v':0.1, 'lidar':0.01}
+    # main_multiple.lap_time_test_with_noise(agent_name=agent_name, n_episodes=n_test, detect_issues=False, initial_conditions=True, noise=noise)
+
     
     pass
 
 # agent_names = ['porto_ete_v5_r_collision_5', 'porto_pete_s_r_collision_0', 'porto_pete_s_polynomial', 
 #                 'porto_pete_v_k_1_attempt_2', 'porto_pete_sv_c_r_8', 'porto_pete_sv_p_r_0']
-# # noise_params = ['xy', 'theta', 'v', 'lidar']
-# noise_params = ['xy']
+# noise_params = ['xy', 'theta', 'v', 'lidar']
+# # noise_params = ['xy']
 # legend_title = 'Agent architecture'
 # legend = ['End-to-end',
 #             'Steering control, circle path',
@@ -1698,7 +1830,7 @@ if True:
 #             'Velocity control',
 #             'Steering and velocity control, circle path',
 #             'Steering and velocity control, polynomial path']
-# # display_results_multiple.display_lap_noise_results(agent_names, noise_params, legend_title, legend)
+# display_results_multiple.display_lap_noise_results_multiple(agent_names, noise_params, legend_title, legend)
 # display_results_multiple.display_lap_noise_results_single(agent_names, noise_params, legend_title, legend)
 
 # Final porto agents!!!
@@ -1715,7 +1847,6 @@ if True:
 # legend_title = ''
 # ns=[0]
 
-
 # display_results_multiple.learning_curve_lap_time_average(agent_names, legend, legend_title, ns)
 # display_results_multiple.learning_curve_reward_average(agent_names, legend, legend_title)
 
@@ -1729,7 +1860,7 @@ if True:
 
 # mismatch_parameters = [['C_Sf']]
 # frac_vary = [[0]]
-# noise_dicts = [{'xy':2, 'theta':1, 'v':2, 'lidar':1}]
+# noise_dicts = [{'xy':0.025, 'theta':0.05, 'v':0.1, 'lidar':0.01}]
 
 
 # # Porto

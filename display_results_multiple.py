@@ -36,7 +36,7 @@ import random
 from matplotlib.ticker import FormatStrFormatter
 import mapping
 from PIL import Image, ImageOps, ImageDraw, ImageFilter
-
+import os
 
 def compare_learning_curves_progress(agent_names, legend, legend_title, show_average=True, show_median=True, xaxis='episodes'):
     
@@ -1028,56 +1028,86 @@ def display_train_parameters(agent_name):
 
 def display_lap_results(agent_name):
 
-    infile = open('lap_results/' + agent_name, 'rb')
-    times = pickle.load(infile)
-    collisions = pickle.load(infile)
-    infile.close() 
-    
-    collisions_ = []
-    times_ = []
-    for n in range(len(times[:,0])):
-        frac_succ_ =  np.sum(np.logical_not(np.array(collisions[n])))/len(np.array(collisions[n]))
-        if frac_succ_ >= 0.6:
-            collisions_.append(collisions[n,:])
-            times_.append(times[n,:])
-    collisions_ = np.array(collisions_)
-    times_ = np.array(times_)
-
-    ave_times = np.average(times[np.logical_not(np.array(collisions))])
-    perc_success = np.sum(np.logical_not(np.array(collisions)))/len(np.array(collisions).flatten())
-    perc_failure = 1-perc_success
-    std_dev = np.std(times[np.logical_not(np.array(collisions))])
-
-
-    # ave_times_ = np.average(times_[np.logical_not(np.array(collisions_))])
-    # perc_success_ = np.sum(np.logical_not(np.array(collisions_)))/len(np.array(collisions_).flatten())
-    # std_dev_ = np.std(times_[np.logical_not(np.array(collisions_))])
-    
-    print('\nLap results over all n, including failed runs:')
-    print('Average lap time: ', ave_times)
-    print('Lap time std deviation:', std_dev)
-    print('Success %: ', perc_success*100)
-    print('Failure %: ', perc_failure*100)
-    # print('\nLap results over all n, excluding failed runs:')
-    # print('Average lap time: ', ave_times_)
-    # print('Lap time std deviation:', std_dev_)
-    # print('Fraction successful laps: ', perc_success_)
-    
-    print("\nAgent lap statistics for individual runs:")
-
-    print(f"{'n':3s}{'| fraction success':20s}{'|avg lap time':12s}")
-    for n in range(len(times[:,0])):
-        avg_time = np.average(times[n, np.logical_not(np.array(collisions[n]))])
-        frac_succ =  np.sum(np.logical_not(np.array(collisions[n])))/len(np.array(collisions[n]))
-        print(f"{n:3d}", end='')
-        print(f"{frac_succ:20.3f}{avg_time:12.3f}")
+    path = 'lap_results/' + agent_name
+    if os.path.exists(path):
+        infile = open(path, 'rb')
+        times = pickle.load(infile)
+        collisions = pickle.load(infile)
+        infile.close() 
         
-        #print(f"{np.average(np.round(, 1), axis=1)[n]:10.3f}", end='')
-        #print(f"{np.median(np.round(test_progress, 1), axis=1)[n]:10.3f}", end='')
-        #print(f"{np.max(np.round(test_progress, 1), axis=1)[n]:10.3f}", end='')
-        #print(f"{np.min(np.round(test_progress, 1), axis=1)[n]:10.3f}", end='')
-        #print(f"{np.std(np.round(test_progress, 1), axis=1)[n]:10.3f}", end='')
-        #print("")
+        collisions_ = []
+        times_ = []
+        for n in range(len(times[:,0])):
+            frac_succ_ =  np.sum(np.logical_not(np.array(collisions[n])))/len(np.array(collisions[n]))
+            if frac_succ_ >= 0.6:
+                collisions_.append(collisions[n,:])
+                times_.append(times[n,:])
+        collisions_ = np.array(collisions_)
+        times_ = np.array(times_)
+
+        ave_times = np.average(times[np.logical_not(np.array(collisions))])
+        perc_success = np.sum(np.logical_not(np.array(collisions)))/len(np.array(collisions).flatten())
+        perc_failure = 1-perc_success
+        std_dev = np.std(times[np.logical_not(np.array(collisions))])
+
+        
+        print('\nLap results over all n, without noise:')
+        print('Average lap time: ', ave_times)
+        print('Lap time std deviation:', std_dev)
+        print('Success %: ', perc_success*100)
+        print('Failure %: ', perc_failure*100)
+        
+        print("\nAgent lap statistics for individual runs without noise:")
+
+        print(f"{'n':3s}{'| fraction success':20s}{'|avg lap time':12s}")
+        for n in range(len(times[:,0])):
+            avg_time = np.average(times[n, np.logical_not(np.array(collisions[n]))])
+            frac_succ =  np.sum(np.logical_not(np.array(collisions[n])))/len(np.array(collisions[n]))
+            print(f"{n:3d}", end='')
+            print(f"{frac_succ:20.3f}{avg_time:12.3f}")
+        
+    
+    path = 'lap_results_with_noise/' + agent_name
+    if os.path.exists(path):
+        infile = open(path, 'rb')
+        times = pickle.load(infile)
+        collisions = pickle.load(infile)
+        infile.close() 
+        
+        collisions_ = []
+        times_ = []
+        for n in range(len(times[:,0])):
+            frac_succ_ =  np.sum(np.logical_not(np.array(collisions[n])))/len(np.array(collisions[n]))
+            if frac_succ_ >= 0.6:
+                collisions_.append(collisions[n,:])
+                times_.append(times[n,:])
+        collisions_ = np.array(collisions_)
+        times_ = np.array(times_)
+
+        ave_times = np.average(times[np.logical_not(np.array(collisions))])
+        perc_success = np.sum(np.logical_not(np.array(collisions)))/len(np.array(collisions).flatten())
+        perc_failure = 1-perc_success
+        std_dev = np.std(times[np.logical_not(np.array(collisions))])
+
+        
+        print('\nLap results over all n, with noise:')
+        print('Average lap time: ', ave_times)
+        print('Lap time std deviation:', std_dev)
+        print('Success %: ', perc_success*100)
+        print('Failure %: ', perc_failure*100)
+        
+        print("\nAgent lap statistics for individual runs with noise:")
+
+        print(f"{'n':3s}{'| fraction success':20s}{'|avg lap time':12s}")
+        for n in range(len(times[:,0])):
+            avg_time = np.average(times[n, np.logical_not(np.array(collisions[n]))])
+            frac_succ =  np.sum(np.logical_not(np.array(collisions[n])))/len(np.array(collisions[n]))
+            print(f"{n:3d}", end='')
+            print(f"{frac_succ:20.3f}{avg_time:12.3f}")
+
+
+
+
 
 def graph_lap_results(agent_names):
     
@@ -1467,7 +1497,7 @@ def display_lap_mismatch_results_multiple(agent_names, parameters, legend_title,
     # plt.show()
 
     
-def display_lap_noise_results_multiple(agent_names, noise_param, legend_title, legend):
+def display_lap_noise_results_multiple(agent_names, noise_params, legend_title, legend):
     
     
     fig, axs = plt.subplots(len(noise_params), 2, figsize=(5.5,7))
@@ -1630,6 +1660,225 @@ def display_lap_noise_results_single(agent_names, noise_param, legend_title, leg
     plt.figlegend(legend, title=legend_title, loc = 'lower center', ncol=2)
     plt.show()
 
+
+
+def sensitivity_analysis(agent_names, ns, legend_title, legend, mismatch_parameters, frac_vary, noise_dicts, start_condition):
+    
+    pose_history = []
+    progress_history = []
+    state_history = []
+    local_path_history = []
+    action_step_history = []
+    
+    init_noise_dict = {'xy':0, 'theta':0, 'v':0, 'lidar':0}
+
+    for agent_name, n, i in zip(agent_names, ns, range(len(agent_names))):
+
+        infile = open('environments/' + agent_name, 'rb')
+        env_dict = pickle.load(infile)
+        infile.close()
+        # Compensate for changes to reward structure
+        env_dict['reward_signal']['max_progress'] = 0
+        
+        # Model mismatches
+        if mismatch_parameters:
+            for par, var in zip(mismatch_parameters[i], frac_vary[i]):
+                env_dict['car_params'][par] *= 1+var 
+
+        noise_dict = noise_dicts[i]
+
+        env = environment(env_dict)
+        if start_condition:
+            env.reset(save_history=True, start_condition=start_condition, car_params=env_dict['car_params'], noise=init_noise_dict)
+        else:
+            env.reset(save_history=True, start_condition=[], car_params=env_dict['car_params'], noise=init_noise_dict)
+
+        infile = open('agents/' + agent_name + '/' + agent_name + '_params', 'rb')
+        agent_dict = pickle.load(infile)
+        infile.close()
+
+        infile = open('train_parameters/' + agent_name, 'rb')
+        main_dict = pickle.load(infile)
+        infile.close()
+          
+        if i==0 and not start_condition:
+            infile = open('test_initial_condition/' + env_dict['map_name'], 'rb')
+            start_conditions = pickle.load(infile)
+            infile.close()
+            start_condition = random.choice(start_conditions)
+
+        if main_dict['learning_method']=='dqn':
+            agent_dict['epsilon'] = 0
+            a = agent_dqn.agent(agent_dict)
+        if main_dict['learning_method']=='reinforce':
+            a = agent_reinforce.PolicyGradientAgent(agent_dict)
+        if main_dict['learning_method']=='actor_critic_sep':
+            a = agent_actor_critic.actor_critic_separated(agent_dict)
+        if  main_dict['learning_method']=='actor_critic_com':
+            a = agent_actor_critic.actor_critic_combined(agent_dict)
+        if main_dict['learning_method']=='actor_critic_cont':
+            a = agent_actor_critic_continuous.agent_separate(agent_dict)
+        if main_dict['learning_method'] == 'dueling_dqn':
+            agent_dict['epsilon'] = 0
+            a = agent_dueling_dqn.agent(agent_dict)
+        if main_dict['learning_method'] == 'dueling_ddqn':
+            agent_dict['epsilon'] = 0
+            a = agent_dueling_ddqn.agent(agent_dict)
+        if main_dict['learning_method'] == 'rainbow':
+            agent_dict['epsilon'] = 0
+            a = agent_rainbow.agent(agent_dict)
+        if main_dict['learning_method'] == 'ddpg':
+            a = agent_ddpg.agent(agent_dict)
+        if main_dict['learning_method'] == 'td3':
+            a = agent_td3.agent(agent_dict)
+            
+        a.load_weights(agent_name, n)
+
+        #start_pose = {'x':11.2, 'y':7.7, 'v':0, 'delta':0, 'theta':0, 'goal':1}
+        env.reset(save_history=True, start_condition=start_condition, car_params=env_dict['car_params'], noise=init_noise_dict)
+        obs = env.observation
+        done = False
+        score = 0
+
+        while not done:
+            if main_dict['learning_method']=='ddpg' or main_dict['learning_method']=='td3':
+                action = a.choose_greedy_action(obs)
+            else:
+                action = a.choose_action(obs)
+
+            next_obs, reward, done = env.take_action(action)
+            score += reward
+            obs = next_obs
+
+            if env.progress>=0.98:
+                done=True
+            
+
+        print('Total score = ', score)
+        print('Progress = ', env.progress)
+        print('Collision = ', env.collision)
+
+        state_history.append(env.state_history)
+        pose_history.append(env.pose_history)
+        progress_history.append(env.progress_history)
+        local_path_history.append(env.local_path_history)
+        action_step_history.append(env.action_step_history)
+        
+        
+    myfont = {'fontname':'serif'}
+    figure_size = (10,4)
+    xlims = [0,100]
+
+    legend_new = legend.copy()
+    legend_new.insert(0, 'Min and max')
+
+    legend_racetrack = legend.copy()
+    legend_racetrack.insert(0, 'Track centerline')
+
+
+
+    plt.figure(1, figsize=figure_size)
+    ax = plt.subplot(111)
+
+    #plt.rc('axes',edgecolor='lightgrey')
+    
+    #ax.tick_params(axis='both', colors='lightgrey')
+    ax.spines['bottom'].set_color('lightgrey')
+    ax.spines['top'].set_color('lightgrey') 
+    ax.spines['right'].set_color('lightgrey')
+    ax.spines['left'].set_color('lightgrey')
+
+    ax.tick_params(axis=u'both', which=u'both',length=0)
+    
+    track = mapping.map(env.map_name)
+    ax.imshow(ImageOps.invert(track.gray_im.filter(ImageFilter.FIND_EDGES).filter(ImageFilter.MaxFilter(1))), extent=(0,track.map_width,0,track.map_height), cmap="gray")
+    # ax.plot(env.rx, env.ry, color='gray', linestyle='dashed')
+    alpha=0.7
+
+    for i in range(len(agent_names)):
+   
+        if env_dict['steer_control_dict']['steering_control']:
+            for j in np.array(local_path_history[i])[np.arange(0,len(local_path_history[i]),20)]:
+                ax.plot(j[0], j[1], alpha=0.5, linestyle='dashdot', color='red')
+                ax.plot(j[0][0], j[1][0], alpha=0.5, color='red', marker='s')
+
+        ax.plot(np.array(state_history[i])[:,0], np.array(state_history[i])[:,1], linewidth=1.5, alpha=alpha)   
+        
+        #sample points
+        idx = np.arange(0,len(state_history[i]),40)
+        idx = [50, 100, 150, 200, 250, 300, 350, 400, 450, 500, 550]
+        sample_states = np.array(state_history[i])[idx]
+        sample_actions = np.array(action_step_history[i])[idx]
+        
+        ax.plot(sample_states[:,0], sample_states[:,1], 'x', color='orange', alpha=alpha)  
+        
+        arrow_length = 0.1
+        arrow_size=0.3
+        for state,action in zip(sample_states,sample_actions):
+            plt.arrow(state[0], state[1], arrow_length*math.cos(state[4]), arrow_length*math.sin(state[4]), head_length=arrow_size, head_width=arrow_size, shape='full', ec='None', fc='blue', alpha=0.5)
+            plt.arrow(state[0], state[1], arrow_length*math.cos(state[4]+action[0]*0.4), arrow_length*math.sin(state[4]+action[0]*0.4), head_length=arrow_size, head_width=arrow_size, shape='full',ec='None', fc='red', alpha=0.5)
+
+            for i in range(5):
+                noisy_x = state[0]+np.random.normal(loc=0, scale=noise_dict['xy'])
+                noisy_y = state[1]+np.random.normal(loc=0, scale=noise_dict['xy'])
+                noisy_theta = state[4]%(2*np.pi)+np.random.normal(loc=0, scale=noise_dict['theta'])
+                noisy_v = state[3]+np.random.normal(loc=0, scale=noise_dict['v'])
+                lidar_dists, lidar_coords = env.lidar.get_scan(noisy_x, noisy_y, noisy_theta)
+                x_norm = (noisy_x)/env.map_width
+                y_norm = (noisy_y)/env.map_height
+                theta_norm = (noisy_theta)/(2*math.pi)
+                v_norm = (noisy_v)/env.params['v_max']
+                lidar_norm = np.array(lidar_dists+np.random.normal(loc=0, scale=noise_dict['lidar'], size=env.lidar_dict['n_beams']))/env.lidar_dict['max_range']
+                observation = [x_norm, y_norm, theta_norm, v_norm]
+                for n in lidar_norm:
+                    observation.append(n)
+                action=a.choose_greedy_action(observation)
+
+                ax.plot(noisy_x, noisy_y, 'x', color='orange', alpha=alpha)
+                plt.arrow(noisy_x, noisy_y, arrow_length*math.cos(noisy_theta), arrow_length*math.sin(noisy_theta), head_length=arrow_size, head_width=arrow_size, shape='full', ec='None', fc='blue', alpha=0.5)
+                plt.arrow(noisy_x, noisy_y, arrow_length*math.cos(noisy_theta+action[0]*0.4), arrow_length*math.sin(noisy_theta+action[0]*0.4), head_length=arrow_size, head_width=arrow_size, shape='full',ec='None', fc='red', alpha=0.5)
+  
+                 
+                
+
+    prog = np.array([0, 0.2, 0.4, 0.6, 0.8])
+    idx =  np.zeros(len(prog), int)
+    text = ['Start', '20%', '40%', '60%', '80%']
+
+    for i in range(len(idx)):
+        idx[i] = np.mod(env.start_point+np.round(prog[i]*len(env.rx)), len(env.rx))
+    idx.astype(int)
+    
+    for i in range(len(idx)):
+        plt.text(x=env.rx[idx[i]], y=env.ry[idx[i]], s=text[i], fontsize = 'small', bbox=dict(facecolor='white', edgecolor='black',pad=0.1,boxstyle='round'))
+
+
+    ax.set_xlabel('x coordinate [m]',**myfont) 
+    ax.set_ylabel('y coordinate [m]',**myfont)
+    #ax.set_tick_params(axis=u'both', which=u'both',length=0)
+    
+    # https://stackoverflow.com/questions/4700614/how-to-put-the-legend-outside-the-plot
+
+    box = ax.get_position()
+    ax.set_position([box.x0, box.y0, box.width * 0.8, box.height])
+
+    # Put a legend to the right of the current axis
+    ax.legend(legend_racetrack, loc='center left',  bbox_to_anchor=(1, 0.5))
+    plt.show()
+
+
+
+# agent_names = ['porto_ete_v5_r_collision_5']    
+# legend = ['']
+# legend_title = ''
+# ns=[0]
+# start_condition = {'x':10, 'y':4.5, 'v':3, 'theta':np.pi, 'delta':0, 'goal':0}
+# mismatch_parameters = [['C_Sf']]
+# frac_vary = [[0]]
+# noise_dicts = [{'xy':0.25, 'theta':0.1, 'v':0, 'lidar':0}]
+# sensitivity_analysis(agent_names=agent_names, ns=ns, legend_title=legend_title,          
+#                                              legend=legend, mismatch_parameters=mismatch_parameters, frac_vary=frac_vary, noise_dicts=noise_dicts,
+#                                              start_condition=start_condition)
 
 
 
