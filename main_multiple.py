@@ -286,15 +286,15 @@ class trainingLoop():
                pickle.dump(terminal_poses, outfile)
                outfile.close()
 
-            if episode%100==0 and episode!=0:
-               eval_steps[n, int(episode/eval_interval)-1] = np.sum(steps[n,:])
-               eval_lap_times[n, int(episode/eval_interval)-1], eval_collisions[n, int(episode/eval_interval)-1] = self.evaluate(n_episodes=eval_n_episodes)
+            # if episode%100==0 and episode!=0:
+            #    eval_steps[n, int(episode/eval_interval)-1] = np.sum(steps[n,:])
+            #    eval_lap_times[n, int(episode/eval_interval)-1], eval_collisions[n, int(episode/eval_interval)-1] = self.evaluate(n_episodes=eval_n_episodes)
 
-               outfile=open(self.evaluation_results_file_name, 'wb')
-               pickle.dump(eval_steps, outfile)
-               pickle.dump(eval_lap_times, outfile)
-               pickle.dump(eval_collisions, outfile)
-               outfile.close()
+            #    outfile=open(self.evaluation_results_file_name, 'wb')
+            #    pickle.dump(eval_steps, outfile)
+            #    pickle.dump(eval_lap_times, outfile)
+            #    pickle.dump(eval_collisions, outfile)
+            #    outfile.close()
 
 
             if episode%10==0:
