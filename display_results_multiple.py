@@ -1500,7 +1500,7 @@ def display_lap_mismatch_results_multiple(agent_names, parameters, legend_title,
 def display_lap_noise_results_multiple(agent_names, noise_params, legend_title, legend):
     
     
-    fig, axs = plt.subplots(len(noise_params), 2, figsize=(5.5,7))
+    fig, axs = plt.subplots(len(noise_params), 2, figsize=(5.5,8))
     numbering = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p']
 
     for j, parameter in enumerate(noise_params):
@@ -1576,10 +1576,30 @@ def display_lap_noise_results_multiple(agent_names, noise_params, legend_title, 
     axs[3,0].set_xlabel('m')
     axs[3,1].set_xlabel('m')
 
+    axs[0,0].set_xlim([0,0.3])
+    axs[1,0].set_xlim([0,0.4])
+    axs[2,0].set_xlim([0,1])
+    axs[3,0].set_xlim([0,0.4])
+
+    axs[0,1].set_xlim([0,0.3])
+    axs[1,1].set_xlim([0,0.4])
+    axs[2,1].set_xlim([0,1])
+    axs[3,1].set_xlim([0,0.4])
+
+    axs[0,0].set_ylim([50,105])
+    axs[1,0].set_ylim([50,105])
+    axs[2,0].set_ylim([50,105])
+    axs[3,0].set_ylim([50,105])
+
+    axs[0,1].set_ylim([5,7])
+    # axs[1,1].set_ylim([50,105])
+    # axs[2,1].set_ylim([50,105])
+    # axs[3,1].set_ylim([50,105])
+
 
 
     fig.tight_layout()
-    fig.subplots_adjust(bottom=0.2) 
+    fig.subplots_adjust(bottom=0.22) 
     plt.figlegend(legend, title=legend_title, loc = 'lower center', ncol=2)
     plt.show()
 
