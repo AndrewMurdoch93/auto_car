@@ -1332,7 +1332,7 @@ if True:
     # main_multiple.lap_time_test(agent_name=agent_name, n_episodes=n_test, detect_issues=False, initial_conditions=True)
     # main_multiple.lap_time_test_with_noise(agent_name=agent_name, n_episodes=n_test, detect_issues=False, initial_conditions=True, noise=env_dict['noise'])
 
-    # agent_name = 'porto_pete_v_k_1_attempt_2_noise'
+    # agent_name = 'porto_pete_v_k_1_attempt_2_noise_1'
     # main_dict['name'] = agent_name
     # main_dict['max_steps'] = 3e6
     # env_dict['steer_control_dict']['steering_control'] = False
@@ -1817,18 +1817,18 @@ if True:
     
     pass
 
-agent_names = ['porto_ete_v5_r_collision_5', 'porto_pete_s_r_collision_0', 'porto_pete_s_polynomial', 
-                'porto_pete_v_k_1_attempt_2', 'porto_pete_sv_c_r_8', 'porto_pete_sv_p_r_0']
-noise_params = ['xy', 'theta', 'v', 'lidar']
-# noise_params = ['xy']
-legend_title = 'Agent architecture'
-legend = ['End-to-end',
-            'Steering control,\ncircular path',
-            'Steering control, \npolynomial path',
-            'Velocity control',
-            'Steering and velocity \ncontrol, circular path',
-            'Steering and velocity \ncontrol, polynomial path']
-display_results_multiple.display_lap_noise_results_multiple(agent_names, noise_params, legend_title, legend)
+# agent_names = ['porto_ete_v5_r_collision_5', 'porto_pete_s_r_collision_0', 'porto_pete_s_polynomial', 
+#                 'porto_pete_v_k_1_attempt_2', 'porto_pete_sv_c_r_8', 'porto_pete_sv_p_r_0']
+# noise_params = ['xy', 'theta', 'v', 'lidar']
+# # noise_params = ['xy']
+# legend_title = 'Agent architecture'
+# legend = ['End-to-end',
+#             'Steering control,\ncircular path',
+#             'Steering control, \npolynomial path',
+#             'Velocity control',
+#             'Steering and velocity \ncontrol, circular path',
+#             'Steering and velocity \ncontrol, polynomial path']
+# display_results_multiple.display_lap_noise_results_multiple(agent_names, noise_params, legend_title, legend)
 # display_results_multiple.display_lap_noise_results_single(agent_names, noise_params, legend_title, legend)
 
 # Final porto agents!!!
@@ -1842,7 +1842,7 @@ display_results_multiple.display_lap_noise_results_multiple(agent_names, noise_p
 # agent_names = ['porto_ete_v5_r_collision_5_noise']    
 # agent_names = ['porto_pete_s_r_collision_0_noise']
 # agent_names = ['porto_pete_s_polynomial_noise']   
-# agent_names = ['porto_pete_v_k_1_attempt_2_noise']
+# agent_names = ['porto_pete_v_k_1_attempt_2_noise_1']
 # agent_names = ['porto_pete_sv_c_r_8_noise']
 # agent_names = ['porto_pete_sv_p_r_0_noise']
 

@@ -1786,6 +1786,88 @@ def display_path_velocity_multiple(agent_names, ns, legend_title, legend, mismat
     plt.savefig('results/'+filename+'.pgf', format='pgf')
 
 
+def sensitivity_analysis_noise(agent_name, n, start_condition, filename):
+    
+    n_acts = 50
+    lidar_noise = np.arange(0,1,0.01)
+    action_history = np.zeros((len(lidar_noise), n_acts))
+    init_noise_dict = {'xy':0, 'theta':0, 'v':0, 'lidar':0}
+
+    infile = open('environments/' + agent_name, 'rb')
+    env_dict = pickle.load(infile)
+    infile.close()
+    env = environment(env_dict)
+    
+    infile = open('agents/' + agent_name + '/' + agent_name + '_params', 'rb')
+    agent_dict = pickle.load(infile)
+    infile.close()
+
+    infile = open('train_parameters/' + agent_name, 'rb')
+    main_dict = pickle.load(infile)
+    infile.close()
+        
+    a = agent_td3.agent(agent_dict)
+    a.load_weights(agent_name, n)
+
+    env.reset(save_history=True, start_condition=start_condition, car_params=env_dict['car_params'], noise=init_noise_dict)
+    obs = env.observation
+    
+    for idx, l_n in enumerate(lidar_noise):
+        noise_dict=init_noise_dict.copy()
+        noise_dict['lidar'] = l_n
+        for i in range(n_acts):
+            env.reset(save_history=True, start_condition=start_condition, car_params=env_dict['car_params'], noise=noise_dict)
+            obs = env.observation
+            action = a.choose_greedy_action(obs)
+            action_history[idx,i] = action[0]
+        
+    avg = np.average(action_history, axis=1)
+    std_dev = np.std(action_history, axis=1)
+
+    avg_filter = functions.savitzky_golay(avg, 9, 2)
+    std_dev_filter = functions.savitzky_golay(std_dev, 9, 2)
+    
+    plt.rcParams.update({
+    "font.family": "serif",  # use serif/main font for text elements
+    "text.usetex": True,     # use inline math for ticks
+    "pgf.rcfonts": False,     # don't setup fonts from rc parameters
+    "font.size": 12
+    })
+
+    fig, ax = plt.subplots(1, figsize=(5.5,2.3))
+
+    ax.spines['bottom'].set_color('lightgrey')
+    ax.spines['top'].set_color('lightgrey') 
+    ax.spines['right'].set_color('lightgrey')
+    ax.spines['left'].set_color('lightgrey')
+    ax.tick_params(axis=u'both', which=u'both',length=0)
+    ax.grid(True)
+    ax.set_title('')
+    ax.set_xlabel('LiDAR noise standard deviation [m]')
+    ax.set_ylabel('Steering control action')
+    # ax.plot(lidar_noise, avg)
+    # ax.fill_between(x=lidar_noise, y1=avg-std_dev, y2=avg+std_dev,alpha=0.5)
+
+    ax.plot(lidar_noise, avg_filter)
+    ax.fill_between(x=lidar_noise, y1=avg_filter-std_dev_filter, y2=avg_filter+std_dev_filter,alpha=0.3)
+    ax.hlines(y=1,xmin=0,xmax=lidar_noise[-1], color='k', linestyles='--')
+    ax.hlines(y=-1,xmin=0,xmax=lidar_noise[-1], color='k', linestyles='--')
+
+    fig.tight_layout()
+    fig.subplots_adjust(right=0.72)
+    plt.figlegend(['Average', 'Standard\ndeviation', 'Action\nlimits'], loc='center right', ncol=1)
+    plt.savefig('results/'+filename+'.pgf', format='pgf')
+    # plt.show()
+    pass
+
+
+agent_name = 'porto_ete_v5_r_collision_5' 
+n=0
+start_condition = {'x':4, 'y':4.8, 'v':5, 'theta':np.pi, 'delta':0, 'goal':0}
+filename='control_action_noise'
+sensitivity_analysis_noise(agent_name=agent_name, n=n, start_condition=start_condition, filename=filename)
+
+
 
 def display_path_actions_multiple(agent_names, ns, legend_title, legend, mismatch_parameters, frac_vary, start_condition, filename):
     
