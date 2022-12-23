@@ -1226,15 +1226,15 @@ def graph_lap_results(agent_names):
     # handles, _ = p.get_legend_handles_labels()
     # p.legend(handles, legend ,title=legend_title, loc='lower left')
     # plt.title('Lap success rate for ' + param + ' mismatch')
-    #plt.show()
+    # plt.show()
 
-    #p = sns.barplot(x='map', y='success', hue='architecture', capsize=.2, data=df_success)
+    # p = sns.barplot(x='map', y='success', hue='architecture', capsize=.2, data=df_success)
     # p.set_xlabel('% variation from original ' + param + ' value')
     # p.set_ylabel('fraction successful laps')
     # handles, _ = p.get_legend_handles_labels()
     # p.legend(handles, legend ,title=legend_title, loc='lower left')
     # plt.title('Lap success rate for ' + param + ' mismatch')
-    #plt.show()
+    # plt.show()
 
 agent_names = ['circle_pete_sv', 'circle_pete_s', 'circle_pete_v', 'circle_ete', 
             'columbia_pete_sv', 'columbia_pete_s', 'columbia_pete_v', 'columbia_ete',
@@ -1252,7 +1252,7 @@ agent_names = ['circle_pete_sv', 'circle_pete_s', 'circle_pete_v', 'circle_ete',
 
 #agent_names = ['porto_pete_sv', 'porto_pete_s', 'porto_pete_v', 'porto_ete']
 
-#graph_lap_results(agent_names)
+# graph_lap_results(agent_names)
 
 
 #graphs mistmatch results for all tracks
@@ -1418,7 +1418,7 @@ agent_names = ['circle_pete_sv', 'circle_pete_s', 'circle_pete_v', 'circle_ete',
 #agent_names = ['porto_pete_sv', 'porto_pete_s', 'porto_pete_v', 'porto_ete']
 
 
-#graph_lap_results_mismatch(agent_names, 'C_Sf', title='Front tyre stiffness coefficient 20% higher than expected')
+# graph_lap_results_mismatch(agent_names, 'C_Sf', title='Front tyre stiffness coefficient 20% higher than expected')
 
 
 
@@ -1496,7 +1496,13 @@ def display_lap_mismatch_results_multiple(agent_names, parameters, legend_title,
     #     plt.title('Lap success rate for ' + param + ' mismatch')
     # plt.show()
 
-    
+agent_names = ['porto_pete_sv', 'porto_pete_s', 'porto_pete_v', 'porto_ete']
+parameters = ['C_Sf', 'C_Sr']
+legend_title = ''
+legend = agent_names
+plot_titles = parameters
+# display_lap_mismatch_results_multiple(agent_names, parameters, legend_title, legend, plot_titles)
+
 def display_lap_noise_results_multiple(agent_names, noise_params, legend_title, legend):
     
     
@@ -2211,12 +2217,12 @@ def sensitivity_analysis_noise(agent_name, n, start_condition):
     plt.show()
 
 
-agent_name = 'porto_ete_v5_r_collision_5' 
-legend = ['']
-legend_title = ''
-n=0
-start_condition = {'x':4, 'y':4.8, 'v':5, 'theta':np.pi, 'delta':0, 'goal':0}
-sensitivity_analysis_noise(agent_name=agent_name, n=n, start_condition=start_condition)
+# agent_name = 'porto_ete_v5_r_collision_5' 
+# legend = ['']
+# legend_title = ''
+# n=0
+# start_condition = {'x':4, 'y':4.8, 'v':5, 'theta':np.pi, 'delta':0, 'goal':0}
+# sensitivity_analysis_noise(agent_name=agent_name, n=n, start_condition=start_condition)
 
 
 
@@ -2802,8 +2808,6 @@ def display_path_multiple(agent_names, ns, legend_title, legend, mismatch_parame
     plt.grid(True, color='lightgrey')
     plt.tick_params(axis=u'both', which=u'both',length=0)
     plt.show()
-
-
 
 
 

@@ -826,7 +826,7 @@ def lap_time_test_mismatch(agent_name, n_episodes, detect_issues, initial_condit
    #env = environment(env_dict, start_condition={'x':15,'y':5,'theta':0,'goal':0})
    
    #env_dict['architecture'] = 'pete'
-   noise = {'x':0, 'y':0, 'theta':0, 'v':0, 'lidar':0}
+   noise = {'xy':0.025, 'theta':0.05, 'v':0.1, 'lidar':0.01}
 
    env = environment(env_dict)
    env.reset(save_history=False, start_condition=[], car_params=init_car_params, noise=noise, get_lap_time=True)
@@ -882,7 +882,18 @@ def lap_time_test_mismatch(agent_name, n_episodes, detect_issues, initial_condit
    for v_i, frac_vary in enumerate(frac_variation):
       
       car_params = init_car_params.copy()
-      car_params[parameter] *= 1+frac_vary
+      if parameter == 'C_S':
+         car_params['C_Sf'] *= 1+frac_vary
+         car_params['C_Sr'] *= 1+frac_vary
+      elif parameter == 'l_f':
+         axle_length = car_params['lf']+car_params['lr']
+         car_params['lf'] *= 1+frac_vary
+         car_params['lr'] =  axle_length - car_params['lf']
+      elif parameter == 'sv':
+         car_params['sv_max'] *= 1+frac_vary
+         car_params['sv_min'] *= 1+frac_vary
+      else:
+         car_params[parameter] *= 1+frac_vary
    
       for n in range(runs):
 
