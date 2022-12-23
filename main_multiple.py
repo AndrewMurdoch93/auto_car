@@ -873,7 +873,7 @@ def lap_time_test_mismatch(agent_name, n_episodes, detect_issues, initial_condit
    #frac_variation = np.array([-0.05, 0.05])
 
    param_dict = {'parameter': parameter
-               , 'original_value':init_car_params[parameter]
+               # , 'original_value':init_car_params[parameter]
                , 'frac_variation': frac_variation
                , 'times_results': np.zeros((runs, len(frac_variation), n_episodes))
                , 'collision_results': np.zeros((runs, len(frac_variation), n_episodes))
