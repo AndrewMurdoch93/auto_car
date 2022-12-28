@@ -1450,7 +1450,7 @@ def display_lap_mismatch_results_multiple(agent_names, parameters, legend_title,
                 dev[i] = np.sqrt(n_episodes*(successes/n_episodes)*((failures)/n_episodes))/(n_episodes*n_runs)
 
             axs[j].grid()
-            axs[j].set_ylim([0,1.1])
+            # axs[j].set_ylim([0.9,1])
             axs[j].yaxis.set_major_formatter(FormatStrFormatter('%.2f'))
             axs[j].plot(results_dict['frac_variation']*100, avg)
             #plt.fill_between(results_dict['frac_variation']*100, avg-dev, avg+dev, alpha=0.25)
@@ -1463,45 +1463,21 @@ def display_lap_mismatch_results_multiple(agent_names, parameters, legend_title,
     plt.show()
 
 
-    # results = []
-    # data = []
+   
 
-    # for agent in agent_names:
-    #     for param in parameters:
-    #         infile = open('lap_results_mismatch/' + agent + '_new/' + param, 'rb')
-    #         results_dict = pickle.load(infile)
-    #         results.append(results_dict)
-    #         infile.close() 
-            
-    #         n_episodes = len(results_dict['collision_results'][0,0,:])
-    #         n_param = len(results_dict['collision_results'][0,:,0])
-    #         n_runs = len(results_dict['collision_results'][:,0,0])
-
-    #         y = np.zeros((n_param, n_runs))
-
-    #         for i in range(n_param):
-    #             y = np.sum(np.logical_not(results_dict['collision_results'][:,i,:]))/(n_episodes*n_runs)
-    #             data.append({'agent_name':agent, 'parameter':param,'frac_variation':round(results_dict['frac_variation'][i],2)*100, 'success_rate':y})
-
-    # df = pd.DataFrame(data)
-    
-    # if len(parameters)>1:
-    #     p = sns.factorplot(x='frac_variation', y='success_rate', hue='agent_name', row='parameter',data=df)
-    # else:
-    #     p = sns.lineplot(x='frac_variation', y='success_rate', hue='agent_name', data=df)
-    #     p.set_xlabel('% variation from original ' + param + ' value')
-    #     p.set_ylabel('fraction successful laps')
-    #     handles, _ = p.get_legend_handles_labels()
-    #     p.legend(handles, legend ,title=legend_title, loc='lower left')
-    #     plt.title('Lap success rate for ' + param + ' mismatch')
-    # plt.show()
-
-agent_names = ['porto_pete_sv', 'porto_pete_s', 'porto_pete_v', 'porto_ete']
-parameters = ['C_Sf', 'C_Sr']
+# agent_names = ['porto_pete_sv', 'porto_pete_s', 'porto_pete_v', 'porto_ete']
+agent_names = ['porto_ete_v5_r_collision_5', 'porto_pete_s_r_collision_0', 'porto_pete_s_polynomial', 'porto_pete_v_k_1_attempt_2', 'porto_pete_sv_c_r_8', 'porto_pete_sv_p_r_0']    
+# agent_names = ['porto_pete_s_r_collision_0']
+# agent_names = ['porto_pete_s_polynomial']   
+# agent_names = ['porto_pete_v_k_1_attempt_2']
+# agent_names = ['porto_pete_sv_c_r_8']
+# agent_names = ['porto_pete_sv_p_r_0']
+# parameters = ['mu', 'C_Sr', 'C_Sf', 'C_S']
+parameters = ['lf', 'h', 'm', 'I', 'sv', 'a_max']
 legend_title = ''
 legend = agent_names
 plot_titles = parameters
-# display_lap_mismatch_results_multiple(agent_names, parameters, legend_title, legend, plot_titles)
+display_lap_mismatch_results_multiple(agent_names, parameters, legend_title, legend, plot_titles)
 
 def display_lap_noise_results_multiple(agent_names, noise_params, legend_title, legend):
     
