@@ -2202,7 +2202,7 @@ if True:
 
 
     n_tests=100
-    frac_variation = np.linspace(-1,1,5)
+    frac_variation = np.array([-1, -0.5, 0.5, 1])
 
     agent_name = 'porto_ete_v5_r_collision_5' 
     main_multiple.lap_time_test_mismatch(agent_name=agent_name, n_episodes=n_tests, detect_issues=False, initial_conditions=True, parameter='mu', frac_variation=frac_variation)
