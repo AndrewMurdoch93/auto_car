@@ -891,7 +891,7 @@ def lap_time_test_mismatch(agent_name, n_episodes, detect_issues, initial_condit
          car_params['lr'] =  axle_length - car_params['lf']
       elif parameter == 'sv':
          car_params['sv_max'] *= 1+frac_vary
-         car_params['sv_min'] *= 1+frac_vary
+         car_params['sv_min'] *= 1+frac_vary     
       else:
          car_params[parameter] *= 1+frac_vary
    
@@ -906,6 +906,140 @@ def lap_time_test_mismatch(agent_name, n_episodes, detect_issues, initial_condit
 
          a.load_weights(agent_name, n)
          print("Testing agent " + agent_name + ", n = " + str(n) + ", parameter = " + parameter + ", variation = " + str(round(frac_vary,2)))
+
+         for episode in range(n_episodes):
+
+            env.reset(save_history=True, start_condition=start_conditions[episode], get_lap_time=True, car_params=car_params, noise=noise)
+            action_history = []
+            obs = env.observation
+            done = False
+            score = 0
+
+            while not done:
+               if main_dict['learning_method']=='ddpg' or main_dict['learning_method']=='td3':
+                  action = a.choose_greedy_action(obs)
+               else:
+                  action = np.array([a.choose_action(obs), 1])
+
+               action_history.append(action)
+               
+               next_obs, reward, done = env.take_action(action)
+               score += reward
+               obs = next_obs
+               
+            time = env.steps*0.01
+            collision = env.collision or env.park or env.backwards
+            
+            if detect_issues==True and (collision==False):
+               print('Stop condition met')
+               print('Progress = ', env.progress)
+               print('score = ', score)
+
+               outfile = open(replay_episode_name, 'wb')
+               pickle.dump(action_history, outfile)
+               pickle.dump(env.initial_condition_dict, outfile)
+               pickle.dump(n, outfile)
+               env_dict['car_params'] = car_params
+               pickle.dump(env_dict, outfile)
+               outfile.close()
+               break
+
+            param_dict['times_results'][n, v_i, episode] = time
+            param_dict['collision_results'][n, v_i, episode] = collision
+
+            if episode%10==0:
+               print('Lap test episode', episode, '| Lap time = %.2f' % time, '| Score = %.2f' % score, '| Fail = %.2f' %collision)
+
+   outfile=open(results_file, 'wb')
+   pickle.dump(param_dict, outfile)
+   outfile.close()
+
+
+
+def lap_time_test_unknown_mass(agent_name, n_episodes, detect_issues, initial_conditions, mass, distances):
+
+   results_dir = 'lap_results_mismatch/' + agent_name
+   results_file = results_dir + '/' + 'unknown_mass'
+   parent_dir = os.path.dirname(os.path.abspath(__file__))
+   agent_dir = parent_dir + '/agents/' + agent_name
+   agent_params_file = agent_dir + '/' + agent_name + '_params'
+   replay_episode_name = 'replay_episodes/' + agent_name
+
+   try:
+      os.mkdir(results_dir)
+   except OSError as error:
+      print(error)
+      print("Warning: Files will be overwritten")
+
+   
+   infile = open('environments/' + agent_name, 'rb')
+   env_dict = pickle.load(infile)
+   infile.close()
+   init_car_params = env_dict['car_params']
+   
+
+   if initial_conditions==True:
+      start_condition_file_name = 'test_initial_condition/' + env_dict['map_name']
+   else:
+      start_condition_file_name = 'test_initial_condition/none' 
+   
+   infile = open(start_condition_file_name, 'rb')
+   start_conditions = pickle.load(infile)
+   infile.close()
+
+   env_dict['max_steps'] = 2000
+
+   #env = environment(env_dict, start_condition={'x':15,'y':5,'theta':0,'goal':0})
+   
+   #env_dict['architecture'] = 'pete'
+   noise = {'xy':0.025, 'theta':0.05, 'v':0.1, 'lidar':0.01}
+
+   env = environment(env_dict)
+   env.reset(save_history=False, start_condition=[], car_params=init_car_params, noise=noise, get_lap_time=True)
+   
+   action_history = []
+   
+   infile = open(agent_params_file, 'rb')
+   agent_dict = pickle.load(infile)
+   infile.close()
+   agent_dict['layer3_size']=300
+
+   infile = open('train_parameters/' + agent_name, 'rb')
+   main_dict = pickle.load(infile)
+   infile.close()
+
+   runs = main_dict['runs']
+
+   param_dict = {'parameter': 'payload mass'
+               , 'mass': mass
+               , 'distances': distances
+               , 'times_results': np.zeros((runs, len(distances), n_episodes))
+               , 'collision_results': np.zeros((runs, len(distances), n_episodes))
+               }
+
+   for v_i, distance in enumerate(distances):
+      
+      car_params = init_car_params.copy()
+      
+      m_new = car_params['m'] + mass
+      lf_new = (car_params['m']*car_params['lf']+mass*distance) / (m_new)
+      I_new = car_params['I'] + car_params['m']*abs(lf_new-car_params['lf'])**2 + mass*abs(lf_new-distance)**2
+
+      car_params['m'] = m_new
+      car_params['lf'] = lf_new
+      car_params['I'] = I_new
+   
+      for n in range(runs):
+
+         if main_dict['learning_method']=='td3':
+            a = agent_td3.agent(agent_dict)
+         elif main_dict['learning_method']=='ddpg':
+            a = agent_ddpg.agent(agent_dict)
+         if main_dict['learning_method']=='actor_critic_cont':
+            a = agent_actor_critic_continuous.agent_separate(agent_dict) 
+
+         a.load_weights(agent_name, n)
+         print("Testing agent " + agent_name + ", n = " + str(n) + ", payload distance = " + str(round(distance,2)))
 
          for episode in range(n_episodes):
 

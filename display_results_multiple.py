@@ -1472,12 +1472,61 @@ agent_names = ['porto_ete_v5_r_collision_5', 'porto_pete_s_r_collision_0', 'port
 # agent_names = ['porto_pete_v_k_1_attempt_2']
 # agent_names = ['porto_pete_sv_c_r_8']
 # agent_names = ['porto_pete_sv_p_r_0']
-# parameters = ['mu', 'C_Sr', 'C_Sf', 'C_S']
-parameters = ['lf', 'h', 'm', 'I', 'sv', 'a_max']
+# parameters = ['mu', 'C_S']
+parameters = ['lf', 'h', 'm', 'I']
+# parameters = ['sv', 'a_max']
 legend_title = ''
 legend = agent_names
 plot_titles = parameters
-display_lap_mismatch_results_multiple(agent_names, parameters, legend_title, legend, plot_titles)
+# display_lap_mismatch_results_multiple(agent_names, parameters, legend_title, legend, plot_titles)
+
+
+def display_lap_unknown_mass(agent_names, legend):
+    
+    fig, axs = plt.subplots(1, sharex=True)
+
+    for j, parameter in enumerate(parameters):
+        for agent in agent_names:
+            
+            #infile = open('lap_results_mismatch/' + agent + '_new/' + parameter, 'rb')
+            infile = open('lap_results_mismatch/' + agent + '/' + 'unknown_mass', 'rb')
+            results_dict = pickle.load(infile)
+            infile.close() 
+
+            n_episodes = len(results_dict['collision_results'][0,0,:])
+            n_param = len(results_dict['collision_results'][0,:,0])
+            n_runs = len(results_dict['collision_results'][:,0,0])
+
+            avg = np.zeros(n_param)
+            dev = np.zeros(n_param)
+
+            for i in range(n_param):
+                avg[i] = np.round(np.sum(np.logical_not(results_dict['collision_results'][:,i,:]))/(n_episodes*n_runs), 2)
+                failures = np.count_nonzero(results_dict['collision_results'][:,0,:].flatten())
+                successes = n_episodes - failures
+                dev[i] = np.sqrt(n_episodes*(successes/n_episodes)*((failures)/n_episodes))/(n_episodes*n_runs)
+
+            axs.grid()
+            # axs[j].set_ylim([0.9,1])
+            axs.yaxis.set_major_formatter(FormatStrFormatter('%.2f'))
+            axs.plot(results_dict['distances'], avg)
+            #plt.fill_between(results_dict['frac_variation']*100, avg-dev, avg+dev, alpha=0.25)
+            axs.set(ylabel='fraction successful laps')
+            #axs.yaxis.set_major_formatter(plt.ticker.FormatStrFormatter('%.2f'))
+
+        axs.set_title('Lap success rate with unknown mass')
+    axs.set(xlabel='Distance of payload mass from front axle [m]')
+    axs.legend(legend, title=legend_title, loc='lower right')
+    plt.show()
+
+agent_names = ['porto_ete_v5_r_collision_5', 'porto_pete_s_r_collision_0', 'porto_pete_s_polynomial', 'porto_pete_v_k_1_attempt_2', 'porto_pete_sv_c_r_8', 'porto_pete_sv_p_r_0']    
+# agent_names = ['porto_pete_s_r_collision_0']
+agent_names = ['porto_pete_s_polynomial']   
+# agent_names = ['porto_pete_v_k_1_attempt_2']
+# agent_names = ['porto_pete_sv_c_r_8']
+agent_names = ['porto_ete_v5_r_collision_5', 'porto_pete_sv_p_r_0']
+legend = agent_names
+display_lap_unknown_mass(agent_names, legend)
 
 def display_lap_noise_results_multiple(agent_names, noise_params, legend_title, legend):
     
