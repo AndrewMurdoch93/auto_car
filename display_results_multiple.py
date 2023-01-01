@@ -1585,7 +1585,7 @@ parameters = ['mu', 'C_S']
 legend_title = ''
 legend = ['End-to-end', 'Steering control', 'Velocity control', 'Steering and velocity control']
 plot_titles = parameters
-display_lap_mismatch_results_multiple_1(agent_names, parameters, legend_title, legend, plot_titles)
+# display_lap_mismatch_results_multiple_1(agent_names, parameters, legend_title, legend, plot_titles)
 
 
 
