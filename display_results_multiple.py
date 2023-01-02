@@ -1483,7 +1483,7 @@ plot_titles = parameters
 # display_lap_mismatch_results_multiple(agent_names, parameters, legend_title, legend, plot_titles)
 
 
-def display_lap_mismatch_results_multiple_1(agent_names, parameters, legend_title, legend, plot_titles):
+def display_lap_mismatch_results_multiple_1(agent_names, parameters, legend_title, legend, plot_titles, nom_value, graph, text):
     
     
     fig, axs = plt.subplots(nrows=len(parameters), ncols=2)
@@ -1507,33 +1507,61 @@ def display_lap_mismatch_results_multiple_1(agent_names, parameters, legend_titl
             dev_time = np.zeros(n_param)
 
             for i in range(n_param):
-                avg_col[i] = np.round(np.sum(np.logical_not(results_dict['collision_results'][:,i,:]))/(n_episodes*n_runs), 2)
-                failures = np.count_nonzero(results_dict['collision_results'][:,0,:].flatten())
-                successes = n_episodes - failures
-                dev_col[i] = np.sqrt(n_episodes*(successes/n_episodes)*((failures)/n_episodes))/(n_episodes*n_runs)
                 
                 cols = results_dict['collision_results']
                 times = results_dict['times_results']
                 times[cols==1]=np.nan
-                avg_times = np.mean(np.nanmean(times,axis=0),axis=1)
-                dev_times = np.std(np.nanstd(times,axis=0),axis=1)
+                
+                avg_col[i] = np.round(np.sum(np.logical_not(results_dict['collision_results'][:,i,:]))/(n_episodes*n_runs), 2)
+                failures = np.count_nonzero(results_dict['collision_results'][:,i,:].flatten())
+                successes = n_episodes*n_runs - failures
+                dev_col[i] = np.sqrt(n_episodes*(successes/n_episodes)*((failures)/n_episodes))/(n_episodes*n_runs)
+                
+
+            avg_times = np.nanmean(times,axis=(0,2))
+            dev_times = np.nanstd(times,axis=(0,2))
 
             avg_col_filter = functions.savitzky_golay(avg_col, 5, 2)
-            std_dev_col_filter = functions.savitzky_golay(dev_col, 5, 2)
+            dev_col_filter = functions.savitzky_golay(dev_col, 5, 2)
 
-            avg_times_filter = functions.savitzky_golay(avg_times, 13, 2)
-            dev_times_filter = functions.savitzky_golay(dev_times, 13, 2)
+            avg_times_filter = functions.savitzky_golay(avg_times, 5, 2)
+            dev_times_filter = functions.savitzky_golay(dev_times, 5, 2)
 
-            # axs[j,0].plot(results_dict['frac_variation'], avg_col_filter*100, alpha=0.8)
-            # axs[j,0].fill_between(results_dict['frac_variation'], (avg_col_filter+std_dev_col_filter)*100, (avg_col_filter-std_dev_col_filter)*100, alpha=0.2, label='_nolegend_')
+            
+            if text==True:
+                print(agent)
+                print(f"{'parameter: ':11s} {parameter:13s}")
+                print(f"{'Fraction:':10s}", end='')
+                for i in range(n_param):
+                    print(f"{results_dict['frac_variation'][i]:8.2f}", end='')
+                    pass
+                print('')
+                print(f"{'Value:':10s}", end='')
+                for i in range(n_param):
+                    print(f"{nom_value[j]*(1+results_dict['frac_variation'])[i]:8.2f}", end='')
+                    pass
+                print('')
+                print(f"{'Success:':10s}", end='')
+                for i in range(n_param):
+                    print(f"{avg_col[i]:8.2f}", end='')
+                    pass
+                print('')
+                print(f"{'Lap time:':10s}", end='')
+                for i in range(n_param):
+                    print(f"{avg_times[i]:8.2f}", end='')
+                    pass
+                print('')
 
-            # axs[j,1].plot(results_dict['frac_variation'], avg_times_filter, alpha=0.8)
-            # axs[j,1].fill_between(results_dict['frac_variation'], (avg_times_filter+dev_times_filter), (avg_times_filter-dev_times_filter), alpha=0.2, label='_nolegend_')
-            nom_value = [3.2, 9.51]
 
-            axs[j,0].plot(nom_value[j]*(1+results_dict['frac_variation']), avg_col*100, alpha=0.8)
-            axs[j,0].fill_between(nom_value[j]*(1+results_dict['frac_variation']), (avg_col+dev_col)*100, (avg_col-dev_col)*100, alpha=0.2, label='_nolegend_')
-
+            # plot collisions
+            if parameter=='C_S' or parameter=='sv' or parameter=='a_max':
+                axs[j,0].plot(nom_value[j]*(1+results_dict['frac_variation']), avg_col_filter*100, alpha=0.8)
+                axs[j,0].fill_between(nom_value[j]*(1+results_dict['frac_variation']), (avg_col_filter+dev_col_filter)*100, (avg_col_filter-dev_col_filter)*100, alpha=0.2, label='_nolegend_')
+            else:
+                axs[j,0].plot(nom_value[j]*(1+results_dict['frac_variation']), avg_col*100, alpha=0.8)
+                axs[j,0].fill_between(nom_value[j]*(1+results_dict['frac_variation']), (avg_col+dev_col)*100, (avg_col-dev_col)*100, alpha=0.2, label='_nolegend_')
+            
+            # plot lap times
             axs[j,1].plot(nom_value[j]*(1+results_dict['frac_variation']), avg_times, alpha=0.8)
             axs[j,1].fill_between(nom_value[j]*(1+results_dict['frac_variation']), (avg_times+dev_times), (avg_times-dev_times), alpha=0.2, label='_nolegend_')
 
@@ -1571,21 +1599,166 @@ def display_lap_mismatch_results_multiple_1(agent_names, parameters, legend_titl
     fig.tight_layout()
     fig.subplots_adjust(bottom=0.22) 
     plt.figlegend(legend,loc='lower center', ncol=2)
-    plt.show()
+    if graph==True:
+        plt.show()
     
+    
+def display_lap_mismatch_results_multiple_2(agent_names, parameters, legend_title, legend, plot_titles, nom_value, graph, text):
+    
+    
+    fig, axs = plt.subplots(nrows=1, ncols=2, figsize=(5.5,3))
+
+    for j, parameter in enumerate(parameters):
+        for agent in agent_names:
+            
+            #infile = open('lap_results_mismatch/' + agent + '_new/' + parameter, 'rb')
+            infile = open('lap_results_mismatch/' + agent + '/' + parameter, 'rb')
+            results_dict = pickle.load(infile)
+            infile.close() 
+
+            n_episodes = len(results_dict['collision_results'][0,0,:])
+            n_param = len(results_dict['collision_results'][0,:,0])
+            n_runs = len(results_dict['collision_results'][:,0,0])
+
+            avg_col = np.zeros(n_param)
+            dev_col = np.zeros(n_param)
+
+            avg_time = np.zeros(n_param)
+            dev_time = np.zeros(n_param)
+
+            for i in range(n_param):
+                
+                cols = results_dict['collision_results']
+                times = results_dict['times_results']
+                times[cols==1]=np.nan
+                
+                avg_col[i] = np.round(np.sum(np.logical_not(results_dict['collision_results'][:,i,:]))/(n_episodes*n_runs), 2)
+                failures = np.count_nonzero(results_dict['collision_results'][:,i,:].flatten())
+                successes = n_episodes*n_runs - failures
+                dev_col[i] = np.sqrt(n_episodes*(successes/n_episodes)*((failures)/n_episodes))/(n_episodes*n_runs)
+                
+
+            avg_times = np.nanmean(times,axis=(0,2))
+            dev_times = np.nanstd(times,axis=(0,2))
+
+            avg_col_filter = functions.savitzky_golay(avg_col, 5, 2)
+            dev_col_filter = functions.savitzky_golay(dev_col, 5, 2)
+
+            avg_times_filter = functions.savitzky_golay(avg_times, 5, 2)
+            dev_times_filter = functions.savitzky_golay(dev_times, 5, 2)
+
+            
+            if text==True:
+                print(agent)
+                print(f"{'parameter: ':11s} {parameter:13s}")
+                print(f"{'Fraction:':10s}", end='')
+                for i in range(n_param):
+                    print(f"{results_dict['frac_variation'][i]:8.2f}", end='')
+                    pass
+                print('')
+                print(f"{'Value:':10s}", end='')
+                for i in range(n_param):
+                    print(f"{nom_value[j]*(1+results_dict['frac_variation'])[i]:8.2f}", end='')
+                    pass
+                print('')
+                print(f"{'Success:':10s}", end='')
+                for i in range(n_param):
+                    print(f"{avg_col[i]:8.2f}", end='')
+                    pass
+                print('')
+                print(f"{'Lap time:':10s}", end='')
+                for i in range(n_param):
+                    print(f"{avg_times[i]:8.2f}", end='')
+                    pass
+                print('')
+
+
+            # plot collisions
+            if parameter=='C_S' or parameter=='sv' or parameter=='a_max':
+                axs[0].plot(nom_value[j]*(1+results_dict['frac_variation']), avg_col_filter*100, alpha=0.8)
+                axs[0].fill_between(nom_value[j]*(1+results_dict['frac_variation']), (avg_col_filter+dev_col_filter)*100, (avg_col_filter-dev_col_filter)*100, alpha=0.2, label='_nolegend_')
+            else:
+                axs[0].plot(nom_value[j]*(1+results_dict['frac_variation']), avg_col*100, alpha=0.8)
+                axs[0].fill_between(nom_value[j]*(1+results_dict['frac_variation']), (avg_col+dev_col)*100, (avg_col-dev_col)*100, alpha=0.2, label='_nolegend_')
+            
+            # plot lap times
+            axs[1].plot(nom_value[j]*(1+results_dict['frac_variation']), avg_times, alpha=0.8)
+            axs[1].fill_between(nom_value[j]*(1+results_dict['frac_variation']), (avg_times+dev_times), (avg_times-dev_times), alpha=0.2, label='_nolegend_')
+
+        axs[0].grid(True)
+        axs[1].grid(True)
+            
+        axs[0].yaxis.set_major_formatter(FormatStrFormatter('%.0f'))
+        axs[1].yaxis.set_major_formatter(FormatStrFormatter('%.1f'))
+        axs[0].tick_params('both', length=0)
+        axs[1].tick_params('both', length=0)
+        color='grey'
+        axs[0].spines['bottom'].set_color(color)
+        axs[0].spines['top'].set_color(color) 
+        axs[0].spines['right'].set_color(color)
+        axs[0].spines['left'].set_color(color)
+        axs[1].spines['bottom'].set_color(color)
+        axs[1].spines['top'].set_color(color) 
+        axs[1].spines['right'].set_color(color)
+        axs[1].spines['left'].set_color(color)
+
+
+        # axs[0].set_title('                                                 '+parameter, fontsize=12)
+        
+        axs[0].set(ylabel='Successful laps [%]') 
+        axs[1].set(ylabel='Times [s]') 
+        
+        xlabels = ['Deviation from mean', 'Deviation from mean']
+        axs[0].set(xlabel=xlabels[j]) 
+        axs[1].set(xlabel=xlabels[j])
+        
+        axs[0].set_xlim([0.2,1.2])
+        axs[1].set_xlim([0.2,1.2])
+        # axs[j,0].set_xticks(ticks=, labels=)
+        # axs[j,1].set_xticks(ticks=, labels=)
+
+    axs[0].vlines(x=nom_value, ymin=0, ymax=100, color='black', linestyle='--')
+    axs[0].vlines(x=0.7, ymin=0, ymax=100, color='black', linestyle='--')
+    axs[0].vlines(x=0.5, ymin=0, ymax=100, color='black', linestyle='--')
+    axs[0].text(x=0.75, y=40, s='Nominal value', fontsize = 'small', bbox=dict(facecolor='white', edgecolor='black',pad=0.1,boxstyle='round'))
+    axs[0].text(x=0.6, y=25, s='Dry asphalt', fontsize = 'small', bbox=dict(facecolor='white', edgecolor='black',pad=0.1,boxstyle='round'))
+    axs[0].text(x=0.4, y=10, s='Wet asphalt', fontsize = 'small', bbox=dict(facecolor='white', edgecolor='black',pad=0.1,boxstyle='round'))
+    
+    axs[1].vlines(x=nom_value, ymin=5.5, ymax=9, color='black', linestyle='--')
+    axs[1].vlines(x=0.7, ymin=5.5, ymax=9, color='black', linestyle='--')
+    axs[1].vlines(x=0.5, ymin=5.5, ymax=9, color='black', linestyle='--')
+    axs[1].text(x=0.75, y=7.3, s='Nominal value', fontsize = 'small', bbox=dict(facecolor='white', edgecolor='black',pad=0.1,boxstyle='round'))
+    axs[1].text(x=0.6, y=7.9, s='Dry asphalt', fontsize = 'small', bbox=dict(facecolor='white', edgecolor='black',pad=0.1,boxstyle='round'))
+    axs[1].text(x=0.4, y=8.5, s='Wet asphalt', fontsize = 'small', bbox=dict(facecolor='white', edgecolor='black',pad=0.1,boxstyle='round'))
+
+
+    fig.tight_layout()
+    fig.subplots_adjust(bottom=0.35) 
+    plt.figlegend(legend,loc='lower center', ncol=2)
+    if graph==True:
+        plt.show()   
 
 
    
 
 agent_names = ['porto_ete_v5_r_collision_5', 'porto_pete_s_polynomial', 'porto_pete_v_k_1_attempt_2', 'porto_pete_sv_p_r_0']    
 parameters = ['mu', 'C_S']
+nom_value = [1.0489, 1]
 # parameters = ['C_Sf', 'C_Sr']
+# nom_value = [4.718, 5.4562]
 # parameters = ['lf', 'h', 'm', 'I']
 # parameters = ['sv', 'a_max']
+# nom_value = [3.2, 9.51]
+parameters = ['mu']
+nom_value = [1.0489]
+
 legend_title = ''
 legend = ['End-to-end', 'Steering control', 'Velocity control', 'Steering and velocity control']
 plot_titles = parameters
-# display_lap_mismatch_results_multiple_1(agent_names, parameters, legend_title, legend, plot_titles)
+graph=True
+text=False
+# display_lap_mismatch_results_multiple_1(agent_names, parameters, legend_title, legend, plot_titles, nom_value, graph, text)
+display_lap_mismatch_results_multiple_2(agent_names, parameters, legend_title, legend, plot_titles, nom_value, graph, text)
 
 
 
