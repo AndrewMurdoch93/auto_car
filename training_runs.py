@@ -1804,39 +1804,39 @@ if True:
     # noise_std = np.linspace(0,0.3,20)
     # main_multiple.lap_time_test_noise(agent_name, n_episodes, detect_issues, initial_conditions, noise_param, noise_std)
 
-    agent_name = 'porto_pete_v_k_1_attempt_2'
-    n_episodes = 100
-    detect_issues = False
-    initial_conditions = True
-    noise_param = 'xy'
-    noise_std = np.linspace(0,0.5,20)
-    main_multiple.lap_time_test_noise(agent_name, n_episodes, detect_issues, initial_conditions, noise_param, noise_std)
-    noise_param = 'theta'
-    noise_std = np.linspace(0, 10*np.pi/180, 20)
-    main_multiple.lap_time_test_noise(agent_name, n_episodes, detect_issues, initial_conditions, noise_param, noise_std)
-    noise_param = 'v'
-    noise_std = np.linspace(0,0.5,20)
-    main_multiple.lap_time_test_noise(agent_name, n_episodes, detect_issues, initial_conditions, noise_param, noise_std)
-    noise_param = 'lidar'
-    noise_std = np.linspace(0,0.3,20)
-    main_multiple.lap_time_test_noise(agent_name, n_episodes, detect_issues, initial_conditions, noise_param, noise_std)
+    # agent_name = 'porto_pete_v_k_1_attempt_2'
+    # n_episodes = 100
+    # detect_issues = False
+    # initial_conditions = True
+    # noise_param = 'xy'
+    # noise_std = np.linspace(0,0.5,20)
+    # main_multiple.lap_time_test_noise(agent_name, n_episodes, detect_issues, initial_conditions, noise_param, noise_std)
+    # noise_param = 'theta'
+    # noise_std = np.linspace(0, 10*np.pi/180, 20)
+    # main_multiple.lap_time_test_noise(agent_name, n_episodes, detect_issues, initial_conditions, noise_param, noise_std)
+    # noise_param = 'v'
+    # noise_std = np.linspace(0,0.5,20)
+    # main_multiple.lap_time_test_noise(agent_name, n_episodes, detect_issues, initial_conditions, noise_param, noise_std)
+    # noise_param = 'lidar'
+    # noise_std = np.linspace(0,0.3,20)
+    # main_multiple.lap_time_test_noise(agent_name, n_episodes, detect_issues, initial_conditions, noise_param, noise_std)
 
-    agent_name = 'porto_pete_sv_p_r_0'
-    n_episodes = 100
-    detect_issues = False
-    initial_conditions = True
-    noise_param = 'xy'
-    noise_std = np.linspace(0,0.5,20)
-    main_multiple.lap_time_test_noise(agent_name, n_episodes, detect_issues, initial_conditions, noise_param, noise_std)
-    noise_param = 'theta'
-    noise_std = np.linspace(0, 10*np.pi/180, 20)
-    main_multiple.lap_time_test_noise(agent_name, n_episodes, detect_issues, initial_conditions, noise_param, noise_std)
-    noise_param = 'v'
-    noise_std = np.linspace(0,0.5,20)
-    main_multiple.lap_time_test_noise(agent_name, n_episodes, detect_issues, initial_conditions, noise_param, noise_std)
-    noise_param = 'lidar'
-    noise_std = np.linspace(0,0.3,20)
-    main_multiple.lap_time_test_noise(agent_name, n_episodes, detect_issues, initial_conditions, noise_param, noise_std)
+    # agent_name = 'porto_pete_sv_p_r_0'
+    # n_episodes = 100
+    # detect_issues = False
+    # initial_conditions = True
+    # noise_param = 'xy'
+    # noise_std = np.linspace(0,0.5,20)
+    # main_multiple.lap_time_test_noise(agent_name, n_episodes, detect_issues, initial_conditions, noise_param, noise_std)
+    # noise_param = 'theta'
+    # noise_std = np.linspace(0, 10*np.pi/180, 20)
+    # main_multiple.lap_time_test_noise(agent_name, n_episodes, detect_issues, initial_conditions, noise_param, noise_std)
+    # noise_param = 'v'
+    # noise_std = np.linspace(0,0.5,20)
+    # main_multiple.lap_time_test_noise(agent_name, n_episodes, detect_issues, initial_conditions, noise_param, noise_std)
+    # noise_param = 'lidar'
+    # noise_std = np.linspace(0,0.3,20)
+    # main_multiple.lap_time_test_noise(agent_name, n_episodes, detect_issues, initial_conditions, noise_param, noise_std)
 
 
 
@@ -1882,12 +1882,15 @@ if True:
 # display_results_multiple.display_lap_noise_results_single(agent_names, noise_params, legend_title, legend)
 
 # Final porto agents!!!
-# agent_names = ['porto_ete_v5_r_collision_5', 'porto_ete_v5_r_collision_5']    
+# agent_names = ['porto_ete_v5_r_collision_5']  
+agent_names = ['porto_ete_v5_r_collision_5', 'porto_ete_v5_r_collision_5']    
 # agent_names = ['porto_pete_s_r_collision_0']
 # agent_names = ['porto_pete_s_polynomial', 'porto_pete_s_polynomial']   
 # agent_names = ['porto_pete_v_k_1_attempt_2', 'porto_pete_v_k_1_attempt_2']
 # agent_names = ['porto_pete_sv_c_r_8']
-agent_names = ['porto_pete_sv_p_r_0', 'porto_pete_sv_p_r_0']
+# agent_names = ['porto_pete_sv_p_r_0', 'porto_pete_sv_p_r_0']
+# agent_names = ['porto_pete_sv_p_r_0']
+
 
 # agent_names = ['porto_ete_v5_r_collision_5_noise']    
 # agent_names = ['porto_pete_s_r_collision_0_noise']
@@ -1897,8 +1900,8 @@ agent_names = ['porto_pete_sv_p_r_0', 'porto_pete_sv_p_r_0']
 # agent_names = ['porto_pete_sv_p_r_0_noise']
 
 legend = ['none', 'mismatch']
-legend_title = ''
-ns=[0,0]
+legend_title = 'Partial end-to-end'
+ns=[0,1]
 
 # display_results_multiple.learning_curve_lap_time_average(agent_names, legend, legend_title, ns)
 # display_results_multiple.learning_curve_reward_average(agent_names, legend, legend_title)
@@ -1912,14 +1915,17 @@ ns=[0,0]
 #     display_results_multiple.display_lap_results(agent_name=agent_name)
 
 
-mismatch_parameters = [['a_max'], ['a_max', 'sv']]
-frac_vary = [[0], [-0.15, -0.15]]
+mismatch_parameters = [['mu'], ['mu']]
+frac_vary = [[0], [-0.5]]
 noise_dicts = [{'xy':0.025, 'theta':0.05, 'v':0.1, 'lidar':0.01}, {'xy':0.025, 'theta':0.05, 'v':0.1, 'lidar':0.01}]
 
 start_condition = {'x':10, 'y':4.5, 'v':3, 'theta':np.pi, 'delta':0, 'goal':0}
 # Columbia
 # start_condition = {'x':5.7, 'y':7.25, 'v':3, 'theta':0, 'delta':0, 'goal':0}
 # start_condition = []
+
+
+# NB!!!! Error: Path is junk when no mismatch is present, when displaying 2 agents
 
 display_results_multiple.display_path_multiple(agent_names=agent_names, ns=ns, legend_title=legend_title,          
                                              legend=legend, mismatch_parameters=mismatch_parameters, frac_vary=frac_vary, noise_dicts=noise_dicts,

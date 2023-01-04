@@ -1742,15 +1742,15 @@ def display_lap_mismatch_results_multiple_2(agent_names, parameters, legend_titl
    
 
 agent_names = ['porto_ete_v5_r_collision_5', 'porto_pete_s_polynomial', 'porto_pete_v_k_1_attempt_2', 'porto_pete_sv_p_r_0']    
-parameters = ['mu', 'C_S']
-nom_value = [1.0489, 1]
-# parameters = ['C_Sf', 'C_Sr']
-# nom_value = [4.718, 5.4562]
+# parameters = ['mu', 'C_S']
+# nom_value = [1.0489, 1]
+parameters = ['C_Sf', 'C_Sr']
+nom_value = [4.718, 5.4562]
 # parameters = ['lf', 'h', 'm', 'I']
 # parameters = ['sv', 'a_max']
 # nom_value = [3.2, 9.51]
-parameters = ['mu']
-nom_value = [1.0489]
+# parameters = ['mu']
+# nom_value = [1.0489]
 
 legend_title = ''
 legend = ['End-to-end', 'Steering control', 'Velocity control', 'Steering and velocity control']
@@ -1758,7 +1758,8 @@ plot_titles = parameters
 graph=True
 text=False
 # display_lap_mismatch_results_multiple_1(agent_names, parameters, legend_title, legend, plot_titles, nom_value, graph, text)
-display_lap_mismatch_results_multiple_2(agent_names, parameters, legend_title, legend, plot_titles, nom_value, graph, text)
+#mu
+# display_lap_mismatch_results_multiple_2(agent_names, parameters, legend_title, legend, plot_titles, nom_value, graph, text)
 
 
 
@@ -3154,8 +3155,8 @@ def display_path_multiple(agent_names, ns, legend_title, legend, mismatch_parame
     ax.set_position([box.x0, box.y0, box.width * 0.8, box.height])
 
     # Put a legend to the right of the current axis
+    # ax.legend(legend, title=legend_title, loc='center left',  bbox_to_anchor=(1, 0.5))
     ax.legend(legend, loc='center left',  bbox_to_anchor=(1, 0.5))
-    
     #plt.legend(legend_new, title=legend_title, loc='lower right')
 
 
@@ -3271,6 +3272,9 @@ def display_path_multiple(agent_names, ns, legend_title, legend, mismatch_parame
     plt.grid(True, color='lightgrey')
     plt.tick_params(axis=u'both', which=u'both',length=0)
     plt.show()
+
+
+
 
 def display_path_mismatch_multiple(agent_names, ns, legend_title, legend, mismatch_parameters, frac_vary, noise_dicts, start_condition):
     
@@ -3433,8 +3437,7 @@ def display_path_mismatch_multiple(agent_names, ns, legend_title, legend, mismat
     fig.subplots_adjust(bottom=0.12) 
     
     plt.figlegend(legend, loc='lower center', ncol=2, labelspacing=0.7)
-    plt.show()
-    
+    plt.show()   
 
 
 agent_names = ['porto_ete_v5_r_collision_5', 'porto_pete_s_polynomial', 'porto_pete_v_k_1_attempt_2', 'porto_pete_sv_p_r_0']    
