@@ -408,9 +408,6 @@ def learning_curve_reward_average(agent_names, legend, legend_title):
     # plt.show()
     plt.savefig('results/'+filename+'.pgf', format='pgf')
 
-
-
-
 def learning_curve_all(agent_names, legend, legend_title, ns, filename, xlim, xspace):
 
     legend_coll = legend.copy()
@@ -655,15 +652,6 @@ def learning_curve_all(agent_names, legend, legend_title, ns, filename, xlim, xs
     # plt.show()
     plt.savefig('results/'+filename+'.pgf', format='pgf')
 
-
-
-
-
-
-
-
-
-
 def display_velocity_slip(agent_names, ns, legend_title, legend, mismatch_parameters, frac_vary, start_condition, filename):
     
     pose_history = []
@@ -897,7 +885,6 @@ def display_velocity_slip(agent_names, ns, legend_title, legend, mismatch_parame
     # plt.show() 
     plt.savefig('results/'+filename+'.pgf', format='pgf')
 
-
 def display_path_multiple(agent_names, ns, legend_title, legend, mismatch_parameters, frac_vary, start_condition, filename):
     
     pose_history = []
@@ -1093,7 +1080,6 @@ def display_path_multiple(agent_names, ns, legend_title, legend, mismatch_parame
     # plt.show() 
     plt.savefig('results/'+filename+'.pgf', format='pgf')
 
-
 def display_path_steer_multiple(agent_names, ns, legend_title, legend, mismatch_parameters, frac_vary, start_condition, filename):
     
     pose_history = []
@@ -1262,8 +1248,6 @@ def display_path_steer_multiple(agent_names, ns, legend_title, legend, mismatch_
     # plt.show() 
     plt.savefig('results/'+filename+'.pgf', format='pgf')
 
-
-
 def display_only_path_multiple(agent_names, ns, legend_title, legend, mismatch_parameters, frac_vary, start_condition, filename):
     
     pose_history = []
@@ -1425,7 +1409,6 @@ def display_only_path_multiple(agent_names, ns, legend_title, legend, mismatch_p
     plt.show() 
     # plt.savefig('results/'+filename+'.pgf', format='pgf')
     pass
-
 
 def display_path_two_multiple(agent_names, ns, legend_title, legend, mismatch_parameters, frac_vary, start_condition, filename):
     
@@ -1791,6 +1774,7 @@ def sensitivity_analysis_noise(agent_name, n, start_condition, filename):
     n_acts = 50
     lidar_noise = np.arange(0,1,0.01)
     action_history = np.zeros((len(lidar_noise), n_acts))
+    action_long_history = np.zeros((len(lidar_noise), n_acts))
     init_noise_dict = {'xy':0, 'theta':0, 'v':0, 'lidar':0}
 
     infile = open('environments/' + agent_name, 'rb')
@@ -1820,12 +1804,19 @@ def sensitivity_analysis_noise(agent_name, n, start_condition, filename):
             obs = env.observation
             action = a.choose_greedy_action(obs)
             action_history[idx,i] = action[0]
-        
+            action_long_history[idx,i] = action[1]
+
     avg = np.average(action_history, axis=1)
     std_dev = np.std(action_history, axis=1)
 
+    avg_long = np.average(action_long_history, axis=1)
+    std_dev_long = np.std(action_long_history, axis=1)
+
     avg_filter = functions.savitzky_golay(avg, 9, 2)
     std_dev_filter = functions.savitzky_golay(std_dev, 9, 2)
+
+    avg_filter_long = functions.savitzky_golay(avg_long, 9, 2)
+    std_dev_filter_long = functions.savitzky_golay(std_dev_long, 9, 2)
     
     plt.rcParams.update({
     "font.family": "serif",  # use serif/main font for text elements
@@ -1844,18 +1835,22 @@ def sensitivity_analysis_noise(agent_name, n, start_condition, filename):
     ax.grid(True)
     ax.set_title('')
     ax.set_xlabel('LiDAR noise standard deviation [m]')
-    ax.set_ylabel('Steering control action')
+    ax.set_ylabel('Control action value')
     # ax.plot(lidar_noise, avg)
     # ax.fill_between(x=lidar_noise, y1=avg-std_dev, y2=avg+std_dev,alpha=0.5)
 
     ax.plot(lidar_noise, avg_filter)
-    ax.fill_between(x=lidar_noise, y1=avg_filter-std_dev_filter, y2=avg_filter+std_dev_filter,alpha=0.3)
+    ax.fill_between(x=lidar_noise, y1=avg_filter-std_dev_filter, y2=avg_filter+std_dev_filter,alpha=0.3, label='_nolegend_')
+    
+    ax.plot(lidar_noise, avg_filter_long)
+    ax.fill_between(x=lidar_noise, y1=avg_filter_long-std_dev_filter_long, y2=avg_filter_long+std_dev_filter_long,alpha=0.3, label='_nolegend_')
+    
     ax.hlines(y=1,xmin=0,xmax=lidar_noise[-1], color='k', linestyles='--')
     ax.hlines(y=-1,xmin=0,xmax=lidar_noise[-1], color='k', linestyles='--')
 
     fig.tight_layout()
-    fig.subplots_adjust(right=0.72)
-    plt.figlegend(['Average', 'Standard\ndeviation', 'Action\nlimits'], loc='center right', ncol=1)
+    fig.subplots_adjust(right=0.7)
+    plt.figlegend(['Steering', 'Acceleration', 'Action limits'], loc='center right', ncol=1)
     plt.savefig('results/'+filename+'.pgf', format='pgf')
     # plt.show()
     pass
@@ -1864,7 +1859,7 @@ def sensitivity_analysis_noise(agent_name, n, start_condition, filename):
 agent_name = 'porto_ete_v5_r_collision_5' 
 n=0
 start_condition = {'x':4, 'y':4.8, 'v':5, 'theta':np.pi, 'delta':0, 'goal':0}
-filename='control_action_noise'
+filename='action_noise'
 sensitivity_analysis_noise(agent_name=agent_name, n=n, start_condition=start_condition, filename=filename)
 
 
@@ -2231,7 +2226,7 @@ def display_lap_noise_results_multiple(agent_names, noise_params, legend_title, 
         axs[j,1].spines['right'].set_color(color)
         axs[j,1].spines['left'].set_color(color)
 
-        axs[j,0].set_yticks(ticks=[50,75,100], labels=[50,75,100])
+        # axs[j,0].set_yticks(ticks=[50,75,100], labels=[50,75,100])
         # axs[j,1].set_yticks(ticks=[5,6,7], labels=[5,6,7])
         
 
@@ -2271,7 +2266,6 @@ def display_lap_noise_results_multiple(agent_names, noise_params, legend_title, 
             avg_times_filter = functions.savitzky_golay(avg_times, 9, 2)
 
             axs[j,0].grid(True)
-            axs[j,0].set_ylim([0,101])
             axs[j,0].yaxis.set_major_formatter(FormatStrFormatter('%.0f'))
             axs[j,0].tick_params('both', length=0)
             axs[j,0].plot(results_dict['noise_std_values'], avg_cols_filter)
@@ -2291,49 +2285,58 @@ def display_lap_noise_results_multiple(agent_names, noise_params, legend_title, 
         #axs[j].set_title('(' + numbering[j] + ') ' + plot_titles[j])
     # axs[j].set(xlabel='standard deviation')
     # axs[j].legend(legend, title=legend_title, loc='lower right')
-    
-    axs[0,0].set_title('$x$ and $y$ coordinates')
-    axs[1,0].set_title('Vehicle heading')
-    axs[2,0].set_title('Velocity')
-    axs[3,0].set_title('LiDAR')
+    space = '                                               '
+    axs[0,0].set_title('                                               $x$ and $y$ coordinates')
+    axs[1,0].set_title('                                               Vehicle heading')
+    axs[2,0].set_title('                                               Velocity')
+    axs[3,0].set_title('                                               LiDAR')
+
 
     
-    axs[0,0].set_xlabel('m')
-    axs[0,1].set_xlabel('m')
-    axs[1,0].set_xlabel('rads')
-    axs[1,1].set_xlabel('rads')
-    axs[2,0].set_xlabel('m/s')
-    axs[2,1].set_xlabel('m/s')
-    axs[3,0].set_xlabel('m')
-    axs[3,1].set_xlabel('m')
+    axs[0,0].set_xlabel('Noise standard deviation [m]')
+    axs[0,1].set_xlabel('Noise standard deviation [m]')
+    axs[1,0].set_xlabel('Noise standard deviation [rads]')
+    axs[1,1].set_xlabel('Noise standard deviation [rads]')
+    axs[2,0].set_xlabel('Noise standard deviation [m/s]')
+    axs[2,1].set_xlabel('Noise standard deviation [m/s]')
+    axs[3,0].set_xlabel('Noise standard deviation [m]')
+    axs[3,1].set_xlabel('Noise standard deviation [m]')
 
     axs[0,0].set_xlim([0,0.3])
-    axs[1,0].set_xlim([0,0.4])
-    axs[2,0].set_xlim([0,1])
-    axs[3,0].set_xlim([0,0.4])
+    # axs[1,0].set_xlim([0,0.15])
+    # axs[2,0].set_xlim([0,0.4])
+    # axs[3,0].set_xlim([0,0.4])
 
     axs[0,1].set_xlim([0,0.3])
-    axs[1,1].set_xlim([0,0.4])
-    axs[2,1].set_xlim([0,1])
-    axs[3,1].set_xlim([0,0.4])
+    # axs[1,1].set_xlim([0,0.4])
+    # axs[2,1].set_xlim([0,0.4])
+    # axs[3,1].set_xlim([0,0.4])
 
     axs[0,0].set_ylim([45,105])
-    axs[1,0].set_ylim([45,105])
-    axs[2,0].set_ylim([45,105])
-    axs[3,0].set_ylim([45,105])
+    axs[1,0].set_ylim([90,101])
+    # axs[2,0].set_ylim([50,105])
+    # axs[3,0].set_ylim([50,105])
 
-    axs[0,1].set_ylim([5,7])
-    # axs[1,1].set_ylim([4.8,7])
-    # axs[2,1].set_ylim([4.8,7])
-    # axs[3,1].set_ylim([4.8,7])
+    # axs[0,1].set_ylim([5,7])
+    # axs[1,1].set_ylim([50,105])
+    # axs[2,1].set_ylim([50,105])
+    # axs[3,1].set_ylim([50,105])
 
 
 
     fig.tight_layout()
-    fig.subplots_adjust(bottom=0.23) 
+    fig.subplots_adjust(bottom=0.14) 
     plt.figlegend(legend, title=legend_title, loc = 'lower center', ncol=2)
     plt.savefig('results/'+filename+'.pgf', format='pgf')
     # plt.show()
+
+agent_names = ['porto_ete_v5_r_collision_5', 'porto_pete_s_polynomial', 'porto_pete_v_k_1_attempt_2', 'porto_pete_sv_p_r_0']    
+noise_params = ['xy', 'theta', 'v', 'lidar']
+legend = ['End-to-end', 'Steering control', 'Velocity control', 'Steering and velocity control']
+legend_title = ''
+filename = 'noise_vary'
+display_lap_noise_results_multiple(agent_names, noise_params, legend_title, legend, filename)
+
 
 def display_lap_unknown_mass(agent_names, legend, filename):
     
@@ -2477,7 +2480,7 @@ def display_lap_unknown_mass_time(agent_names, legend, filename):
 
 
     axs[0].set(ylabel='Successful laps [%]') 
-    axs[1].set(ylabel='Times [s]') 
+    axs[1].set(ylabel='Lap time [s]') 
     
     for i in range(2):
         axs[i].grid(True)  
@@ -2503,6 +2506,7 @@ agent_names = ['porto_ete_v5_r_collision_5', 'porto_pete_s_polynomial', 'porto_p
 legend = ['End-to-end', 'Steering control', 'Velocity control', 'Steering and velocity control']
 filename = 'unknown_mass'
 # display_lap_unknown_mass_time(agent_names, legend, filename)
+
 
 def display_path_mismatch_multiple(agent_names, ns, legend_title, legend, mismatch_parameters, frac_vary, noise_dicts, start_condition, filename):
     
@@ -2679,11 +2683,165 @@ frac_vary = [0]
 noise_dicts = [{'xy':0.025, 'theta':0.05, 'v':0.1, 'lidar':0.01}]
 start_condition = {'x':10, 'y':4.5, 'v':3, 'theta':np.pi, 'delta':0, 'goal':0}
 filename='unknown_mass_path'
-display_path_mismatch_multiple(agent_names=agent_names, ns=ns, legend_title=legend_title,          
-                                             legend=legend, mismatch_parameters=mismatch_parameters, frac_vary=frac_vary, noise_dicts=noise_dicts,
-                                             start_condition=start_condition, filename=filename)
+# display_path_mismatch_multiple(agent_names=agent_names, ns=ns, legend_title=legend_title,          
+#                                              legend=legend, mismatch_parameters=mismatch_parameters, frac_vary=frac_vary, noise_dicts=noise_dicts,
+#                                              start_condition=start_condition, filename=filename)
+
+def display_lap_mismatch_results_multiple_mu(agent_names, parameters, legend_title, legend, plot_titles, nom_value, graph, text, filename):
+    
+    plt.rcParams.update({
+    "font.family": "serif",  # use serif/main font for text elements
+    "text.usetex": True,     # use inline math for ticks
+    "pgf.rcfonts": False,     # don't setup fonts from rc parameters
+    "font.size": 12
+    })
+
+    fig, axs = plt.subplots(nrows=1, ncols=2, figsize=(5.5,3))
+
+    for j, parameter in enumerate(parameters):
+        for agent in agent_names:
+            
+            #infile = open('lap_results_mismatch/' + agent + '_new/' + parameter, 'rb')
+            infile = open('lap_results_mismatch/' + agent + '/' + parameter, 'rb')
+            results_dict = pickle.load(infile)
+            infile.close() 
+
+            n_episodes = len(results_dict['collision_results'][0,0,:])
+            n_param = len(results_dict['collision_results'][0,:,0])
+            n_runs = len(results_dict['collision_results'][:,0,0])
+
+            avg_col = np.zeros(n_param)
+            dev_col = np.zeros(n_param)
+
+            avg_time = np.zeros(n_param)
+            dev_time = np.zeros(n_param)
+
+            for i in range(n_param):
+                
+                cols = results_dict['collision_results']
+                times = results_dict['times_results']
+                times[cols==1]=np.nan
+                
+                avg_col[i] = np.round(np.sum(np.logical_not(results_dict['collision_results'][:,i,:]))/(n_episodes*n_runs), 2)
+                failures = np.count_nonzero(results_dict['collision_results'][:,i,:].flatten())
+                successes = n_episodes*n_runs - failures
+                dev_col[i] = np.sqrt(n_episodes*(successes/n_episodes)*((failures)/n_episodes))/(n_episodes*n_runs)
+                
+
+            avg_times = np.nanmean(times,axis=(0,2))
+            dev_times = np.nanstd(times,axis=(0,2))
+
+            avg_col_filter = functions.savitzky_golay(avg_col, 5, 2)
+            dev_col_filter = functions.savitzky_golay(dev_col, 5, 2)
+
+            avg_times_filter = functions.savitzky_golay(avg_times, 5, 2)
+            dev_times_filter = functions.savitzky_golay(dev_times, 5, 2)
+
+            
+            if text==True:
+                print(agent)
+                print(f"{'parameter: ':11s} {parameter:13s}")
+                print(f"{'Fraction:':10s}", end='')
+                for i in range(n_param):
+                    print(f"{results_dict['frac_variation'][i]:8.2f}", end='')
+                    pass
+                print('')
+                print(f"{'Value:':10s}", end='')
+                for i in range(n_param):
+                    print(f"{nom_value[j]*(1+results_dict['frac_variation'])[i]:8.2f}", end='')
+                    pass
+                print('')
+                print(f"{'Success:':10s}", end='')
+                for i in range(n_param):
+                    print(f"{avg_col[i]:8.2f}", end='')
+                    pass
+                print('')
+                print(f"{'Lap time:':10s}", end='')
+                for i in range(n_param):
+                    print(f"{avg_times[i]:8.2f}", end='')
+                    pass
+                print('')
 
 
+            # plot collisions
+            if parameter=='C_S' or parameter=='sv' or parameter=='a_max':
+                axs[0].plot(nom_value[j]*(1+results_dict['frac_variation']), avg_col_filter*100, alpha=0.8)
+                axs[0].fill_between(nom_value[j]*(1+results_dict['frac_variation']), (avg_col_filter+dev_col_filter)*100, (avg_col_filter-dev_col_filter)*100, alpha=0.2, label='_nolegend_')
+            else:
+                axs[0].plot(nom_value[j]*(1+results_dict['frac_variation']), avg_col*100, alpha=0.8)
+                axs[0].fill_between(nom_value[j]*(1+results_dict['frac_variation']), (avg_col+dev_col)*100, (avg_col-dev_col)*100, alpha=0.2, label='_nolegend_')
+            
+            # plot lap times
+            axs[1].plot(nom_value[j]*(1+results_dict['frac_variation']), avg_times, alpha=0.8)
+            axs[1].fill_between(nom_value[j]*(1+results_dict['frac_variation']), (avg_times+dev_times), (avg_times-dev_times), alpha=0.2, label='_nolegend_')
+
+    axs[0].grid(True)
+    axs[1].grid(True)
+        
+    axs[0].yaxis.set_major_formatter(FormatStrFormatter('%.0f'))
+    axs[1].yaxis.set_major_formatter(FormatStrFormatter('%.1f'))
+    axs[0].tick_params('both', length=0)
+    axs[1].tick_params('both', length=0)
+    color='grey'
+    axs[0].spines['bottom'].set_color(color)
+    axs[0].spines['top'].set_color(color) 
+    axs[0].spines['right'].set_color(color)
+    axs[0].spines['left'].set_color(color)
+    axs[1].spines['bottom'].set_color(color)
+    axs[1].spines['top'].set_color(color) 
+    axs[1].spines['right'].set_color(color)
+    axs[1].spines['left'].set_color(color)
+
+    # axs[0].set_title('                                                 '+parameter, fontsize=12)
+    
+    axs[0].set(ylabel='Successful laps [%]') 
+    axs[1].set(ylabel='Lap time [s]') 
+    
+    xlabel = 'Friction coefficient, $\mu$'
+    axs[0].set(xlabel=xlabel) 
+    axs[1].set(xlabel=xlabel)
+    
+    axs[0].set_xlim([0.2,1.2])
+    axs[1].set_xlim([0.2,1.2])
+    # axs[j,0].set_xticks(ticks=, labels=)
+    # axs[j,1].set_xticks(ticks=, labels=)
+
+    axs[0].vlines(x=nom_value, ymin=-50, ymax=150, color='black', linestyle='--')
+    axs[0].vlines(x=0.7, ymin=-50, ymax=150, color='black', linestyle='--')
+    axs[0].vlines(x=0.5, ymin=-50, ymax=150, color='black', linestyle='--')
+    axs[0].text(x=0.75, y=40, s='Nominal value', fontsize = 'small', bbox=dict(facecolor='white', edgecolor='black',pad=0.1,boxstyle='round'))
+    axs[0].text(x=0.6, y=25, s='Dry asphalt', fontsize = 'small', bbox=dict(facecolor='white', edgecolor='black',pad=0.1,boxstyle='round'))
+    axs[0].text(x=0.4, y=10, s='Wet asphalt', fontsize = 'small', bbox=dict(facecolor='white', edgecolor='black',pad=0.1,boxstyle='round'))
+    
+    axs[1].vlines(x=nom_value, ymin=0, ymax=15, color='black', linestyle='--')
+    axs[1].vlines(x=0.7, ymin=0, ymax=15, color='black', linestyle='--')
+    axs[1].vlines(x=0.5, ymin=0, ymax=15, color='black', linestyle='--')
+    axs[1].text(x=0.75, y=7.3, s='Nominal value', fontsize = 'small', bbox=dict(facecolor='white', edgecolor='black',pad=0.1,boxstyle='round'))
+    axs[1].text(x=0.6, y=7.9, s='Dry asphalt', fontsize = 'small', bbox=dict(facecolor='white', edgecolor='black',pad=0.1,boxstyle='round'))
+    axs[1].text(x=0.4, y=8.5, s='Wet asphalt', fontsize = 'small', bbox=dict(facecolor='white', edgecolor='black',pad=0.1,boxstyle='round'))
+
+    axs[0].set_ylim([-5,105])
+    axs[1].set_ylim([5.5,9])
+
+    fig.tight_layout()
+    fig.subplots_adjust(bottom=0.35) 
+    plt.figlegend(legend,loc='lower center', ncol=2)
+    if graph==True:
+        # plt.show()
+        pass   
+    
+    plt.savefig('results/'+filename+'.pgf', format='pgf')
+
+agent_names = ['porto_ete_v5_r_collision_5', 'porto_pete_s_polynomial', 'porto_pete_v_k_1_attempt_2', 'porto_pete_sv_p_r_0']    
+parameters = ['mu']
+nom_value = [1.0489]
+legend_title = ''
+legend = ['End-to-end', 'Steering control', 'Velocity control', 'Steering and velocity control']
+plot_titles = parameters
+graph=True
+text=False
+filename = 'mu'
+# display_lap_mismatch_results_multiple_mu(agent_names, parameters, legend_title, legend, plot_titles, nom_value, graph, text, filename)
 
 # agent_names = ['porto_ete_r_1', 'porto_ete_r_2', 'porto_ete_r_3', 'porto_ete_LiDAR_10', 'porto_ete_r_4' ]
 # legend = ['1', '0.7', '0.5', '0.3', '0.1']
@@ -2864,7 +3022,7 @@ legend = ['End-to-end',
             'Steering and velocity \ncontrol, circular path',
             'Steering and velocity \ncontrol, polynomial path']
 filename='noise_vary'
-display_lap_noise_results_multiple(agent_names, noise_params, legend_title, legend, filename)
+# display_lap_noise_results_multiple(agent_names, noise_params, legend_title, legend, filename)
 
 # mismatch_parameters = ['C_Sf']
 # frac_vary = [0]

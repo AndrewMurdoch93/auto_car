@@ -1,0 +1,189 @@
+%% Creator: Inkscape 1.2.2 (1:1.2.2+202212051550+b0a8486541), www.inkscape.org
+%% PDF/EPS/PS + LaTeX output extension by Johan Engelen, 2010
+%% Accompanies image file 'contents/chapt7/figs/model/Figure_1.pdf' (pdf, eps, ps)
+%%
+%% To include the image in your LaTeX document, write
+%%   \input{<filename>.pdf_tex}
+%%  instead of
+%%   \includegraphics{<filename>.pdf}
+%% To scale the image, write
+%%   \def\svgwidth{<desired width>}
+%%   \input{<filename>.pdf_tex}
+%%  instead of
+%%   \includegraphics[width=<desired width>]{<filename>.pdf}
+%%
+%% Images with a different path to the parent latex file can
+%% be accessed with the `import' package (which may need to be
+%% installed) using
+%%   \usepackage{import}
+%% in the preamble, and then including the image with
+%%   \import{<path to file>}{<filename>.pdf_tex}
+%% Alternatively, one can specify
+%%   \graphicspath{{<path to file>/}}
+%% 
+%% For more information, please see info/svg-inkscape on CTAN:
+%%   http://tug.ctan.org/tex-archive/info/svg-inkscape
+%%
+\begingroup%
+  \makeatletter%
+  \providecommand\color[2][]{%
+    \errmessage{(Inkscape) Color is used for the text in Inkscape, but the package 'color.sty' is not loaded}%
+    \renewcommand\color[2][]{}%
+  }%
+  \providecommand\transparent[1]{%
+    \errmessage{(Inkscape) Transparency is used (non-zero) for the text in Inkscape, but the package 'transparent.sty' is not loaded}%
+    \renewcommand\transparent[1]{}%
+  }%
+  \providecommand\rotatebox[2]{#2}%
+  \newcommand*\fsize{\dimexpr\f@size pt\relax}%
+  \newcommand*\lineheight[1]{\fontsize{\fsize}{#1\fsize}\selectfont}%
+  \ifx\svgwidth\undefined%
+    \setlength{\unitlength}{396bp}%
+    \ifx\svgscale\undefined%
+      \relax%
+    \else%
+      \setlength{\unitlength}{\unitlength * \real{\svgscale}}%
+    \fi%
+  \else%
+    \setlength{\unitlength}{\svgwidth}%
+  \fi%
+  \global\let\svgwidth\undefined%
+  \global\let\svgscale\undefined%
+  \makeatother%
+  \begin{picture}(1,1.30681818)%
+    \lineheight{1}%
+    \setlength\tabcolsep{0pt}%
+    \put(0,0){\includegraphics[width=\unitlength,page=1]{contents/chapt7/figs/model/Figure_1.pdf}}%
+    \put(0.70158354,0.95882953){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}$C_{S,f}, \left[ \frac{1}{\text{rad}} \right]$\end{tabular}}}}%
+    \put(0.21062111,0.95983592){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}$C_{S,f}, \left[ \frac{1}{\text{rad}} \right]$\end{tabular}}}}%
+    \put(0.21062111,0.48138034){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}$C_{S,r}, \left[ \frac{1}{\text{rad}} \right]$\end{tabular}}}}%
+    \put(0.21062111,0.60190916){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}$C_{S,r}, \left[ \frac{1}{\text{rad}} \right]$\end{tabular}}}}%
+    \put(0.70158354,0.60098778){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}$C_{S,r}, \left[ \frac{1}{\text{rad}} \right]$\end{tabular}}}}%
+    \put(0.70158354,0.47896625){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}$C_{S,r}, \left[ \frac{1}{\text{rad}} \right]$\end{tabular}}}}%
+    \put(0.70158354,0.13803563){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}$C_{S,f}, \left[ \frac{1}{\text{rad}} \right]$\end{tabular}}}}%
+    \put(0,0){\includegraphics[width=\unitlength,page=2]{contents/chapt7/figs/model/Figure_1.pdf}}%
+    \put(0.15554892,1.01104606){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}4.0\end{tabular}}}}%
+    \put(0,0){\includegraphics[width=\unitlength,page=3]{contents/chapt7/figs/model/Figure_1.pdf}}%
+    \put(0.24814362,1.01104606){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}4.5\end{tabular}}}}%
+    \put(0,0){\includegraphics[width=\unitlength,page=4]{contents/chapt7/figs/model/Figure_1.pdf}}%
+    \put(0.3407383,1.01104606){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}5.0\end{tabular}}}}%
+    \put(0,0){\includegraphics[width=\unitlength,page=5]{contents/chapt7/figs/model/Figure_1.pdf}}%
+    \put(0.43333299,1.01104606){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}5.5\end{tabular}}}}%
+    \put(0,0){\includegraphics[width=\unitlength,page=6]{contents/chapt7/figs/model/Figure_1.pdf}}%
+    \put(0.07911932,1.0294725){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}40\end{tabular}}}}%
+    \put(0,0){\includegraphics[width=\unitlength,page=7]{contents/chapt7/figs/model/Figure_1.pdf}}%
+    \put(0.07911932,1.09209255){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}60\end{tabular}}}}%
+    \put(0,0){\includegraphics[width=\unitlength,page=8]{contents/chapt7/figs/model/Figure_1.pdf}}%
+    \put(0.07911932,1.1547126){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}80\end{tabular}}}}%
+    \put(0,0){\includegraphics[width=\unitlength,page=9]{contents/chapt7/figs/model/Figure_1.pdf}}%
+    \put(0.06306029,1.21733265){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}100\end{tabular}}}}%
+    \put(0.04771149,1.01824475){\color[rgb]{0,0,0}\rotatebox{90}{\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}Successful laps [\%]\end{tabular}}}}}%
+    \put(0,0){\includegraphics[width=\unitlength,page=10]{contents/chapt7/figs/model/Figure_1.pdf}}%
+    \put(0.26230121,1.09392646){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}nominal\end{tabular}}}}%
+    \put(0.27567969,1.07037061){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}value\end{tabular}}}}%
+    \put(0.42890766,1.25772724){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}Front tire stiffness\end{tabular}}}}%
+    \put(0,0){\includegraphics[width=\unitlength,page=11]{contents/chapt7/figs/model/Figure_1.pdf}}%
+    \put(0.63782163,1.01104606){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}4.0\end{tabular}}}}%
+    \put(0,0){\includegraphics[width=\unitlength,page=12]{contents/chapt7/figs/model/Figure_1.pdf}}%
+    \put(0.73041635,1.01104606){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}4.5\end{tabular}}}}%
+    \put(0,0){\includegraphics[width=\unitlength,page=13]{contents/chapt7/figs/model/Figure_1.pdf}}%
+    \put(0.82301101,1.01104606){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}5.0\end{tabular}}}}%
+    \put(0,0){\includegraphics[width=\unitlength,page=14]{contents/chapt7/figs/model/Figure_1.pdf}}%
+    \put(0.91560573,1.01104606){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}5.5\end{tabular}}}}%
+    \put(0,0){\includegraphics[width=\unitlength,page=15]{contents/chapt7/figs/model/Figure_1.pdf}}%
+    \put(0.55334279,1.0294725){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}5.5\end{tabular}}}}%
+    \put(0,0){\includegraphics[width=\unitlength,page=16]{contents/chapt7/figs/model/Figure_1.pdf}}%
+    \put(0.55334279,1.10774757){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}6.0\end{tabular}}}}%
+    \put(0,0){\includegraphics[width=\unitlength,page=17]{contents/chapt7/figs/model/Figure_1.pdf}}%
+    \put(0.55334279,1.18602262){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}6.5\end{tabular}}}}%
+    \put(0,0){\includegraphics[width=\unitlength,page=18]{contents/chapt7/figs/model/Figure_1.pdf}}%
+    \put(0.74457992,1.20552282){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}nominal\end{tabular}}}}%
+    \put(0.75795881,1.18315657){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}value\end{tabular}}}}%
+    \put(0,0){\includegraphics[width=\unitlength,page=19]{contents/chapt7/figs/model/Figure_1.pdf}}%
+    \put(0.13862047,0.65036087){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}4.4\end{tabular}}}}%
+    \put(0,0){\includegraphics[width=\unitlength,page=20]{contents/chapt7/figs/model/Figure_1.pdf}}%
+    \put(0.2346446,0.65036087){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}5.1\end{tabular}}}}%
+    \put(0,0){\includegraphics[width=\unitlength,page=21]{contents/chapt7/figs/model/Figure_1.pdf}}%
+    \put(0.33066872,0.65036087){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}5.8\end{tabular}}}}%
+    \put(0,0){\includegraphics[width=\unitlength,page=22]{contents/chapt7/figs/model/Figure_1.pdf}}%
+    \put(0.42669286,0.65036087){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}6.5\end{tabular}}}}%
+    \put(0,0){\includegraphics[width=\unitlength,page=23]{contents/chapt7/figs/model/Figure_1.pdf}}%
+    \put(0.07659448,0.7069464){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}40\end{tabular}}}}%
+    \put(0,0){\includegraphics[width=\unitlength,page=24]{contents/chapt7/figs/model/Figure_1.pdf}}%
+    \put(0.07659448,0.75782519){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}60\end{tabular}}}}%
+    \put(0,0){\includegraphics[width=\unitlength,page=25]{contents/chapt7/figs/model/Figure_1.pdf}}%
+    \put(0.07659448,0.80870397){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}80\end{tabular}}}}%
+    \put(0,0){\includegraphics[width=\unitlength,page=26]{contents/chapt7/figs/model/Figure_1.pdf}}%
+    \put(0.06053545,0.85958276){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}100\end{tabular}}}}%
+    \put(0.04518665,0.65755956){\color[rgb]{0,0,0}\rotatebox{90}{\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}Successful laps [\%]\end{tabular}}}}}%
+    \put(0,0){\includegraphics[width=\unitlength,page=27]{contents/chapt7/figs/model/Figure_1.pdf}}%
+    \put(0.42997342,0.89704205){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}Rear tire stiffness\end{tabular}}}}%
+    \put(0,0){\includegraphics[width=\unitlength,page=28]{contents/chapt7/figs/model/Figure_1.pdf}}%
+    \put(0.62089318,0.65036087){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}4.4\end{tabular}}}}%
+    \put(0,0){\includegraphics[width=\unitlength,page=29]{contents/chapt7/figs/model/Figure_1.pdf}}%
+    \put(0.71691732,0.65036087){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}5.1\end{tabular}}}}%
+    \put(0,0){\includegraphics[width=\unitlength,page=30]{contents/chapt7/figs/model/Figure_1.pdf}}%
+    \put(0.81294143,0.65036087){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}5.8\end{tabular}}}}%
+    \put(0,0){\includegraphics[width=\unitlength,page=31]{contents/chapt7/figs/model/Figure_1.pdf}}%
+    \put(0.90896557,0.65036087){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}6.5\end{tabular}}}}%
+    \put(0,0){\includegraphics[width=\unitlength,page=32]{contents/chapt7/figs/model/Figure_1.pdf}}%
+    \put(0.55081795,0.66878734){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}5.5\end{tabular}}}}%
+    \put(0,0){\includegraphics[width=\unitlength,page=33]{contents/chapt7/figs/model/Figure_1.pdf}}%
+    \put(0.55081795,0.74706238){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}6.0\end{tabular}}}}%
+    \put(0,0){\includegraphics[width=\unitlength,page=34]{contents/chapt7/figs/model/Figure_1.pdf}}%
+    \put(0.55081795,0.82533743){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}6.5\end{tabular}}}}%
+    \put(0,0){\includegraphics[width=\unitlength,page=35]{contents/chapt7/figs/model/Figure_1.pdf}}%
+    \put(0.1535554,0.18625365){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}4.0\end{tabular}}}}%
+    \put(0,0){\includegraphics[width=\unitlength,page=36]{contents/chapt7/figs/model/Figure_1.pdf}}%
+    \put(0.24615009,0.18625365){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}4.5\end{tabular}}}}%
+    \put(0,0){\includegraphics[width=\unitlength,page=37]{contents/chapt7/figs/model/Figure_1.pdf}}%
+    \put(0.33874477,0.18625365){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}5.0\end{tabular}}}}%
+    \put(0,0){\includegraphics[width=\unitlength,page=38]{contents/chapt7/figs/model/Figure_1.pdf}}%
+    \put(0.43133947,0.18625365){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}5.5\end{tabular}}}}%
+    \put(0,0){\includegraphics[width=\unitlength,page=39]{contents/chapt7/figs/model/Figure_1.pdf}}%
+    \put(0.07712579,0.2046801){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}90\end{tabular}}}}%
+    \put(0,0){\includegraphics[width=\unitlength,page=40]{contents/chapt7/figs/model/Figure_1.pdf}}%
+    \put(0.07712579,0.29718698){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}95\end{tabular}}}}%
+    \put(0,0){\includegraphics[width=\unitlength,page=41]{contents/chapt7/figs/model/Figure_1.pdf}}%
+    \put(0.06106676,0.38969387){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}100\end{tabular}}}}%
+    \put(0.04571796,0.19345236){\color[rgb]{0,0,0}\rotatebox{90}{\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}Successful laps [\%]\end{tabular}}}}}%
+    \put(0,0){\includegraphics[width=\unitlength,page=42]{contents/chapt7/figs/model/Figure_1.pdf}}%
+    \put(0.35808736,0.5300071){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}Front and rear tire stiffness\end{tabular}}}}%
+    \put(0,0){\includegraphics[width=\unitlength,page=43]{contents/chapt7/figs/model/Figure_1.pdf}}%
+    \put(0.6358281,0.18625365){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}4.0\end{tabular}}}}%
+    \put(0,0){\includegraphics[width=\unitlength,page=44]{contents/chapt7/figs/model/Figure_1.pdf}}%
+    \put(0.72842282,0.18625365){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}4.5\end{tabular}}}}%
+    \put(0,0){\includegraphics[width=\unitlength,page=45]{contents/chapt7/figs/model/Figure_1.pdf}}%
+    \put(0.82101749,0.18625365){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}5.0\end{tabular}}}}%
+    \put(0,0){\includegraphics[width=\unitlength,page=46]{contents/chapt7/figs/model/Figure_1.pdf}}%
+    \put(0.91361221,0.18625365){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}5.5\end{tabular}}}}%
+    \put(0,0){\includegraphics[width=\unitlength,page=47]{contents/chapt7/figs/model/Figure_1.pdf}}%
+    \put(0.55134926,0.2046801){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}5.5\end{tabular}}}}%
+    \put(0,0){\includegraphics[width=\unitlength,page=48]{contents/chapt7/figs/model/Figure_1.pdf}}%
+    \put(0.55134926,0.28295517){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}6.0\end{tabular}}}}%
+    \put(0,0){\includegraphics[width=\unitlength,page=49]{contents/chapt7/figs/model/Figure_1.pdf}}%
+    \put(0.55134926,0.36123021){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}6.5\end{tabular}}}}%
+    \put(0.53600046,0.2352374){\color[rgb]{0,0,0}\rotatebox{90}{\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}Lap time [s]\end{tabular}}}}}%
+    \put(0.53600046,0.69474154){\color[rgb]{0,0,0}\rotatebox{90}{\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}Lap time [s]\end{tabular}}}}}%
+    \put(0.53600048,1.05645944){\color[rgb]{0,0,0}\rotatebox{90}{\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}Lap time [s]\end{tabular}}}}}%
+    \put(0,0){\includegraphics[width=\unitlength,page=50]{contents/chapt7/figs/model/Figure_1.pdf}}%
+    \put(0.1535554,0.43186949){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}4.4\end{tabular}}}}%
+    \put(0.24615009,0.43186949){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}5.1\end{tabular}}}}%
+    \put(0.33874478,0.43186949){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}5.8\end{tabular}}}}%
+    \put(0.43133948,0.43186949){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}6.5\end{tabular}}}}%
+    \put(0,0){\includegraphics[width=\unitlength,page=51]{contents/chapt7/figs/model/Figure_1.pdf}}%
+    \put(0.63582811,0.43186949){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}4.4\end{tabular}}}}%
+    \put(0.72842283,0.43186949){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}5.1\end{tabular}}}}%
+    \put(0.8210175,0.43186949){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}5.8\end{tabular}}}}%
+    \put(0.91361222,0.43186949){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}6.5\end{tabular}}}}%
+    \put(0,0){\includegraphics[width=\unitlength,page=52]{contents/chapt7/figs/model/Figure_1.pdf}}%
+    \put(0.19542809,0.06639456){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}End-to-end\end{tabular}}}}%
+    \put(0,0){\includegraphics[width=\unitlength,page=53]{contents/chapt7/figs/model/Figure_1.pdf}}%
+    \put(0.19542809,0.02934437){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}Steering control\end{tabular}}}}%
+    \put(0,0){\includegraphics[width=\unitlength,page=54]{contents/chapt7/figs/model/Figure_1.pdf}}%
+    \put(0.51866039,0.06639456){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}Velocity control\end{tabular}}}}%
+    \put(0,0){\includegraphics[width=\unitlength,page=55]{contents/chapt7/figs/model/Figure_1.pdf}}%
+    \put(0.51866039,0.02934437){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}Steering and velocity control\end{tabular}}}}%
+    \put(0.21062111,0.13790209){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}$C_{S,f}, \left[ \frac{1}{\text{rad}} \right]$\end{tabular}}}}%
+  \end{picture}%
+\endgroup%
