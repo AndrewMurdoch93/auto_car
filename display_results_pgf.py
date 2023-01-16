@@ -1848,6 +1848,7 @@ def sensitivity_analysis_noise(agent_name, n, start_condition, filename):
     ax.hlines(y=1,xmin=0,xmax=lidar_noise[-1], color='k', linestyles='--')
     ax.hlines(y=-1,xmin=0,xmax=lidar_noise[-1], color='k', linestyles='--')
 
+    ax.set_xlim([0,0.3])
     fig.tight_layout()
     fig.subplots_adjust(right=0.7)
     plt.figlegend(['Steering', 'Acceleration', 'Action limits'], loc='center right', ncol=1)

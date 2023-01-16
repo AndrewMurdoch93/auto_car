@@ -740,15 +740,15 @@
      inkscape:pagecheckerboard="0"
      inkscape:deskcolor="#d1d1d1"
      showgrid="false"
-     inkscape:zoom="0.99331667"
-     inkscape:cx="334.73716"
-     inkscape:cy="282.38729"
+     inkscape:zoom="0.70238095"
+     inkscape:cx="395.08475"
+     inkscape:cy="339.55932"
      inkscape:window-width="1848"
      inkscape:window-height="1136"
      inkscape:window-x="72"
      inkscape:window-y="27"
      inkscape:window-maximized="1"
-     inkscape:current-layer="g8885">
+     inkscape:current-layer="g10377">
     <inkscape:page
        x="0"
        y="0"
@@ -1489,19 +1489,6 @@
              y="0"
              sodipodi:role="line"
              id="tspan9347">6.5</tspan></text>
-      </g>
-      <g
-         id="g9351"
-         transform="rotate(90,-102.41778,315.46341)">
-        <text
-           xml:space="preserve"
-           transform="scale(1,-1)"
-           style="font-variant:normal;font-weight:normal;font-size:10px;font-family:'DejaVu Sans';-inkscape-font-specification:DejaVuSans;writing-mode:lr-tb;fill:#000000;fill-opacity:1;fill-rule:nonzero;stroke:none"
-           id="text9355"><tspan
-             x="0 5.8131251 8.5931253 18.333124 24.483126 27.663124 31.563126 36.773125"
-             y="0"
-             sodipodi:role="line"
-             id="tspan9353">Time [s]</tspan></text>
       </g>
     </g>
     <g
@@ -2276,19 +2263,6 @@
              sodipodi:role="line"
              id="tspan9885">6.5</tspan></text>
       </g>
-      <g
-         id="g9889"
-         transform="rotate(90,-21.825781,234.87141)">
-        <text
-           xml:space="preserve"
-           transform="scale(1,-1)"
-           style="font-variant:normal;font-weight:normal;font-size:10px;font-family:'DejaVu Sans';-inkscape-font-specification:DejaVuSans;writing-mode:lr-tb;fill:#000000;fill-opacity:1;fill-rule:nonzero;stroke:none"
-           id="text9893"><tspan
-             x="0 5.8131251 8.5931253 18.333124 24.483126 27.663124 31.563126 36.773125"
-             y="0"
-             sodipodi:role="line"
-             id="tspan9891">Time [s]</tspan></text>
-      </g>
     </g>
     <g
        id="g9895"
@@ -3002,16 +2976,45 @@
       </g>
       <g
          id="g10385"
-         transform="rotate(90,60.070906,152.97472)">
+         transform="rotate(90,60.070905,152.97472)">
         <text
            xml:space="preserve"
            transform="scale(1,-1)"
            style="font-variant:normal;font-weight:normal;font-size:10px;font-family:'DejaVu Sans';-inkscape-font-specification:DejaVuSans;writing-mode:lr-tb;fill:#000000;fill-opacity:1;fill-rule:nonzero;stroke:none"
-           id="text10389"><tspan
-             x="0 5.8131251 8.5931253 18.333124 24.483126 29.693125 32.873123 36.773125 41.983124"
-             y="0"
+           id="text10389"
+           x="-9"><tspan
+             x="-9"
              sodipodi:role="line"
-             id="tspan10387">Times [s]</tspan></text>
+             id="tspan10387"
+             y="0">Lap time [s]</tspan></text>
+      </g>
+      <g
+         id="g10385-3"
+         transform="rotate(90,-30.910917,243.95654)">
+        <text
+           xml:space="preserve"
+           transform="scale(1,-1)"
+           style="font-variant:normal;font-weight:normal;font-size:10px;font-family:'DejaVu Sans';-inkscape-font-specification:DejaVuSans;writing-mode:lr-tb;fill:#000000;fill-opacity:1;fill-rule:nonzero;stroke:none"
+           id="text10389-6"
+           x="-9"><tspan
+             x="-9"
+             sodipodi:role="line"
+             id="tspan10387-7"
+             y="0">Lap time [s]</tspan></text>
+      </g>
+      <g
+         id="g10385-5"
+         transform="rotate(90,-102.53106,315.57669)">
+        <text
+           xml:space="preserve"
+           transform="scale(1,-1)"
+           style="font-variant:normal;font-weight:normal;font-size:10px;font-family:'DejaVu Sans';-inkscape-font-specification:DejaVuSans;writing-mode:lr-tb;fill:#000000;fill-opacity:1;fill-rule:nonzero;stroke:none"
+           id="text10389-3"
+           x="-9"><tspan
+             x="-9"
+             sodipodi:role="line"
+             id="tspan10387-5"
+             y="0">Lap time [s]</tspan></text>
       </g>
     </g>
     <g

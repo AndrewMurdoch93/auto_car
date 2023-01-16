@@ -525,23 +525,32 @@ def plot_frenet_polynomial():
     #transform_XY_to_NS(rx, ry, x, y)
     convert_xy_to_sn(rx, ry, ryaw, x, y, ds)
     
-    s_0 = 0
-    s_1 = s_0+1
-    s_2 = s_1+0.5
-    theta = 0.5
-    n_0 = 0.25
-    n_1s = [0.7, 0.9, -0.9]
+    s_0s = np.array([0, 0, 0])
+    n_0s = np.array([0.25, 0.25, 0.25])
+    thetas = np.array([0.5, 0.5, 0.5])
+    n_1s = np.array([0.7, 0.9, -0.9])
+
+    # s_0s = np.array([0, 0.25])
+    # n_0s = np.array([0.25, 0.5])
+    # thetas = np.array([0.5, 0.8])
+    # n_1s = np.array([0.7, 0.7])
+
+
+    s_1s = s_0s+1
+    s_2s = s_1s+0.5
     
-    s_ = [[] for _ in range(3)]
-    n_ = [[] for _ in range(3)]
+    s_ = [[] for _ in range(len(s_0s))]
+    n_ = [[] for _ in range(len(s_0s))]
 
     plt.rcParams['font.family'] = 'serif'
     plt.rcParams['font.serif'] = ['Times New Roman'] + plt.rcParams['font.serif']
-    plt.rcParams.update({'font.size': 8})
+    plt.rcParams.update({'font.size': 10})
 
     # font = {'fontname':'Times New Roman'}
     # font = {'fontname':'Times New Roman'}
-    fig, ax = plt.subplots(1, figsize=(5,2.5))
+    fig, ax = plt.subplots(1, figsize=(5,3))
+    
+    
     color='grey'
     ax.tick_params(axis=u'both', which=u'both',length=0)
     ax.spines['bottom'].set_color(color)
@@ -549,15 +558,17 @@ def plot_frenet_polynomial():
     ax.spines['right'].set_color(color)
     ax.spines['left'].set_color(color)
 
-    ax.set_xticks(ticks=[s_0, s_1], labels=['$s_0$', '$s_1$'])
-    ax.set_yticks(ticks=[n_0, n_1s[0]], labels=['$n_0$', '$n_1$'])
-   
-    ax.plot(s_0,n_0, 'x')
-    ax.plot([0,s_2], [1,1])
-    ax.plot([0,s_2], [-1,-1])
+    ax.set_xticks(ticks=[s_0s[0], s_1s[0]], labels=['$s_0$', '$s_1$'])
+    ax.set_yticks(ticks=[n_0s[0], n_1s[0]], labels=['$n_0$', '$n_1$'])
+    # ax.set_xticks(ticks=[], labels=[])
+    # ax.set_yticks(ticks=[], labels=[])
+
+    ax.plot(s_0s[0], n_0s[0], 'x')
+    # ax.plot([0,s_2], [1,1])
+    # ax.plot([0,s_2], [-1,-1])
     
 
-    for idx, n_1 in enumerate(n_1s): 
+    for idx, (s_0, n_0, theta, n_1, s_1, s_2) in enumerate(zip(s_0s, n_0s, thetas, n_1s, s_1s, s_2s)): 
        
         
         A = np.array([[3*s_1**2, 2*s_1, 1, 0], [3*s_0**2, 2*s_0, 1, 0], [s_0**3, s_0**2, s_0, 1], [s_1**3, s_1**2, s_1, 1]])
@@ -579,9 +590,12 @@ def plot_frenet_polynomial():
         n_[idx].append(n)
         
         
+    # for i in range(len(s_0s)):
+    #     plt.plot(s_[i][0], n_[i][0], color='#1f77b4', label='Sampled path')
     
     plt.plot(s_[0][0], n_[0][0], color='#1f77b4', label='Sampled path')
     plt.fill_between(x=s_[1][0], y1=n_[1][0], y2=n_[2][0], color='#1f77b4', alpha=0.3, label='Range of selectable paths')
+
 
     # plt.plot(np.linspace(s_1, s_2), np.ones(len(np.linspace(s_1, s_2)))*n_1)
     ax.hlines(y=1, xmin=s_0-0.2, xmax=s_2+0.2, color='k', label='Track boundaries')
@@ -590,14 +604,16 @@ def plot_frenet_polynomial():
     # plt.vlines(x=s_0, ymin=-1, ymax=1 ,color='grey', linestyle='--', label='Track centerline')
     # plt.vlines(x=s_1, ymin=-1, ymax=1)
     ax.grid(True)
-    #plt.xlim([s_0, s_2])
+    # ax.set_xlim([np.min(s_0s)-2, np.max(s_2s)+2])
     ax.set_xlabel('Distance along \ncenterline, $s$ [m]')
     ax.set_ylabel('Distance perpendicular \nto centerline, $n$ [m]')
-    ax.set_xlim([s_0-0.2, s_2+0.2])
     fig.tight_layout()
     fig.subplots_adjust(bottom=0.4)
-    fig.subplots_adjust(left=0.4)
-    fig.subplots_adjust(right=0.65)
+    # fig.subplots_adjust(left=0.4)
+    # fig.subplots_adjust(right=0.65)
+
+    fig.subplots_adjust(left=0.35)
+    fig.subplots_adjust(right=0.7)
     plt.figlegend(loc='lower center', ncol=2)
     plt.show()
 
@@ -701,6 +717,7 @@ def savitzky_golay(y, window_size, order, deriv=0, rate=1):
 
 if __name__ == '__main__':
     
+    plot_frenet_polynomial()
 
     # num = 1
     # noise = OUActionNoise(mu=np.zeros(num), sigma=0.03, theta=1, dt=0.01, x0=None)
@@ -712,8 +729,6 @@ if __name__ == '__main__':
     #     plt.plot(y[:,i])
     
     # plt.show()
-
-
 
 
     # def velocity_along_line(theta, velocity, ryaw, )
