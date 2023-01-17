@@ -548,7 +548,7 @@ def plot_frenet_polynomial():
 
     # font = {'fontname':'Times New Roman'}
     # font = {'fontname':'Times New Roman'}
-    fig, ax = plt.subplots(1, figsize=(5,2.3))
+    fig, ax = plt.subplots(1, figsize=(5.5,2.3))
     
     
     color='grey'
