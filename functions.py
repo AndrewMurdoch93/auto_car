@@ -525,15 +525,15 @@ def plot_frenet_polynomial():
     #transform_XY_to_NS(rx, ry, x, y)
     convert_xy_to_sn(rx, ry, ryaw, x, y, ds)
     
-    s_0s = np.array([0, 0, 0])
-    n_0s = np.array([0.25, 0.25, 0.25])
-    thetas = np.array([0.5, 0.5, 0.5])
-    n_1s = np.array([0.7, 0.9, -0.9])
+    # s_0s = np.array([0, 0, 0])
+    # n_0s = np.array([0.25, 0.25, 0.25])
+    # thetas = np.array([0.5, 0.5, 0.5])
+    # n_1s = np.array([0.7, 0.9, -0.9])
 
-    # s_0s = np.array([0, 0.25])
-    # n_0s = np.array([0.25, 0.5])
-    # thetas = np.array([0.5, 0.8])
-    # n_1s = np.array([0.7, 0.7])
+    s_0s = np.array([0, 0.25])
+    n_0s = np.array([0, -0.25])
+    thetas = np.array([0.8, 0.8])
+    n_1s = np.array([0.7, 0.7])
 
 
     s_1s = s_0s+1
@@ -548,7 +548,7 @@ def plot_frenet_polynomial():
 
     # font = {'fontname':'Times New Roman'}
     # font = {'fontname':'Times New Roman'}
-    fig, ax = plt.subplots(1, figsize=(5,3))
+    fig, ax = plt.subplots(1, figsize=(5,2.3))
     
     
     color='grey'
@@ -558,13 +558,14 @@ def plot_frenet_polynomial():
     ax.spines['right'].set_color(color)
     ax.spines['left'].set_color(color)
 
-    ax.set_xticks(ticks=[s_0s[0], s_1s[0]], labels=['$s_0$', '$s_1$'])
-    ax.set_yticks(ticks=[n_0s[0], n_1s[0]], labels=['$n_0$', '$n_1$'])
-    # ax.set_xticks(ticks=[], labels=[])
-    # ax.set_yticks(ticks=[], labels=[])
+    # ax.set_xticks(ticks=[s_0s[0], s_1s[0]], labels=['$s_0$', '$s_1$'])
+    # ax.set_yticks(ticks=[n_0s[0], n_1s[0]], labels=['$n_0$', '$n_1$'])
 
-    ax.plot(s_0s[0], n_0s[0], 'x')
-    # ax.plot([0,s_2], [1,1])
+    ax.set_xticks(ticks=[], labels=[])
+    ax.set_yticks(ticks=[], labels=[])
+
+    # ax.plot(s_0s[0], n_0s[0], 'x', label='True position')
+    # ax.plot([s_0s[1]], n_0s[1], 'x', label='Believed position')
     # ax.plot([0,s_2], [-1,-1])
     
 
@@ -588,33 +589,38 @@ def plot_frenet_polynomial():
         
         s_[idx].append(s)
         n_[idx].append(n)
-        
-        
-    # for i in range(len(s_0s)):
-    #     plt.plot(s_[i][0], n_[i][0], color='#1f77b4', label='Sampled path')
     
-    plt.plot(s_[0][0], n_[0][0], color='#1f77b4', label='Sampled path')
-    plt.fill_between(x=s_[1][0], y1=n_[1][0], y2=n_[2][0], color='#1f77b4', alpha=0.3, label='Range of selectable paths')
+    alpha=0.7
 
+    labels = ['Path using true position', 'Path using believed position']
+    for i in range(len(s_0s)):
+        plt.plot(s_[i][0], n_[i][0], label=labels[i], alpha=alpha)
+
+    plt.plot(s_[1][0]-s_0s[1], n_[1][0]-n_0s[1], label='Path travelled by vehicle', alpha=alpha)
+    # plt.plot(s_[0][0], n_[0][0], color='#1f77b4', label='Sampled path')
+    # plt.fill_between(x=s_[1][0], y1=n_[1][0], y2=n_[2][0], color='#1f77b4', alpha=0.3, label='Range of selectable paths')
+
+    ax.plot(s_0s[0], n_0s[0], 'x', label='True position')
+    ax.plot([s_0s[1]], n_0s[1], 'x', label='Believed position')
 
     # plt.plot(np.linspace(s_1, s_2), np.ones(len(np.linspace(s_1, s_2)))*n_1)
-    ax.hlines(y=1, xmin=s_0-0.2, xmax=s_2+0.2, color='k', label='Track boundaries')
-    ax.hlines(y=-1, xmin=s_0-0.2, xmax=s_2+0.2, color='k', label='_nolegend_')
-    ax.hlines(y=0, xmin=s_0-0.2, xmax=s_2+0.2, color='grey', linestyle='--', label='Track centerline')
+    ax.hlines(y=1, xmin=-10, xmax=10, color='k', label='Track boundaries')
+    ax.hlines(y=-1, xmin=-10, xmax=10, color='k', label='_nolegend_')
+    ax.hlines(y=0, xmin=s_0-10, xmax=10, color='grey', linestyle='--', label='Track centerline')
     # plt.vlines(x=s_0, ymin=-1, ymax=1 ,color='grey', linestyle='--', label='Track centerline')
     # plt.vlines(x=s_1, ymin=-1, ymax=1)
     ax.grid(True)
-    # ax.set_xlim([np.min(s_0s)-2, np.max(s_2s)+2])
+    ax.set_xlim([np.min(s_0s)-0.2, np.max(s_2s)+0.2])
     ax.set_xlabel('Distance along \ncenterline, $s$ [m]')
     ax.set_ylabel('Distance perpendicular \nto centerline, $n$ [m]')
     fig.tight_layout()
-    fig.subplots_adjust(bottom=0.4)
+    # fig.subplots_adjust(bottom=0.4)
     # fig.subplots_adjust(left=0.4)
     # fig.subplots_adjust(right=0.65)
 
-    fig.subplots_adjust(left=0.35)
-    fig.subplots_adjust(right=0.7)
-    plt.figlegend(loc='lower center', ncol=2)
+    # fig.subplots_adjust(left=0.35)
+    fig.subplots_adjust(right=0.5)
+    plt.figlegend(loc='center right', ncol=1)
     plt.show()
 
 
