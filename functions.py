@@ -594,7 +594,8 @@ def plot_frenet_polynomial():
 
     labels = ['Path using true position', 'Path using believed position']
     for i in range(len(s_0s)):
-        plt.plot(s_[i][0], n_[i][0], label=labels[i], alpha=alpha)
+        if i==1:
+            plt.plot(s_[i][0], n_[i][0], label=labels[i], alpha=alpha)
 
     plt.plot(s_[1][0]-s_0s[1], n_[1][0]-n_0s[1], label='Path travelled by vehicle', alpha=alpha)
     # plt.plot(s_[0][0], n_[0][0], color='#1f77b4', label='Sampled path')

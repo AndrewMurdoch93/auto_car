@@ -18,7 +18,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 import torch.optim as optim
 import matplotlib
-matplotlib.use('pgf')
+# matplotlib.use('pgf')
 import matplotlib.pyplot as plt
 import pickle
 import functions
@@ -1410,7 +1410,7 @@ def display_only_path_multiple(agent_names, ns, legend_title, legend, mismatch_p
     # plt.savefig('results/'+filename+'.pgf', format='pgf')
     pass
 
-def display_path_two_multiple(agent_names, ns, legend_title, legend, mismatch_parameters, frac_vary, start_condition, filename):
+def display_path_two_multiple(agent_names, ns, legend_title, legend, mismatch_parameters, noise_dict, frac_vary, start_condition, filename):
     
     pose_history = []
     progress_history = []
@@ -1427,16 +1427,16 @@ def display_path_two_multiple(agent_names, ns, legend_title, legend, mismatch_pa
         env_dict['reward_signal']['max_progress'] = 0
         
         # Model mismatches
-        if mismatch_parameters:
-            for par, var in zip(mismatch_parameters, frac_vary):
-                env_dict['car_params'][par] *= 1+var 
+        # if mismatch_parameters:
+        #     for par, var in zip(mismatch_parameters, frac_vary):
+        #         env_dict['car_params'][par] *= 1+var 
 
 
         env = environment(env_dict)
         if start_condition:
-            env.reset(save_history=True, start_condition=start_condition, car_params=env_dict['car_params'])
+            env.reset(save_history=True, start_condition=start_condition, car_params=env_dict['car_params'], noise=noise_dict)
         else:
-            env.reset(save_history=True, start_condition=[], car_params=env_dict['car_params'])
+            env.reset(save_history=True, start_condition=[], car_params=env_dict['car_params'], noise=noise_dict)
 
         infile = open('agents/' + agent_name + '/' + agent_name + '_params', 'rb')
         agent_dict = pickle.load(infile)
@@ -1480,7 +1480,7 @@ def display_path_two_multiple(agent_names, ns, legend_title, legend, mismatch_pa
         a.load_weights(agent_name, n)
 
         #start_pose = {'x':11.2, 'y':7.7, 'v':0, 'delta':0, 'theta':0, 'goal':1}
-        env.reset(save_history=True, start_condition=start_condition, car_params=env_dict['car_params'])
+        env.reset(save_history=True, start_condition=start_condition, car_params=env_dict['car_params'], noise=noise_dict)
         obs = env.observation
         done = False
         score=0
@@ -1509,21 +1509,18 @@ def display_path_two_multiple(agent_names, ns, legend_title, legend, mismatch_pa
         
         
     
-
-
-
     legend_new = legend.copy()
     legend_new.insert(0, 'Min and max')
 
     legend_racetrack = legend.copy()
     legend_racetrack.insert(0, 'Track centerline')
 
-    plt.rcParams.update({
-    "font.family": "serif",  # use serif/main font for text elements
-    "text.usetex": True,     # use inline math for ticks
-    "pgf.rcfonts": False,     # don't setup fonts from rc parameters
-    "font.size": 12
-    })
+    # plt.rcParams.update({
+    # "font.family": "serif",  # use serif/main font for text elements
+    # "text.usetex": True,     # use inline math for ticks
+    # "pgf.rcfonts": False,     # don't setup fonts from rc parameters
+    # "font.size": 12
+    # })
 
     fig, ax = plt.subplots(2, figsize=(5,2))
 
@@ -1541,7 +1538,7 @@ def display_path_two_multiple(agent_names, ns, legend_title, legend, mismatch_pa
     for i in [0,1]:
         ax[0].plot(np.array(pose_history[i])[:,0], np.array(pose_history[i])[:,1], linewidth=1.5, color=colors[i])   
 
-    for i in [2,3]:
+    for i in [0,1]:
         ax[1].plot(np.array(pose_history[i])[:,0], np.array(pose_history[i])[:,1], linewidth=1.5, color=colors[i])   
 
 
@@ -1567,9 +1564,21 @@ def display_path_two_multiple(agent_names, ns, legend_title, legend, mismatch_pa
     fig.subplots_adjust(right=0.5) 
     plt.figlegend(legend, title=legend_title, loc='center right', ncol=1, labelspacing=0.7)
     
-    # plt.show() 
-    plt.savefig('results/'+filename+'.pgf', format='pgf')
+    plt.show() 
+    # plt.savefig('results/'+filename+'.pgf', format='pgf')
     pass
+
+
+agent_names = ['porto_pete_s_r_collision_0', 'porto_pete_s_polynomial']    
+legend = ['Circular path', 'Polynomical path']
+legend_title = ''
+ns=[0,0]
+mismatch_parameters = ['unknown_mass']
+frac_vary = [0]
+noise_dict = {'xy':0, 'theta':0, 'v':0, 'lidar':0}
+start_condition = {'x':10, 'y':4.5, 'v':3, 'theta':np.pi, 'delta':0, 'goal':0}
+filename='path_method_comparison'
+display_path_two_multiple(agent_names, ns, legend_title, legend, mismatch_parameters, noise_dict, frac_vary, start_condition, filename)
 
 
 
@@ -1861,7 +1870,7 @@ agent_name = 'porto_ete_v5_r_collision_5'
 n=0
 start_condition = {'x':4, 'y':4.8, 'v':5, 'theta':np.pi, 'delta':0, 'goal':0}
 filename='action_noise'
-sensitivity_analysis_noise(agent_name=agent_name, n=n, start_condition=start_condition, filename=filename)
+# sensitivity_analysis_noise(agent_name=agent_name, n=n, start_condition=start_condition, filename=filename)
 
 
 
@@ -2336,7 +2345,7 @@ noise_params = ['xy', 'theta', 'v', 'lidar']
 legend = ['End-to-end', 'Steering control', 'Velocity control', 'Steering and velocity control']
 legend_title = ''
 filename = 'noise_vary'
-display_lap_noise_results_multiple(agent_names, noise_params, legend_title, legend, filename)
+# display_lap_noise_results_multiple(agent_names, noise_params, legend_title, legend, filename)
 
 
 def display_lap_unknown_mass(agent_names, legend, filename):
@@ -2929,16 +2938,17 @@ def plot_frenet_polynomial(filename):
     
     alpha=0.7
 
-    labels = ['Path using true position', 'Path using believed position']
+    labels = ['', 'Path using observed position']
     for i in range(len(s_0s)):
-        plt.plot(s_[i][0], n_[i][0], label=labels[i], alpha=alpha)
+        if i==1:
+            plt.plot(s_[i][0], n_[i][0], label=labels[i], alpha=alpha)
 
     plt.plot(s_[1][0]-s_0s[1], n_[1][0]-n_0s[1], label='Path travelled by vehicle', alpha=alpha)
     # plt.plot(s_[0][0], n_[0][0], color='#1f77b4', label='Sampled path')
     # plt.fill_between(x=s_[1][0], y1=n_[1][0], y2=n_[2][0], color='#1f77b4', alpha=0.3, label='Range of selectable paths')
 
     ax.plot(s_0s[0], n_0s[0], 'x', label='True position')
-    ax.plot([s_0s[1]], n_0s[1], 'x', label='Believed position')
+    ax.plot([s_0s[1]], n_0s[1], 'x', label='Observed position')
 
     # plt.plot(np.linspace(s_1, s_2), np.ones(len(np.linspace(s_1, s_2)))*n_1)
     ax.hlines(y=1, xmin=-10, xmax=10, color='k', label='Track boundaries')
