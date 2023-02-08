@@ -1569,7 +1569,7 @@ if True:
 
 
     #lfc
-    # agent_names = ['porto_pete_s_lfc_4', 'porto_pete_s_lfc_0', 'porto_pete_s_r_collision_0', 'porto_pete_s_lfc_1', 'porto_pete_s_lfc_2',  'porto_pete_s_lfc_3']
+    agent_names = ['porto_pete_s_lfc_4', 'porto_pete_s_lfc_0', 'porto_pete_s_r_collision_0', 'porto_pete_s_lfc_1', 'porto_pete_s_lfc_2',  'porto_pete_s_lfc_3']
     # legend = ['0.3', '0.5', '1', '1.5', '2', '2.5']
     # legend_title = 'L_fc'
     # ns=[0,0,0,0,0,0]
@@ -1883,7 +1883,7 @@ if True:
 
 # Final porto agents!!!
 # agent_names = ['porto_ete_v5_r_collision_5']  
-agent_names = ['porto_ete_v5_r_collision_5', 'porto_ete_v5_r_collision_5']    
+# agent_names = ['porto_ete_v5_r_collision_5', 'porto_ete_v5_r_collision_5']    
 # agent_names = ['porto_pete_s_r_collision_0']
 # agent_names = ['porto_pete_s_polynomial', 'porto_pete_s_polynomial']   
 # agent_names = ['porto_pete_v_k_1_attempt_2', 'porto_pete_v_k_1_attempt_2']
@@ -1900,8 +1900,8 @@ agent_names = ['porto_ete_v5_r_collision_5', 'porto_ete_v5_r_collision_5']
 # agent_names = ['porto_pete_sv_p_r_0_noise']
 
 legend = ['none', 'mismatch']
-legend_title = 'Partial end-to-end'
-ns=[0,1]
+legend_title = 'End-to-end'
+ns=[1,1]
 
 # display_results_multiple.learning_curve_lap_time_average(agent_names, legend, legend_title, ns)
 # display_results_multiple.learning_curve_reward_average(agent_names, legend, legend_title)
@@ -1915,9 +1915,9 @@ ns=[0,1]
 #     display_results_multiple.display_lap_results(agent_name=agent_name)
 
 
-mismatch_parameters = [['mu'], ['mu']]
-frac_vary = [[0], [-0.5]]
-noise_dicts = [{'xy':0.025, 'theta':0.05, 'v':0.1, 'lidar':0.01}, {'xy':0.025, 'theta':0.05, 'v':0.1, 'lidar':0.01}]
+mismatch_parameters = [['mu']]
+frac_vary = [[0]]
+noise_dicts = [{'xy':0, 'theta':0, 'v':0, 'lidar':0}]
 
 start_condition = {'x':10, 'y':4.5, 'v':3, 'theta':np.pi, 'delta':0, 'goal':0}
 # Columbia
@@ -1927,9 +1927,9 @@ start_condition = {'x':10, 'y':4.5, 'v':3, 'theta':np.pi, 'delta':0, 'goal':0}
 
 # NB!!!! Error: Path is junk when no mismatch is present, when displaying 2 agents
 
-# display_results_multiple.display_path_multiple(agent_names=agent_names, ns=ns, legend_title=legend_title,          
-#                                              legend=legend, mismatch_parameters=mismatch_parameters, frac_vary=frac_vary, noise_dicts=noise_dicts,
-#                                              start_condition=start_condition)
+display_results_multiple.display_path_multiple(agent_names=agent_names, ns=ns, legend_title=legend_title,          
+                                             legend=legend, mismatch_parameters=mismatch_parameters, frac_vary=frac_vary, noise_dicts=noise_dicts,
+                                             start_condition=start_condition)
 
 # display_results_multiple.display_path_mismatch_multiple(agent_names=agent_names, ns=ns, legend_title=legend_title,          
 #                                              legend=legend, mismatch_parameters=mismatch_parameters, frac_vary=frac_vary, noise_dicts=noise_dicts,
