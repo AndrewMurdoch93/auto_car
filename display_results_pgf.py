@@ -559,7 +559,7 @@ def learning_curve_all(agent_names, legend, legend_title, ns, filename, xlim, xs
 
     plt.rc('axes',edgecolor='gray')
     #fig, ax = plt.subplots(1, 3, figsize=(5.5,3))
-    fig, ax = plt.subplots(1, 3, figsize=(5.5,2.4))
+    fig, ax = plt.subplots(1, 3, figsize=(5.5,2.8))
     
     #ax[0].ticklabel_format(style='scientific', axis='x', scilimits=(0,0), useMathText=True, useOffset=True)
     ax[1].ticklabel_format(style='scientific', axis='x', scilimits=(0,0), useMathText=True)
@@ -647,8 +647,8 @@ def learning_curve_all(agent_names, legend, legend_title, ns, filename, xlim, xs
 
 
     fig.tight_layout()
-    fig.subplots_adjust(bottom=0.34) 
-    plt.figlegend(legend, title=legend_title, loc = 'lower center', ncol=5)
+    fig.subplots_adjust(bottom=0.4) 
+    plt.figlegend(legend, title=legend_title, loc = 'lower center', ncol=2)
     # plt.show()
     plt.savefig('results/'+filename+'.pgf', format='pgf')
 
@@ -1127,7 +1127,7 @@ mismatch_parameters = ['mu']
 frac_vary = [0]
 start_condition = {'x':10, 'y':4.5, 'v':3, 'theta':np.pi, 'delta':0, 'goal':0}
 filename = 'velocity_profile_steer_agent'
-display_only_velocity(agent_names, ns, legend_title, legend, mismatch_parameters, frac_vary, start_condition, filename)
+# display_only_velocity(agent_names, ns, legend_title, legend, mismatch_parameters, frac_vary, start_condition, filename)
 
 
 
@@ -1840,7 +1840,7 @@ frac_vary = [0]
 noise_dict = {'xy':0, 'theta':0, 'v':0, 'lidar':0}
 start_condition = {'x':10, 'y':4.5, 'v':3, 'theta':np.pi, 'delta':0, 'goal':0}
 filename='path_method_comparison'
-display_path_two_multiple(agent_names, ns, legend_title, legend, mismatch_parameters, noise_dict, frac_vary, start_condition, filename)
+# display_path_two_multiple(agent_names, ns, legend_title, legend, mismatch_parameters, noise_dict, frac_vary, start_condition, filename)
 
 
 
@@ -2144,7 +2144,8 @@ def display_path_actions_multiple(agent_names, ns, legend_title, legend, mismatc
     progress_history = []
     state_history = []
     action_step_history = []
-
+    noise_dict = {'xy':0, 'theta':0, 'v':0, 'lidar':0}
+    
     for agent_name, n, i in zip(agent_names, ns, range(len(agent_names))):
 
         infile = open('environments/' + agent_name, 'rb')
@@ -2161,9 +2162,9 @@ def display_path_actions_multiple(agent_names, ns, legend_title, legend, mismatc
 
         env = environment(env_dict)
         if start_condition:
-            env.reset(save_history=True, start_condition=start_condition, car_params=env_dict['car_params'])
+            env.reset(save_history=True, start_condition=start_condition, car_params=env_dict['car_params'], noise=noise_dict)
         else:
-            env.reset(save_history=True, start_condition=[], car_params=env_dict['car_params'])
+            env.reset(save_history=True, start_condition=[], car_params=env_dict['car_params'], nosie=noise_dict)
 
         infile = open('agents/' + agent_name + '/' + agent_name + '_params', 'rb')
         agent_dict = pickle.load(infile)
@@ -2207,7 +2208,7 @@ def display_path_actions_multiple(agent_names, ns, legend_title, legend, mismatc
         a.load_weights(agent_name, n)
 
         #start_pose = {'x':11.2, 'y':7.7, 'v':0, 'delta':0, 'theta':0, 'goal':1}
-        env.reset(save_history=True, start_condition=start_condition, car_params=env_dict['car_params'])
+        env.reset(save_history=True, start_condition=start_condition, car_params=env_dict['car_params'], noise=noise_dict)
         obs = env.observation
         done = False
         score=0
@@ -2252,10 +2253,10 @@ def display_path_actions_multiple(agent_names, ns, legend_title, legend, mismatc
     "font.size": 12
     })
 
-    fig, ax = plt.subplots(3, figsize=(5,5))
+    fig, ax = plt.subplots(2, figsize=(5,4))
     alpha = 0.8
     color='gray'
-    for i in range(3):
+    for i in range(2):
         #ax[i].tick_params(axis='both', colors='lightgrey')
         ax[i].spines['bottom'].set_color(color)
         ax[i].spines['top'].set_color(color) 
@@ -2299,27 +2300,25 @@ def display_path_actions_multiple(agent_names, ns, legend_title, legend, mismatc
     ax[1].set_ylim([env_dict['action_space_dict']['vel_select'][0]-0.2, env_dict['action_space_dict']['vel_select'][1]+0.2])
     ax[1].grid(True, color='lightgrey')
     ax[1].tick_params('both', length=0)
-    ax[1].set_xticklabels([])
+    # ax[1].set_xticklabels([])
 
 
-    ax[2].hlines(y=1, xmin=0, xmax=100, colors='black', linestyle='dashed')
-    ax[2].hlines(y=-1, xmin=0, xmax=100, colors='black', linestyle='dashed', label='_nolegend_')
-    for i in range(len(agent_names)):
-        plt.plot(np.array(progress_history[i])[0:len(np.array(action_step_history[i])[:,1])]*100, np.array(action_step_history[i])[:,1], linewidth=1.5, alpha=alpha)
-    ax[2].set_ylabel('Longitudinal\naction')
-    ax[2].set_xlim(xlims)
-    # ax[2].set_ylim([env_dict['action_space_dict']['vel_select'][0]-0.2, env_dict['action_space_dict']['vel_select'][1]+0.2])
-    ax[2].grid(True, color='lightgrey')
-    ax[2].tick_params('both', length=0)
-    #ax[2].set_xticklabels([])
-    ax[2].set_xlabel('Progress along centerline [%]')
-
-   
+    # ax[2].hlines(y=1, xmin=0, xmax=100, colors='black', linestyle='dashed')
+    # ax[2].hlines(y=-1, xmin=0, xmax=100, colors='black', linestyle='dashed', label='_nolegend_')
+    # for i in range(len(agent_names)):
+    #     plt.plot(np.array(progress_history[i])[0:len(np.array(action_step_history[i])[:,1])]*100, np.array(action_step_history[i])[:,1], linewidth=1.5, alpha=alpha)
+    # ax[2].set_ylabel('Longitudinal\naction')
+    # ax[2].set_xlim(xlims)
+    # # ax[2].set_ylim([env_dict['action_space_dict']['vel_select'][0]-0.2, env_dict['action_space_dict']['vel_select'][1]+0.2])
+    # ax[2].grid(True, color='lightgrey')
+    # ax[2].tick_params('both', length=0)
+    # #ax[2].set_xticklabels([])
+    ax[1].set_xlabel('Progress along centerline [%]')
 
 
     # legend.insert(0, 'Track centerline')
     fig.tight_layout()
-    fig.subplots_adjust(bottom=0.17) 
+    fig.subplots_adjust(bottom=0.23) 
     plt.figlegend(legend, title=legend_title, loc='lower center', ncol=5)
     
     # plt.show() 
@@ -3235,8 +3234,7 @@ def plot_frenet_polynomial(filename):
     # plt.show()
     plt.savefig('results/'+filename+'.pgf', format='pgf')
 
-
-plot_frenet_polynomial(filename='noise_path')
+# plot_frenet_polynomial(filename='noise_path')
 
 # agent_names = ['porto_ete_r_1', 'porto_ete_r_2', 'porto_ete_r_3', 'porto_ete_LiDAR_10', 'porto_ete_r_4' ]
 # legend = ['1', '0.7', '0.5', '0.3', '0.1']
@@ -3419,6 +3417,22 @@ legend = ['End-to-end',
 filename='noise_vary'
 # display_lap_noise_results_multiple(agent_names, noise_params, legend_title, legend, filename)
 
+
+# agent_names = ['porto_ete_v5_r_collision_5', 'porto_pete_sv_p_r_0']
+# legend = ['End-to-end', 'Steering and velocity control']
+# legend_title = ''
+# ns=[0,1]
+# filename='steer_velocity_lap'
+
+
+agent_names = ['porto_ete_v5_r_collision_5', 'porto_pete_s_polynomial', 'porto_pete_v_k_1_attempt_2', 'porto_pete_sv_p_r_0']
+legend = ['End-to-end', 'Steering control' , 'Velocity control', 'Steering and velocity control']
+legend_title = ''
+ns=[0,0,0,0]
+xlim = 3000
+xspace = 1000 
+filename = 'all_learning_curves'
+
 # mismatch_parameters = ['C_Sf']
 # frac_vary = [0]
 # start_condition = {'x':10, 'y':4.5, 'v':3, 'theta':np.pi, 'delta':0, 'goal':0}
@@ -3448,10 +3462,11 @@ filename='noise_vary'
 # mismatch_parameters = ['C_Sf']
 # frac_vary = [0]
 # start_condition = {'x':10, 'y':4.5, 'v':3, 'theta':np.pi, 'delta':0, 'goal':0}
-# #start_condition = []
+#start_condition = []
 # display_path_actions_multiple(agent_names=agent_names, ns=ns, legend_title=legend_title,          
 #                         legend=legend, mismatch_parameters=mismatch_parameters, frac_vary=frac_vary, 
 #                         start_condition=start_condition, filename=filename)
+
 
 
 # mismatch_parameters = ['C_Sf']
@@ -3475,6 +3490,6 @@ filename='noise_vary'
 
 # learning_curve_reward_average(agent_names, legend, legend_title)
 
-# learning_curve_all(agent_names, legend, legend_title, ns, filename, xlim, xspace)
+learning_curve_all(agent_names, legend, legend_title, ns, filename, xlim, xspace)
 
 # display_velocity_slip(agent_names, ns, legend_title, legend, mismatch_parameters, frac_vary, start_condition, filename)

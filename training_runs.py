@@ -23,7 +23,7 @@ import os
 
 agent_name = 'porto_pete_sv'
 
-main_dict = {'name':agent_name, 'max_episodes':50000, 'max_steps':3e6, 'learning_method':'td3', 'runs':3, 'comment':''}
+main_dict = {'name':agent_name, 'max_episodes':10000, 'max_steps':3e6, 'learning_method':'td3', 'runs':3, 'comment':''}
 
 agent_dqn_dict = {'gamma':0.99, 'epsilon':1, 'eps_end':0.01, 'eps_dec':1/1000, 'lr':0.001, 'batch_size':64, 'max_mem_size':500000, 
                 'fc1_dims': 64, 'fc2_dims': 64, 'fc3_dims':64}
@@ -1379,6 +1379,112 @@ if True:
 
     pass
 
+    # agent_name = 'porto_ete_v5_r_collision_5_noise'
+    # main_dict['name'] = agent_name
+    # main_dict['max_steps'] = 3e6
+    # env_dict['steer_control_dict']['steering_control'] = False
+    # env_dict['steer_control_dict']['path_strategy'] = 'circle'
+    # env_dict['velocity_control'] = False
+    # env_dict['velocity_gain'] = 2
+    # env_dict['reward_signal']['distance'] = 0.3
+    # env_dict['reward_signal']['collision'] = -10
+    # env_dict['noise'] = {'xy':0.025, 'theta':0.05, 'v':0.1, 'lidar':0.01}
+    # a = main_multiple.trainingLoop(main_dict, agent_td3_dict, env_dict, load_agent='')
+    # a.train()
+    # main_multiple.lap_time_test(agent_name=agent_name, n_episodes=n_test, detect_issues=False, initial_conditions=True)
+    # main_multiple.lap_time_test_with_noise(agent_name=agent_name, n_episodes=n_test, detect_issues=False, initial_conditions=True, noise=env_dict['noise'])
+
+# Algorithm hyper-parameters
+if True: 
+    # agent_name = 'target_update_0'
+    # main_dict['name'] = agent_name
+    # main_dict['max_steps'] = 3e6
+    # env_dict['steer_control_dict']['steering_control'] = False
+    # env_dict['velocity_control'] = False
+    # env_dict['reward_signal']['distance'] = 0.3
+    # env_dict['reward_signal']['collision'] = -10
+    # env_dict['noise'] = {'xy':0, 'theta':0, 'v':0, 'lidar':0}
+    
+    # agent_td3_dict = {'alpha':0.001, 'beta':0.001, 'tau':0.003, 'gamma':0.99, 'update_actor_interval':2, 'warmup':100, 
+    #                 'max_size':1000000, 'layer1_size':400, 'layer2_size':300, 'layer3_size':300, 'batch_size':100, 'noise':0.1}
+    # a = main_multiple.trainingLoop(main_dict, agent_td3_dict, env_dict, load_agent='')
+    # a.train()
+    # main_multiple.lap_time_test(agent_name=agent_name, n_episodes=n_test, detect_issues=False, initial_conditions=True)
+    
+    # agent_name = 'target_update_1'
+    # main_dict['name'] = agent_name
+    # agent_td3_dict = {'alpha':0.001, 'beta':0.001, 'tau':0.007, 'gamma':0.99, 'update_actor_interval':2, 'warmup':100, 
+    #                 'max_size':1000000, 'layer1_size':400, 'layer2_size':300, 'layer3_size':300, 'batch_size':100, 'noise':0.1}
+    # a = main_multiple.trainingLoop(main_dict, agent_td3_dict, env_dict, load_agent='')
+    # a.train()
+    # main_multiple.lap_time_test(agent_name=agent_name, n_episodes=n_test, detect_issues=False, initial_conditions=True)
+
+
+    # agent_name = 'update_actor_interval_0'
+    # main_dict['name'] = agent_name
+    # agent_td3_dict = {'alpha':0.001, 'beta':0.001, 'tau':0.005, 'gamma':0.99, 'update_actor_interval':1, 'warmup':100, 
+    #                 'max_size':1000000, 'layer1_size':400, 'layer2_size':300, 'layer3_size':300, 'batch_size':100, 'noise':0.1}
+    # a = main_multiple.trainingLoop(main_dict, agent_td3_dict, env_dict, load_agent='')
+    # a.train()
+    # main_multiple.lap_time_test(agent_name=agent_name, n_episodes=n_test, detect_issues=False, initial_conditions=True)
+
+    # agent_name = 'update_actor_interval_1'
+    # main_dict['name'] = agent_name
+    # agent_td3_dict = {'alpha':0.001, 'beta':0.001, 'tau':0.005, 'gamma':0.99, 'update_actor_interval':3, 'warmup':100, 
+    #                 'max_size':1000000, 'layer1_size':400, 'layer2_size':300, 'layer3_size':300, 'batch_size':100, 'noise':0.1}
+    # a = main_multiple.trainingLoop(main_dict, agent_td3_dict, env_dict, load_agent='')
+    # a.train()
+    # main_multiple.lap_time_test(agent_name=agent_name, n_episodes=n_test, detect_issues=False, initial_conditions=True)
+
+    # agent_name = 'batch_size_0'
+    # main_dict['name'] = agent_name
+    # agent_td3_dict = {'alpha':0.001, 'beta':0.001, 'tau':0.005, 'gamma':0.99, 'update_actor_interval':2, 'warmup':100, 
+    #                 'max_size':1000000, 'layer1_size':400, 'layer2_size':300, 'layer3_size':300, 'batch_size':60, 'noise':0.1}
+    # a = main_multiple.trainingLoop(main_dict, agent_td3_dict, env_dict, load_agent='')
+    # a.train()
+    # main_multiple.lap_time_test(agent_name=agent_name, n_episodes=n_test, detect_issues=False, initial_conditions=True)
+
+    # agent_name = 'batch_size_1'
+    # main_dict['name'] = agent_name
+    # agent_td3_dict = {'alpha':0.001, 'beta':0.001, 'tau':0.005, 'gamma':0.99, 'update_actor_interval':2, 'warmup':100, 
+    #                 'max_size':1000000, 'layer1_size':400, 'layer2_size':300, 'layer3_size':300, 'batch_size':140, 'noise':0.1}
+    # a = main_multiple.trainingLoop(main_dict, agent_td3_dict, env_dict, load_agent='')
+    # a.train()
+    # main_multiple.lap_time_test(agent_name=agent_name, n_episodes=n_test, detect_issues=False, initial_conditions=True)
+
+    # agent_name = 'explore_policy_0'
+    # main_dict['name'] = agent_name
+    # agent_td3_dict = {'alpha':0.001, 'beta':0.001, 'tau':0.005, 'gamma':0.99, 'update_actor_interval':2, 'warmup':100, 
+    #                 'max_size':1000000, 'layer1_size':400, 'layer2_size':300, 'layer3_size':300, 'batch_size':100, 'noise':0.05}
+    # a = main_multiple.trainingLoop(main_dict, agent_td3_dict, env_dict, load_agent='')
+    # a.train()
+    # main_multiple.lap_time_test(agent_name=agent_name, n_episodes=n_test, detect_issues=False, initial_conditions=True)
+
+    # agent_name = 'explore_policy_1'
+    # main_dict['name'] = agent_name
+    # agent_td3_dict = {'alpha':0.001, 'beta':0.001, 'tau':0.005, 'gamma':0.99, 'update_actor_interval':2, 'warmup':100, 
+    #                 'max_size':1000000, 'layer1_size':400, 'layer2_size':300, 'layer3_size':300, 'batch_size':100, 'noise':0.2}
+    # a = main_multiple.trainingLoop(main_dict, agent_td3_dict, env_dict, load_agent='')
+    # a.train()
+    # main_multiple.lap_time_test(agent_name=agent_name, n_episodes=n_test, detect_issues=False, initial_conditions=True)
+
+    # agent_name = 'layer_0'
+    # main_dict['name'] = agent_name
+    # agent_td3_dict = {'alpha':0.001, 'beta':0.001, 'tau':0.005, 'gamma':0.99, 'update_actor_interval':2, 'warmup':100, 
+    #                 'max_size':1000000, 'layer1_size':300, 'layer2_size':200, 'layer3_size':300, 'batch_size':100, 'noise':0.2}
+    # a = main_multiple.trainingLoop(main_dict, agent_td3_dict, env_dict, load_agent='')
+    # a.train()
+    # main_multiple.lap_time_test(agent_name=agent_name, n_episodes=n_test, detect_issues=False, initial_conditions=True)
+
+    # agent_name = 'layer_1'
+    # main_dict['name'] = agent_name
+    # agent_td3_dict = {'alpha':0.001, 'beta':0.001, 'tau':0.005, 'gamma':0.99, 'update_actor_interval':2, 'warmup':100, 
+    #                 'max_size':1000000, 'layer1_size':300, 'layer2_size':500, 'layer3_size':400, 'batch_size':100, 'noise':0.2}
+    # a = main_multiple.trainingLoop(main_dict, agent_td3_dict, env_dict, load_agent='')
+    # a.train()
+    # main_multiple.lap_time_test(agent_name=agent_name, n_episodes=n_test, detect_issues=False, initial_conditions=True)
+    pass
+
 
 #tests with v=6
 if True:
@@ -1516,13 +1622,12 @@ if True:
     # ns = [0,0,0,0,0]
     
     
-    
     # agent_names = ['redbull_ring_ete']
     # agent_names = ['porto_ete_v5_r_collision_5']
 
     # legend = ['None', 'Steering', 'Velocity', 'Steering and velocity']
     # legend_title = 'Controller'
-    # ns=[0, 0, 0 ,0]
+    ns=[0, 0, 0 ,0]
 
     pass
 
@@ -1569,7 +1674,7 @@ if True:
 
 
     #lfc
-    agent_names = ['porto_pete_s_lfc_4', 'porto_pete_s_lfc_0', 'porto_pete_s_r_collision_0', 'porto_pete_s_lfc_1', 'porto_pete_s_lfc_2',  'porto_pete_s_lfc_3']
+    # agent_names = ['porto_pete_s_lfc_4', 'porto_pete_s_lfc_0', 'porto_pete_s_r_collision_0', 'porto_pete_s_lfc_1', 'porto_pete_s_lfc_2',  'porto_pete_s_lfc_3']
     # legend = ['0.3', '0.5', '1', '1.5', '2', '2.5']
     # legend_title = 'L_fc'
     # ns=[0,0,0,0,0,0]
@@ -1891,6 +1996,10 @@ if True:
 # agent_names = ['porto_pete_sv_p_r_0', 'porto_pete_sv_p_r_0']
 # agent_names = ['porto_pete_sv_p_r_0']
 
+# agent_names = ['porto_ete_v5_r_collision_5', 'porto_pete_s_polynomial', 'porto_pete_v_k_1_attempt_2', 'porto_pete_sv_p_r_0']
+# legend = ['End-to-end', 'Steering control', , 'Velocity control', 'Steering and velocity control']
+# legend_title = ''
+# ns=[0,0,0,0]
 
 # agent_names = ['porto_ete_v5_r_collision_5_noise']    
 # agent_names = ['porto_pete_s_r_collision_0_noise']
@@ -1899,9 +2008,21 @@ if True:
 # agent_names = ['porto_pete_sv_c_r_8_noise']
 # agent_names = ['porto_pete_sv_p_r_0_noise']
 
-legend = ['none', 'mismatch']
-legend_title = 'End-to-end'
-ns=[1,1]
+
+#Neural network and TD3 parameters
+# agent_names = ['target_update_0', 'target_update_1']
+# agent_names = ['update_actor_interval_0', 'update_actor_interval_1']
+# agent_names = ['batch_size_0', 'batch_size_1']
+# agent_names = ['explore_policy_0', 'explore_policy_1']
+# agent_names = ['layer_0', 'layer_1']
+
+# agent_names = ['batch_size_1']
+# legend = agent_names
+# ns=[0]
+
+# legend = ['none', 'mismatch']
+# legend_title = ''
+# ns=[1,1]
 
 # display_results_multiple.learning_curve_lap_time_average(agent_names, legend, legend_title, ns)
 # display_results_multiple.learning_curve_reward_average(agent_names, legend, legend_title)
@@ -1915,10 +2036,9 @@ ns=[1,1]
 #     display_results_multiple.display_lap_results(agent_name=agent_name)
 
 
-mismatch_parameters = [['mu']]
-frac_vary = [[0]]
-noise_dicts = [{'xy':0, 'theta':0, 'v':0, 'lidar':0}]
-
+mismatch_parameters = [['mu'], ['mu'], ['mu'], ['mu']]
+frac_vary = [[0], [0], [0], [0]]
+noise_dicts = [{'xy':0, 'theta':0, 'v':0, 'lidar':0}, {'xy':0, 'theta':0, 'v':0, 'lidar':0}, {'xy':0, 'theta':0, 'v':0, 'lidar':0}, {'xy':0, 'theta':0, 'v':0, 'lidar':0}]
 start_condition = {'x':10, 'y':4.5, 'v':3, 'theta':np.pi, 'delta':0, 'goal':0}
 # Columbia
 # start_condition = {'x':5.7, 'y':7.25, 'v':3, 'theta':0, 'delta':0, 'goal':0}
