@@ -3831,46 +3831,116 @@ def display_path_mismatch_multiple(agent_names, ns, legend_title, legend, mismat
 
     legend_racetrack = legend.copy()
 
-    fig, ax =   plt.subplots(nrows=2, ncols=2, figsize=(5.5,2.8))
+    size = (5.5,3.8)
+    bottom_space = 0.23
+
+    fig, ax =   plt.subplots(nrows=2, ncols=2, figsize=size)
     plt_idx=0
     for graph in [[0,0], [0,1], [1,0], [1,1]]:
         y=graph[0]
         x=graph[1]
-
         ax[y,x].axis('off')
-        
         track = mapping.map(env.map_name)
         ax[y,x].imshow(ImageOps.invert(track.gray_im.filter(ImageFilter.FIND_EDGES).filter(ImageFilter.MaxFilter(1))), extent=(0,track.map_width,0,track.map_height), cmap="gray")
         # ax.plot(env.rx, env.ry, color='gray', linestyle='dashed')
         alpha=0.7
-
         for _ in range(2):
             ax[y,x].plot(np.array(state_history[plt_idx])[:,0], np.array(state_history[plt_idx])[:,1], linewidth=1.5, alpha=alpha)  
-            plt_idx+=1
-        
+            plt_idx+=1  
     ax[0,0].set_title('End-to-end')
     ax[0,1].set_title('Steering controller')
     ax[1,0].set_title('Velocity controller')
     ax[1,1].set_title('Steering and velocity controllers')
-    
     fig.tight_layout()
-    fig.subplots_adjust(bottom=0.12) 
+    fig.subplots_adjust(bottom=0.2) 
+    plt.figlegend(legend, loc='lower center', ncol=2, labelspacing=0.7, title='path')
+
+
+    fig, ax = plt.subplots(nrows=2, ncols=2, figsize=size)
+    plt_idx=0
+    for graph in [[0,0], [0,1], [1,0], [1,1]]:
+        y=graph[0]
+        x=graph[1]
+        alpha=0.7
+        for _ in range(2):
+            ax[y,x].plot(np.array(progress_history[plt_idx])*100, np.array(state_history[plt_idx])[:,2], linewidth=1.5, alpha=alpha)
+            plt_idx+=1
+    ax[0,0].set_title('End-to-end')
+    ax[0,1].set_title('Steering controller')
+    ax[1,0].set_title('Velocity controller')
+    ax[1,1].set_title('Steering and velocity controllers')
+    fig.tight_layout()
+    fig.subplots_adjust(bottom=bottom_space) 
+    plt.figlegend(legend, loc='lower center', ncol=2, labelspacing=0.7, title='Steering angle')
     
-    plt.figlegend(legend, loc='lower center', ncol=2, labelspacing=0.7)
-    plt.show()   
+
+    fig, ax = plt.subplots(nrows=2, ncols=2, figsize=size)
+    plt_idx=0
+    for graph in [[0,0], [0,1], [1,0], [1,1]]:
+        y=graph[0]
+        x=graph[1]
+        alpha=0.7
+        for _ in range(2):
+            ax[y,x].plot(np.array(progress_history[plt_idx])*100, np.array(state_history[plt_idx])[:,3], linewidth=1.5, alpha=alpha)
+            plt_idx+=1   
+    ax[0,0].set_title('End-to-end')
+    ax[0,1].set_title('Steering controller')
+    ax[1,0].set_title('Velocity controller')
+    ax[1,1].set_title('Steering and velocity controllers')
+    fig.tight_layout()
+    fig.subplots_adjust(bottom=bottom_space) 
+    plt.figlegend(legend, loc='lower center', ncol=2, labelspacing=0.7, title='Velocity')
+    
+
+    fig, ax = plt.subplots(nrows=2, ncols=2, figsize=size)
+    plt_idx=0
+    for graph in [[0,0], [0,1], [1,0], [1,1]]:
+        y=graph[0]
+        x=graph[1]
+        alpha=0.7
+        for _ in range(2):
+            ax[y,x].plot(np.array(progress_history[plt_idx])*100, np.array(state_history[plt_idx])[:,6], linewidth=1.5, alpha=alpha)
+            plt_idx+=1   
+    ax[0,0].set_title('End-to-end')
+    ax[0,1].set_title('Steering controller')
+    ax[1,0].set_title('Velocity controller')
+    ax[1,1].set_title('Steering and velocity controllers')
+    fig.tight_layout()
+    fig.subplots_adjust(bottom=bottom_space) 
+    plt.figlegend(legend, loc='lower center', ncol=2, labelspacing=0.7, title='Slip angle')
+    
+    fig, ax = plt.subplots(nrows=2, ncols=2, figsize=size)
+    plt_idx=0
+    for graph in [[0,0], [0,1], [1,0], [1,1]]:
+        y=graph[0]
+        x=graph[1]
+        alpha=0.7
+        for _ in range(2):
+            ax[y,x].plot(np.array(progress_history[plt_idx])*100, linewidth=1.5, alpha=alpha)
+            plt_idx+=1   
+    ax[0,0].set_title('End-to-end')
+    ax[0,1].set_title('Steering controller')
+    ax[1,0].set_title('Velocity controller')
+    ax[1,1].set_title('Steering and velocity controllers')
+    fig.tight_layout()
+    fig.subplots_adjust(bottom=bottom_space) 
+    plt.figlegend(legend, loc='lower center', ncol=2, labelspacing=0.7, title='Progres along centerline')
+    
+
+    plt.show()     
 
 
-# agent_names = ['porto_ete_v5_r_collision_5', 'porto_pete_s_polynomial', 'porto_pete_v_k_1_attempt_2', 'porto_pete_sv_p_r_0']    
-# legend = ['No model error', 'Mass placed on front axle']
-# legend_title = ''
-# ns=[0,0,0,0]
-# mismatch_parameters = ['unknown_mass']
-# frac_vary = [0]
-# noise_dicts = [{'xy':0.025, 'theta':0.05, 'v':0.1, 'lidar':0.01}]
-# start_condition = {'x':10, 'y':4.5, 'v':3, 'theta':np.pi, 'delta':0, 'goal':0}
-# display_path_mismatch_multiple(agent_names=agent_names, ns=ns, legend_title=legend_title,          
-#                                              legend=legend, mismatch_parameters=mismatch_parameters, frac_vary=frac_vary, noise_dicts=noise_dicts,
-#                                              start_condition=start_condition)
+agent_names = ['porto_ete_v5_r_collision_5', 'porto_pete_s_polynomial', 'porto_pete_v_k_1_attempt_2', 'porto_pete_sv_p_r_0']    
+legend = ['No model error', 'Tire stiffness']
+legend_title = ''
+ns=[2,1,0,1]
+mismatch_parameters = ['unknown_mass']
+frac_vary = [0]
+noise_dicts = [{'xy':0.025, 'theta':0.05, 'v':0.1, 'lidar':0.01}]
+start_condition = {'x':10, 'y':4.5, 'v':3, 'theta':np.pi, 'delta':0, 'goal':0}
+display_path_mismatch_multiple(agent_names=agent_names, ns=ns, legend_title=legend_title,          
+                                             legend=legend, mismatch_parameters=mismatch_parameters, frac_vary=frac_vary, noise_dicts=noise_dicts,
+                                             start_condition=start_condition)
 
 
 
