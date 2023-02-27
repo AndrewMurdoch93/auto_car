@@ -1997,9 +1997,9 @@ if True:
 # agent_names = ['porto_pete_sv_p_r_0']
 
 # agent_names = ['porto_ete_v5_r_collision_5', 'porto_pete_s_polynomial', 'porto_pete_v_k_1_attempt_2', 'porto_pete_sv_p_r_0']
-# legend = ['End-to-end', 'Steering control', , 'Velocity control', 'Steering and velocity control']
+# legend = ['End-to-end', 'Steering control',  'Velocity control', 'Steering and velocity control']
 # legend_title = ''
-# ns=[0,0,0,0]
+# ns=[0,1,0,1]
 
 # agent_names = ['porto_ete_v5_r_collision_5_noise']    
 # agent_names = ['porto_pete_s_r_collision_0_noise']
@@ -2020,9 +2020,10 @@ if True:
 # legend = agent_names
 # ns=[0]
 
-# legend = ['none', 'mismatch']
-# legend_title = ''
-# ns=[1,1]
+agent_names = ['porto_ete_v5_r_collision_5', 'porto_ete_v5_r_collision_5']
+legend = ['none', 'mismatch']
+legend_title = ''
+ns=[0,0]
 
 # display_results_multiple.learning_curve_lap_time_average(agent_names, legend, legend_title, ns)
 # display_results_multiple.learning_curve_reward_average(agent_names, legend, legend_title)
@@ -2036,8 +2037,8 @@ if True:
 #     display_results_multiple.display_lap_results(agent_name=agent_name)
 
 
-mismatch_parameters = [['mu'], ['mu'], ['mu'], ['mu']]
-frac_vary = [[0], [0], [0], [0]]
+mismatch_parameters = [['unknown_mass'], ['unknown_mass']]
+frac_vary = [[0], [1]]
 noise_dicts = [{'xy':0, 'theta':0, 'v':0, 'lidar':0}, {'xy':0, 'theta':0, 'v':0, 'lidar':0}, {'xy':0, 'theta':0, 'v':0, 'lidar':0}, {'xy':0, 'theta':0, 'v':0, 'lidar':0}]
 start_condition = {'x':10, 'y':4.5, 'v':3, 'theta':np.pi, 'delta':0, 'goal':0}
 # Columbia
@@ -2464,10 +2465,10 @@ if True:
 #unknown mass
 if True:
 
-    n_tests=100
-    mass = car_params['m']*0.1
-    length = car_params['lf']+car_params['lr']
-    distances = np.linspace(-0.05, length+0.05, 20)
+    # n_tests=100
+    # mass = car_params['m']*0.1
+    # length = car_params['lf']+car_params['lr']
+    # distances = np.linspace(-0.05, length+0.05, 20)
     
     # agent_name = 'porto_ete_v5_r_collision_5' 
     # main_multiple.lap_time_test_unknown_mass(agent_name=agent_name, n_episodes=n_tests, detect_issues=False, initial_conditions=True, mass=mass, distances=distances)

@@ -38,6 +38,7 @@ import mapping
 from PIL import Image, ImageOps, ImageDraw, ImageFilter
 import os
 
+
 def compare_learning_curves_progress(agent_names, legend, legend_title, show_average=True, show_median=True, xaxis='episodes'):
     
     #window = 300
@@ -3859,14 +3860,14 @@ def display_path_mismatch_multiple(agent_names, ns, legend_title, legend, mismat
     plt.show()   
 
 
-agent_names = ['porto_ete_v5_r_collision_5', 'porto_pete_s_polynomial', 'porto_pete_v_k_1_attempt_2', 'porto_pete_sv_p_r_0']    
-legend = ['No model error', 'Mass placed on front axle']
-legend_title = ''
-ns=[0,0,0,0]
-mismatch_parameters = ['unknown_mass']
-frac_vary = [0]
-noise_dicts = [{'xy':0.025, 'theta':0.05, 'v':0.1, 'lidar':0.01}]
-start_condition = {'x':10, 'y':4.5, 'v':3, 'theta':np.pi, 'delta':0, 'goal':0}
+# agent_names = ['porto_ete_v5_r_collision_5', 'porto_pete_s_polynomial', 'porto_pete_v_k_1_attempt_2', 'porto_pete_sv_p_r_0']    
+# legend = ['No model error', 'Mass placed on front axle']
+# legend_title = ''
+# ns=[0,0,0,0]
+# mismatch_parameters = ['unknown_mass']
+# frac_vary = [0]
+# noise_dicts = [{'xy':0.025, 'theta':0.05, 'v':0.1, 'lidar':0.01}]
+# start_condition = {'x':10, 'y':4.5, 'v':3, 'theta':np.pi, 'delta':0, 'goal':0}
 # display_path_mismatch_multiple(agent_names=agent_names, ns=ns, legend_title=legend_title,          
 #                                              legend=legend, mismatch_parameters=mismatch_parameters, frac_vary=frac_vary, noise_dicts=noise_dicts,
 #                                              start_condition=start_condition)
