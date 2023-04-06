@@ -21,6 +21,7 @@ import cubic_spline_planner
 import agent_td3
 import os
 import frenet_optimal_trajectory
+from PIL import Image, ImageOps, ImageDraw, ImageFilter
 
 class environment():
 
@@ -90,20 +91,20 @@ class environment():
         #Initialise map and goal settings
         #self.occupancy_grid, self.map_height, c, self.map_res = functions.map_generator(map_name = self.map_name)
         
-        track = mapping.map(self.map_name)
-        self.occupancy_grid = track.occupancy_grid
-        self.map_height = track.map_height
-        self.map_width = track.map_width
-        self.map_res = track.resolution
+        self.track = mapping.map(self.map_name)
+        self.occupancy_grid = self.track.occupancy_grid
+        self.map_height = self.track.map_height
+        self.map_width = self.track.map_width
+        self.map_res = self.track.resolution
 
         self.s=2
 
         image_path = sys.path[0] + '/maps/' + input_dict['map_name'] + '.png'
         self.im = image.imread(image_path)
         
-        track.find_centerline()
-        self.goal_x = track.centerline[:,0]
-        self.goal_y = track.centerline[:,1]
+        self.track.find_centerline()
+        self.goal_x = self.track.centerline[:,0]
+        self.goal_y = self.track.centerline[:,1]
         self.goals=[]
         self.max_goals_reached=False
         for x,y in zip(self.goal_x, self.goal_y):
@@ -602,34 +603,38 @@ class environment():
         current_goal = self.goals[self.current_goal]
         plt.cla()
         plt.gcf().canvas.mpl_connect('key_release_event', lambda event: [exit(0) if event.key == 'escape' else None])
-        plt.imshow(self.im, extent=(0,self.map_width,0,self.map_height))
+        
+        # plt.imshow(self.im, extent=(0,self.map_width,0,self.map_height))
+        plt.imshow(ImageOps.invert(self.track.gray_im.filter(ImageFilter.FIND_EDGES).filter(ImageFilter.MaxFilter(1))), extent=(0,self.track.map_width,0,self.track.map_height), cmap="gray")
+        plt.axis('off')
         
         if self.steering_control==True:
-            plt.plot(self.path_tracker.cx, self.path_tracker.cy)
+            plt.plot(self.path_tracker.cx, self.path_tracker.cy, color='red', alpha=0.3, linestyle='-.')
+            pass
         
         plt.arrow(self.x, self.y, 0.5*math.cos(self.theta), 0.5*math.sin(self.theta), head_length=0.5, head_width=0.5, shape='full', ec='None', fc='blue')
         plt.arrow(self.x, self.y, 0.5*math.cos(self.theta+self.delta), 0.5*math.sin(self.theta+self.delta), head_length=0.5, head_width=0.5, shape='full',ec='None', fc='red')
         
-        plt.plot(self.x, self.y, 'o')
+        plt.plot(self.x, self.y, 'o', color='orange')
         #plt.plot(waypoint[0], waypoint[1], 'x')
 
         #plt.plot([current_goal[0]-self.s, current_goal[0]+self.s, current_goal[0]+self.s, current_goal[0]-self.s, 
         #current_goal[0]-self.s], [current_goal[1]-self.s, current_goal[1]-self.s, current_goal[1]+self.s, 
         #current_goal[1]+self.s, current_goal[1]-self.s], 'r')
 
-        if self.lidar_dict['is_lidar']==True:
-            for coord in self.lidar_coords:
-                plt.plot(coord[0], coord[1], 'xb')
+        # if self.lidar_dict['is_lidar']==True:
+        #     for coord in self.lidar_coords:
+        #         plt.plot(coord[0], coord[1], 'xb')
             
-        plt.plot(np.array(self.pose_history)[0:self.steps,0], np.array(self.pose_history)[0:self.steps,1])
+        plt.plot(np.array(self.pose_history)[0:self.steps,0], np.array(self.pose_history)[0:self.steps,1], color='orange', alpha=0.5)
         
         #plt.plot(self.rx, self.ry)
         #plt.plot(self.rx[self.old_closest_point], self.ry[self.old_closest_point], 'x')
-        plt.xlabel('x coordinate')
-        plt.ylabel('y coordinate')
-        plt.xlim([0,self.map_width])
-        plt.ylim([0,self.map_height])
-        plt.title('Episode history')
+        # plt.xlabel('x coordinate')
+        # plt.ylabel('y coordinate')
+        # plt.xlim([0,self.map_width])
+        # plt.ylim([0,self.map_height])
+        # plt.title('Episode history')
         plt.pause(0.001)
 
     
@@ -956,23 +961,26 @@ class environment():
 def test_environment():
     
     
-    agent_name = 'porto_pete_s_r_collision_0'
+    # agent_name = 'porto_pete_s_r_collision_0'
+    agent_name = 'porto_ete_v5_r_collision_5' 
+
     parent_dir = os.path.dirname(os.path.abspath(__file__))
     agent_dir = parent_dir + '/agents/' + agent_name
     agent_params_file = agent_dir + '/' + agent_name + '_params'
     replay_episode_name = 'replay_episodes/' + agent_name
     
-    infile=open(replay_episode_name, 'rb')
-    action_history = pickle.load(infile)
-    initial_condition = pickle.load(infile)
-    n = pickle.load(infile)
-    infile.close()
+    # infile=open(replay_episode_name, 'rb')
+    # action_history = pickle.load(infile)
+    # initial_condition = pickle.load(infile)
+    # n = pickle.load(infile)
+    # infile.close()
     
     infile = open('environments/' + agent_name, 'rb')
     env_dict = pickle.load(infile)
     infile.close()
     env_dict['display']=True
 
+    initial_condition = {'x':10, 'y':4.5, 'v':3, 'theta':np.pi, 'delta':0, 'goal':0}
 
     infile = open(agent_params_file, 'rb')
     agent_dict = pickle.load(infile)
@@ -982,6 +990,7 @@ def test_environment():
     env = environment(env_dict)
     env.reset(save_history=True, start_condition=initial_condition, car_params=env_dict['car_params'], get_lap_time=False, noise=noise_dict)
     
+    n=0
     a = agent_td3.agent(agent_dict)
     a.load_weights(agent_name, n)
     
@@ -1041,7 +1050,7 @@ def test_environment():
     #a = agent_td3.agent(agent_dict)
     #a.load_weights(agent_name, n)
     
-    action_history = np.ones((1000,2))*0.2
+    action_history = np.ones((1000,2))*np.random
     action_history[:,1] = np.ones(1000)*1
 
     done=False
