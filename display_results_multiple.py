@@ -3938,9 +3938,9 @@ mismatch_parameters = ['unknown_mass']
 frac_vary = [0]
 noise_dicts = [{'xy':0.025, 'theta':0.05, 'v':0.1, 'lidar':0.01}]
 start_condition = {'x':10, 'y':4.5, 'v':3, 'theta':np.pi, 'delta':0, 'goal':0}
-display_path_mismatch_multiple(agent_names=agent_names, ns=ns, legend_title=legend_title,          
-                                             legend=legend, mismatch_parameters=mismatch_parameters, frac_vary=frac_vary, noise_dicts=noise_dicts,
-                                             start_condition=start_condition)
+# display_path_mismatch_multiple(agent_names=agent_names, ns=ns, legend_title=legend_title,          
+#                                              legend=legend, mismatch_parameters=mismatch_parameters, frac_vary=frac_vary, noise_dicts=noise_dicts,
+#                                              start_condition=start_condition)
 
 
 
@@ -4002,34 +4002,39 @@ def display_all_maps_outline():
 
     plt.show()
 
-def display_map_outline():
-    names = ['Circle', 'Redbull ring', 'Berlin', 'Columbia', 'Porto', 'Torino']
-    circle = mapping.map('circle')
-    columbia = mapping.map('columbia_1')
-    porto = mapping.map('porto_1')
-    berlin = mapping.map('berlin')
-    torino = mapping.map('torino')
-    redbull_ring = mapping.map('redbull_ring')
+def display_map_outline(map):
+    # names = ['Circle', 'Redbull ring', 'Berlin', 'Columbia', 'Porto', 'Torino']
+    # circle = mapping.map('circle')
+    # columbia = mapping.map('columbia_1')
+    # porto = mapping.map('porto_1')
+    # berlin = mapping.map('berlin')
+    # torino = mapping.map('torino')
+    # redbull_ring = mapping.map('redbull_ring')
+
+    track = mapping.map(map)
 
     
-    plt.imshow(ImageOps.invert(circle.gray_im.filter(ImageFilter.FIND_EDGES).filter(ImageFilter.MaxFilter(3))), extent=(0,circle.map_width,0,circle.map_height), cmap="gray")
+    plt.imshow(ImageOps.invert(track.gray_im.filter(ImageFilter.FIND_EDGES).filter(ImageFilter.MaxFilter(1))), extent=(0, track.map_width,0, track.map_height), cmap="gray")
     plt.axis('off')
+
+    
+
     plt.show()
-    plt.imshow(ImageOps.invert(redbull_ring.gray_im.filter(ImageFilter.FIND_EDGES).filter(ImageFilter.MaxFilter(1))), extent=(0,redbull_ring.map_width,0,redbull_ring.map_height), cmap="gray")
-    plt.axis('off')
-    plt.show()
-    plt.imshow(ImageOps.invert(berlin.gray_im.filter(ImageFilter.FIND_EDGES).filter(ImageFilter.MaxFilter(3))), extent=(0,berlin.map_width,0,berlin.map_height), cmap="gray")
-    plt.axis('off')
-    plt.show()
-    plt.imshow(ImageOps.invert(columbia.gray_im.filter(ImageFilter.FIND_EDGES).filter(ImageFilter.MaxFilter(1))), extent=(0,columbia.map_width,0,columbia.map_height), cmap="gray")
-    plt.axis('off')
-    plt.show()
-    plt.imshow(ImageOps.invert(porto.gray_im.filter(ImageFilter.FIND_EDGES).filter(ImageFilter.MaxFilter(1))), extent=(0,porto.map_width,0,porto.map_height), cmap="gray")
-    plt.axis('off')
-    plt.show()
-    plt.imshow(ImageOps.invert(torino.gray_im.filter(ImageFilter.FIND_EDGES).filter(ImageFilter.MaxFilter(1))), extent=(0,torino.map_width,0,torino.map_height), cmap="gray")
-    plt.axis('off')
-    plt.show()
+    # plt.imshow(ImageOps.invert(redbull_ring.gray_im.filter(ImageFilter.FIND_EDGES).filter(ImageFilter.MaxFilter(1))), extent=(0,redbull_ring.map_width,0,redbull_ring.map_height), cmap="gray")
+    # plt.axis('off')
+    # plt.show()
+    # plt.imshow(ImageOps.invert(berlin.gray_im.filter(ImageFilter.FIND_EDGES).filter(ImageFilter.MaxFilter(3))), extent=(0,berlin.map_width,0,berlin.map_height), cmap="gray")
+    # plt.axis('off')
+    # plt.show()
+    # plt.imshow(ImageOps.invert(columbia.gray_im.filter(ImageFilter.FIND_EDGES).filter(ImageFilter.MaxFilter(1))), extent=(0,columbia.map_width,0,columbia.map_height), cmap="gray")
+    # plt.axis('off')
+    # plt.show()
+    # plt.imshow(ImageOps.invert(porto.gray_im.filter(ImageFilter.FIND_EDGES).filter(ImageFilter.MaxFilter(1))), extent=(0,porto.map_width,0,porto.map_height), cmap="gray")
+    # plt.axis('off')
+    # plt.show()
+    # plt.imshow(ImageOps.invert(torino.gray_im.filter(ImageFilter.FIND_EDGES).filter(ImageFilter.MaxFilter(1))), extent=(0,torino.map_width,0,torino.map_height), cmap="gray")
+    # plt.axis('off')
+    # plt.show()
     
     # for i in range(2):
     #     for j in range(3):
@@ -4046,8 +4051,8 @@ def display_map_outline():
     plt.show()
 
 
-#display_all_maps_outline()
-#display_map_outline()
+# display_all_maps_outline()
+display_map_outline('porto_1')
 
 
 

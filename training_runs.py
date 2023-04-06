@@ -2041,6 +2041,7 @@ mismatch_parameters = [['unknown_mass'], ['unknown_mass']]
 frac_vary = [[0], [1]]
 noise_dicts = [{'xy':0, 'theta':0, 'v':0, 'lidar':0}, {'xy':0, 'theta':0, 'v':0, 'lidar':0}, {'xy':0, 'theta':0, 'v':0, 'lidar':0}, {'xy':0, 'theta':0, 'v':0, 'lidar':0}]
 start_condition = {'x':10, 'y':4.5, 'v':3, 'theta':np.pi, 'delta':0, 'goal':0}
+
 # Columbia
 # start_condition = {'x':5.7, 'y':7.25, 'v':3, 'theta':0, 'delta':0, 'goal':0}
 # start_condition = []
