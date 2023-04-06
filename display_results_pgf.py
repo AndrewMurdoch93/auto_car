@@ -2686,7 +2686,7 @@ def display_lap_unknown_mass_time(agent_names, legend, filename):
     "font.size": 12
     })
 
-    fig, axs = plt.subplots(nrows=1, ncols=2, figsize=(5.5,2.8))
+    fig, axs = plt.subplots(nrows=1, ncols=1, figsize=(5.5,2.8))
 
   
     for agent in agent_names:
@@ -2732,46 +2732,49 @@ def display_lap_unknown_mass_time(agent_names, legend, filename):
         avg_times_filter = functions.savitzky_golay(avg_times, 13, 2)
         dev_times_filter = functions.savitzky_golay(dev_times, 13, 2)
 
-        axs[0].plot(results_dict['distances'], avg_col_filter*100, alpha=0.8)
-        axs[0].fill_between(results_dict['distances'], (avg_col_filter+std_dev_col_filter)*100, (avg_col_filter-std_dev_col_filter)*100, alpha=0.2, label='_nolegend_')
+        axs.plot(results_dict['distances'], avg_col_filter*100, alpha=0.8)
+        axs.fill_between(results_dict['distances'], (avg_col_filter+std_dev_col_filter)*100, (avg_col_filter-std_dev_col_filter)*100, alpha=0.2, label='_nolegend_')
 
-        axs[1].plot(results_dict['distances'], avg_times_filter, alpha=0.8)
-        axs[1].fill_between(results_dict['distances'], (avg_times_filter+dev_times_filter), (avg_times_filter-dev_times_filter), alpha=0.2, label='_nolegend_')
+        # axs[1].plot(results_dict['distances'], avg_times_filter, alpha=0.8)
+        # axs[1].fill_between(results_dict['distances'], (avg_times_filter+dev_times_filter), (avg_times_filter-dev_times_filter), alpha=0.2, label='_nolegend_')
 
         # axs.plot(results_dict['distances'], avg_times*100, alpha=0.8)
         # axs.fill_between(results_dict['distances'], (avg_times+dev_times)*100, (avg_times-dev_times)*100, alpha=0.2, label='_nolegend_')
        
     
-    axs[0].vlines(x=0,ymin=90,ymax=100,color='black',linestyle='--', label='_nolegend_', alpha=0.8)
-    axs[0].vlines(x=0.3,ymin=90,ymax=100,color='black',linestyle='--', alpha=0.8)
-    axs[0].text(x=0.37, y=90.5, s='Rear axle', fontsize = 'small', bbox=dict(facecolor='white', edgecolor='black',pad=0.1,boxstyle='round'))
-    axs[0].text(x=0.1, y=90.5, s='Front axle', fontsize = 'small', bbox=dict(facecolor='white', edgecolor='black',pad=0.1,boxstyle='round'))
+    axs.vlines(x=0,ymin=90,ymax=100,color='black',linestyle='--', label='_nolegend_', alpha=0.8)
+    axs.vlines(x=0.3,ymin=90,ymax=100,color='black',linestyle='--', alpha=0.8)
+    axs.text(x=0.35, y=90.5, s='Rear axle', fontsize = 'small', bbox=dict(facecolor='white', edgecolor='black',pad=0.1,boxstyle='round'))
+    axs.text(x=0.065, y=90.5, s='Front axle', fontsize = 'small', bbox=dict(facecolor='white', edgecolor='black',pad=0.1,boxstyle='round'))
 
-    axs[1].vlines(x=0,ymin=5.8,ymax=6.3,color='black',linestyle='--', label='_nolegend_', alpha=0.8)
-    axs[1].vlines(x=0.33,ymin=5.8,ymax=6.3,color='black',linestyle='--', alpha=0.8)
-    axs[1].text(x=0.37, y=6.25, s='Rear axle', fontsize = 'small', bbox=dict(facecolor='white', edgecolor='black',pad=0.1,boxstyle='round'))
-    axs[1].text(x=0.1, y=6.25, s='Front axle', fontsize = 'small', bbox=dict(facecolor='white', edgecolor='black',pad=0.1,boxstyle='round'))
+    # axs[1].vlines(x=0,ymin=5.8,ymax=6.3,color='black',linestyle='--', label='_nolegend_', alpha=0.8)
+    # axs[1].vlines(x=0.33,ymin=5.8,ymax=6.3,color='black',linestyle='--', alpha=0.8)
+    # axs[1].text(x=0.37, y=6.25, s='Rear axle', fontsize = 'small', bbox=dict(facecolor='white', edgecolor='black',pad=0.1,boxstyle='round'))
+    # axs[1].text(x=0.1, y=6.25, s='Front axle', fontsize = 'small', bbox=dict(facecolor='white', edgecolor='black',pad=0.1,boxstyle='round'))
 
 
 
-    axs[0].set(ylabel='Successful laps [%]') 
-    axs[1].set(ylabel='Lap time [s]') 
+    axs.set(ylabel='Successful laps [%]') 
+    # axs[1].set(ylabel='Lap time [s]') 
     
-    for i in range(2):
-        axs[i].grid(True)  
+    for i in range(1):
+        axs.grid(True)  
         # axs.yaxis.set_major_formatter(FormatStrFormatter('%.0f'))
         # axs.set_title('Lap success rate with unknown mass')
-        axs[i].set(xlabel='Distance of payload mass\nfrom front axle [m]')
+        axs.set(xlabel='Distance of payload mass\nfrom front axle [m]')
         # axs.legend(legend, title=legend_title, loc='lower right')
         # axs[i].gca().invert_xaxis()
-        axs[i].spines['bottom'].set_color('grey')
-        axs[i].spines['top'].set_color('grey') 
-        axs[i].spines['right'].set_color('grey')
-        axs[i].spines['left'].set_color('grey')
-        axs[i].invert_xaxis()
+        axs.spines['bottom'].set_color('grey')
+        axs.spines['top'].set_color('grey') 
+        axs.spines['right'].set_color('grey')
+        axs.spines['left'].set_color('grey')
+        axs.tick_params(length=0)
+        axs.invert_xaxis()
 
     fig.tight_layout()
-    fig.subplots_adjust(bottom=0.48) 
+    fig.subplots_adjust(bottom=0.48)
+    fig.subplots_adjust(right=0.75)
+    fig.subplots_adjust(left=0.3)
     plt.figlegend(legend,loc='lower center', ncol=2)
     # plt.show()
     plt.savefig('results/'+filename+'.pgf', format='pgf')
@@ -2949,17 +2952,18 @@ def display_path_mismatch_multiple(agent_names, ns, legend_title, legend, mismat
 
 
 agent_names = ['porto_ete_v5_r_collision_5', 'porto_pete_s_polynomial', 'porto_pete_v_k_1_attempt_2', 'porto_pete_sv_p_r_0']    
-legend = ['No model error', 'Mass placed on front axle']
+legend = ['No mass', 'Mass placed on front axle']
 legend_title = ''
-ns=[0,0,0,0]
+ns=[0,1,0,0]
 mismatch_parameters = ['unknown_mass']
 frac_vary = [0]
 noise_dicts = [{'xy':0.025, 'theta':0.05, 'v':0.1, 'lidar':0.01}]
 start_condition = {'x':10, 'y':4.5, 'v':3, 'theta':np.pi, 'delta':0, 'goal':0}
-filename='unknown_mass_path'
-# display_path_mismatch_multiple(agent_names=agent_names, ns=ns, legend_title=legend_title,          
-#                                              legend=legend, mismatch_parameters=mismatch_parameters, frac_vary=frac_vary, noise_dicts=noise_dicts,
-#                                              start_condition=start_condition, filename=filename)
+filename='unknown_mass_path_1'
+display_path_mismatch_multiple(agent_names=agent_names, ns=ns, legend_title=legend_title,          
+                                             legend=legend, mismatch_parameters=mismatch_parameters, frac_vary=frac_vary, noise_dicts=noise_dicts,
+                                             start_condition=start_condition, filename=filename)
+
 
 
 def display_path_multiple_1(agent_names, ns, legend_title, legend, mismatch_parameters, frac_vary, noise_dicts, start_condition, filename):
@@ -3623,13 +3627,11 @@ def plot_frenet_polynomial(filename):
 # ns=[0,0]
 # filename = 'velocity_control_lap_1'
 
-agent_names = ['porto_pete_s_polynomial', 'porto_pete_sv_p_r_0']
-legend = ['Steering control', 'Steering and velocity control']
-legend_title = ''
-ns=[1,1]
-filename = 'steer_velocity_lap_1'
-
-
+# agent_names = ['porto_pete_s_polynomial', 'porto_pete_sv_p_r_0']
+# legend = ['Steering control', 'Steering and velocity control']
+# legend_title = ''
+# ns=[1,1]
+# filename = 'steer_velocity_lap_1'
 
 
 # mismatch_parameters = ['C_Sf']
@@ -3658,13 +3660,13 @@ filename = 'steer_velocity_lap_1'
 #                         legend=legend, mismatch_parameters=mismatch_parameters, frac_vary=frac_vary, 
 #                         start_condition=start_condition, filename=filename)
 
-mismatch_parameters = ['C_Sf']
-frac_vary = [0]
-start_condition = {'x':10, 'y':4.5, 'v':3, 'theta':np.pi, 'delta':0, 'goal':0}
-# start_condition = []
-display_path_actions_multiple(agent_names=agent_names, ns=ns, legend_title=legend_title,          
-                        legend=legend, mismatch_parameters=mismatch_parameters, frac_vary=frac_vary, 
-                        start_condition=start_condition, filename=filename)
+# mismatch_parameters = ['C_Sf']
+# frac_vary = [0]
+# start_condition = {'x':10, 'y':4.5, 'v':3, 'theta':np.pi, 'delta':0, 'goal':0}
+# # start_condition = []
+# display_path_actions_multiple(agent_names=agent_names, ns=ns, legend_title=legend_title,          
+#                         legend=legend, mismatch_parameters=mismatch_parameters, frac_vary=frac_vary, 
+#                         start_condition=start_condition, filename=filename)
 
 
 

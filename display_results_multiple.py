@@ -1723,7 +1723,7 @@ def display_lap_mismatch_results_multiple_mu(agent_names, parameters, legend_tit
     axs[0].text(x=0.4, y=10, s='Wet asphalt', fontsize = 'small', bbox=dict(facecolor='white', edgecolor='black',pad=0.1,boxstyle='round'))
     
     axs[1].vlines(x=nom_value, ymin=0, ymax=15, color='black', linestyle='--')
-    axs[1].vlines(x=0.7, ymin=0, ymax=15, color='black', linestyle='--')
+    axs[1].vlines(x=0.8, ymin=0, ymax=15, color='black', linestyle='--')
     axs[1].vlines(x=0.5, ymin=0, ymax=15, color='black', linestyle='--')
     axs[1].text(x=0.75, y=7.3, s='Nominal value', fontsize = 'small', bbox=dict(facecolor='white', edgecolor='black',pad=0.1,boxstyle='round'))
     axs[1].text(x=0.6, y=7.9, s='Dry asphalt', fontsize = 'small', bbox=dict(facecolor='white', edgecolor='black',pad=0.1,boxstyle='round'))
@@ -2134,7 +2134,8 @@ def display_lap_mismatch_results_multiple_C_S_fr(agent_names, parameters, legend
 
    
 
-agent_names = ['porto_ete_v5_r_collision_5', 'porto_pete_s_polynomial', 'porto_pete_v_k_1_attempt_2', 'porto_pete_sv_p_r_0']    
+# agent_names = ['porto_ete_v5_r_collision_5', 'porto_pete_s_polynomial', 'porto_pete_v_k_1_attempt_2', 'porto_pete_sv_p_r_0']    
+agent_names = ['porto_ete_v5_r_collision_5', 'porto_pete_sv_p_r_0']    
 # parameters = ['mu', 'C_S']
 # nom_value = [1.0489, 1]
 # parameters = ['C_Sf', 'C_Sr']
@@ -2153,7 +2154,7 @@ nom_value = [1.0489]
 
 
 legend_title = ''
-legend = ['End-to-end', 'Steering control', 'Velocity control', 'Steering and velocity control']
+legend = ['End-to-end', 'Steering and velocity control']
 plot_titles = parameters
 graph=True
 text=False
@@ -3696,7 +3697,7 @@ def display_path_multiple(agent_names, ns, legend_title, legend, mismatch_parame
 
 
 
-def display_path_mismatch_multiple(agent_names, ns, legend_title, legend, mismatch_parameters, frac_vary, noise_dicts, start_condition):
+def display_path_mismatch_multiple_by_state(agent_names, ns, legend_title, legend, mismatch_parameters, frac_vary, noise_dicts, start_condition):
     
     pose_history = []
     progress_history = []
@@ -3822,7 +3823,8 @@ def display_path_mismatch_multiple(agent_names, ns, legend_title, legend, mismat
             action_step_history.append(env.action_step_history)
         
         
-    myfont = {'fontname':'serif'}
+    plt.rcParams['font.family'] = 'serif'
+    plt.rcParams['font.serif'] = ['Times New Roman'] + plt.rcParams['font.serif']
     figure_size = (10,4)
     xlims = [0,100]
 
@@ -3854,6 +3856,24 @@ def display_path_mismatch_multiple(agent_names, ns, legend_title, legend, mismat
     fig.tight_layout()
     fig.subplots_adjust(bottom=0.2) 
     plt.figlegend(legend, loc='lower center', ncol=2, labelspacing=0.7, title='path')
+
+
+    fig, ax =   plt.subplots(nrows=1, ncols=2, figsize=(5.5,2))
+    plt_idx=0
+    for graph in [0,1]:
+        ax[graph].axis('off')
+        track = mapping.map(env.map_name)
+        ax[graph].imshow(ImageOps.invert(track.gray_im.filter(ImageFilter.FIND_EDGES).filter(ImageFilter.MaxFilter(1))), extent=(0,track.map_width,0,track.map_height), cmap="gray")
+        # ax.plot(env.rx, env.ry, color='gray', linestyle='dashed')
+        alpha=0.7
+        for _ in range(2):
+            ax[graph].plot(np.array(state_history[plt_idx])[:,0], np.array(state_history[plt_idx])[:,1], linewidth=1.5, alpha=alpha)  
+            plt_idx+=1  
+    ax[0].set_title('End-to-end')
+    ax[1].set_title('Steering and velocity controllers')
+    fig.tight_layout()
+    fig.subplots_adjust(bottom=0.05) 
+    plt.figlegend(legend, loc='lower center', ncol=2, labelspacing=0.7)
 
 
     fig, ax = plt.subplots(nrows=2, ncols=2, figsize=size)
@@ -3931,19 +3951,811 @@ def display_path_mismatch_multiple(agent_names, ns, legend_title, legend, mismat
 
 
 agent_names = ['porto_ete_v5_r_collision_5', 'porto_pete_s_polynomial', 'porto_pete_v_k_1_attempt_2', 'porto_pete_sv_p_r_0']    
-legend = ['No model error', 'Tire stiffness']
+legend = ['No model error', 'Increased front tire \ncornering stiffness']
+legend_title = ''
+ns=[0,1,0,1]
+# mismatch_parameters = ['unknown_mass', 'mu', 'C_Sf', 'C_Sr']
+# frac_vary = [0, -0.1, 0.1, -0.1]
+mismatch_parameters = ['C_Sf']
+frac_vary = [-0.15]
+noise_dicts = [{'xy':0.025, 'theta':0.05, 'v':0.1, 'lidar':0.01}]
+start_condition = {'x':10, 'y':4.5, 'v':3, 'theta':np.pi, 'delta':0, 'goal':0}
+# display_path_mismatch_multiple_by_state(agent_names=agent_names, ns=ns, legend_title=legend_title,          
+#                                              legend=legend, mismatch_parameters=mismatch_parameters, frac_vary=frac_vary, noise_dicts=noise_dicts,
+#                                              start_condition=start_condition)
+
+
+def display_path_mismatch_multiple_by_agent(agent_names, ns, legend_title, legend, mismatch_parameters, frac_vary, noise_dicts, start_condition):
+    
+    pose_history = []
+    progress_history = []
+    state_history = []
+    local_path_history = []
+    action_step_history = []
+    
+
+    for agent_name, n, i in zip(agent_names, ns, range(len(agent_names))):
+
+        infile = open('environments/' + agent_name, 'rb')
+        env_dict = pickle.load(infile)
+        infile.close()
+        # Compensate for changes to reward structure
+        env_dict['reward_signal']['max_progress'] = 0
+        
+        # Model mismatches
+        lap_idx=0
+
+        for mis_idx in range(1+len(mismatch_parameters)):
+            car_params = env_dict['car_params'].copy()
+    
+            if mis_idx == 1:
+                for par, var in zip(mismatch_parameters[lap_idx], frac_vary[lap_idx]):
+                    if par == 'unknown_mass':
+                        mass=car_params['m']*0.1
+                        m_new = car_params['m'] + mass
+                        lf_new = (car_params['m']*car_params['lf']+mass*var) / (m_new)
+                        I_new = car_params['I'] + car_params['m']*abs(lf_new-car_params['lf'])**2 + mass*abs(lf_new-var)**2
+                        car_params['m'] = m_new
+                        car_params['lf'] = lf_new
+                        car_params['I'] = I_new
+                    elif par == 'C_S':
+                        car_params['C_Sf'] *= 1+var
+                        car_params['C_Sr'] *= 1+var
+                    elif par == 'l_f':
+                        axle_length = car_params['lf']+car_params['lr']
+                        car_params['lf'] *= 1+var
+                        car_params['lr'] =  axle_length - car_params['lf']
+                    elif par == 'sv':
+                        car_params['sv_max'] *= 1+var
+                        car_params['sv_min'] *= 1+var    
+                    else:
+                        car_params[par] *= 1+var
+                lap_idx+=1
+            
+            noise_dict = noise_dicts[0]
+
+            env = environment(env_dict)
+            if start_condition:
+                env.reset(save_history=True, start_condition=start_condition, car_params=car_params, noise=noise_dict)
+            else:
+                env.reset(save_history=True, start_condition=[], car_params=car_params, noise=noise_dict)
+
+            infile = open('agents/' + agent_name + '/' + agent_name + '_params', 'rb')
+            agent_dict = pickle.load(infile)
+            infile.close()
+
+            infile = open('train_parameters/' + agent_name, 'rb')
+            main_dict = pickle.load(infile)
+            infile.close()
+            
+            if i==0 and not start_condition:
+                infile = open('test_initial_condition/' + env_dict['map_name'], 'rb')
+                start_conditions = pickle.load(infile)
+                infile.close()
+                start_condition = random.choice(start_conditions)
+
+            if main_dict['learning_method']=='dqn':
+                agent_dict['epsilon'] = 0
+                a = agent_dqn.agent(agent_dict)
+            if main_dict['learning_method']=='reinforce':
+                a = agent_reinforce.PolicyGradientAgent(agent_dict)
+            if main_dict['learning_method']=='actor_critic_sep':
+                a = agent_actor_critic.actor_critic_separated(agent_dict)
+            if  main_dict['learning_method']=='actor_critic_com':
+                a = agent_actor_critic.actor_critic_combined(agent_dict)
+            if main_dict['learning_method']=='actor_critic_cont':
+                a = agent_actor_critic_continuous.agent_separate(agent_dict)
+            if main_dict['learning_method'] == 'dueling_dqn':
+                agent_dict['epsilon'] = 0
+                a = agent_dueling_dqn.agent(agent_dict)
+            if main_dict['learning_method'] == 'dueling_ddqn':
+                agent_dict['epsilon'] = 0
+                a = agent_dueling_ddqn.agent(agent_dict)
+            if main_dict['learning_method'] == 'rainbow':
+                agent_dict['epsilon'] = 0
+                a = agent_rainbow.agent(agent_dict)
+            if main_dict['learning_method'] == 'ddpg':
+                a = agent_ddpg.agent(agent_dict)
+            if main_dict['learning_method'] == 'td3':
+                a = agent_td3.agent(agent_dict)
+                
+            a.load_weights(agent_name, n)
+
+            #start_pose = {'x':11.2, 'y':7.7, 'v':0, 'delta':0, 'theta':0, 'goal':1}
+            env.reset(save_history=True, start_condition=start_condition, car_params=car_params, noise=noise_dict)
+            obs = env.observation
+            done = False
+            score = 0
+
+            while not done:
+                if main_dict['learning_method']=='ddpg' or main_dict['learning_method']=='td3':
+                    action = a.choose_greedy_action(obs)
+                else:
+                    action = a.choose_action(obs)
+
+                next_obs, reward, done = env.take_action(action)
+                score += reward
+                obs = next_obs
+
+                if env.progress>=0.98:
+                    done=True
+                
+
+            print('Total score = ', score)
+            print('Progress = ', env.progress)
+            print('Collision = ', env.collision)
+
+            state_history.append(env.state_history)
+            pose_history.append(env.pose_history)
+            progress_history.append(env.progress_history)
+            local_path_history.append(env.local_path_history)
+            action_step_history.append(env.action_step_history)
+        
+        
+    plt.rcParams['font.family'] = 'serif'
+    plt.rcParams['font.serif'] = ['Times New Roman'] + plt.rcParams['font.serif']
+
+    legend_new = legend.copy()
+    legend_new.insert(0, 'Min and max')
+
+    size = (5.5,3.8)
+    alpha=0.7
+    track = mapping.map(env.map_name)
+
+    if False:
+        
+        fig, ax =   plt.subplots(nrows=3, ncols=2, figsize=size)
+     
+        prog = np.array([0, 0.2, 0.4, 0.6, 0.8])
+        idx =  np.zeros(len(prog), int)
+        text = ['', '20%', '40%', '60%', '80%']
+        for i in range(len(idx)):
+            idx[i] = np.mod(env.start_point+np.round(prog[i]*len(env.rx)), len(env.rx))
+        idx.astype(int)
+        for i in range(len(idx)):
+            ax[0,0].text(x=env.rx[idx[i]], y=env.ry[idx[i]], s=text[i], fontsize = 'small', bbox=dict(facecolor='white', edgecolor='black',pad=0.1,boxstyle='round'))
+        for i in range(len(idx)):
+            ax[0,1].text(x=env.rx[idx[i]], y=env.ry[idx[i]], s=text[i], fontsize = 'small', bbox=dict(facecolor='white', edgecolor='black',pad=0.1,boxstyle='round'))
+        ax[0,0].vlines(x=env.rx[idx[0]], ymin=env.ry[idx[0]]-1, ymax=env.ry[idx[0]]+1, linestyles='dotted', color='red', label='_nolegend_')
+        # ax[0,0].text(x=env.rx[idx[0]]-1.2, y=env.ry[idx[0]]+1.3, s='Start/finish', fontsize = 'small', bbox=dict(facecolor='white', edgecolor='black',pad=0.1,boxstyle='round'))
+        ax[0,1].vlines(x=env.rx[idx[0]], ymin=env.ry[idx[0]]-1, ymax=env.ry[idx[0]]+1, linestyles='dotted', color='red', label='_nolegend_')
+        # ax[0,1].text(x=env.rx[idx[0]]-1.2, y=env.ry[idx[0]]+1.3, s='Start/finish', fontsize = 'small', bbox=dict(facecolor='white', edgecolor='black',pad=0.1,boxstyle='round'))
+
+
+
+        # Plot path of end-to-end agent
+        ax[0,0].axis('off')
+        ax[0,0].imshow(ImageOps.invert(track.gray_im.filter(ImageFilter.FIND_EDGES).filter(ImageFilter.MaxFilter(1))), extent=(0,track.map_width,0,track.map_height), cmap="gray")
+        idx=0
+        for _ in range(2):
+                
+            ax[0,0].plot(np.array(state_history[idx])[:,0], np.array(state_history[idx])[:,1], linewidth=1.5, alpha=alpha)  
+            idx+=1  
+
+        # Plot path of partial end-to-end agent with steering and velocity control
+        ax[0,1].axis('off')
+        ax[0,1].imshow(ImageOps.invert(track.gray_im.filter(ImageFilter.FIND_EDGES).filter(ImageFilter.MaxFilter(1))), extent=(0,track.map_width,0,track.map_height), cmap="gray")
+        idx=6
+        for _ in range(2):
+            
+            # if local_path_history[idx] and idx==7:
+            #     for j in np.array(local_path_history[idx])[np.arange(0,len(local_path_history[idx]),40)]:
+            #         ax[0,1].plot(j[0], j[1], alpha=0.5, linestyle='dashdot', color='red')
+            #         ax[0,1].plot(j[0][0], j[1][0], alpha=0.5, color='red', marker='s')
+
+            ax[0,1].plot(np.array(state_history[idx])[:,0], np.array(state_history[idx])[:,1], linewidth=1.5, alpha=alpha)  
+            idx+=1  
+
+        
+        # Plot velocity of end-to-end agent
+        ax[1,0].set(ylabel='Longitudinal \nvelocity \n[m/s]')
+        idx=0
+        for _ in range(2):
+            ax[1,0].plot(np.array(progress_history[idx])*100, np.array(state_history[idx])[:,3], linewidth=1.5, alpha=alpha)  
+            idx+=1  
+
+        # Plot velocity of partial end-to-end agent with steering and velocity control
+        idx=6
+        for _ in range(2):
+            ax[1,1].plot(np.array(progress_history[idx])*100, np.array(state_history[idx])[:,3], linewidth=1.5, alpha=alpha)  
+            idx+=1  
+
+        
+
+        # Plot slip angle of end-to-end agent
+        ax[2,0].set(xlabel='Progress along centerline', ylabel='Slip angle \n[rads]')
+        idx=0
+        for _ in range(2):
+            ax[2,0].plot(np.array(progress_history[idx])*100, np.array(state_history[idx])[:,6], linewidth=1.5, alpha=alpha)  
+            idx+=1  
+
+        # Plot velocity of partial end-to-end agent with steering and velocity control
+        ax[2,1].set(xlabel='Progress along centerline')
+        idx=6
+        for _ in range(2):
+            ax[2,1].plot(np.array(progress_history[idx])*100, np.array(state_history[idx])[:,6], linewidth=1.5, alpha=alpha)  
+            idx+=1  
+
+
+    
+        for plt_idx_0 in [1,2]:
+            for plt_idx_1 in [0,1] :
+                ax[plt_idx_0, plt_idx_1].spines['bottom'].set_color('grey')
+                ax[plt_idx_0, plt_idx_1].spines['top'].set_color('grey') 
+                ax[plt_idx_0, plt_idx_1].spines['right'].set_color('grey')
+                ax[plt_idx_0, plt_idx_1].spines['left'].set_color('grey')
+                ax[plt_idx_0, plt_idx_1].tick_params(length=0)
+                ax[plt_idx_0, plt_idx_1].grid('lightgrey')
+                ax[plt_idx_0, plt_idx_1].set_xticks([0,20,40,60,80,100])
+                if plt_idx_0==1:
+                    ax[plt_idx_0,plt_idx_1].set_xticklabels([])  
+                    ax[plt_idx_0,plt_idx_1].set_yticks([3,4,5])
+                if plt_idx_0==2:
+                    ax[plt_idx_0,plt_idx_1].set_yticks([-0.5,0,0.5])
+                    pass
+                if plt_idx_1==1:
+                    ax[plt_idx_0,plt_idx_1].set_yticklabels([])
+
+        
+        ax[0,0].set_title('End-to-end')
+        ax[0,1].set_title('Steering and velocity control')
+        fig.tight_layout()
+        fig.subplots_adjust(bottom=0.2) 
+        plt.figlegend(legend, loc='lower center', ncol=2, labelspacing=0.7)
+        plt.show()     
+
+    if False:
+        
+        fig, ax =   plt.subplots(nrows=3, ncols=2, figsize=size)
+        
+        alpha=0.7
+        track = mapping.map(env.map_name)
+
+        # Plot path of end-to-end agent
+        ax[0,0].axis('off')
+        ax[0,0].imshow(ImageOps.invert(track.gray_im.filter(ImageFilter.FIND_EDGES).filter(ImageFilter.MaxFilter(1))), extent=(0,track.map_width,0,track.map_height), cmap="gray")
+        idx=2
+        for _ in range(2):
+            ax[0,0].plot(np.array(state_history[idx])[:,0], np.array(state_history[idx])[:,1], linewidth=1.5, alpha=alpha)  
+            idx+=1  
+
+        # Plot path of partial end-to-end agent with steering and velocity control
+        ax[0,1].axis('off')
+        ax[0,1].imshow(ImageOps.invert(track.gray_im.filter(ImageFilter.FIND_EDGES).filter(ImageFilter.MaxFilter(1))), extent=(0,track.map_width,0,track.map_height), cmap="gray")
+        idx=4
+        for _ in range(2):
+            ax[0,1].plot(np.array(state_history[idx])[:,0], np.array(state_history[idx])[:,1], linewidth=1.5, alpha=alpha)  
+            idx+=1  
+
+
+        
+        # Plot velocity of end-to-end agent
+        ax[1,0].set(ylabel='Longitudinal \nvelocity \n[m/s]')
+        idx=2
+        for _ in range(2):
+            ax[1,0].plot(np.array(progress_history[idx])*100, np.array(state_history[idx])[:,3], linewidth=1.5, alpha=alpha)  
+            idx+=1  
+
+        # Plot velocity of partial end-to-end agent with steering and velocity control
+        idx=4
+        for _ in range(2):
+            ax[1,1].plot(np.array(progress_history[idx])*100, np.array(state_history[idx])[:,3], linewidth=1.5, alpha=alpha)  
+            idx+=1  
+
+        
+
+        # Plot slip angle of end-to-end agent
+        ax[2,0].set(xlabel='Progress along centerline', ylabel='Slip angle \n[rads]')
+        idx=2
+        for _ in range(2):
+            ax[2,0].plot(np.array(progress_history[idx])*100, np.array(state_history[idx])[:,6], linewidth=1.5, alpha=alpha)  
+            idx+=1  
+
+        # Plot velocity of partial end-to-end agent with steering and velocity control
+        ax[2,1].set(xlabel='Progress along centerline')
+        idx=4
+        for _ in range(2):
+            ax[2,1].plot(np.array(progress_history[idx])*100, np.array(state_history[idx])[:,6], linewidth=1.5, alpha=alpha)  
+            idx+=1  
+
+
+        for plt_idx_0 in [1,2]:
+            for plt_idx_1 in [0,1] :
+                ax[plt_idx_0, plt_idx_1].spines['bottom'].set_color('grey')
+                ax[plt_idx_0, plt_idx_1].spines['top'].set_color('grey') 
+                ax[plt_idx_0, plt_idx_1].spines['right'].set_color('grey')
+                ax[plt_idx_0, plt_idx_1].spines['left'].set_color('grey')
+                ax[plt_idx_0, plt_idx_1].tick_params(length=0)
+                ax[plt_idx_0, plt_idx_1].grid('lightgrey')
+                ax[plt_idx_0, plt_idx_1].set_xticks([0,20,40,60,80,100])
+                if plt_idx_0==1:
+                    ax[plt_idx_0,plt_idx_1].set_xticklabels([])  
+                    ax[plt_idx_0,plt_idx_1].set_yticks([3,4,5])
+                if plt_idx_0==2:
+                    ax[plt_idx_0,plt_idx_1].set_yticks([-0.5,0,0.5])
+                    pass
+                if plt_idx_1==1:
+                    ax[plt_idx_0,plt_idx_1].set_yticklabels([])
+
+        
+        ax[0,0].set_title('Steering control')
+        ax[0,1].set_title('Velocity control')
+        fig.tight_layout()
+        fig.subplots_adjust(bottom=0.2) 
+        plt.figlegend(legend, loc='lower center', ncol=2, labelspacing=0.7)
+        plt.show()
+
+    #end-to-end and both, only path and slip angles
+    if False:
+        
+        fig, ax =   plt.subplots(nrows=2, ncols=2, figsize=(5.5,3))
+     
+        prog = np.array([0, 0.2, 0.4, 0.6, 0.8])
+        idx =  np.zeros(len(prog), int)
+        text = ['', '20%', '40%', '60%', '80%']
+        for i in range(len(idx)):
+            idx[i] = np.mod(env.start_point+np.round(prog[i]*len(env.rx)), len(env.rx))
+        idx.astype(int)
+        for i in range(len(idx)):
+            ax[0,0].text(x=env.rx[idx[i]], y=env.ry[idx[i]], s=text[i], fontsize = 'small', bbox=dict(facecolor='white', edgecolor='black',pad=0.1,boxstyle='round'))
+        for i in range(len(idx)):
+            ax[0,1].text(x=env.rx[idx[i]], y=env.ry[idx[i]], s=text[i], fontsize = 'small', bbox=dict(facecolor='white', edgecolor='black',pad=0.1,boxstyle='round'))
+        ax[0,0].vlines(x=env.rx[idx[0]], ymin=env.ry[idx[0]]-1, ymax=env.ry[idx[0]]+1, linestyles='dotted', color='red', label='_nolegend_')
+        # ax[0,0].text(x=env.rx[idx[0]]-1.2, y=env.ry[idx[0]]+1.3, s='Start/finish', fontsize = 'small', bbox=dict(facecolor='white', edgecolor='black',pad=0.1,boxstyle='round'))
+        ax[0,1].vlines(x=env.rx[idx[0]], ymin=env.ry[idx[0]]-1, ymax=env.ry[idx[0]]+1, linestyles='dotted', color='red', label='_nolegend_')
+        # ax[0,1].text(x=env.rx[idx[0]]-1.2, y=env.ry[idx[0]]+1.3, s='Start/finish', fontsize = 'small', bbox=dict(facecolor='white', edgecolor='black',pad=0.1,boxstyle='round'))
+
+
+        # Plot path of end-to-end agent
+        ax[0,0].axis('off')
+        ax[0,0].imshow(ImageOps.invert(track.gray_im.filter(ImageFilter.FIND_EDGES).filter(ImageFilter.MaxFilter(1))), extent=(0,track.map_width,0,track.map_height), cmap="gray")
+        idx=0
+        for _ in range(2):
+                
+            ax[0,0].plot(np.array(state_history[idx])[:,0], np.array(state_history[idx])[:,1], linewidth=1.5, alpha=alpha)  
+            idx+=1  
+
+        # Plot path of partial end-to-end agent with steering and velocity control
+        ax[0,1].axis('off')
+        ax[0,1].imshow(ImageOps.invert(track.gray_im.filter(ImageFilter.FIND_EDGES).filter(ImageFilter.MaxFilter(1))), extent=(0,track.map_width,0,track.map_height), cmap="gray")
+        idx=6
+        for _ in range(2):
+            
+            # if local_path_history[idx] and idx==7:
+            #     for j in np.array(local_path_history[idx])[np.arange(0,len(local_path_history[idx]),40)]:
+            #         ax[0,1].plot(j[0], j[1], alpha=0.5, linestyle='dashdot', color='red')
+            #         ax[0,1].plot(j[0][0], j[1][0], alpha=0.5, color='red', marker='s')
+
+            ax[0,1].plot(np.array(state_history[idx])[:,0], np.array(state_history[idx])[:,1], linewidth=1.5, alpha=alpha)  
+            idx+=1  
+
+        
+
+        # Plot slip angle of end-to-end agent
+        ax[1,0].set(xlabel='Progress along centerline [%]', ylabel='Slip angle \n[rads]')
+        idx=0
+        for _ in range(2):
+            ax[1,0].plot(np.array(progress_history[idx])*100, np.array(state_history[idx])[:,6], linewidth=1.5, alpha=alpha)  
+            idx+=1  
+
+        # Plot slip angle of partial end-to-end agent with steering and velocity control
+        ax[1,1].set(xlabel='Progress along centerline [%]')
+        idx=6
+        for _ in range(2):
+            ax[1,1].plot(np.array(progress_history[idx])*100, np.array(state_history[idx])[:,6], linewidth=1.5, alpha=alpha)  
+            idx+=1  
+
+
+    
+        for plt_idx_0 in [1]:
+            for plt_idx_1 in [0,1] :
+                ax[plt_idx_0, plt_idx_1].spines['bottom'].set_color('grey')
+                ax[plt_idx_0, plt_idx_1].spines['top'].set_color('grey') 
+                ax[plt_idx_0, plt_idx_1].spines['right'].set_color('grey')
+                ax[plt_idx_0, plt_idx_1].spines['left'].set_color('grey')
+                ax[plt_idx_0, plt_idx_1].tick_params(length=0)
+                ax[plt_idx_0, plt_idx_1].grid('lightgrey')
+                ax[plt_idx_0, plt_idx_1].set_xticks([0,20,40,60,80,100])
+                if plt_idx_0==1:
+                    ax[plt_idx_0,plt_idx_1].set_yticks([-0.5,0,0.5])
+                if plt_idx_1==1:
+                    ax[plt_idx_0,plt_idx_1].set_yticklabels([])
+                    
+
+
+        
+        ax[0,0].set_title('End-to-end')
+        ax[0,1].set_title('Steering and velocity control')
+        fig.tight_layout()
+        fig.subplots_adjust(bottom=0.3) 
+        plt.figlegend(legend, loc='lower center', ncol=2, labelspacing=0.7)
+        plt.show()     
+
+    if False:
+        
+        fig, ax =   plt.subplots(nrows=1, ncols=2, figsize=(5.5,2))
+     
+        prog = np.array([0, 0.2, 0.4, 0.6, 0.8])
+        idx =  np.zeros(len(prog), int)
+        text = ['', '20%', '40%', '60%', '80%']
+        for i in range(len(idx)):
+            idx[i] = np.mod(env.start_point+np.round(prog[i]*len(env.rx)), len(env.rx))
+        idx.astype(int)
+        # for i in range(len(idx)):
+        #     ax[0].text(x=env.rx[idx[i]], y=env.ry[idx[i]], s=text[i], fontsize = 'small', bbox=dict(facecolor='white', edgecolor='black',pad=0.1,boxstyle='round'))
+        # for i in range(len(idx)):
+        #     ax[1].text(x=env.rx[idx[i]], y=env.ry[idx[i]], s=text[i], fontsize = 'small', bbox=dict(facecolor='white', edgecolor='black',pad=0.1,boxstyle='round'))
+        
+        ax[0].vlines(x=env.rx[idx[0]], ymin=env.ry[idx[0]]-1, ymax=env.ry[idx[0]]+1, linestyles='dotted', color='red', label='_nolegend_')
+        # ax[0,0].text(x=env.rx[idx[0]]-1.2, y=env.ry[idx[0]]+1.3, s='Start/finish', fontsize = 'small', bbox=dict(facecolor='white', edgecolor='black',pad=0.1,boxstyle='round'))
+        ax[1].vlines(x=env.rx[idx[0]], ymin=env.ry[idx[0]]-1, ymax=env.ry[idx[0]]+1, linestyles='dotted', color='red', label='_nolegend_')
+        # ax[0,1].text(x=env.rx[idx[0]]-1.2, y=env.ry[idx[0]]+1.3, s='Start/finish', fontsize = 'small', bbox=dict(facecolor='white', edgecolor='black',pad=0.1,boxstyle='round'))
+
+
+        # Plot path of end-to-end agent
+        ax[0].axis('off')
+        ax[0].imshow(ImageOps.invert(track.gray_im.filter(ImageFilter.FIND_EDGES).filter(ImageFilter.MaxFilter(1))), extent=(0,track.map_width,0,track.map_height), cmap="gray")
+        idx=0
+        for _ in range(2):
+                
+            ax[0].plot(np.array(state_history[idx])[:,0], np.array(state_history[idx])[:,1], linewidth=1.5, alpha=alpha)  
+            idx+=1  
+
+        # Plot path of partial end-to-end agent with steering and velocity control
+        ax[1].axis('off')
+        ax[1].imshow(ImageOps.invert(track.gray_im.filter(ImageFilter.FIND_EDGES).filter(ImageFilter.MaxFilter(1))), extent=(0,track.map_width,0,track.map_height), cmap="gray")
+        idx=6
+        for _ in range(2):
+            
+            # if local_path_history[idx] and idx==7:
+            #     for j in np.array(local_path_history[idx])[np.arange(0,len(local_path_history[idx]),40)]:
+            #         ax[0,1].plot(j[0], j[1], alpha=0.5, linestyle='dashdot', color='red')
+            #         ax[0,1].plot(j[0][0], j[1][0], alpha=0.5, color='red', marker='s')
+
+            ax[1].plot(np.array(state_history[idx])[:,0], np.array(state_history[idx])[:,1], linewidth=1.5, alpha=alpha)  
+            idx+=1  
+        
+        ax[0].set_title('End-to-end')
+        ax[1].set_title('Steering and velocity control')
+        fig.tight_layout()
+        fig.subplots_adjust(bottom=0.05) 
+        plt.figlegend(legend, loc='lower center', ncol=2, labelspacing=0.7)
+        plt.show()     
+
+    if True:
+        
+        fig, ax =   plt.subplots(nrows=1, ncols=2, figsize=(5.5,2))
+     
+        prog = np.array([0, 0.2, 0.4, 0.6, 0.8])
+        idx =  np.zeros(len(prog), int)
+        text = ['', '20%', '40%', '60%', '80%']
+        for i in range(len(idx)):
+            idx[i] = np.mod(env.start_point+np.round(prog[i]*len(env.rx)), len(env.rx))
+        idx.astype(int)
+        # for i in range(len(idx)):
+        #     ax[0].text(x=env.rx[idx[i]], y=env.ry[idx[i]], s=text[i], fontsize = 'small', bbox=dict(facecolor='white', edgecolor='black',pad=0.1,boxstyle='round'))
+        # for i in range(len(idx)):
+        #     ax[1].text(x=env.rx[idx[i]], y=env.ry[idx[i]], s=text[i], fontsize = 'small', bbox=dict(facecolor='white', edgecolor='black',pad=0.1,boxstyle='round'))
+        
+        ax[0].vlines(x=env.rx[idx[0]], ymin=env.ry[idx[0]]-1, ymax=env.ry[idx[0]]+1, linestyles='dotted', color='red', label='_nolegend_')
+        # ax[0,0].text(x=env.rx[idx[0]]-1.2, y=env.ry[idx[0]]+1.3, s='Start/finish', fontsize = 'small', bbox=dict(facecolor='white', edgecolor='black',pad=0.1,boxstyle='round'))
+        ax[1].vlines(x=env.rx[idx[0]], ymin=env.ry[idx[0]]-1, ymax=env.ry[idx[0]]+1, linestyles='dotted', color='red', label='_nolegend_')
+        # ax[0,1].text(x=env.rx[idx[0]]-1.2, y=env.ry[idx[0]]+1.3, s='Start/finish', fontsize = 'small', bbox=dict(facecolor='white', edgecolor='black',pad=0.1,boxstyle='round'))
+
+
+        # Plot path of end-to-end agent
+        ax[0].axis('off')
+        ax[0].imshow(ImageOps.invert(track.gray_im.filter(ImageFilter.FIND_EDGES).filter(ImageFilter.MaxFilter(1))), extent=(0,track.map_width,0,track.map_height), cmap="gray")
+        i=[0,1,2]
+        for idx in i:
+            if idx==0:
+                ax[0].plot(np.array(state_history[idx])[:,0], np.array(state_history[idx])[:,1], linewidth=1.5, alpha=alpha)  
+            else:
+                ax[0].plot(np.array(state_history[idx])[:,0], np.array(state_history[idx])[:,1], linewidth=1.5, alpha=alpha, linestyle='--') 
+
+        # Plot path of partial end-to-end agent with steering and velocity control
+        ax[1].axis('off')
+        ax[1].imshow(ImageOps.invert(track.gray_im.filter(ImageFilter.FIND_EDGES).filter(ImageFilter.MaxFilter(1))), extent=(0,track.map_width,0,track.map_height), cmap="gray")
+        i=[9,10,11]
+        for idx in i:
+            
+            # if local_path_history[idx] and idx==7:
+            #     for j in np.array(local_path_history[idx])[np.arange(0,len(local_path_history[idx]),40)]:
+            #         ax[0,1].plot(j[0], j[1], alpha=0.5, linestyle='dashdot', color='red')
+            #         ax[0,1].plot(j[0][0], j[1][0], alpha=0.5, color='red', marker='s')
+
+            if idx==9:
+                ax[1].plot(np.array(state_history[idx])[:,0], np.array(state_history[idx])[:,1], linewidth=1.5, alpha=alpha)  
+            else:
+                ax[1].plot(np.array(state_history[idx])[:,0], np.array(state_history[idx])[:,1], linewidth=1.5, alpha=alpha, linestyle='--') 
+            
+
+        ax[0].set_title('End-to-end')
+        ax[1].set_title('Steering and velocity control')
+        fig.tight_layout()
+        fig.subplots_adjust(bottom=0.05) 
+        plt.figlegend(legend, loc='lower center', ncol=3, labelspacing=0.7)
+        plt.show()     
+
+    
+
+
+agent_names = ['porto_ete_v5_r_collision_5', 'porto_pete_s_polynomial', 'porto_pete_v_k_1_attempt_2', 'porto_pete_sv_p_r_0']    
+legend = ['No model error', 'Wet asphalt', 'Dry asphalt']
+legend_title = ''
+ns=[0,1,0,1]
+mismatch_parameters = [['mu'], ['mu']]
+frac_vary = [[-0.5], [-0.3]]
+noise_dicts = [{'xy':0.025, 'theta':0.05, 'v':0.1, 'lidar':0.01}]
+start_condition = {'x':10, 'y':4.5, 'v':3, 'theta':np.pi, 'delta':0, 'goal':0}
+# display_path_mismatch_multiple_by_agent(agent_names=agent_names, ns=ns, legend_title=legend_title,          
+#                                         legend=legend, mismatch_parameters=mismatch_parameters, frac_vary=frac_vary, noise_dicts=noise_dicts,
+#                                         start_condition=start_condition)
+
+
+
+def display_path_mismatch_multiple_by_agent_2(agent_names, ns, legend_title, legend, mismatch_parameters, frac_vary, noise_dicts, start_condition):
+    
+    pose_history = []
+    progress_history = []
+    state_history = []
+    local_path_history = []
+    action_step_history = []
+    
+
+    for agent_name, n, i in zip(agent_names, ns, range(len(agent_names))):
+
+        infile = open('environments/' + agent_name, 'rb')
+        env_dict = pickle.load(infile)
+        infile.close()
+        # Compensate for changes to reward structure
+        env_dict['reward_signal']['max_progress'] = 0
+        
+        # Model mismatches
+
+        for mis_idx in range(2):
+            car_params = env_dict['car_params'].copy()
+    
+            if mis_idx == 1:
+                for par, var in zip(mismatch_parameters, frac_vary):
+                    if par == 'unknown_mass':
+                        mass=car_params['m']*0.1
+                        m_new = car_params['m'] + mass
+                        lf_new = (car_params['m']*car_params['lf']+mass*var) / (m_new)
+                        I_new = car_params['I'] + car_params['m']*abs(lf_new-car_params['lf'])**2 + mass*abs(lf_new-var)**2
+                        car_params['m'] = m_new
+                        car_params['lf'] = lf_new
+                        car_params['I'] = I_new
+                    elif par == 'C_S':
+                        car_params['C_Sf'] *= 1+var
+                        car_params['C_Sr'] *= 1+var
+                    elif par == 'l_f':
+                        axle_length = car_params['lf']+car_params['lr']
+                        car_params['lf'] *= 1+var
+                        car_params['lr'] =  axle_length - car_params['lf']
+                    elif par == 'sv':
+                        car_params['sv_max'] *= 1+var
+                        car_params['sv_min'] *= 1+var    
+                    else:
+                        car_params[par] *= 1+var
+
+            
+            noise_dict = noise_dicts[0]
+
+            env = environment(env_dict)
+            if start_condition:
+                env.reset(save_history=True, start_condition=start_condition, car_params=car_params, noise=noise_dict)
+            else:
+                env.reset(save_history=True, start_condition=[], car_params=car_params, noise=noise_dict)
+
+            infile = open('agents/' + agent_name + '/' + agent_name + '_params', 'rb')
+            agent_dict = pickle.load(infile)
+            infile.close()
+
+            infile = open('train_parameters/' + agent_name, 'rb')
+            main_dict = pickle.load(infile)
+            infile.close()
+            
+            if i==0 and not start_condition:
+                infile = open('test_initial_condition/' + env_dict['map_name'], 'rb')
+                start_conditions = pickle.load(infile)
+                infile.close()
+                start_condition = random.choice(start_conditions)
+
+            if main_dict['learning_method']=='dqn':
+                agent_dict['epsilon'] = 0
+                a = agent_dqn.agent(agent_dict)
+            if main_dict['learning_method']=='reinforce':
+                a = agent_reinforce.PolicyGradientAgent(agent_dict)
+            if main_dict['learning_method']=='actor_critic_sep':
+                a = agent_actor_critic.actor_critic_separated(agent_dict)
+            if  main_dict['learning_method']=='actor_critic_com':
+                a = agent_actor_critic.actor_critic_combined(agent_dict)
+            if main_dict['learning_method']=='actor_critic_cont':
+                a = agent_actor_critic_continuous.agent_separate(agent_dict)
+            if main_dict['learning_method'] == 'dueling_dqn':
+                agent_dict['epsilon'] = 0
+                a = agent_dueling_dqn.agent(agent_dict)
+            if main_dict['learning_method'] == 'dueling_ddqn':
+                agent_dict['epsilon'] = 0
+                a = agent_dueling_ddqn.agent(agent_dict)
+            if main_dict['learning_method'] == 'rainbow':
+                agent_dict['epsilon'] = 0
+                a = agent_rainbow.agent(agent_dict)
+            if main_dict['learning_method'] == 'ddpg':
+                a = agent_ddpg.agent(agent_dict)
+            if main_dict['learning_method'] == 'td3':
+                a = agent_td3.agent(agent_dict)
+                
+            a.load_weights(agent_name, n)
+
+            #start_pose = {'x':11.2, 'y':7.7, 'v':0, 'delta':0, 'theta':0, 'goal':1}
+            env.reset(save_history=True, start_condition=start_condition, car_params=car_params, noise=noise_dict)
+            obs = env.observation
+            done = False
+            score = 0
+
+            while not done:
+                if main_dict['learning_method']=='ddpg' or main_dict['learning_method']=='td3':
+                    action = a.choose_greedy_action(obs)
+                else:
+                    action = a.choose_action(obs)
+
+                next_obs, reward, done = env.take_action(action)
+                score += reward
+                obs = next_obs
+
+                if env.progress>=0.98:
+                    done=True
+                
+
+            print('Total score = ', score)
+            print('Progress = ', env.progress)
+            print('Collision = ', env.collision)
+
+            state_history.append(env.state_history)
+            pose_history.append(env.pose_history)
+            progress_history.append(env.progress_history)
+            local_path_history.append(env.local_path_history)
+            action_step_history.append(env.action_step_history)
+        
+        
+    plt.rcParams['font.family'] = 'serif'
+    plt.rcParams['font.serif'] = ['Times New Roman'] + plt.rcParams['font.serif']
+
+    legend_new = legend.copy()
+    legend_new.insert(0, 'Min and max')
+
+    size = (5.5,5)
+    alpha=0.7
+    track = mapping.map(env.map_name)
+
+    if True:
+        
+        fig, ax =   plt.subplots(nrows=4, ncols=2, figsize=size)
+     
+        prog = np.array([0, 0.2, 0.4, 0.6, 0.8])
+        idx =  np.zeros(len(prog), int)
+        text = ['', '20%', '40%', '60%', '80%']
+        for i in range(len(idx)):
+            idx[i] = np.mod(env.start_point+np.round(prog[i]*len(env.rx)), len(env.rx))
+        idx.astype(int)
+        for i in range(len(idx)):
+            ax[0,0].text(x=env.rx[idx[i]], y=env.ry[idx[i]], s=text[i], fontsize = 'small', bbox=dict(facecolor='white', edgecolor='black',pad=0.1,boxstyle='round'))
+        for i in range(len(idx)):
+            ax[0,1].text(x=env.rx[idx[i]], y=env.ry[idx[i]], s=text[i], fontsize = 'small', bbox=dict(facecolor='white', edgecolor='black',pad=0.1,boxstyle='round'))
+        ax[0,0].vlines(x=env.rx[idx[0]], ymin=env.ry[idx[0]]-1, ymax=env.ry[idx[0]]+1, linestyles='dotted', color='red', label='_nolegend_')
+        # ax[0,0].text(x=env.rx[idx[0]]-1.2, y=env.ry[idx[0]]+1.3, s='Start/finish', fontsize = 'small', bbox=dict(facecolor='white', edgecolor='black',pad=0.1,boxstyle='round'))
+        ax[0,1].vlines(x=env.rx[idx[0]], ymin=env.ry[idx[0]]-1, ymax=env.ry[idx[0]]+1, linestyles='dotted', color='red', label='_nolegend_')
+        # ax[0,1].text(x=env.rx[idx[0]]-1.2, y=env.ry[idx[0]]+1.3, s='Start/finish', fontsize = 'small', bbox=dict(facecolor='white', edgecolor='black',pad=0.1,boxstyle='round'))
+
+
+
+        # Plot path of end-to-end agent
+        ax[0,0].axis('off')
+        ax[0,0].imshow(ImageOps.invert(track.gray_im.filter(ImageFilter.FIND_EDGES).filter(ImageFilter.MaxFilter(1))), extent=(0,track.map_width,0,track.map_height), cmap="gray")
+        idx=0
+        for _ in range(2):
+            ax[0,0].plot(np.array(state_history[idx])[:,0], np.array(state_history[idx])[:,1], linewidth=1.5, alpha=alpha)  
+            idx+=1  
+
+        # Plot path of partial end-to-end agent with steering and velocity control
+        ax[0,1].axis('off')
+        ax[0,1].imshow(ImageOps.invert(track.gray_im.filter(ImageFilter.FIND_EDGES).filter(ImageFilter.MaxFilter(1))), extent=(0,track.map_width,0,track.map_height), cmap="gray")
+        idx=6
+        for _ in range(2):
+            ax[0,1].plot(np.array(state_history[idx])[:,0], np.array(state_history[idx])[:,1], linewidth=1.5, alpha=alpha)  
+            idx+=1  
+
+        # Plot Steering angle of end-to-end agent
+        ax[1,0].set(ylabel='Steering \nangle \n[rads]')
+        idx=0
+        for _ in range(2):
+            ax[1,0].plot(np.array(progress_history[idx])*100, np.array(state_history[idx])[:,2], linewidth=1.5, alpha=alpha)  
+            idx+=1  
+
+        # Plot steering angle of partial end-to-end agent with steering and velocity control
+        idx=6
+        for _ in range(2):
+            ax[1,1].plot(np.array(progress_history[idx])*100, np.array(state_history[idx])[:,2], linewidth=1.5, alpha=alpha)  
+            idx+=1  
+
+        
+        # Plot velocity of end-to-end agent
+        ax[2,0].set(ylabel='Longitudinal \nvelocity \n[m/s]')
+        idx=0
+        for _ in range(2):
+            ax[2,0].plot(np.array(progress_history[idx])*100, np.array(state_history[idx])[:,3], linewidth=1.5, alpha=alpha)  
+            idx+=1  
+
+        # Plot velocity of partial end-to-end agent with steering and velocity control
+        idx=6
+        for _ in range(2):
+            ax[2,1].plot(np.array(progress_history[idx])*100, np.array(state_history[idx])[:,3], linewidth=1.5, alpha=alpha)  
+            idx+=1  
+
+        
+
+        # Plot slip angle of end-to-end agent
+        ax[3,0].set(xlabel='Progress along centerline', ylabel='Slip angle \n[rads]')
+        idx=0
+        for _ in range(2):
+            ax[3,0].plot(np.array(progress_history[idx])*100, np.array(state_history[idx])[:,6], linewidth=1.5, alpha=alpha)  
+            idx+=1  
+
+        # Plot velocity of partial end-to-end agent with steering and velocity control
+        ax[3,1].set(xlabel='Progress along centerline')
+        idx=6
+        for _ in range(2):
+            ax[3,1].plot(np.array(progress_history[idx])*100, np.array(state_history[idx])[:,6], linewidth=1.5, alpha=alpha)  
+            idx+=1  
+
+
+    
+        for plt_idx_0 in [1,2,3]:
+            for plt_idx_1 in [0,1] :
+                ax[plt_idx_0, plt_idx_1].spines['bottom'].set_color('grey')
+                ax[plt_idx_0, plt_idx_1].spines['top'].set_color('grey') 
+                ax[plt_idx_0, plt_idx_1].spines['right'].set_color('grey')
+                ax[plt_idx_0, plt_idx_1].spines['left'].set_color('grey')
+                ax[plt_idx_0, plt_idx_1].tick_params(length=0)
+                ax[plt_idx_0, plt_idx_1].grid('lightgrey')
+                ax[plt_idx_0, plt_idx_1].set_xticks([0,20,40,60,80,100])
+                
+                if plt_idx_0==1:
+                    ax[plt_idx_0,plt_idx_1].set_xticklabels([])  
+                    ax[plt_idx_0,plt_idx_1].set_yticks([-0.4,0,0.4])
+                if plt_idx_0==2:
+                    ax[plt_idx_0,plt_idx_1].set_xticklabels([]) 
+                    ax[plt_idx_0,plt_idx_1].set_yticks([3,4,5])
+                if plt_idx_0==3:
+                    ax[plt_idx_0,plt_idx_1].set_yticks([-0.5,0,0.5])
+                
+                if plt_idx_1==1:
+                    ax[plt_idx_0,plt_idx_1].set_yticklabels([])
+
+        
+        ax[0,0].set_title('End-to-end')
+        ax[0,1].set_title('Steering and velocity control')
+        fig.tight_layout()
+        fig.subplots_adjust(bottom=0.2) 
+        plt.figlegend(legend, loc='lower center', ncol=2, labelspacing=0.7)
+        plt.show()     
+
+    
+
+
+agent_names = ['porto_ete_v5_r_collision_5', 'porto_pete_s_polynomial', 'porto_pete_v_k_1_attempt_2', 'porto_pete_sv_p_r_0']    
+legend = ['No mass', 'Mass placed above front axle']
 legend_title = ''
 ns=[2,1,0,1]
 mismatch_parameters = ['unknown_mass']
 frac_vary = [0]
 noise_dicts = [{'xy':0.025, 'theta':0.05, 'v':0.1, 'lidar':0.01}]
 start_condition = {'x':10, 'y':4.5, 'v':3, 'theta':np.pi, 'delta':0, 'goal':0}
-# display_path_mismatch_multiple(agent_names=agent_names, ns=ns, legend_title=legend_title,          
+# display_path_mismatch_multiple_by_agent_2(agent_names=agent_names, ns=ns, legend_title=legend_title,          
 #                                              legend=legend, mismatch_parameters=mismatch_parameters, frac_vary=frac_vary, noise_dicts=noise_dicts,
 #                                              start_condition=start_condition)
-
-
-
 
 def display_maps():
     names = ['Circle', 'Redbull ring', 'Berlin', 'Columbia', 'Porto', 'Torino']
@@ -4017,7 +4829,7 @@ def display_map_outline(map):
     plt.imshow(ImageOps.invert(track.gray_im.filter(ImageFilter.FIND_EDGES).filter(ImageFilter.MaxFilter(1))), extent=(0, track.map_width,0, track.map_height), cmap="gray")
     plt.axis('off')
 
-    
+
 
     plt.show()
     # plt.imshow(ImageOps.invert(redbull_ring.gray_im.filter(ImageFilter.FIND_EDGES).filter(ImageFilter.MaxFilter(1))), extent=(0,redbull_ring.map_width,0,redbull_ring.map_height), cmap="gray")
