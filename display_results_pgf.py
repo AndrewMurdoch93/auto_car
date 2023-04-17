@@ -18,7 +18,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 import torch.optim as optim
 import matplotlib
-matplotlib.use('pgf')
+# matplotlib.use('pgf')
 import matplotlib.pyplot as plt
 import pickle
 import functions
@@ -550,20 +550,23 @@ def learning_curve_all(agent_names, legend, legend_title, ns, filename, xlim, xs
 
 
 
-    plt.rcParams.update({
-    "font.family": "serif",  # use serif/main font for text elements
-    "text.usetex": True,     # use inline math for ticks
-    "pgf.rcfonts": False,     # don't setup fonts from rc parameters
-    "font.size": 12
-    })
+    # plt.rcParams.update({
+    # "font.family": "serif",  # use serif/main font for text elements
+    # "text.usetex": True,     # use inline math for ticks
+    # "pgf.rcfonts": False,     # don't setup fonts from rc parameters
+    # "font.size": 12
+    # })
+
+    plt.rcParams['font.family'] = 'serif'
+    plt.rcParams['font.serif'] = ['Times New Roman'] + plt.rcParams['font.serif']
 
     plt.rc('axes',edgecolor='gray')
-    #fig, ax = plt.subplots(1, 3, figsize=(5.5,3))
-    fig, ax = plt.subplots(1, 3, figsize=(5.5,2.8))
+    fig, ax = plt.subplots(1, 3, figsize=(5.5,2.2))
+    # fig, ax = plt.subplots(1, 3, figsize=(5.5,2.65))
     
-    #ax[0].ticklabel_format(style='scientific', axis='x', scilimits=(0,0), useMathText=True, useOffset=True)
-    ax[1].ticklabel_format(style='scientific', axis='x', scilimits=(0,0), useMathText=True)
-    #ax[2].ticklabel_format(style='scientific', axis='x', scilimits=(0,0), useMathText=True, useOffset=True)
+    # ax[0].ticklabel_format(style='scientific', axis='x', scilimits=(0,0), useMathText=True, useOffset=True)
+    # ax[1].ticklabel_format(style='scientific', axis='x', scilimits=(0,0), useMathText=True)
+    ax[2].ticklabel_format(style='scientific', axis='x', scilimits=(0,0), useMathText=True, useOffset=True)
     #plt.ticklabel_format(style='scientific', axis='x', scilimits=(0,0))
     
     xax1000 = np.arange(0,xlim+1000,xspace)
@@ -571,12 +574,15 @@ def learning_curve_all(agent_names, legend, legend_title, ns, filename, xlim, xs
 
     ax[0].set_xticks(ticks=xax1000, labels=xax1)
     ax[1].set_xticks(ticks=xax1000, labels=xax1)
-    ax[2].set_xticks(xax1000, labels=xax1)
+    # ax[2].set_xticks(xax1000, labels=xax1)
     
     ax[0].set_yticks(ticks=[0,25,50,75,100], labels=[0,25,50,75,100])
-    
     ax[1].set_yticks(ticks=[5,6,7,8,9,10], labels=[5,6,7,8,9,10])
     ax[2].set_yticks(ticks=[-10, -5, 0, 5], labels=[-10, -5, 0, 5])
+
+
+
+
 
     #ax[1].ticklabel_format(style='scientific', axis='x', scilimits=(0,0), useMathText=True)
 
@@ -612,7 +618,8 @@ def learning_curve_all(agent_names, legend, legend_title, ns, filename, xlim, xs
 
         #np.arange(len(steps[i][ns[i]]))[np.logical_not(collisions[i][ns[i]])][0:end_episodes[i]]
         #plt.plot(np.array(max_steps_no_coll[i][0:end_episode_no_coll])*0.01 )
-    ax[1].set_xlabel(r'Episodes $\times 10^3$')
+    # ax[1].set_xlabel(r'Episodes $\times 10^3$')
+    ax[1].set_xlabel('Episodes')
     #ax[1].set_xlim([0, np.max(end_episodes)])
     #plt.title('Average time per episode without collisions')
     #ax[1].set_ylabel('Lap time [s]')
@@ -647,10 +654,11 @@ def learning_curve_all(agent_names, legend, legend_title, ns, filename, xlim, xs
 
 
     fig.tight_layout()
-    fig.subplots_adjust(bottom=0.4) 
-    plt.figlegend(legend, title=legend_title, loc = 'lower center', ncol=2)
-    # plt.show()
-    plt.savefig('results/'+filename+'.pgf', format='pgf')
+    # fig.subplots_adjust(bottom=0.4) 
+    # plt.figlegend(legend, title=legend_title, loc = 'lower center', ncol=2)
+    plt.show()
+    # plt.savefig('results/'+filename+'.pgf', format='pgf')
+
 
 def display_velocity_slip(agent_names, ns, legend_title, legend, mismatch_parameters, frac_vary, start_condition, filename):
     
@@ -2960,9 +2968,9 @@ frac_vary = [0]
 noise_dicts = [{'xy':0.025, 'theta':0.05, 'v':0.1, 'lidar':0.01}]
 start_condition = {'x':10, 'y':4.5, 'v':3, 'theta':np.pi, 'delta':0, 'goal':0}
 filename='unknown_mass_path_1'
-display_path_mismatch_multiple(agent_names=agent_names, ns=ns, legend_title=legend_title,          
-                                             legend=legend, mismatch_parameters=mismatch_parameters, frac_vary=frac_vary, noise_dicts=noise_dicts,
-                                             start_condition=start_condition, filename=filename)
+# display_path_mismatch_multiple(agent_names=agent_names, ns=ns, legend_title=legend_title,          
+#                                              legend=legend, mismatch_parameters=mismatch_parameters, frac_vary=frac_vary, noise_dicts=noise_dicts,
+#                                              start_condition=start_condition, filename=filename)
 
 
 
@@ -3500,11 +3508,14 @@ def plot_frenet_polynomial(filename):
 # ns=[0, 0]
 # filename = 'path_collision_penalty'
 
-# agent_names = ['porto_ete_v5_r_collision_5']
-# legend = ['End-to-end agent']
-# legend_title = ''
-# ns=[0]
-# filename = 'path_end_to_end_agent'
+agent_names = ['porto_ete_v5_r_collision_5']
+legend = ['End to end', 'Partial end-to-end']
+legend_title = 'Architecture'
+ns=[0, 0]
+filename = 'lcetea'
+xlim = 3000
+xspace = 1000
+
 
 # agent_names = ['porto_ete_v5_gamma_0', 'porto_ete_v5_gamma_1', 'porto_ete_v5_r_collision_5', 'porto_ete_v5_gamma_4']
 # legend = ['0.9', '0.95', '0.99', '1']

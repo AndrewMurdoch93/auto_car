@@ -21,7 +21,7 @@ import os
 
 
 
-agent_name = 'porto_pete_sv'
+agent_name = 'end_to_end_display'
 
 main_dict = {'name':agent_name, 'max_episodes':10000, 'max_steps':3e6, 'learning_method':'td3', 'runs':3, 'comment':''}
 
@@ -62,7 +62,7 @@ action_space_dict = {'action_space': 'continuous', 'vel_select':[3,5], 'R_range'
 
 #action_space_dict = {'action_space': 'discrete', 'n_waypoints': 10, 'vel_select':[7], 'R_range':[6]}
 
-steer_control_dict = {'steering_control': True, 'wpt_arc':np.pi/2, 'track_width':1.2}
+steer_control_dict = {'steering_control': False, 'wpt_arc':np.pi/2, 'track_width':1.2}
 
 if  steer_control_dict['steering_control'] == True:
     steer_control_dict['path_strategy'] = 'circle'  #circle or linear or polynomial or gradient
@@ -75,15 +75,16 @@ if  steer_control_dict['steering_control'] == True:
 
 lidar_dict = {'is_lidar':True, 'lidar_res':0.1, 'n_beams':10, 'max_range':20, 'fov':np.pi}
 
-noise_dict = {'xy':0.025, 'theta':0.05, 'v':0.1, 'lidar':0.01}
+# noise_dict = {'xy':0.025, 'theta':0.05, 'v':0.1, 'lidar':0.01}
+noise_dict = {'xy':0, 'theta':0, 'v':0, 'lidar':0}
 
 env_dict = {'sim_conf': functions.load_config(sys.path[0], "config")
         , 'save_history': False
         , 'map_name': 'porto_1'
         , 'max_steps': 3000
         , 'control_steps': 20
-        , 'display': False
-        , 'velocity_control': True
+        , 'display': True
+        , 'velocity_control': False
         , 'velocity_gain':1
         , 'steer_control_dict': steer_control_dict
         , 'car_params':car_params
@@ -2020,10 +2021,16 @@ if True:
 # legend = agent_names
 # ns=[0]
 
-agent_names = ['porto_ete_v5_r_collision_5', 'porto_ete_v5_r_collision_5']
-legend = ['none', 'mismatch']
+agent_names = ['porto_ete_v5_r_collision_5']
+# agent_names = ['porto_pete_sv_p_r_0']
+legend = ['End-to-end']
 legend_title = ''
-ns=[0,0]
+ns=[2]
+
+# agent_names = ['porto_ete_v5_r_collision_5']
+# legend = []
+# legend_title = ''
+# ns=[0]
 
 # display_results_multiple.learning_curve_lap_time_average(agent_names, legend, legend_title, ns)
 # display_results_multiple.learning_curve_reward_average(agent_names, legend, legend_title)
@@ -2037,10 +2044,12 @@ ns=[0,0]
 #     display_results_multiple.display_lap_results(agent_name=agent_name)
 
 
-mismatch_parameters = [['mu'], ['mu']]
-frac_vary = [[0], [0]]
-noise_dicts = [{'xy':0, 'theta':0, 'v':0, 'lidar':0}, {'xy':0, 'theta':0, 'v':0, 'lidar':0}, {'xy':0, 'theta':0, 'v':0, 'lidar':0}, {'xy':0, 'theta':0, 'v':0, 'lidar':0}]
-start_condition = {'x':10, 'y':4.5, 'v':3, 'theta':np.pi, 'delta':0, 'goal':0}
+# mismatch_parameters = [['unknown_mass', 'C_Sr', 'mu']]
+# frac_vary = [[0, -0.2, -0.4]]
+# noise_dicts = [{'xy':0.025, 'theta':0.05, 'v':0.1, 'lidar':0.01}, {'xy':0.025, 'theta':0.05, 'v':0.1, 'lidar':0.01}, {'xy':0.025, 'theta':0.05, 'v':0.1, 'lidar':0.01}, {'xy':0.025, 'theta':0.05, 'v':0.1, 'lidar':0.01}]
+# start_condition = {'x':10, 'y':4.5, 'v':3, 'theta':np.pi, 'delta':0, 'goal':0}
+
+
 
 # Columbia
 # start_condition = {'x':5.7, 'y':7.25, 'v':3, 'theta':0, 'delta':0, 'goal':0}
@@ -2049,13 +2058,17 @@ start_condition = {'x':10, 'y':4.5, 'v':3, 'theta':np.pi, 'delta':0, 'goal':0}
 
 # NB!!!! Error: Path is junk when no mismatch is present, when displaying 2 agents
 
+# display_results_multiple.display_moving_agent(agent_names=agent_names, ns=ns, legend_title=legend_title,          
+#                                              legend=legend, mismatch_parameters=mismatch_parameters, frac_vary=frac_vary, noise_dicts=noise_dicts,
+#                                              start_condition=start_condition)
+
 # display_results_multiple.display_path_multiple(agent_names=agent_names, ns=ns, legend_title=legend_title,          
 #                                              legend=legend, mismatch_parameters=mismatch_parameters, frac_vary=frac_vary, noise_dicts=noise_dicts,
 #                                              start_condition=start_condition)
 
-display_results_multiple.display_path_mismatch_multiple_by_state(agent_names=agent_names, ns=ns, legend_title=legend_title,          
-                                             legend=legend, mismatch_parameters=mismatch_parameters, frac_vary=frac_vary, noise_dicts=noise_dicts,
-                                             start_condition=start_condition)
+# display_results_multiple.display_path_mismatch_multiple_by_state(agent_names=agent_names, ns=ns, legend_title=legend_title,          
+#                                              legend=legend, mismatch_parameters=mismatch_parameters, frac_vary=frac_vary, noise_dicts=noise_dicts,
+#                                              start_condition=start_condition)
 
 
 

@@ -358,6 +358,7 @@ def convert_sn_to_xy(s, n, csp):
     yaw = []
     ds = []
     c = []
+    
     for i in range(len(s)):
         ix, iy = csp.calc_position(s[i])
         if ix is None:
@@ -515,6 +516,8 @@ def generate_initial_condition(name, episodes, distance_offset, angle_offset, ve
 
 
 def plot_frenet_polynomial():
+
+    
     ds = 0.1
     x_sparse = np.array([0,10])
     y_sparse = [0,0]
@@ -530,10 +533,10 @@ def plot_frenet_polynomial():
     # thetas = np.array([0.5, 0.5, 0.5])
     # n_1s = np.array([0.7, 0.9, -0.9])
 
-    s_0s = np.array([0, 0.25])
-    n_0s = np.array([0, -0.25])
-    thetas = np.array([0.8, 0.8])
-    n_1s = np.array([0.7, 0.7])
+    s_0s = np.array([0,0])
+    n_0s = np.array([0,0])
+    thetas = np.array([0.8,0.8])
+    n_1s = np.array([0.7,0.7])
 
 
     s_1s = s_0s+1
@@ -542,12 +545,11 @@ def plot_frenet_polynomial():
     s_ = [[] for _ in range(len(s_0s))]
     n_ = [[] for _ in range(len(s_0s))]
 
+    
     plt.rcParams['font.family'] = 'serif'
     plt.rcParams['font.serif'] = ['Times New Roman'] + plt.rcParams['font.serif']
-    plt.rcParams.update({'font.size': 10})
 
-    # font = {'fontname':'Times New Roman'}
-    # font = {'fontname':'Times New Roman'}
+
     fig, ax = plt.subplots(1, figsize=(5.5,2.3))
     
     
@@ -560,6 +562,8 @@ def plot_frenet_polynomial():
 
     # ax.set_xticks(ticks=[s_0s[0], s_1s[0]], labels=['$s_0$', '$s_1$'])
     # ax.set_yticks(ticks=[n_0s[0], n_1s[0]], labels=['$n_0$', '$n_1$'])
+
+
 
     ax.set_xticks(ticks=[], labels=[])
     ax.set_yticks(ticks=[], labels=[])
@@ -595,33 +599,29 @@ def plot_frenet_polynomial():
     labels = ['Path using true position', 'Path using believed position']
     for i in range(len(s_0s)):
         if i==1:
-            plt.plot(s_[i][0], n_[i][0], label=labels[i], alpha=alpha)
+            # plt.plot(s_[i][0], n_[i][0], label=labels[i], alpha=alpha)
+            pass
 
-    plt.plot(s_[1][0]-s_0s[1], n_[1][0]-n_0s[1], label='Path travelled by vehicle', alpha=alpha)
+    plt.plot(s_[1][0]-s_0s[1], n_[1][0]-n_0s[1], label='', alpha=0.5, color='red', linestyle='dashdot')
+
     # plt.plot(s_[0][0], n_[0][0], color='#1f77b4', label='Sampled path')
     # plt.fill_between(x=s_[1][0], y1=n_[1][0], y2=n_[2][0], color='#1f77b4', alpha=0.3, label='Range of selectable paths')
 
-    ax.plot(s_0s[0], n_0s[0], 'x', label='True position')
-    ax.plot([s_0s[1]], n_0s[1], 'x', label='Believed position')
 
     # plt.plot(np.linspace(s_1, s_2), np.ones(len(np.linspace(s_1, s_2)))*n_1)
-    ax.hlines(y=1, xmin=-10, xmax=10, color='k', label='Track boundaries')
-    ax.hlines(y=-1, xmin=-10, xmax=10, color='k', label='_nolegend_')
-    ax.hlines(y=0, xmin=s_0-10, xmax=10, color='grey', linestyle='--', label='Track centerline')
-    # plt.vlines(x=s_0, ymin=-1, ymax=1 ,color='grey', linestyle='--', label='Track centerline')
-    # plt.vlines(x=s_1, ymin=-1, ymax=1)
+    # ax.hlines(y=1, xmin=-10, xmax=10, color='k', label='Track boundaries')
+    # ax.hlines(y=-1, xmin=-10, xmax=10, color='k', label='_nolegend_')
+    # ax.hlines(y=0, xmin=s_0-10, xmax=10, color='grey', linestyle='--', label='Track centerline')
+
     ax.grid(True)
-    ax.set_xlim([np.min(s_0s)-0.2, np.max(s_2s)+0.2])
+    # ax.set_xlim([np.min(s_0s)-0.2, np.max(s_2s)+0.2])
     ax.set_xlabel('Distance along \ncenterline, $s$ [m]')
     ax.set_ylabel('Distance perpendicular \nto centerline, $n$ [m]')
     fig.tight_layout()
-    # fig.subplots_adjust(bottom=0.4)
-    # fig.subplots_adjust(left=0.4)
-    # fig.subplots_adjust(right=0.65)
 
-    # fig.subplots_adjust(left=0.35)
-    fig.subplots_adjust(right=0.5)
-    plt.figlegend(loc='center right', ncol=1)
+
+    # fig.subplots_adjust(right=0.5)
+    # plt.figlegend(loc='center right', ncol=1)
     plt.show()
 
 

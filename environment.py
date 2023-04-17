@@ -3,6 +3,7 @@ import numpy as np
 import math
 import functions
 import sys
+import matplotlib
 import matplotlib.pyplot as plt
 from matplotlib import image
 from PIL import Image
@@ -599,23 +600,26 @@ class environment():
   
 
     def visualise(self):
-        
-        current_goal = self.goals[self.current_goal]
+
+
         plt.cla()
         plt.gcf().canvas.mpl_connect('key_release_event', lambda event: [exit(0) if event.key == 'escape' else None])
         
         # plt.imshow(self.im, extent=(0,self.map_width,0,self.map_height))
         plt.imshow(ImageOps.invert(self.track.gray_im.filter(ImageFilter.FIND_EDGES).filter(ImageFilter.MaxFilter(1))), extent=(0,self.track.map_width,0,self.track.map_height), cmap="gray")
         plt.axis('off')
-        
+        plt.xlim([0,16])
+        plt.ylim([0,6])
+
         if self.steering_control==True:
             plt.plot(self.path_tracker.cx, self.path_tracker.cy, color='red', alpha=0.3, linestyle='-.')
             pass
         
         plt.arrow(self.x, self.y, 0.5*math.cos(self.theta), 0.5*math.sin(self.theta), head_length=0.5, head_width=0.5, shape='full', ec='None', fc='blue')
         plt.arrow(self.x, self.y, 0.5*math.cos(self.theta+self.delta), 0.5*math.sin(self.theta+self.delta), head_length=0.5, head_width=0.5, shape='full',ec='None', fc='red')
+
         
-        plt.plot(self.x, self.y, 'o', color='orange')
+
         #plt.plot(waypoint[0], waypoint[1], 'x')
 
         #plt.plot([current_goal[0]-self.s, current_goal[0]+self.s, current_goal[0]+self.s, current_goal[0]-self.s, 
@@ -625,9 +629,30 @@ class environment():
         # if self.lidar_dict['is_lidar']==True:
         #     for coord in self.lidar_coords:
         #         plt.plot(coord[0], coord[1], 'xb')
-            
-        plt.plot(np.array(self.pose_history)[0:self.steps,0], np.array(self.pose_history)[0:self.steps,1], color='orange', alpha=0.5)
         
+        if self.steering_control==False:
+            car_color = plt.rcParams['axes.prop_cycle'].by_key()['color'][0]
+        else:
+            car_color = plt.rcParams['axes.prop_cycle'].by_key()['color'][1]
+
+        plt.plot(self.x, self.y, 'o', color=car_color)
+        plt.plot(np.array(self.pose_history)[0:self.steps,0], np.array(self.pose_history)[0:self.steps,1], color=car_color, alpha=0.5)
+        
+        prog = np.array([0, 0.2, 0.4, 0.6, 0.8])
+        idx =  np.zeros(len(prog), int)
+        text = ['', '20%', '40%', '60%', '80%']
+
+        for i in range(len(idx)):
+            idx[i] = np.mod(self.start_point+np.round(prog[i]*len(self.rx)), len(self.rx))
+        idx.astype(int)
+        
+        # for i in range(len(idx)):
+        #     plt.text(x=self.rx[idx[i]], y=self.ry[idx[i]], s=text[i], fontsize = 'small', bbox=dict(facecolor='white', edgecolor='black',pad=0.1,boxstyle='round'))
+        
+        # plt.vlines(x=self.rx[idx[0]], ymin=self.ry[idx[0]]-1, ymax=self.ry[idx[0]]+1, linestyles='dotted', color='red')
+        # plt.text(x=self.rx[idx[0]]-1.2, y=self.ry[idx[0]]+1.3, s='Start/finish', fontsize = 'small', bbox=dict(facecolor='white', edgecolor='black',pad=0.1,boxstyle='round'))
+
+
         #plt.plot(self.rx, self.ry)
         #plt.plot(self.rx[self.old_closest_point], self.ry[self.old_closest_point], 'x')
         # plt.xlabel('x coordinate')
@@ -962,7 +987,8 @@ def test_environment():
     
     
     # agent_name = 'porto_pete_s_r_collision_0'
-    agent_name = 'porto_ete_v5_r_collision_5' 
+    # agent_name = 'porto_ete_v5_r_collision_5' 
+    agent_name = 'porto_pete_sv_p_r_0'
 
     parent_dir = os.path.dirname(os.path.abspath(__file__))
     agent_dir = parent_dir + '/agents/' + agent_name
@@ -988,7 +1014,7 @@ def test_environment():
     agent_dict['layer3_size'] = 300
     noise_dict = {'xy':0, 'theta':0, 'v':0, 'lidar':0}
     env = environment(env_dict)
-    env.reset(save_history=True, start_condition=initial_condition, car_params=env_dict['car_params'], get_lap_time=False, noise=noise_dict)
+    env.reset(save_history=True, start_condition=[], car_params=env_dict['car_params'], get_lap_time=False, noise=noise_dict)
     
     n=0
     a = agent_td3.agent(agent_dict)
@@ -1045,28 +1071,27 @@ def test_environment():
     
 
     env = environment(env_dict)
-    env.reset(save_history=True, start_condition=initial_condition, get_lap_time=False, car_params=env_dict['car_params'], noise=noise_dict)
-
-    #a = agent_td3.agent(agent_dict)
-    #a.load_weights(agent_name, n)
     
-    action_history = np.ones((1000,2))*np.random
-    action_history[:,1] = np.ones(1000)*1
-
-    done=False
-    score=0
-    i=0
-    while done==False:
+    for i in range(100):
+    
+        env.reset(save_history=True, start_condition=[], get_lap_time=False, car_params=env_dict['car_params'], noise=noise_dict)
+        obs = env.observation
+        done=False
+        score=0
+        i=0
         
-        action = action_history[i]
-        i+=1
-        print('action = ', action)
-        #action = env.goals[env.current_goal]
-        state, reward, done = env.take_action(action)
-        score+=reward
+        while done==False:
+            
+            # action = a.choose_action(obs)
+            action = [np.random.uniform(-1,1), 1]  
+            print('action = ', action)
+            #action = env.goals[env.current_goal]
+            obs, reward, done = env.take_action(action)
+            score+=reward
+            i+=1
 
-    print('score = ', score)
-    #env.save_initial_condition()
+        print('score = ', score)
+        #env.save_initial_condition()
     
 if __name__=='__main__':
     test_environment()
