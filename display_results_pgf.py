@@ -560,8 +560,11 @@ def learning_curve_all(agent_names, legend, legend_title, ns, filename, xlim, xs
     plt.rcParams['font.family'] = 'serif'
     plt.rcParams['font.serif'] = ['Times New Roman'] + plt.rcParams['font.serif']
 
+    size = (5.5,2.5)
+    bottom_space=0.4
+
     plt.rc('axes',edgecolor='gray')
-    fig, ax = plt.subplots(1, 3, figsize=(5.5,2.2))
+    fig, ax = plt.subplots(1, 3, figsize=size)
     # fig, ax = plt.subplots(1, 3, figsize=(5.5,2.65))
     
     # ax[0].ticklabel_format(style='scientific', axis='x', scilimits=(0,0), useMathText=True, useOffset=True)
@@ -580,82 +583,54 @@ def learning_curve_all(agent_names, legend, legend_title, ns, filename, xlim, xs
     ax[1].set_yticks(ticks=[5,6,7,8,9,10], labels=[5,6,7,8,9,10])
     ax[2].set_yticks(ticks=[-10, -5, 0, 5], labels=[-10, -5, 0, 5])
 
+    # y_title=-0.5
 
-
-
-
-    #ax[1].ticklabel_format(style='scientific', axis='x', scilimits=(0,0), useMathText=True)
-
-    #plt.figure(3, figsize=(5,4))
     for i in range(len(agent_names)):
         end_episode = end_episodes[i] 
-        #ax[0].plot(avg_coll[i][0:end_episode])
         ax[0].plot(np.arange(0,end_episode,100), np.array(avg_coll[i][0:end_episode])[np.arange(0,end_episode,100)]*100)
         ax[0].fill_between(x=np.arange(end_episode)[np.arange(0,end_episode,100)], y1=np.array(upper_fill_coll[i][0])[np.arange(0,end_episode,100)]*100, y2=np.array(lower_fill_coll[i][0])[np.arange(0,end_episode,100)]*100, alpha=0.15, label='_nolegend_')
     
     ax[0].hlines(y=100, xmin=0, xmax=np.max(end_episodes), colors='black', linestyle='dashed')
     ax[0].hlines(y=0, xmin=0, xmax=np.max(end_episodes), colors='black', linestyle='dashed')
     ax[0].set_ylim([-5, 105])
-    #ax[0].set_xlim([0, np.max(end_episodes)])
-    #ax[0].set_xlabel('Episodes')
-    #plt.title('Collision rate')
-    #ax[0].set_ylabel('Failure rate [%]')
-    ax[0].set_title('Failure rate [%]', fontdict={'fontsize': 12})
+    ax[0].set_title('(a)', fontdict={'fontsize': 10})
     ax[0].tick_params('both', length=0)
     ax[0].grid(True)
     ax[0].set_xlim([0,xlim])
-    #plt.rc('axes',edgecolor='gray')
-    #plt.tick_params(axis=u'both', which=u'both',length=0)
+    ax[0].set_ylabel('Failure rate [%]')
 
 
 
     for i in range(np.size(end_ep, axis=0)):
         end_episode = end_episodes[i] 
-        #plt.plot(np.cumsum(steps[0]), steps[0], 'x')
-        #plt.plot(steps[0][np.where(np.logical_not(collisions[0]))], 'x')
         ax[1].plot(np.arange(0,end_episode,100), (np.array(steps_y_avg_smoothed[i])*0.01)[np.arange(0,end_episode,100)])
         ax[1].fill_between(x=np.arange(0,end_episode,100), y1=np.array(upper_fill[i][0])[np.arange(0,end_episode,100)]*0.01, y2=np.array(lower_fill[i][0])[np.arange(0,end_episode,100)]*0.01, alpha=0.15, label='_nolegend_')
 
-        #np.arange(len(steps[i][ns[i]]))[np.logical_not(collisions[i][ns[i]])][0:end_episodes[i]]
-        #plt.plot(np.array(max_steps_no_coll[i][0:end_episode_no_coll])*0.01 )
-    # ax[1].set_xlabel(r'Episodes $\times 10^3$')
+
     ax[1].set_xlabel('Episodes')
-    #ax[1].set_xlim([0, np.max(end_episodes)])
-    #plt.title('Average time per episode without collisions')
-    #ax[1].set_ylabel('Lap time [s]')
-    ax[1].set_title('Lap time [s]', fontdict={'fontsize': 12})
-    #ax[1].legend(legend, title=legend_title, loc='upper right')
+    ax[1].set_title('(b)', fontdict={'fontsize': 10})
     ax[1].grid(True)
     ax[1].tick_params('both', length=0)
-    #ax[1].set_xlim([0,4000])
-    #plt.tick_params(axis=u'both', which=u'both',length=0)
     ax[1].set_xlim([0,xlim])
+    ax[1].set_ylabel('Lap time [s]')
 
     for i in range(np.size(end_ep, axis=0)):
         end_episode = end_episodes[i] 
-        #plt.plot(np.cumsum(steps[0]), steps[0], 'x')
-        #plt.plot(steps[0][np.where(np.logical_not(collisions[0]))], 'x')
         ax[2].plot(np.arange(0,end_episode,100), np.array(avg_score[i])[np.arange(0,end_episode,100)])
         ax[2].fill_between(x=np.arange(0,end_episode,100), y1=np.array(score_upper_fill[i][0])[np.arange(0,end_episode,100)], y2=np.array(score_lower_fill[i][0])[np.arange(0,end_episode,100)], alpha=0.15, label='_nolegend_')
 
-        #np.arange(len(steps[i][ns[i]]))[np.logical_not(collisions[i][ns[i]])][0:end_episodes[i]]
-        #plt.plot(np.array(max_steps_no_coll[i][0:end_episode_no_coll])*0.01 )
-    #ax[2].set_xlabel('Episodes')
-    #ax[1].set_xlim([0, np.max(end_episodes)])
-    #plt.title('Average time per episode without collisions')
-    #ax[2].set_ylabel('Lap time [s]')
-    ax[2].set_title('Reward', fontdict={'fontsize': 12})
-    #ax[1].legend(legend, title=legend_title, loc='upper right')
+      
+    ax[2].set_title('(c)', fontdict={'fontsize': 10})
     ax[2].grid(True)
     ax[2].tick_params('both', length=0)
     ax[2].set_xlim([0,xlim])
-    #plt.tick_params(axis=u'both', which=u'both',length=0)
-    #plt.xlim([0,6000])
+    ax[2].set_ylabel('Reward')
+
 
 
     fig.tight_layout()
-    # fig.subplots_adjust(bottom=0.4) 
-    # plt.figlegend(legend, title=legend_title, loc = 'lower center', ncol=2)
+    fig.subplots_adjust(bottom=bottom_space) 
+    plt.figlegend(legend, title=legend_title, loc = 'lower center', ncol=3)
     plt.show()
     # plt.savefig('results/'+filename+'.pgf', format='pgf')
 
@@ -3458,13 +3433,14 @@ def plot_frenet_polynomial(filename):
 # xspace = 2000
 
 
-# agent_names = ['porto_ete_only_LiDAR', 'porto_ete_LiDAR_20', 'porto_ete_no_LiDAR']
-# legend = ['Only LiDAR', 'LiDAR and pose', 'Only pose']
-# legend_title = 'Observation space'
-# ns=[0, 0, 0]
-# filename = 'observation_space_1'
-# xlim=6000
-# xspace = 2000
+agent_names = ['porto_ete_only_LiDAR', 'porto_ete_LiDAR_20', 'porto_ete_no_LiDAR']
+legend = ['Only LiDAR', 'LiDAR and pose', 'Only pose']
+legend_title = 'Observation space'
+ns=[0, 0, 0]
+filename = 'observation_space_1'
+xlim=6000
+xspace = 2000
+learning_curve_all(agent_names, legend, legend_title, ns, filename, xlim, xspace)
 
 # agent_names = ['porto_ete_cs_1', 'porto_ete_cs_5', 'porto_ete_cs_10', 'porto_ete_cs_15', 'porto_ete_LiDAR_10', 'porto_ete_cs_25']
 # legend = ['1', '5', '10', '15', '20', '25']
@@ -3508,13 +3484,13 @@ def plot_frenet_polynomial(filename):
 # ns=[0, 0]
 # filename = 'path_collision_penalty'
 
-agent_names = ['porto_ete_v5_r_collision_5']
-legend = ['End to end', 'Partial end-to-end']
-legend_title = 'Architecture'
-ns=[0, 0]
-filename = 'lcetea'
-xlim = 3000
-xspace = 1000
+# agent_names = ['porto_ete_v5_r_collision_5']
+# legend = ['End to end', 'Partial end-to-end']
+# legend_title = 'Architecture'
+# ns=[0, 0]
+# filename = 'lcetea'
+# xlim = 3000
+# xspace = 1000
 
 
 # agent_names = ['porto_ete_v5_gamma_0', 'porto_ete_v5_gamma_1', 'porto_ete_v5_r_collision_5', 'porto_ete_v5_gamma_4']

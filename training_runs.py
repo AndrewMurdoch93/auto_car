@@ -2021,11 +2021,14 @@ if True:
 # legend = agent_names
 # ns=[0]
 
-agent_names = ['porto_ete_v5_r_collision_5']
+# agent_names = ['porto_ete_v5_r_collision_5']
 # agent_names = ['porto_pete_sv_p_r_0']
+
+agent_names = ['porto_ete_only_LiDAR']
+agent_names = ['porto_ete_no_LiDAR']
 legend = ['End-to-end']
 legend_title = ''
-ns=[2]
+ns=[0]
 
 # agent_names = ['porto_ete_v5_r_collision_5']
 # legend = []
@@ -2044,10 +2047,10 @@ ns=[2]
 #     display_results_multiple.display_lap_results(agent_name=agent_name)
 
 
-# mismatch_parameters = [['unknown_mass', 'C_Sr', 'mu']]
-# frac_vary = [[0, -0.2, -0.4]]
-# noise_dicts = [{'xy':0.025, 'theta':0.05, 'v':0.1, 'lidar':0.01}, {'xy':0.025, 'theta':0.05, 'v':0.1, 'lidar':0.01}, {'xy':0.025, 'theta':0.05, 'v':0.1, 'lidar':0.01}, {'xy':0.025, 'theta':0.05, 'v':0.1, 'lidar':0.01}]
-# start_condition = {'x':10, 'y':4.5, 'v':3, 'theta':np.pi, 'delta':0, 'goal':0}
+mismatch_parameters = [['C_Sr', 'mu']]
+frac_vary = [[0, 0]]
+noise_dicts = [{'xy':0.025, 'theta':0.05, 'v':0.1, 'lidar':0.01}, {'xy':0.025, 'theta':0.05, 'v':0.1, 'lidar':0.01}, {'xy':0.025, 'theta':0.05, 'v':0.1, 'lidar':0.01}, {'xy':0.025, 'theta':0.05, 'v':0.1, 'lidar':0.01}]
+start_condition = {'x':10, 'y':4.5, 'v':3, 'theta':np.pi, 'delta':0, 'goal':0}
 
 
 
