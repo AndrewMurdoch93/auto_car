@@ -2030,6 +2030,8 @@ if True:
 # agent_names =  ['sample_5hz_batch_140_noise']
 
 agent_names =  ['batch_size_1', 'sample_5hz_batch_140_noise']
+
+agent_names = ['sample_3hz']
 legend = ['no noise', 'noise']
 legend_title = ''
 ns=[0,0]
@@ -2046,9 +2048,9 @@ ns=[0,0]
 #     print('------------------------------' + '\n' + agent_name + '\n' + '------------------------------')
 #     display_results_multiple.display_train_parameters(agent_name=agent_name)
 
-# for agent_name in agent_names:
-#     print('------------------------------' + '\n' + agent_name + '\n' + '------------------------------')
-#     display_results_multiple.display_lap_results(agent_name=agent_name)
+for agent_name in agent_names:
+    print('------------------------------' + '\n' + agent_name + '\n' + '------------------------------')
+    display_results_multiple.display_lap_results(agent_name=agent_name)
 
 
 mismatch_parameters = [['C_Sr', 'mu'], ['C_Sr', 'mu']]

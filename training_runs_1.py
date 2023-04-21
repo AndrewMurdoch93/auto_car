@@ -21,9 +21,9 @@ import os
 
 
 
-agent_name = 'only_LiDAR'
+agent_name = 'standard'
 
-main_dict = {'name':agent_name, 'max_episodes':10000, 'max_steps':3e6, 'learning_method':'td3', 'runs':1, 'comment':''}
+main_dict = {'name':agent_name, 'max_episodes':10000, 'max_steps':3e6, 'learning_method':'td3', 'runs':3, 'comment':''}
 
 agent_ddpg_dict = {'alpha':0.000025, 'beta':0.00025, 'tau':0.001, 'gamma':0.99, 'max_size':1000000, 'layer1_size':400, 'layer2_size':300, 'batch_size':64}
 
@@ -55,8 +55,8 @@ if  steer_control_dict['steering_control'] == True:
 
 lidar_dict = {'is_lidar':True, 'lidar_res':0.1, 'n_beams':10, 'max_range':20, 'fov':np.pi}
 
-noise_dict = {'xy':0.025, 'theta':0.05, 'v':0.1, 'lidar':0.01}
-# noise_dict = {'xy':0, 'theta':0, 'v':0, 'lidar':0}
+# noise_dict = {'xy':0.025, 'theta':0.05, 'v':0.1, 'lidar':0.01}
+noise_dict = {'xy':0, 'theta':0, 'v':0, 'lidar':0}
 
 env_dict = {'sim_conf': functions.load_config(sys.path[0], "config")
         , 'save_history': False
@@ -70,7 +70,7 @@ env_dict = {'sim_conf': functions.load_config(sys.path[0], "config")
         , 'car_params':car_params
         , 'reward_signal':reward_signal
         , 'lidar_dict':lidar_dict
-        , 'only_lidar':True
+        , 'only_lidar':False
         , 'action_space_dict':action_space_dict
         , 'noise_dict':noise_dict
         } 
@@ -81,97 +81,110 @@ n_test=100
 # main_multiple.lap_time_test(agent_name=agent_name, n_episodes=n_test, detect_issues=False, initial_conditions=True)
 
 
-# # Experiments for observation space
-
-# #LiDAR and pose
-# agent_name = 'only_pose'
-# main_dict['name'] = agent_name
-# main_dict['only_lidar'] = False
-# lidar_dict['is_lidar'] = True
-# main_dict['lidar_dict'] = lidar_dict
-# a = main_multiple.trainingLoop(main_dict, agent_td3_dict, env_dict, load_agent='')
-# a.train()
+agent_name = 'batch_180'
+main_dict['name'] = agent_name
+main_dict['only_lidar'] = False
+lidar_dict['is_lidar'] = True
+main_dict['lidar_dict'] = lidar_dict
+main_dict['control_steps'] = 20
+agent_td3_dict['batch_size'] = 180
+a = main_multiple.trainingLoop(main_dict, agent_td3_dict, env_dict, load_agent='')
+a.train()
 # main_multiple.lap_time_test(agent_name=agent_name, n_episodes=100, detect_issues=False, initial_conditions=True)
+main_multiple.lap_time_test_with_noise(agent_name=agent_name, n_episodes=100, detect_issues=False, initial_conditions=True, noise={'xy':0.025, 'theta':0.05, 'v':0.1, 'lidar':0.01})
 
-# #Only pose
-# agent_name = 'only_pose'
-# main_dict['name'] = agent_name
-# main_dict['only_lidar'] = False
-# lidar_dict['is_lidar'] = False
-# main_dict['lidar_dict'] = lidar_dict
-# a = main_multiple.trainingLoop(main_dict, agent_td3_dict, env_dict, load_agent='')
-# a.train()
+agent_name = 'batch_220'
+main_dict['name'] = agent_name
+main_dict['only_lidar'] = False
+lidar_dict['is_lidar'] = True
+main_dict['lidar_dict'] = lidar_dict
+main_dict['control_steps'] = 20
+agent_td3_dict['batch_size'] = 220
+a = main_multiple.trainingLoop(main_dict, agent_td3_dict, env_dict, load_agent='')
+a.train()
 # main_multiple.lap_time_test(agent_name=agent_name, n_episodes=100, detect_issues=False, initial_conditions=True)
+main_multiple.lap_time_test_with_noise(agent_name=agent_name, n_episodes=100, detect_issues=False, initial_conditions=True, noise={'xy':0.025, 'theta':0.05, 'v':0.1, 'lidar':0.01})
 
-
-# #Experiments for optimal number of LiDAR beams
-
-# #5 beams
-# agent_name = 'lidar_5'
-# main_dict['name'] = agent_name
-# main_dict['only_lidar'] = False
-# lidar_dict['is_lidar'] = True
-# lidar_dict['n_beams'] = 5
-# main_dict['lidar_dict'] = lidar_dict
-# a = main_multiple.trainingLoop(main_dict, agent_td3_dict, env_dict, load_agent='')
-# a.train()
+agent_name = 'f_agent_10'
+main_dict['name'] = agent_name
+main_dict['only_lidar'] = False
+lidar_dict['is_lidar'] = True
+main_dict['lidar_dict'] = lidar_dict
+main_dict['control_steps'] = 10
+agent_td3_dict['batch_size'] = 140
+a = main_multiple.trainingLoop(main_dict, agent_td3_dict, env_dict, load_agent='')
+a.train()
 # main_multiple.lap_time_test(agent_name=agent_name, n_episodes=100, detect_issues=False, initial_conditions=True)
+main_multiple.lap_time_test_with_noise(agent_name=agent_name, n_episodes=100, detect_issues=False, initial_conditions=True, noise={'xy':0.025, 'theta':0.05, 'v':0.1, 'lidar':0.01})
 
-# #10 beams
-# agent_name = 'lidar_10'
-# main_dict['name'] = agent_name
-# main_dict['only_lidar'] = False
-# lidar_dict['is_lidar'] = True
-# lidar_dict['n_beams'] = 10
-# main_dict['lidar_dict'] = lidar_dict
-# a = main_multiple.trainingLoop(main_dict, agent_td3_dict, env_dict, load_agent='')
-# a.train()
-# main_multiple.lap_time_test(agent_name=agent_name, n_episodes=100, detect_issues=False, initial_conditions=True)
 
-# #20 beams
-# agent_name = 'lidar_20'
-# main_dict['name'] = agent_name
-# main_dict['only_lidar'] = False
-# lidar_dict['is_lidar'] = True
-# lidar_dict['n_beams'] = 20
-# main_dict['lidar_dict'] = lidar_dict
-# a = main_multiple.trainingLoop(main_dict, agent_td3_dict, env_dict, load_agent='')
-# a.train()
-# main_multiple.lap_time_test(agent_name=agent_name, n_episodes=100, detect_issues=False, initial_conditions=True)
+#5 beams
+agent_name = 'lidar_5'
+main_dict['name'] = agent_name
+main_dict['only_lidar'] = False
+lidar_dict['is_lidar'] = True
+lidar_dict['n_beams'] = 5
+main_dict['lidar_dict'] = lidar_dict
+main_dict['control_steps'] = 20
+agent_td3_dict['batch_size'] = 140
+a = main_multiple.trainingLoop(main_dict, agent_td3_dict, env_dict, load_agent='')
+a.train()
+main_multiple.lap_time_test(agent_name=agent_name, n_episodes=100, detect_issues=False, initial_conditions=True)
 
-# #50 beams
+agent_name = 'lidar_10'
+main_dict['name'] = agent_name
+main_dict['only_lidar'] = False
+lidar_dict['is_lidar'] = True
+lidar_dict['n_beams'] = 10
+main_dict['lidar_dict'] = lidar_dict
+main_dict['control_steps'] = 20
+agent_td3_dict['batch_size'] = 140
+a = main_multiple.trainingLoop(main_dict, agent_td3_dict, env_dict, load_agent='')
+a.train()
+main_multiple.lap_time_test(agent_name=agent_name, n_episodes=100, detect_issues=False, initial_conditions=True)
+
+agent_name = 'lidar_20'
+main_dict['name'] = agent_name
+main_dict['only_lidar'] = False
+lidar_dict['is_lidar'] = True
+lidar_dict['n_beams'] = 20
+main_dict['lidar_dict'] = lidar_dict
+main_dict['control_steps'] = 20
+agent_td3_dict['batch_size'] = 140
+a = main_multiple.trainingLoop(main_dict, agent_td3_dict, env_dict, load_agent='')
+a.train()
+main_multiple.lap_time_test(agent_name=agent_name, n_episodes=100, detect_issues=False, initial_conditions=True)
+
 # agent_name = 'lidar_50'
 # main_dict['name'] = agent_name
 # main_dict['only_lidar'] = False
 # lidar_dict['is_lidar'] = True
 # lidar_dict['n_beams'] = 50
 # main_dict['lidar_dict'] = lidar_dict
+# main_dict['control_steps'] = 20
+# agent_td3_dict['batch_size'] = 140
 # a = main_multiple.trainingLoop(main_dict, agent_td3_dict, env_dict, load_agent='')
 # a.train()
 # main_multiple.lap_time_test(agent_name=agent_name, n_episodes=100, detect_issues=False, initial_conditions=True)
 
-
-#LiDAR and pose
-# agent_name = 'sample_3hz'
-# main_dict['name'] = agent_name
-# main_dict['only_lidar'] = False
-# lidar_dict['is_lidar'] = True
-# main_dict['lidar_dict'] = lidar_dict
-# main_dict['control_steps'] = 33
-# a = main_multiple.trainingLoop(main_dict, agent_td3_dict, env_dict, load_agent='')
-# a.train()
-# main_multiple.lap_time_test(agent_name=agent_name, n_episodes=100, detect_issues=False, initial_conditions=True)
-
-agent_name = 'sample_5hz_batch_140_noise'
+#only LiDAR
+agent_name = 'only_LiDAR'
 main_dict['name'] = agent_name
-main_dict['only_lidar'] = False
+main_dict['only_lidar'] = True
 lidar_dict['is_lidar'] = True
 main_dict['lidar_dict'] = lidar_dict
-main_dict['control_steps'] = 20
-agent_td3_dict['batch_size'] = 140
 a = main_multiple.trainingLoop(main_dict, agent_td3_dict, env_dict, load_agent='')
 a.train()
-# main_multiple.lap_time_test(agent_name=agent_name, n_episodes=100, detect_issues=False, initial_conditions=True)
-main_multiple.lap_time_test_with_noise(agent_name=agent_name, n_episodes=100, detect_issues=False, initial_conditions=True, noise={'xy':0.025, 'theta':0.05, 'v':0.1, 'lidar':0.01})
-main_multiple.lap_time_test_with_noise(agent_name='batch_size_1', n_episodes=100, detect_issues=False, initial_conditions=True, noise={'xy':0.025, 'theta':0.05, 'v':0.1, 'lidar':0.01})
+main_multiple.lap_time_test(agent_name=agent_name, n_episodes=100, detect_issues=False, initial_conditions=True)
+
+#Only pose
+agent_name = 'only_pose'
+main_dict['name'] = agent_name
+main_dict['only_lidar'] = False
+lidar_dict['is_lidar'] = False
+main_dict['lidar_dict'] = lidar_dict
+a = main_multiple.trainingLoop(main_dict, agent_td3_dict, env_dict, load_agent='')
+a.train()
+main_multiple.lap_time_test(agent_name=agent_name, n_episodes=100, detect_issues=False, initial_conditions=True)
+
 
