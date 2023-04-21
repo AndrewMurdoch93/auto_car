@@ -326,6 +326,7 @@ class trainingLoop():
       #pickle.dump(durations, outfile)
       #outfile.close()
 
+
    def evaluate(self, n_episodes):
       
       print(f"{'Evaluating agent for '}{n_episodes}{' episodes'}")
@@ -358,13 +359,14 @@ class trainingLoop():
       print('Evaluation lap time is: ' + str(np.round(lap_time, 2)) + ', collision rate is: ' + str(np.round(collision, 2)) )
 
       return lap_times, collisions
-      
+
 
    def save_agent(self, n):
       self.agent.save_agent(self.main_dict['name'], n)
       print("Agent " + self.main_dict['name'] + ", n = " + str(n) + " was saved")
 
-   
+
+
 def test(agent_name, n_episodes, detect_issues, initial_conditions):
 
    results_file_name = 'test_results/' + agent_name 
@@ -650,8 +652,6 @@ def lap_time_test(agent_name, n_episodes, detect_issues, initial_conditions):
    outfile.close()
 
 
-
-
 def lap_time_test_with_noise(agent_name, n_episodes, detect_issues, initial_conditions, noise):
 
    results_file_name = 'lap_results_with_noise/' + agent_name
@@ -785,9 +785,6 @@ def lap_time_test_with_noise(agent_name, n_episodes, detect_issues, initial_cond
    pickle.dump(times, outfile)
    pickle.dump(collisions, outfile)
    outfile.close()
-
-
-
 
 
 def lap_time_test_mismatch(agent_name, n_episodes, detect_issues, initial_conditions, parameter, frac_variation):
@@ -955,9 +952,6 @@ def lap_time_test_mismatch(agent_name, n_episodes, detect_issues, initial_condit
    outfile.close()
 
 
-
-
-
 def lap_time_test_unknown_mass(agent_name, n_episodes, detect_issues, initial_conditions, mass, distances):
 
    results_dir = 'lap_results_mismatch/' + agent_name
@@ -1091,7 +1085,6 @@ def lap_time_test_unknown_mass(agent_name, n_episodes, detect_issues, initial_co
    outfile.close()
 
    
-
 def lap_time_test_noise(agent_name, n_episodes, detect_issues, initial_conditions, noise_param, noise_std):
 
    results_dir = 'lap_results_noise/' + agent_name
