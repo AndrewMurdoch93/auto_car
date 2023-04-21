@@ -137,10 +137,11 @@ class trainingLoop():
       terminal_poses = np.zeros([self.runs, self.max_episodes, 2])
 
       eval_interval = 100
-      eval_n_episodes = 20
+      eval_n_episodes = 50
       eval_steps = np.zeros([self.runs, int(self.max_episodes/eval_interval)])
       eval_lap_times = np.zeros([self.runs, int(self.max_episodes/eval_interval), eval_n_episodes])
-      eval_collisions = np.zeros([self.runs, int(self.max_episodes/eval_interval), eval_n_episodes])
+      eval_collisions = np.ones([self.runs, int(self.max_episodes/eval_interval), eval_n_episodes])
+
 
       for n in range(self.runs):
          
@@ -285,16 +286,19 @@ class trainingLoop():
                outfile=open(self.terminal_poses_filename, 'wb')
                pickle.dump(terminal_poses, outfile)
                outfile.close()
+            
 
-            # if episode%100==0 and episode!=0:
-            #    eval_steps[n, int(episode/eval_interval)-1] = np.sum(steps[n,:])
-            #    eval_lap_times[n, int(episode/eval_interval)-1], eval_collisions[n, int(episode/eval_interval)-1] = self.evaluate(n_episodes=eval_n_episodes)
+            # Evaluate agent
+            if episode%eval_interval==0 and episode!=0:
+               eval_steps[n, int(episode/eval_interval)-1] = np.sum(steps[n,:])
+               eval_lap_times[n, int(episode/eval_interval)-1], eval_collisions[n, int(episode/eval_interval)-1] = self.evaluate(n_episodes=eval_n_episodes)
 
-            #    outfile=open(self.evaluation_results_file_name, 'wb')
-            #    pickle.dump(eval_steps, outfile)
-            #    pickle.dump(eval_lap_times, outfile)
-            #    pickle.dump(eval_collisions, outfile)
-            #    outfile.close()
+
+               outfile=open(self.evaluation_results_file_name, 'wb')
+               pickle.dump(eval_steps, outfile)
+               pickle.dump(eval_lap_times, outfile)
+               pickle.dump(eval_collisions, outfile)
+               outfile.close()
 
 
             if episode%10==0:
@@ -322,6 +326,8 @@ class trainingLoop():
 
 
 
+
+
       #outfile=open(self.action_durations_name, 'wb')
       #pickle.dump(durations, outfile)
       #outfile.close()
@@ -332,11 +338,13 @@ class trainingLoop():
       print(f"{'Evaluating agent for '}{n_episodes}{' episodes'}")
       
       lap_times = np.zeros(n_episodes)
-      collisions = np.zeros(n_episodes)
+      collisions = np.ones(n_episodes)
       
+      car_params = self.env_dict['car_params']
+
       for episode in range(n_episodes):
          
-         self.env.reset(save_history=True, start_condition=[], car_params=self.env_dict['car_params'],get_lap_time=False)
+         self.env.reset(save_history=True, start_condition=[], car_params=car_params, get_lap_time=False, noise={'xy':0.025, 'theta':0.05, 'v':0.1, 'lidar':0.01})
          obs = self.env.observation
          done = False
          score=0

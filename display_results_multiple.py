@@ -219,7 +219,6 @@ def learning_curve_lap_time(agent_names, legend, legend_title, ns):
         steps[i] = pickle.load(infile)
         collisions[i] = pickle.load(infile)
         n_actions[i] = pickle.load(infile)
-        
         infile.close()
         
         for j in range(len(collisions[i][ns[i]])):
