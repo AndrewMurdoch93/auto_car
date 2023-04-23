@@ -32,8 +32,9 @@ import mapping
 from PIL import Image, ImageOps, ImageDraw, ImageFilter
 import os
 
-def graph_eval(agent_names):
-    
+
+
+def graph_eval_time_steps(agent_names):
     
     plt.rcParams['font.family'] = 'serif'
     plt.rcParams['font.serif'] = ['Times New Roman'] + plt.rcParams['font.serif']
@@ -89,7 +90,7 @@ def graph_eval(agent_names):
         axs.grid(True, color='lightgrey')
 
         axs1 = axs.twinx()  
-        axs1.plot(xaxis, collisions, color='orange', label='Successful laps [%]')
+        axs1.plot(xaxis, collisions, color='orange', label='Successful laps')
         axs1.set_ylim([80,101])
         axs1.set_ylabel('Successful laps [%]')
         axs1.tick_params(axis=u'both', which=u'both',length=0)
@@ -102,7 +103,133 @@ def graph_eval(agent_names):
     plt.show()
 
 
+# graph_eval_time_steps(['time_steps'])
 
 
-graph_eval(['time_steps'])
-# 'time_steps'
+
+def graph_replay_batch_size(agent_names):
+    
+    plt.rcParams['font.family'] = 'serif'
+    plt.rcParams['font.serif'] = ['Times New Roman'] + plt.rcParams['font.serif']
+    plt.rc('axes',edgecolor='gray')
+
+    batch_size = np.array([50,100,150])
+    train_times = np.zeros(len(agent_names))
+    min_train_times = np.zeros(len(agent_names))
+    max_train_times = np.zeros(len(agent_names))
+    
+    lap_times = np.zeros(len(agent_names))
+    std_lap_times = np.zeros(len(agent_names))
+    collisions = np.zeros(len(agent_names))
+
+    for i in range(len(agent_names)):
+        
+        agent_name = agent_names[i]
+        
+        train_file_name = 'train_results/' + agent_name
+        infile = open(train_file_name, 'rb')
+        _ = pickle.load(infile)
+        _ = pickle.load(infile)
+        agent_train_times = pickle.load(infile)
+        infile.close()
+
+        test_file_name = 'lap_results_with_noise/' + agent_name
+        infile = open(test_file_name, 'rb')
+        agent_lap_times = pickle.load(infile)
+        agent_collisions = pickle.load(infile)
+        infile.close() 
+
+        agent_lap_times[agent_collisions.astype(bool)] = np.nan
+        
+
+        train_times[i] = np.sum(agent_train_times)/(60*3)
+        min_train_times[i] = np.max(np.sum(agent_train_times,axis=1))/(60)
+        max_train_times[i] = np.min(np.sum(agent_train_times,axis=1))/(60)
+        lap_times[i] = np.nanmean(agent_lap_times)
+        std_lap_times[i] = np.nanstd(agent_lap_times)
+        collisions[i] = np.average(agent_collisions)
+
+    
+    fig, axs = plt.subplots(figsize=(4.5,2.5))
+    axs.plot(batch_size, train_times, label='Training time')
+    axs.fill_between(x=batch_size, y1=min_train_times,y2=max_train_times, alpha=0.2)
+    axs.set_xlabel('Batch size')
+    axs.set_ylabel('Training time [minutes]')
+    axs.set_ylim([20,40])
+    axs.tick_params(axis=u'both', which=u'both',length=0)
+    axs.grid(True, color='lightgrey')
+
+    axs1 = axs.twinx()  
+    axs1.plot(batch_size, lap_times, color='orange', label='Test lap time')
+    axs1.fill_between(x=batch_size, y1=lap_times-std_lap_times,y2=lap_times+std_lap_times, alpha=0.2, color='orange')
+    axs1.set_ylabel('Test lap time [s]')
+    axs1.tick_params(axis=u'both', which=u'both',length=0)
+
+    fig.tight_layout()
+    fig.subplots_adjust(bottom=0.35) 
+    plt.figlegend(loc = 'lower center', ncol=3)    
+
+    plt.show()
+
+
+graph_replay_batch_size(['batch_50', 'batch_100', 'batch_150'])
+
+
+
+def graph_agent_sample_rate(agent_names):
+    
+    plt.rcParams['font.family'] = 'serif'
+    plt.rcParams['font.serif'] = ['Times New Roman'] + plt.rcParams['font.serif']
+    plt.rc('axes',edgecolor='gray')
+
+    sample_rate = np.array([3,5,10,20])
+    train_times = np.zeros(len(agent_names))
+    lap_times = np.zeros(len(agent_names))
+    collisions = np.zeros(len(agent_names))
+
+    for i in range(len(agent_names)):
+        
+        agent_name = agent_names[i]
+        
+        train_file_name = 'train_results/' + agent_name
+        infile = open(train_file_name, 'rb')
+        _ = pickle.load(infile)
+        _ = pickle.load(infile)
+        agent_train_times = pickle.load(infile)
+        infile.close()
+
+        test_file_name = 'lap_results_with_noise/' + agent_name
+        infile = open(test_file_name, 'rb')
+        agent_lap_times = pickle.load(infile)
+        agent_collisions = pickle.load(infile)
+        infile.close() 
+
+        agent_lap_times[agent_collisions.astype(bool)] = np.nan
+        
+        train_times[i] = np.sum(agent_train_times)/(60*3)
+        lap_times[i] = np.nanmean(agent_lap_times)
+        collisions[i] = np.average(agent_collisions)
+
+    
+    fig, axs = plt.subplots(figsize=(4.5,2.5))
+    axs.plot(sample_rate, train_times, label='Training time')
+    # axs.fill_between(x=xaxis, y1=,y2=, alpha=0.2)
+    axs.set_xlabel('Agent sample rate [Hz]')
+    axs.set_ylabel('Training time [minutes]')
+    axs.set_ylim([20,40])
+    axs.tick_params(axis=u'both', which=u'both',length=0)
+    axs.grid(True, color='lightgrey')
+
+    axs1 = axs.twinx()  
+    axs1.plot(sample_rate, collisions, color='orange', label='Test lap time')
+    axs1.set_ylabel('Failed test laps [%]')
+    axs1.tick_params(axis=u'both', which=u'both',length=0)
+
+    fig.tight_layout()
+    fig.subplots_adjust(bottom=0.35) 
+    plt.figlegend(loc = 'lower center', ncol=3)    
+
+    plt.show()
+
+
+# graph_agent_sample_rate(['f_agent_3', 'f_agent_5', 'f_agent_10', 'f_agent_20'])
