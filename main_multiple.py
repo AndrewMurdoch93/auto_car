@@ -35,6 +35,8 @@ import display_results_multiple
 class trainingLoop():
    def __init__(self, main_dict, agent_dict, env_dict, load_agent):
       
+      self.max_actions=150000
+
       self.main_dict = main_dict
       self.agent_dict = agent_dict
       self.env_dict = env_dict
@@ -161,8 +163,9 @@ class trainingLoop():
          episode=0
          
          # while np.sum(steps[n,:])<self.max_steps and episode<self.max_episodes and ((self.env.collision==True and episode>0) or (self.env.collision==False and episode==0)):
-         while np.sum(steps[n,:])<self.max_steps and episode<self.max_episodes:
-           
+         # while np.sum(steps[n,:])<self.max_steps and episode<self.max_episodes:
+         while np.sum(n_actions[n,:])<self.max_actions and episode<self.max_episodes:
+
             self.env.reset(save_history=True, start_condition=[], car_params=car_params, get_lap_time=False, noise=self.noise)  #Reset the environment every episode
             obs = self.env.observation      #Records starting state
             done = False

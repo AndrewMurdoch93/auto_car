@@ -3378,16 +3378,35 @@ def display_collision_distribution(agent_name):
     ax = plt.subplot(111)
 
     track = mapping.map(env.map_name)
+    occupancy_grid = track.occupancy_grid
+    map_height = track.map_height
+    map_width = track.map_width
+    map_res = track.resolution
+
+    crashes = []
+
+    for loc in terminal_poses[0,:]:
+        x=loc[0]
+        y=loc[1]
+        if functions.occupied_cell(x, y, occupancy_grid, map_res, map_height)==True and x!=0 and y!=0:
+            crashes.append([x,y])
+    
+    print('Number of crashes = ', len(crashes))
+
     ax.imshow(ImageOps.invert(track.gray_im.filter(ImageFilter.FIND_EDGES).filter(ImageFilter.MaxFilter(1))), extent=(0,track.map_width,0,track.map_height), cmap="gray")
     ax.plot(env.rx, env.ry, color='gray', linestyle='dashed')
-    ax.plot(np.array(terminal_poses)[0,0:end_episode,0], np.array(terminal_poses)[0,0:end_episode,1], 'rx')
+    ax.plot(np.array(crashes)[0:end_episode,0], np.array(crashes)[0:end_episode,1], 'rx')
     #sns.jointplot(x=np.array(terminal_poses)[:,0],y=np.array(terminal_poses)[:,1], kind="hex", alpha=0.5)
     ax.axis('off')
     plt.show()
 
+
 # display_collision_distribution('collision_distribution_LiDAR')
 # display_collision_distribution('collision_distribution_no_LiDAR')
-# display_collision_distribution('collision_distribution_LiDAR_pose')
+# display_collision_distribution('only_LiDAR')
+# display_collision_distribution('only_pose')
+# display_collision_distribution('batch_150')
+
 
 def display_moving_agent(agent_names, ns, legend_title, legend, mismatch_parameters, frac_vary, noise_dicts, start_condition):
     pose_history = []

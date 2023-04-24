@@ -80,14 +80,15 @@ def graph_eval_time_steps(agent_names):
             # std_collisions[n] = np.std(mask)*100
         pass
         
-        xaxis = np.average(eval_steps,axis=0)
-
-        axs.plot(xaxis, avg_lap_times, label='Lap time [s]')
+        xaxis = np.average(eval_steps,axis=0)/(20*2)
+        
+        axs.plot(xaxis, avg_lap_times, label='Lap time')
         axs.fill_between(x=xaxis, y1=avg_lap_times-std_lap_times,y2=avg_lap_times+std_lap_times, alpha=0.2)
-        axs.set_xlabel('Training steps')
+        axs.set_xlabel('Network updates')
         axs.set_ylabel('Lap time [s]')
         axs.tick_params(axis=u'both', which=u'both',length=0)
         axs.grid(True, color='lightgrey')
+        axs.ticklabel_format(style='scientific', axis='x', scilimits=(0,0), useMathText=True, useOffset=True)
 
         axs1 = axs.twinx()  
         axs1.plot(xaxis, collisions, color='orange', label='Successful laps')
@@ -103,7 +104,7 @@ def graph_eval_time_steps(agent_names):
     plt.show()
 
 
-# graph_eval_time_steps(['time_steps'])
+graph_eval_time_steps(['time_steps'])
 
 
 
@@ -113,7 +114,7 @@ def graph_replay_batch_size(agent_names):
     plt.rcParams['font.serif'] = ['Times New Roman'] + plt.rcParams['font.serif']
     plt.rc('axes',edgecolor='gray')
 
-    batch_size = np.array([50,100,150,200,300,400,600])
+    batch_size = np.array([50,100,150,200,300,400,600,1000])
     train_times = np.zeros(len(agent_names))
     min_train_times = np.zeros(len(agent_names))
     max_train_times = np.zeros(len(agent_names))
@@ -171,8 +172,7 @@ def graph_replay_batch_size(agent_names):
     plt.show()
 
 
-# graph_replay_batch_size(['batch_50', 'batch_100', 'batch_150', 'batch_200', 'batch_300', 'batch_400', 'batch_600'])
-
+graph_replay_batch_size(['batch_50', 'batch_100', 'batch_150', 'batch_200', 'batch_300', 'batch_400', 'batch_600', 'batch_1000'])
 
 
 def graph_agent_sample_rate(agent_names):

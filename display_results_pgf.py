@@ -568,7 +568,7 @@ def learning_curve_all(agent_names, legend, legend_title, ns, filename, xlim, xs
     # fig, ax = plt.subplots(1, 3, figsize=(5.5,2.65))
     
     # ax[0].ticklabel_format(style='scientific', axis='x', scilimits=(0,0), useMathText=True, useOffset=True)
-    # ax[1].ticklabel_format(style='scientific', axis='x', scilimits=(0,0), useMathText=True)
+    # ax[1].ticklabel_format(style='scientific', axis='x', scilimits=(0,0), useMathText=True, useOffset=True)
     ax[2].ticklabel_format(style='scientific', axis='x', scilimits=(0,0), useMathText=True, useOffset=True)
     #plt.ticklabel_format(style='scientific', axis='x', scilimits=(0,0))
     
@@ -577,7 +577,7 @@ def learning_curve_all(agent_names, legend, legend_title, ns, filename, xlim, xs
 
     ax[0].set_xticks(ticks=xax1000, labels=xax1)
     ax[1].set_xticks(ticks=xax1000, labels=xax1)
-    # ax[2].set_xticks(xax1000, labels=xax1)
+    ax[2].set_xticks(xax1000)
     
     ax[0].set_yticks(ticks=[0,25,50,75,100], labels=[0,25,50,75,100])
     ax[1].set_yticks(ticks=[5,6,7,8,9,10], labels=[5,6,7,8,9,10])
@@ -630,7 +630,7 @@ def learning_curve_all(agent_names, legend, legend_title, ns, filename, xlim, xs
 
     fig.tight_layout()
     fig.subplots_adjust(bottom=bottom_space) 
-    plt.figlegend(legend, title=legend_title, loc = 'lower center', ncol=3)
+    plt.figlegend(legend, title=legend_title, loc = 'lower center', ncol=5)
     plt.show()
     # plt.savefig('results/'+filename+'.pgf', format='pgf')
 
@@ -3434,14 +3434,25 @@ def plot_frenet_polynomial(filename):
 # xspace = 2000
 
 
-agent_names = ['porto_ete_only_LiDAR', 'porto_ete_LiDAR_20', 'porto_ete_no_LiDAR']
-legend = ['Only LiDAR', 'LiDAR and pose', 'Only pose']
+agent_names = ['only_LiDAR', 'only_pose', 'batch_150']
+legend = ['Only LiDAR', 'Only pose', 'LiDAR and pose']
 legend_title = 'Observation space'
 ns=[0, 0, 0]
 filename = 'observation_space_1'
-xlim=6000
+xlim=7000
 xspace = 2000
+learning_curve_all(agent_names, legend, legend_title, ns, filename, xlim, xspace)
+
+# agent_names = ['lidar_5', 'lidar_10', 'lidar_20' ,'lidar_50']
+# legend = ['5', '10', '20', '50']
+# legend_title = 'Number of LiDAR beams'
+# ns=[0, 0, 0, 0]
+# filename = 'observation_space_1'
+# xlim=7000
+# xspace = 2000
 # learning_curve_all(agent_names, legend, legend_title, ns, filename, xlim, xspace)
+
+
 
 # agent_names = ['porto_ete_cs_1', 'porto_ete_cs_5', 'porto_ete_cs_10', 'porto_ete_cs_15', 'porto_ete_LiDAR_10', 'porto_ete_cs_25']
 # legend = ['1', '5', '10', '15', '20', '25']
