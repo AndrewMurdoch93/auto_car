@@ -1480,124 +1480,7 @@ agent_names = ['porto_ete_v5_r_collision_5', 'porto_pete_s_polynomial', 'porto_p
 # display_lap_mismatch_results_multiple(agent_names, parameters, legend_title, legend, plot_titles)
 
 
-# def display_lap_mismatch_results_multiple_1(agent_names, parameters, legend_title, legend, plot_titles, nom_value, graph, text):
-    
-    
-#     fig, axs = plt.subplots(nrows=len(parameters), ncols=2)
 
-#     for j, parameter in enumerate(parameters):
-#         for agent in agent_names:
-            
-#             #infile = open('lap_results_mismatch/' + agent + '_new/' + parameter, 'rb')
-#             infile = open('lap_results_mismatch/' + agent + '/' + parameter, 'rb')
-#             results_dict = pickle.load(infile)
-#             infile.close() 
-
-#             n_episodes = len(results_dict['collision_results'][0,0,:])
-#             n_param = len(results_dict['collision_results'][0,:,0])
-#             n_runs = len(results_dict['collision_results'][:,0,0])
-
-#             avg_col = np.zeros(n_param)
-#             dev_col = np.zeros(n_param)
-
-#             avg_time = np.zeros(n_param)
-#             dev_time = np.zeros(n_param)
-
-#             for i in range(n_param):
-                
-#                 cols = results_dict['collision_results']
-#                 times = results_dict['times_results']
-#                 times[cols==1]=np.nan
-                
-#                 avg_col[i] = np.round(np.sum(np.logical_not(results_dict['collision_results'][:,i,:]))/(n_episodes*n_runs), 2)
-#                 failures = np.count_nonzero(results_dict['collision_results'][:,i,:].flatten())
-#                 successes = n_episodes*n_runs - failures
-#                 dev_col[i] = np.sqrt(n_episodes*(successes/n_episodes)*((failures)/n_episodes))/(n_episodes*n_runs)
-                
-
-#             avg_times = np.nanmean(times,axis=(0,2))
-#             dev_times = np.nanstd(times,axis=(0,2))
-
-#             avg_col_filter = functions.savitzky_golay(avg_col, 5, 2)
-#             dev_col_filter = functions.savitzky_golay(dev_col, 5, 2)
-
-#             avg_times_filter = functions.savitzky_golay(avg_times, 5, 2)
-#             dev_times_filter = functions.savitzky_golay(dev_times, 5, 2)
-
-            
-#             if text==True:
-#                 print(agent)
-#                 print(f"{'parameter: ':11s} {parameter:13s}")
-#                 print(f"{'Fraction:':10s}", end='')
-#                 for i in range(n_param):
-#                     print(f"{results_dict['frac_variation'][i]:8.2f}", end='')
-#                     pass
-#                 print('')
-#                 print(f"{'Value:':10s}", end='')
-#                 for i in range(n_param):
-#                     print(f"{nom_value[j]*(1+results_dict['frac_variation'])[i]:8.2f}", end='')
-#                     pass
-#                 print('')
-#                 print(f"{'Success:':10s}", end='')
-#                 for i in range(n_param):
-#                     print(f"{avg_col[i]:8.2f}", end='')
-#                     pass
-#                 print('')
-#                 print(f"{'Lap time:':10s}", end='')
-#                 for i in range(n_param):
-#                     print(f"{avg_times[i]:8.2f}", end='')
-#                     pass
-#                 print('')
-
-
-#             # plot collisions
-#             if parameter=='C_S' or parameter=='sv' or parameter=='a_max':
-#                 axs[j,0].plot(nom_value[j]*(1+results_dict['frac_variation']), avg_col_filter*100, alpha=0.8)
-#                 axs[j,0].fill_between(nom_value[j]*(1+results_dict['frac_variation']), (avg_col_filter+dev_col_filter)*100, (avg_col_filter-dev_col_filter)*100, alpha=0.2, label='_nolegend_')
-#             else:
-#                 axs[j,0].plot(nom_value[j]*(1+results_dict['frac_variation']), avg_col*100, alpha=0.8)
-#                 axs[j,0].fill_between(nom_value[j]*(1+results_dict['frac_variation']), (avg_col+dev_col)*100, (avg_col-dev_col)*100, alpha=0.2, label='_nolegend_')
-            
-#             # plot lap times
-#             axs[j,1].plot(nom_value[j]*(1+results_dict['frac_variation']), avg_times, alpha=0.8)
-#             axs[j,1].fill_between(nom_value[j]*(1+results_dict['frac_variation']), (avg_times+dev_times), (avg_times-dev_times), alpha=0.2, label='_nolegend_')
-
-#         axs[j,0].grid(True)
-#         axs[j,1].grid(True)
-            
-#         axs[j,0].yaxis.set_major_formatter(FormatStrFormatter('%.0f'))
-#         axs[j,1].yaxis.set_major_formatter(FormatStrFormatter('%.1f'))
-#         axs[j,0].tick_params('both', length=0)
-#         axs[j,1].tick_params('both', length=0)
-#         color='grey'
-#         axs[j,0].spines['bottom'].set_color(color)
-#         axs[j,0].spines['top'].set_color(color) 
-#         axs[j,0].spines['right'].set_color(color)
-#         axs[j,0].spines['left'].set_color(color)
-#         axs[j,1].spines['bottom'].set_color(color)
-#         axs[j,1].spines['top'].set_color(color) 
-#         axs[j,1].spines['right'].set_color(color)
-#         axs[j,1].spines['left'].set_color(color)
-
-
-#         axs[j,0].set_title('                                                           '+parameter, fontsize=12)
-        
-#         axs[j,0].set(ylabel='Successful laps [%]') 
-#         axs[j,1].set(ylabel='Times [s]') 
-        
-#         xlabels = ['Deviation from mean', 'Deviation from mean']
-#         axs[j,0].set(xlabel=xlabels[j]) 
-#         axs[j,1].set(xlabel=xlabels[j])
-        
-        
-#         # axs[j,0].set_xticks(ticks=, labels=)
-#         # axs[j,1].set_xticks(ticks=, labels=)
-
-#     fig.tight_layout()
-#     fig.subplots_adjust(bottom=0.22) 
-#     plt.figlegend(legend,loc='lower center', ncol=2)
-#     if graph==True:
-#         plt.show()
 
 def display_lap_mismatch_results_multiple_1(agent_names, parameters, legend_title, legend, plot_titles, nom_value, graph, text):
     
@@ -3755,7 +3638,11 @@ def display_path_multiple(agent_names, ns, legend_title, legend, mismatch_parame
         action_step_history.append(env.action_step_history)
         
         
-    myfont = {'fontname':'serif'}
+    plt.rcParams['font.family'] = 'serif'
+    plt.rcParams['font.serif'] = ['Times New Roman'] + plt.rcParams['font.serif']
+
+    
+    
     figure_size = (10,4)
     xlims = [0,100]
 
@@ -3767,16 +3654,15 @@ def display_path_multiple(agent_names, ns, legend_title, legend, mismatch_parame
 
 
 
-    plt.figure(1, figsize=figure_size)
-    ax = plt.subplot(111)
+    fig, ax = plt.subplots(1, figsize=(5,2.7))
     
-    #plt.rc('axes',edgecolor='lightgrey')
+    ax.axis('off')
     
-    #ax.tick_params(axis='both', colors='lightgrey')
-    ax.spines['bottom'].set_color('lightgrey')
-    ax.spines['top'].set_color('lightgrey') 
-    ax.spines['right'].set_color('lightgrey')
-    ax.spines['left'].set_color('lightgrey')
+    # ax.tick_params(axis='both', colors='lightgrey')
+    # ax.spines['bottom'].set_color('lightgrey')
+    # ax.spines['top'].set_color('lightgrey') 
+    # ax.spines['right'].set_color('lightgrey')
+    # ax.spines['left'].set_color('lightgrey')
 
     ax.tick_params(axis=u'both', which=u'both',length=0)
     
@@ -3805,24 +3691,15 @@ def display_path_multiple(agent_names, ns, legend_title, legend, mismatch_parame
         idx[i] = np.mod(env.start_point+np.round(prog[i]*len(env.rx)), len(env.rx))
     idx.astype(int)
     
-    for i in range(len(idx)):
-        plt.text(x=env.rx[idx[i]], y=env.ry[idx[i]], s=text[i], fontsize = 'small', bbox=dict(facecolor='white', edgecolor='black',pad=0.1,boxstyle='round'))
+    # for i in range(len(idx)):
+    #     plt.text(x=env.rx[idx[i]], y=env.ry[idx[i]], s=text[i], fontsize = 'small', bbox=dict(facecolor='white', edgecolor='black',pad=0.1,boxstyle='round'))
 
+    ax.vlines(x=env.rx[idx[0]], ymin=env.ry[idx[0]]-1, ymax=env.ry[idx[0]]+1, linestyles='dotted', color='red')
+    ax.text(x=env.rx[idx[0]]-1.2, y=env.ry[idx[0]]+1.3, s='Start/finish', fontsize = 'small', bbox=dict(facecolor='white', edgecolor='black',pad=0.1,boxstyle='round'))
 
-    ax.set_xlabel('x coordinate [m]',**myfont) 
-    ax.set_ylabel('y coordinate [m]',**myfont)
-    #ax.set_tick_params(axis=u'both', which=u'both',length=0)
-    
-    # https://stackoverflow.com/questions/4700614/how-to-put-the-legend-outside-the-plot
-
-    box = ax.get_position()
-    ax.set_position([box.x0, box.y0, box.width * 0.8, box.height])
-
-    # Put a legend to the right of the current axis
-    # ax.legend(legend, title=legend_title, loc='center left',  bbox_to_anchor=(1, 0.5))
-    ax.legend(legend, loc='center left',  bbox_to_anchor=(1, 0.5))
-    #plt.legend(legend_new, title=legend_title, loc='lower right')
-
+    fig.tight_layout()
+    # fig.subplots_adjust(bottom=0.2) 
+    plt.figlegend(legend, title=legend_title, loc = 'lower center', ncol=3)
 
 
 
@@ -3836,8 +3713,8 @@ def display_path_multiple(agent_names, ns, legend_title, legend, mismatch_parame
         plt.plot(np.array(progress_history[i])*100, np.array(state_history[i])[:,3], linewidth=1.5, alpha=alpha)
         # plt.plot(np.array(progress_history[i])*100, np.array(pose_history[i])[:,4], linewidth=1.5, alpha=alpha)
 
-    plt.xlabel('progress along centerline [%]',**myfont)
-    plt.ylabel('Longitudinal velocity [m/s]',**myfont)
+    plt.xlabel('progress along centerline [%]')
+    plt.ylabel('Longitudinal velocity [m/s]')
     plt.legend(legend_new, title=legend_title, loc='lower right')
     plt.xlim(xlims)
     #plt.ylim([env_dict['action_space_dict']['vel_select'][0]-0.2, env_dict['action_space_dict']['vel_select'][1]+0.2])
@@ -3856,8 +3733,8 @@ def display_path_multiple(agent_names, ns, legend_title, legend, mismatch_parame
         plt.plot(np.array(progress_history[i])*100, np.array(state_history[i])[:,2], linewidth=1.5, alpha=alpha)
         # plt.plot(np.array(progress_history[i])*100, np.array(pose_history[i])[:,3], linewidth=1.5, alpha=alpha)
 
-    plt.xlabel('progress along centerline [%]',**myfont)
-    plt.ylabel('steering angle [rads]',**myfont)
+    plt.xlabel('progress along centerline [%]')
+    plt.ylabel('steering angle [rads]')
     plt.legend(legend_new, title=legend_title, loc='lower right')
     plt.xlim(xlims)
     plt.ylim([env_dict['car_params']['s_min']-0.05, env_dict['car_params']['s_max']+0.05])
@@ -3871,8 +3748,8 @@ def display_path_multiple(agent_names, ns, legend_title, legend, mismatch_parame
     for i in range(len(agent_names)):
         plt.plot(np.array(progress_history[i])*100, np.array(state_history[i])[:,6], linewidth=1.5, alpha=alpha)
       
-    plt.xlabel('progress along centerline [%]',**myfont)
-    plt.ylabel('Slip angle [rads]',**myfont)
+    plt.xlabel('progress along centerline [%]')
+    plt.ylabel('Slip angle [rads]')
     plt.legend(legend, title=legend_title, loc='lower right')
     plt.xlim(xlims)
     plt.ylim([-1,1])
@@ -3895,8 +3772,8 @@ def display_path_multiple(agent_names, ns, legend_title, legend, mismatch_parame
         
         plt.plot(np.arange(len(progress_history[i])), np.array(progress_history[i])*100, linewidth=1.5, alpha=alpha)
     
-    plt.xlabel('Simulation step',**myfont)
-    plt.ylabel('progress along centerline [%]',**myfont)
+    plt.xlabel('Simulation step')
+    plt.ylabel('progress along centerline [%]')
     plt.ylim([-5,105])
     plt.legend(legend_new, title=legend_title, loc='lower right')
     plt.grid(True, color='lightgrey')
@@ -3912,8 +3789,8 @@ def display_path_multiple(agent_names, ns, legend_title, legend, mismatch_parame
     for i in range(len(agent_names)):
         plt.plot(np.array(progress_history[i])[0:len(np.array(action_step_history[i])[:,0])]*100, np.array(action_step_history[i])[:,0], linewidth=1.5, alpha=alpha)
     
-    plt.xlabel('Simulation step',**myfont)
-    plt.ylabel('Latitude action',**myfont)
+    plt.xlabel('Simulation step')
+    plt.ylabel('Latitude action')
     plt.ylim([-1,1])
     plt.legend(legend_new, title=legend_title, loc='lower right')
     plt.grid(True, color='lightgrey')
@@ -3929,8 +3806,8 @@ def display_path_multiple(agent_names, ns, legend_title, legend, mismatch_parame
     for i in range(len(agent_names)):
         plt.plot(np.array(progress_history[i])[0:len(np.array(action_step_history[i])[:,1])]*100, np.array(action_step_history[i])[:,1], linewidth=1.5, alpha=alpha)
     
-    plt.xlabel('Simulation step',**myfont)
-    plt.ylabel('Longitude action',**myfont)
+    plt.xlabel('Simulation step')
+    plt.ylabel('Longitude action')
     plt.ylim([-1,1])
     plt.legend(legend_new, title=legend_title, loc='lower right')
     plt.grid(True, color='lightgrey')

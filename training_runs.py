@@ -2034,7 +2034,9 @@ agent_names =  ['batch_180',  'batch_220']
 # agent_names =  ['sample_5hz_batch_140_noise']
 # agent_names =  ['time_steps']
 agent_names = ['lidar_5', 'lidar_10', 'lidar_20']
-agent_names = ['only_pose']
+# agent_names = ['train_noise']
+agent_names = ['batch_150','train_noise']
+# agent_names = ['batch_200']
 
 
 # agent_names = ['time_steps']
@@ -2042,25 +2044,25 @@ agent_names = ['only_pose']
 # legend = ['no noise', 'noise']
 # legend = ['180', '220']
 # legend = ['5', '10', '20']
-legend = [agent_names]
+legend = ['Trained without noise', 'Trained with noise']
 legend_title = ''
-ns=[0,0,0]
+ns=[2,2,0]
 
 # agent_names = ['porto_ete_v5_r_collision_5']
 # legend = []
 # legend_title = ''
 # ns=[0]
 
-display_results_multiple.learning_curve_lap_time_average(agent_names, legend, legend_title, ns)
+# display_results_multiple.learning_curve_lap_time_average(agent_names, legend, legend_title, ns)
 # display_results_multiple.learning_curve_reward_average(agent_names, legend, legend_title)
 
 # for agent_name in agent_names:
 #     print('------------------------------' + '\n' + agent_name + '\n' + '------------------------------')
 #     display_results_multiple.display_train_parameters(agent_name=agent_name)
 
-for agent_name in agent_names:
-    print('------------------------------' + '\n' + agent_name + '\n' + '------------------------------')
-    display_results_multiple.display_lap_results(agent_name=agent_name)
+# for agent_name in agent_names:
+#     print('------------------------------' + '\n' + agent_name + '\n' + '------------------------------')
+#     display_results_multiple.display_lap_results(agent_name=agent_name)
 
 
 mismatch_parameters = [['C_Sr', 'mu'], ['C_Sr', 'mu']]

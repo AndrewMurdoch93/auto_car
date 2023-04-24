@@ -1638,6 +1638,7 @@ def display_only_path_multiple(agent_names, ns, legend_title, legend, mismatch_p
     # plt.savefig('results/'+filename+'.pgf', format='pgf')
     pass
 
+
 def display_path_two_multiple(agent_names, ns, legend_title, legend, mismatch_parameters, noise_dict, frac_vary, start_condition, filename):
     
     pose_history = []
@@ -3440,7 +3441,7 @@ ns=[0, 0, 0]
 filename = 'observation_space_1'
 xlim=6000
 xspace = 2000
-learning_curve_all(agent_names, legend, legend_title, ns, filename, xlim, xspace)
+# learning_curve_all(agent_names, legend, legend_title, ns, filename, xlim, xspace)
 
 # agent_names = ['porto_ete_cs_1', 'porto_ete_cs_5', 'porto_ete_cs_10', 'porto_ete_cs_15', 'porto_ete_LiDAR_10', 'porto_ete_cs_25']
 # legend = ['1', '5', '10', '15', '20', '25']
