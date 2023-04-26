@@ -377,9 +377,11 @@ def learning_curve_reward_average(agent_names, legend, legend_title):
     # "font.size": 12
     # })
 
+    plt.rcParams['font.family'] = 'serif'
+    plt.rcParams['font.serif'] = ['Times New Roman'] + plt.rcParams['font.serif']
+
     fig, ax = plt.subplots(1, figsize=(5,2.5))
     plt.rc('axes',edgecolor='gray')
-    
     
     color='grey'
     ax.spines['bottom'].set_color(color)
@@ -405,8 +407,8 @@ def learning_curve_reward_average(agent_names, legend, legend_title):
     #plt.figlegend(legend, title=legend_title, loc='center right', ncol=1)
 
 
-    # plt.show()
-    plt.savefig('results/'+filename+'.pgf', format='pgf')
+    plt.show()
+    # plt.savefig('results/'+filename+'.pgf', format='pgf')
 
 def learning_curve_all(agent_names, legend, legend_title, ns, filename, xlim, xspace):
 
@@ -579,7 +581,7 @@ def learning_curve_all(agent_names, legend, legend_title, ns, filename, xlim, xs
     plt.rcParams['font.family'] = 'serif'
     plt.rcParams['font.serif'] = ['Times New Roman'] + plt.rcParams['font.serif']
 
-    size = (5.5,2.5)
+    size = (5.5,2.2)
     bottom_space=0.4
 
     plt.rc('axes',edgecolor='gray')
@@ -3468,6 +3470,11 @@ def plot_frenet_polynomial(filename):
 # xlim = 5000
 # xspace = 2000
 
+agent_names = ['porto_ete_v5_r_collision_5']
+legend = ['']
+legend_title = ''
+xlim=3000
+xspace = 2000
 
 agent_names = ['only_LiDAR', 'only_pose', 'batch_150']
 legend = ['Only LiDAR', 'Only pose', 'LiDAR and pose']
@@ -3522,7 +3529,7 @@ xspace = 2000
 
 ns=[0, 0, 0, 0, 0]
 filename = 'observation_space_1'
-learning_curve_all(agent_names, legend, legend_title, ns, filename, xlim, xspace)
+# learning_curve_all(agent_names, legend, legend_title, ns, filename, xlim, xspace)
 
 # agent_names = ['lidar_5', 'lidar_10', 'lidar_20' ,'lidar_50']
 # legend = ['5', '10', '20', '50']

@@ -652,6 +652,9 @@ def learning_curve_reward(agent_names, legend, legend_title, ns):
     for i in range(len(agent_names)):
         end_episodes[i] =  np.where(steps[i][ns[i]]==0)[0][0]
 
+    plt.rcParams['font.family'] = 'serif'
+    plt.rcParams['font.serif'] = ['Times New Roman'] + plt.rcParams['font.serif']
+    plt.rc('axes',edgecolor='gray')
     
     plt.figure(1, figsize=(5,4))
     plt.rc('axes',edgecolor='gray')
@@ -670,16 +673,15 @@ def learning_curve_reward(agent_names, legend, legend_title, ns):
 
 
 
-    plt.figure(2, figsize=(5,4))
+    plt.figure(2, figsize=(2.5,2.5))
     plt.rc('axes',edgecolor='gray')
     for i in range(len(agent_names)):
         end_episode = end_episodes[i] 
         plt.plot(np.cumsum(n_actions[i][ns])[0:end_episode],  avg_score[i][0:end_episode])
         plt.fill_between(x=np.cumsum(n_actions[i][ns])[0:end_episode], y1=upper_fill[i][0][0:end_episode], y2=lower_fill[i][0][0:end_episode], alpha=0.3, label='_nolegend_')
-    
-    plt.xlabel('Steps')
+    plt.xlabel('MDP time steps')
     plt.ylabel('Episode reward')
-    plt.legend(legend_new, title=legend_title, loc='upper right')
+    # plt.legend(legend_new, title=legend_title, loc='upper right')
     #plt.xlim([0,6000])
     plt.grid(True)
     plt.tick_params(axis=u'both', which=u'both',length=0)
@@ -757,39 +759,43 @@ def learning_curve_reward_average(agent_names, legend, legend_title):
     end_episodes = np.min(end_episodes, axis=1)
     
 
+    plt.rcParams['font.family'] = 'serif'
+    plt.rcParams['font.serif'] = ['Times New Roman'] + plt.rcParams['font.serif']
+    plt.rc('axes',edgecolor='gray')
     
-    plt.figure(1, figsize=(5,4))
+    fig, ax = plt.subplots(1, figsize=(5,4))
     plt.rc('axes',edgecolor='gray')
     for i in range(len(agent_names)):
         end_episode = end_episodes[i] 
-        plt.plot(np.cumsum(avg_steps[i])[0:end_episode],  avg_score[i][0:end_episode])
-        plt.fill_between(x=np.cumsum(avg_steps[i])[0:end_episode], y1=upper_fill[i][0][0:end_episode], y2=lower_fill[i][0][0:end_episode], alpha=0.3, label='_nolegend_')
+        ax.plot(np.cumsum(avg_steps[i])[0:end_episode],  avg_score[i][0:end_episode])
+        ax.fill_between(x=np.cumsum(avg_steps[i])[0:end_episode], y1=upper_fill[i][0][0:end_episode], y2=lower_fill[i][0][0:end_episode], alpha=0.3, label='_nolegend_')
     
-    plt.xlabel('Simulation steps')
+    ax.set_xlabel('Simulation steps')
     #plt.title('Collision rate')
-    plt.ylabel('Episode reward')
-    plt.legend(legend_new, title=legend_title, loc='lower right')
+    ax.set_ylabel('Episode reward')
+    ax.legend(legend_new, title=legend_title, loc='lower right')
     #plt.xlim([0,6000])
-    plt.grid(True)
-    plt.tick_params(axis=u'both', which=u'both',length=0)
+    ax.grid(True)
+    ax.tick_params(axis=u'both', which=u'both',length=0)
+    fig.tight_layout()
 
 
-
-    plt.figure(2, figsize=(5,4))
+    fig, ax = plt.subplots(1, figsize=(3.5,2))
     plt.rc('axes',edgecolor='gray')
     for i in range(len(agent_names)):
         end_episode = end_episodes[i] 
-        plt.plot(np.cumsum(avg_n_actions[i])[0:end_episode],  avg_score[i][0:end_episode])
-        plt.fill_between(x=np.cumsum(avg_n_actions[i])[0:end_episode], y1=upper_fill[i][0][0:end_episode], y2=lower_fill[i][0][0:end_episode], alpha=0.3, label='_nolegend_')
+        ax.plot(np.cumsum(avg_n_actions[i])[0:end_episode],  avg_score[i][0:end_episode])
+        ax.fill_between(x=np.cumsum(avg_n_actions[i])[0:end_episode], y1=upper_fill[i][0][0:end_episode], y2=lower_fill[i][0][0:end_episode], alpha=0.3, label='_nolegend_')
     
-    plt.xlabel('Steps')
-    plt.ylabel('Episode reward')
-    plt.legend(legend_new, title=legend_title, loc='lower right')
+    ax.set_xlabel('MDP time steps')
+    ax.set_ylabel('Episode reward')
+    # ax.legend(legend_new, title=legend_title, loc='lower right')
     #plt.xlim([0,6000])
-    plt.grid(True)
-    plt.tick_params(axis=u'both', which=u'both',length=0)
-
-
+    ax.grid(True)
+    ax.tick_params(axis=u'both', which=u'both',length=0)
+    ax.ticklabel_format(style='scientific', axis='x', scilimits=(0,0), useMathText=True, useOffset=True)
+    fig.tight_layout()
+    
 
     plt.figure(3, figsize=(5,4))
     plt.rc('axes',edgecolor='gray')
@@ -804,7 +810,9 @@ def learning_curve_reward_average(agent_names, legend, legend_title):
     #plt.xlim([0,6000])
     plt.grid(True)
     plt.tick_params(axis=u'both', which=u'both',length=0)
-
+    
+    
+    
     plt.show()
 
 

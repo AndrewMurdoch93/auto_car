@@ -80,11 +80,11 @@ def graph_eval_time_steps(agent_names):
             # std_collisions[n] = np.std(mask)*100
         pass
         
-        xaxis = np.average(eval_steps,axis=0)/(20*2)
+        xaxis = np.average(eval_steps,axis=0)/(20)
         
         axs.plot(xaxis, avg_lap_times, label='Lap time')
         axs.fill_between(x=xaxis, y1=avg_lap_times-std_lap_times,y2=avg_lap_times+std_lap_times, alpha=0.2)
-        axs.set_xlabel('Network updates')
+        axs.set_xlabel('MDP time steps')
         axs.set_ylabel('Lap time [s]')
         axs.tick_params(axis=u'both', which=u'both',length=0)
         axs.grid(True, color='lightgrey')
@@ -104,7 +104,7 @@ def graph_eval_time_steps(agent_names):
     plt.show()
 
 
-graph_eval_time_steps(['time_steps'])
+# graph_eval_time_steps(['time_steps'])
 
 
 
@@ -172,7 +172,7 @@ def graph_replay_batch_size(agent_names):
     plt.show()
 
 
-graph_replay_batch_size(['batch_50', 'batch_100', 'batch_150', 'batch_200', 'batch_300', 'batch_400', 'batch_600', 'batch_1000'])
+# graph_replay_batch_size(['batch_50', 'batch_100', 'batch_150', 'batch_200', 'batch_300', 'batch_400', 'batch_600', 'batch_1000'])
 
 
 def graph_agent_sample_rate(agent_names):
@@ -181,7 +181,7 @@ def graph_agent_sample_rate(agent_names):
     plt.rcParams['font.serif'] = ['Times New Roman'] + plt.rcParams['font.serif']
     plt.rc('axes',edgecolor='gray')
 
-    sample_rate = np.array([3,5,10,20])
+    sample_rate = np.array([3,5,10,20,50])
     train_times = np.zeros(len(agent_names))
     min_train_times = np.zeros(len(agent_names))
     max_train_times = np.zeros(len(agent_names))
@@ -220,14 +220,14 @@ def graph_agent_sample_rate(agent_names):
     # axs.fill_between(x=xaxis, y1=,y2=, alpha=0.2)
     axs.set_xlabel('Agent sample rate [Hz]')
     axs.set_ylabel('Training time [minutes]')
-    axs.set_ylim([20,40])
+    # axs.set_ylim([20,40])
     axs.tick_params(axis=u'both', which=u'both',length=0)
     axs.grid(True, color='lightgrey')
     
     axs1 = axs.twinx()  
-    axs1.plot(sample_rate, lap_times, color='orange', label='Test lap time')
-    axs1.fill_between(x=sample_rate, y1=lap_times-std_lap_times,y2=lap_times+std_lap_times, alpha=0.2, color='orange')
-    axs1.set_ylabel('Lap time [s]')
+    axs1.plot(sample_rate, collisions*100, color='orange', label='Failed laps')
+    # axs1.fill_between(x=sample_rate, y1=lap_times-std_lap_times,y2=lap_times+std_lap_times, alpha=0.2, color='orange')
+    axs1.set_ylabel('Failed laps [%]')
     axs1.tick_params(axis=u'both', which=u'both',length=0)
 
     fig.tight_layout()
@@ -237,4 +237,5 @@ def graph_agent_sample_rate(agent_names):
     plt.show()
 
 
-graph_agent_sample_rate(['f_agent_3', 'batch_150', 'f_agent_10', 'f_agent_20'])
+agent_names = ['f_agent_3', 'f_agent_5', 'f_agent_10', 'f_agent_20', 'f_agent_50']
+graph_agent_sample_rate(agent_names)

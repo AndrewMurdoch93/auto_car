@@ -76,9 +76,9 @@ env_dict = {'sim_conf': functions.load_config(sys.path[0], "config")
         } 
 
 n_test=100
-a = main_multiple.trainingLoop(main_dict, agent_td3_dict, env_dict, load_agent='')
-a.train()
-main_multiple.lap_time_test(agent_name=agent_name, n_episodes=n_test, detect_issues=False, initial_conditions=True)
+# a = main_multiple.trainingLoop(main_dict, agent_td3_dict, env_dict, load_agent='')
+# a.train()
+# main_multiple.lap_time_test(agent_name=agent_name, n_episodes=n_test, detect_issues=False, initial_conditions=True)
 
 # agent_name = 'train_noise'
 # main_dict['name'] = agent_name
@@ -342,4 +342,99 @@ main_multiple.lap_time_test(agent_name=agent_name, n_episodes=n_test, detect_iss
 # a = main_multiple.trainingLoop(main_dict, agent_td3_dict, env_dict, load_agent='')
 # a.train()
 # main_multiple.lap_time_test_with_noise(agent_name=agent_name, n_episodes=100, detect_issues=False, initial_conditions=True, noise={'xy':0.025, 'theta':0.05, 'v':0.1, 'lidar':0.01})
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# agent_names =  ['batch_size_1', 'sample_5hz_batch_140_noise']
+# agent_names =  ['batch_180',  'batch_220']
+# agent_names =  ['sample_5hz_batch_140_noise']
+# agent_names =  ['time_steps']
+# agent_names = ['lidar_5', 'lidar_10', 'lidar_20', 'lidar_50', 'lidar_100', 'lidar_200']
+# agent_names = ['train_noise']
+# agent_names = ['batch_150','train_noise']
+# agent_names = ['batch_200']
+# agent_names = ['lidar_200']
+# agent_names = ['only_LiDAR', 'only_pose', 'batch_150']
+# agent_names = ['only_LiDAR']
+# agent_names = ['only_pose']
+# agent_names = ['time_steps']
+# agent_names = ['sample_3hz', 'sample_5hz', 'sample_10hz', 'sample_20hz', 'sample_50hz']
+# agent_names = ['porto_ete_v5_gamma_0','porto_ete_v5_gamma_1', 'porto_ete_v5_gamma_2', 'porto_ete_v5_r_collision_5', 'porto_ete_v5_gamma_4']
+# agent_names = ['porto_ete_v5_gamma_2']
+# agent_names = ['porto_ete_v5_alpha_0', 'porto_ete_v5_r_collision_5', 'porto_ete_v5_alpha_1']
+# agent_names = ['redbull']
+agent_names = ['f_agent_3', 'f_agent_5', 'f_agent_10', 'f_agent_20', 'f_agent_50']
+
+# legend = ['no noise', 'noise']
+# legend = ['180', '220']
+# legend = ['5', '10', '20']
+legend = ['Trained without noise', 'Trained with noise']
+legend_title = ''
+ns=[0,0,0,0,0,0]
+
+# agent_names = ['porto_ete_v5_r_collision_5']
+# legend = []
+# legend_title = ''
+# ns=[0]
+
+
+
+
+
+
+# display_results_multiple.learning_curve_lap_time_average(agent_names, legend, legend_title, ns)
+# display_results_multiple.learning_curve_reward_average(agent_names, legend, legend_title)
+
+# for agent_name in agent_names:
+#     print('------------------------------' + '\n' + agent_name + '\n' + '------------------------------')
+#     display_results_multiple.display_train_parameters(agent_name=agent_name)
+
+for agent_name in agent_names:
+    print('------------------------------' + '\n' + agent_name + '\n' + '------------------------------')
+    display_results_multiple.display_lap_results(agent_name=agent_name)
+
+
+mismatch_parameters = [['C_Sr', 'mu'], ['C_Sr', 'mu']]
+frac_vary = [[0, 0], [0, 0]]
+noise_dicts = [{'xy':0.025, 'theta':0.05, 'v':0.1, 'lidar':0.01}, {'xy':0.025, 'theta':0.05, 'v':0.1, 'lidar':0.01}, {'xy':0.025, 'theta':0.05, 'v':0.1, 'lidar':0.01}, {'xy':0.025, 'theta':0.05, 'v':0.1, 'lidar':0.01}]
+# start_condition = {'x':10, 'y':4.5, 'v':3, 'theta':np.pi, 'delta':0, 'goal':0}
+
+
+
+# Columbia
+# start_condition = {'x':5.7, 'y':7.25, 'v':3, 'theta':0, 'delta':0, 'goal':0}
+start_condition = []
+
+
+# NB!!!! Error: Path is junk when no mismatch is present, when displaying 2 agents
+
+# display_results_multiple.display_moving_agent(agent_names=agent_names, ns=ns, legend_title=legend_title,          
+#                                              legend=legend, mismatch_parameters=mismatch_parameters, frac_vary=frac_vary, noise_dicts=noise_dicts,
+#                                              start_condition=start_condition)
+
+# display_results_multiple.display_path_multiple(agent_names=agent_names, ns=ns, legend_title=legend_title,          
+#                                              legend=legend, mismatch_parameters=mismatch_parameters, frac_vary=frac_vary, noise_dicts=noise_dicts,
+#                                              start_condition=start_condition)
+
+# display_results_multiple.display_path_mismatch_multiple_by_state(agent_names=agent_names, ns=ns, legend_title=legend_title,          
+#                                              legend=legend, mismatch_parameters=mismatch_parameters, frac_vary=frac_vary, noise_dicts=noise_dicts,
+#                                              start_condition=start_condition)
 

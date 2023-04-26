@@ -2021,7 +2021,7 @@ if True:
 # legend = agent_names
 # ns=[0]
 
-# agent_names = ['porto_ete_v5_r_collision_5']
+agent_names = ['time_steps']
 # agent_names = ['porto_pete_sv_p_r_0']
 
 # agent_names = ['porto_ete_only_LiDAR']
@@ -2047,13 +2047,14 @@ if True:
 # agent_names = ['porto_ete_v5_gamma_0','porto_ete_v5_gamma_1', 'porto_ete_v5_gamma_2', 'porto_ete_v5_r_collision_5', 'porto_ete_v5_gamma_4']
 # agent_names = ['porto_ete_v5_gamma_2']
 # agent_names = ['porto_ete_v5_alpha_0', 'porto_ete_v5_r_collision_5', 'porto_ete_v5_alpha_1']
-agent_names = ['redbull']
+# agent_names = ['redbull']
 
 
 # legend = ['no noise', 'noise']
 # legend = ['180', '220']
 # legend = ['5', '10', '20']
-legend = ['Trained without noise', 'Trained with noise']
+# legend = ['Trained without noise', 'Trained with noise']
+legend = ['']
 legend_title = ''
 ns=[0,0,0,0,0,0]
 
@@ -2063,15 +2064,15 @@ ns=[0,0,0,0,0,0]
 # ns=[0]
 
 # display_results_multiple.learning_curve_lap_time_average(agent_names, legend, legend_title, ns)
-# display_results_multiple.learning_curve_reward_average(agent_names, legend, legend_title)
+display_results_multiple.learning_curve_reward_average(agent_names, legend, legend_title)
 
 # for agent_name in agent_names:
 #     print('------------------------------' + '\n' + agent_name + '\n' + '------------------------------')
 #     display_results_multiple.display_train_parameters(agent_name=agent_name)
 
-for agent_name in agent_names:
-    print('------------------------------' + '\n' + agent_name + '\n' + '------------------------------')
-    display_results_multiple.display_lap_results(agent_name=agent_name)
+# for agent_name in agent_names:
+#     print('------------------------------' + '\n' + agent_name + '\n' + '------------------------------')
+#     display_results_multiple.display_lap_results(agent_name=agent_name)
 
 
 mismatch_parameters = [['C_Sr', 'mu'], ['C_Sr', 'mu']]
@@ -2092,9 +2093,9 @@ start_condition = []
 #                                              legend=legend, mismatch_parameters=mismatch_parameters, frac_vary=frac_vary, noise_dicts=noise_dicts,
 #                                              start_condition=start_condition)
 
-display_results_multiple.display_path_multiple(agent_names=agent_names, ns=ns, legend_title=legend_title,          
-                                             legend=legend, mismatch_parameters=mismatch_parameters, frac_vary=frac_vary, noise_dicts=noise_dicts,
-                                             start_condition=start_condition)
+# display_results_multiple.display_path_multiple(agent_names=agent_names, ns=ns, legend_title=legend_title,          
+#                                              legend=legend, mismatch_parameters=mismatch_parameters, frac_vary=frac_vary, noise_dicts=noise_dicts,
+#                                              start_condition=start_condition)
 
 # display_results_multiple.display_path_mismatch_multiple_by_state(agent_names=agent_names, ns=ns, legend_title=legend_title,          
 #                                              legend=legend, mismatch_parameters=mismatch_parameters, frac_vary=frac_vary, noise_dicts=noise_dicts,
