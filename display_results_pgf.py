@@ -459,12 +459,28 @@ def learning_curve_all(agent_names, legend, legend_title, ns, filename, xlim, xs
         
         scores[i] = pickle.load(infile)
         _ = pickle.load(infile)
-        times[i] = pickle.load(infile)
-        steps[i] = pickle.load(infile)
-        collisions[i] = pickle.load(infile)
-        n_actions[i] = pickle.load(infile)
-        
+        t = pickle.load(infile)
+        s = pickle.load(infile)
+        c = pickle.load(infile)
+        n = pickle.load(infile)
         infile.close()
+        
+        for x in range(len(t)):
+            times[i].append(t[x][0:10000])
+            steps[i].append(s[x][0:10000])
+            collisions[i].append(c[x][0:10000])
+            n_actions[i].append(n[x][0:10000])
+
+        # times_uniform = []
+        # steps_uniform = []
+        # collisions_uniform = []
+        # n_actions_uniform = []
+        
+        # for t,s,c,n in zip(times[i],steps[i],collisions[i],n_actions[i]):
+        #     times_uniform.append(t[0:10000])
+        #     steps_uniform.append(s[0:10000])
+        #     collisions_uniform.append(c[0:10000])
+        #     n_actions_uniform.append(n[0:10000])
         
 
         avg_steps[i] = np.average(steps[i],axis=0)
@@ -516,10 +532,13 @@ def learning_curve_all(agent_names, legend, legend_title, ns, filename, xlim, xs
     #     end_episodes[i] =  np.where(steps[i][ns[i]]==0)[0][0]
 
     end_episodes = np.zeros((np.size(np.array(steps),axis=0), np.size(np.array(steps),axis=1)), int)
+    # end_episodes = np.zeros(np.size(steps,axis=0), np.size(steps,axis=1), int)
+    
+    
     for i in range(np.size(end_episodes, axis=0)):
         for n in range(np.size(end_episodes, axis=1)):
             end_episodes[i,n] =  np.where(steps[i][n]==0)[0][0]
-            end_ep = end_episodes
+    end_ep = end_episodes
     end_episodes = np.min(end_episodes, axis=1)
     
     steps_y = steps.copy()
@@ -612,6 +631,7 @@ def learning_curve_all(agent_names, legend, legend_title, ns, filename, xlim, xs
     ax[1].grid(True)
     ax[1].tick_params('both', length=0)
     ax[1].set_xlim([0,xlim])
+    ax[1].set_ylim([6,10])
     ax[1].set_ylabel('Lap time [s]')
 
     for i in range(np.size(end_ep, axis=0)):
@@ -1830,12 +1850,14 @@ filename='path_method_comparison'
 
 
 
-def display_path_velocity_multiple(agent_names, ns, legend_title, legend, mismatch_parameters, frac_vary, start_condition, filename):
+def display_path_velocity_multiple(agent_names, ns, legend_title, legend, mismatch_parameters, frac_vary, start_condition):
     
     pose_history = []
     progress_history = []
     state_history = []
-    
+    noise={'xy':0.025, 'theta':0.05, 'v':0.1, 'lidar':0.01}
+
+
     for agent_name, n, i in zip(agent_names, ns, range(len(agent_names))):
 
         infile = open('environments/' + agent_name, 'rb')
@@ -1852,9 +1874,9 @@ def display_path_velocity_multiple(agent_names, ns, legend_title, legend, mismat
 
         env = environment(env_dict)
         if start_condition:
-            env.reset(save_history=True, start_condition=start_condition, car_params=env_dict['car_params'])
+            env.reset(save_history=True, start_condition=start_condition, car_params=env_dict['car_params'],noise=noise)
         else:
-            env.reset(save_history=True, start_condition=[], car_params=env_dict['car_params'])
+            env.reset(save_history=True, start_condition=[], car_params=env_dict['car_params'],noise=noise)
 
         infile = open('agents/' + agent_name + '/' + agent_name + '_params', 'rb')
         agent_dict = pickle.load(infile)
@@ -1898,7 +1920,7 @@ def display_path_velocity_multiple(agent_names, ns, legend_title, legend, mismat
         a.load_weights(agent_name, n)
 
         #start_pose = {'x':11.2, 'y':7.7, 'v':0, 'delta':0, 'theta':0, 'goal':1}
-        env.reset(save_history=True, start_condition=start_condition, car_params=env_dict['car_params'])
+        env.reset(save_history=True, start_condition=start_condition, car_params=env_dict['car_params'], noise=noise)
         obs = env.observation
         done = False
         score=0
@@ -1936,17 +1958,20 @@ def display_path_velocity_multiple(agent_names, ns, legend_title, legend, mismat
     legend_racetrack = legend.copy()
     legend_racetrack.insert(0, 'Track centerline')
 
-    plt.rcParams.update({
-    "font.family": "serif",  # use serif/main font for text elements
-    "text.usetex": True,     # use inline math for ticks
-    "pgf.rcfonts": False,     # don't setup fonts from rc parameters
-    "font.size": 12
-    })
+    # plt.rcParams.update({
+    # "font.family": "serif",  # use serif/main font for text elements
+    # "text.usetex": True,     # use inline math for ticks
+    # "pgf.rcfonts": False,     # don't setup fonts from rc parameters
+    # "font.size": 12
+    # })
+    plt.rcParams['font.family'] = 'serif'
+    plt.rcParams['font.serif'] = ['Times New Roman'] + plt.rcParams['font.serif']
 
-    fig, ax = plt.subplots(4, figsize=(5,7))
+
+    fig, ax = plt.subplots(2, figsize=(5,3.5))
 
     color='gray'
-    for i in range(4):
+    for i in range(2):
         #ax[i].tick_params(axis='both', colors='lightgrey')
         ax[i].spines['bottom'].set_color(color)
         ax[i].spines['top'].set_color(color) 
@@ -1957,10 +1982,10 @@ def display_path_velocity_multiple(agent_names, ns, legend_title, legend, mismat
     
     track = mapping.map(env.map_name)
     ax[0].imshow(ImageOps.invert(track.gray_im.filter(ImageFilter.FIND_EDGES).filter(ImageFilter.MaxFilter(1))), extent=(0,track.map_width,0,track.map_height), cmap="gray")
-    ax[0].plot(env.rx, env.ry, color='gray', linestyle='dashed')
+    ax[0].plot(env.rx, env.ry, color='gray', linestyle='dashed', label='Centerline')
     
     for i in range(len(agent_names)):
-        ax[0].plot(np.array(pose_history[i])[:,0], np.array(pose_history[i])[:,1], linewidth=1.5)   
+        ax[0].plot(np.array(state_history[i])[:,0], np.array(state_history[i])[:,1], linewidth=1.5, label=legend[i])   
 
     prog = np.array([0, 0.2, 0.4, 0.6, 0.8])
     idx =  np.zeros(len(prog), int)
@@ -1981,51 +2006,61 @@ def display_path_velocity_multiple(agent_names, ns, legend_title, legend, mismat
 
 
 
-    ax[1].hlines(y=env_dict['action_space_dict']['vel_select'][0], xmin=0, xmax=100, colors='black', linestyle='dashed')
+    ax[1].hlines(y=env_dict['action_space_dict']['vel_select'][0], xmin=0, xmax=100, colors='black', linestyle='dashed', label='_nolegend_')
     ax[1].hlines(y=env_dict['action_space_dict']['vel_select'][1], xmin=0, xmax=100, colors='black', linestyle='dashed', label='_nolegend_')
     for i in range(len(agent_names)):
-        ax[1].plot(np.array(progress_history[i])*100, np.array(pose_history[i])[:,4], linewidth=1.5)
+        ax[1].plot(np.array(progress_history[i])*100, np.array(state_history[i])[:,3], linewidth=1.5)
     ax[1].set_ylabel('Longitudinal\nvelocity [m/s]')
     ax[1].set_xlim(xlims)
     ax[1].set_ylim([env_dict['action_space_dict']['vel_select'][0]-0.2, env_dict['action_space_dict']['vel_select'][1]+0.2])
     ax[1].grid(True, color='lightgrey')
     ax[1].tick_params('both', length=0)
-    ax[1].set_xticklabels([])
-
-    ax[2].hlines(y=env_dict['car_params']['s_min'], xmin=0, xmax=100, colors='black', linestyle='dashed')
-    ax[2].hlines(y=env_dict['car_params']['s_max'], xmin=0, xmax=100, colors='black', linestyle='dashed', label='_nolegend_')
-    for i in range(len(agent_names)):
-        ax[2].plot(np.array(progress_history[i])*100, np.array(pose_history[i])[:,3], linewidth=1.5)
-
-    ax[2].set_ylabel('steering\nangle [rads]')
-    ax[2].set_xlim(xlims)
-    ax[2].set_ylim([env_dict['car_params']['s_min']-0.05, env_dict['car_params']['s_max']+0.05])
-    ax[2].grid(True, color='lightgrey')
-    ax[2].tick_params(axis=u'both', which=u'both',length=0)
-    ax[2].set_xticklabels([])
-
-
-    for i in range(len(agent_names)):
-        ax[3].plot(np.array(progress_history[i])*100, np.array(state_history[i])[:,6], linewidth=1.5)
+    # ax[1].set_xticklabels([])
+    ax[1].set_xlabel('Progress along centerline [%]')
+    ax[1].set_ylabel('Velocity [m/s]')
     
-    ax[3].set_xlabel('Progress along centerline [%]')
-    ax[3].set_ylabel('Slip\nangle [rads]')
-    ax[3].set_xlim(xlims)
-    ax[3].set_ylim([-1,1])
-    ax[3].grid(True, color='lightgrey')
-    ax[3].tick_params(axis=u'both', which=u'both',length=0)
-    ax[3].set_yticks(np.arange(-1, 1.1, 0.5))
+    # ax[2].hlines(y=env_dict['car_params']['s_min'], xmin=0, xmax=100, colors='black', linestyle='dashed')
+    # ax[2].hlines(y=env_dict['car_params']['s_max'], xmin=0, xmax=100, colors='black', linestyle='dashed', label='_nolegend_')
+    # for i in range(len(agent_names)):
+    #     ax[2].plot(np.array(progress_history[i])*100, np.array(pose_history[i])[:,3], linewidth=1.5)
+
+    # ax[2].set_ylabel('steering\nangle [rads]')
+    # ax[2].set_xlim(xlims)
+    # ax[2].set_ylim([env_dict['car_params']['s_min']-0.05, env_dict['car_params']['s_max']+0.05])
+    # ax[2].grid(True, color='lightgrey')
+    # ax[2].tick_params(axis=u'both', which=u'both',length=0)
+    # ax[2].set_xticklabels([])
 
 
-    legend.insert(0, 'Track centerline')
+    # for i in range(len(agent_names)):
+    #     ax[3].plot(np.array(progress_history[i])*100, np.array(state_history[i])[:,6], linewidth=1.5)
+    
+    # ax[3].set_xlabel('Progress along centerline [%]')
+    # ax[3].set_ylabel('Slip\nangle [rads]')
+    # ax[3].set_xlim(xlims)
+    # ax[3].set_ylim([-1,1])
+    # ax[3].grid(True, color='lightgrey')
+    # ax[3].tick_params(axis=u'both', which=u'both',length=0)
+    # ax[3].set_yticks(np.arange(-1, 1.1, 0.5))
+
+
+    
     fig.tight_layout()
-    fig.subplots_adjust(bottom=0.12) 
-    plt.figlegend(legend, title=legend_title, loc='lower center', ncol=2)
+    fig.subplots_adjust(bottom=0.27) 
+    plt.figlegend(loc='lower center', ncol=4)
     
-    # plt.show() 
-    plt.savefig('results/'+filename+'.pgf', format='pgf')
+    plt.show() 
+    # plt.savefig('results/'+filename+'.pgf', format='pgf')
 
 
+agent_names = ['batch_150','train_noise']
+ns=[2,0]
+legend = ['Trained \nwithout noise', 'Trained \nwith noise     ']
+legend_title = ''
+mismatch_parameters = []
+frac_vary = []
+start_condition = {'x':10, 'y':4.5, 'v':3, 'theta':np.pi, 'delta':0, 'goal':0}
+# display_path_velocity_multiple(agent_names, ns, legend_title, legend, mismatch_parameters, frac_vary, start_condition)
 
 
 def sensitivity_analysis_noise(agent_name, n, start_condition, filename):
@@ -3437,10 +3472,56 @@ def plot_frenet_polynomial(filename):
 agent_names = ['only_LiDAR', 'only_pose', 'batch_150']
 legend = ['Only LiDAR', 'Only pose', 'LiDAR and pose']
 legend_title = 'Observation space'
-ns=[0, 0, 0]
-filename = 'observation_space_1'
+xlim=7500
+xspace = 2000
+
+agent_names = ['porto_ete_v5_gamma_1', 'porto_ete_v5_gamma_2', 'porto_ete_v5_r_collision_5', 'porto_ete_v5_gamma_4']
+legend = ['0.95', '0.98', '0.99', '1']
+legend_title = 'Reward discount rate, $\gamma$'
+xlim=3000
+xspace = 1000
+
+agent_names = ['target_update_0', 'porto_ete_v5_r_collision_5', 'target_update_1']
+legend = ['0.003', '0.005', '0.007']
+legend_title = r'Target update rate, $\tau$'
+xlim=3000
+xspace = 1000
+
+agent_names = ['DDPG', 'porto_ete_v5_r_collision_5']
+legend = ['DDPG', 'TD3']
+legend_title = 'RL method'
 xlim=7000
 xspace = 2000
+
+
+# agent_names = ['explore_policy_0', 'porto_ete_v5_r_collision_5', 'explore_policy_1']
+# legend = ['0.05', '0.1', '0.2']
+# legend_title = r'Exploration noise standard deviation'
+# xlim=3000
+# xspace = 1000
+
+# agent_names = ['update_actor_interval_0', 'porto_ete_v5_r_collision_5', 'update_actor_interval_1']
+# legend = ['1', '2', '3']
+# legend_title = r'Network update interval, $d$'
+# xlim=3000
+# xspace = 1000
+
+# agent_names = ['layer_0', 'porto_ete_v5_r_collision_5', 'layer_1']
+# legend = ['300 and 200', '400 and 300', '500 and 400']
+# legend_title = r'DNN Input and hidden layer sizes'
+# xlim=3000
+# xspace = 1000
+
+# agent_names = ['porto_ete_v5_alpha_0', 'porto_ete_v5_r_collision_5', 'porto_ete_v5_alpha_1']
+# legend = ['0.0001', '0.001', '0.002']
+# legend_title = r'Learning rate, $\alpha$'
+# xlim=3000
+# xspace = 1000
+
+
+
+ns=[0, 0, 0, 0, 0]
+filename = 'observation_space_1'
 learning_curve_all(agent_names, legend, legend_title, ns, filename, xlim, xspace)
 
 # agent_names = ['lidar_5', 'lidar_10', 'lidar_20' ,'lidar_50']
