@@ -35,6 +35,7 @@ import random
 from matplotlib.ticker import FormatStrFormatter
 import mapping
 from PIL import Image, ImageOps, ImageDraw, ImageFilter
+import matplotlib.cm as cm
 
 
 
@@ -2063,6 +2064,210 @@ mismatch_parameters = []
 frac_vary = []
 start_condition = {'x':10, 'y':4.5, 'v':3, 'theta':np.pi, 'delta':0, 'goal':0}
 # display_path_velocity_multiple(agent_names, ns, legend_title, legend, mismatch_parameters, frac_vary, start_condition)
+
+
+
+def display_path_velocity_colormap(agent_names, ns, legend_title, legend, mismatch_parameters, frac_vary, start_condition):
+    
+    pose_history = []
+    progress_history = []
+    state_history = []
+    noise={'xy':0.025, 'theta':0.05, 'v':0.1, 'lidar':0.01}
+
+
+    for agent_name, n, i in zip(agent_names, ns, range(len(agent_names))):
+
+        infile = open('environments/' + agent_name, 'rb')
+        env_dict = pickle.load(infile)
+        infile.close()
+        # Compensate for changes to reward structure
+        env_dict['reward_signal']['max_progress'] = 0
+        
+        # Model mismatches
+        if mismatch_parameters:
+            for par, var in zip(mismatch_parameters, frac_vary):
+                env_dict['car_params'][par] *= 1+var 
+
+
+        env = environment(env_dict)
+        if start_condition:
+            env.reset(save_history=True, start_condition=start_condition, car_params=env_dict['car_params'],noise=noise)
+        else:
+            env.reset(save_history=True, start_condition=[], car_params=env_dict['car_params'],noise=noise)
+
+        infile = open('agents/' + agent_name + '/' + agent_name + '_params', 'rb')
+        agent_dict = pickle.load(infile)
+        infile.close()
+
+        infile = open('train_parameters/' + agent_name, 'rb')
+        main_dict = pickle.load(infile)
+        infile.close()
+          
+        if i==0 and not start_condition:
+            infile = open('test_initial_condition/' + env_dict['map_name'], 'rb')
+            start_conditions = pickle.load(infile)
+            infile.close()
+            start_condition = random.choice(start_conditions)
+
+        if main_dict['learning_method']=='dqn':
+            agent_dict['epsilon'] = 0
+            a = agent_dqn.agent(agent_dict)
+        if main_dict['learning_method']=='reinforce':
+            a = agent_reinforce.PolicyGradientAgent(agent_dict)
+        if main_dict['learning_method']=='actor_critic_sep':
+            a = agent_actor_critic.actor_critic_separated(agent_dict)
+        if  main_dict['learning_method']=='actor_critic_com':
+            a = agent_actor_critic.actor_critic_combined(agent_dict)
+        if main_dict['learning_method']=='actor_critic_cont':
+            a = agent_actor_critic_continuous.agent_separate(agent_dict)
+        if main_dict['learning_method'] == 'dueling_dqn':
+            agent_dict['epsilon'] = 0
+            a = agent_dueling_dqn.agent(agent_dict)
+        if main_dict['learning_method'] == 'dueling_ddqn':
+            agent_dict['epsilon'] = 0
+            a = agent_dueling_ddqn.agent(agent_dict)
+        if main_dict['learning_method'] == 'rainbow':
+            agent_dict['epsilon'] = 0
+            a = agent_rainbow.agent(agent_dict)
+        if main_dict['learning_method'] == 'ddpg':
+            a = agent_ddpg.agent(agent_dict)
+        if main_dict['learning_method'] == 'td3':
+            a = agent_td3.agent(agent_dict)
+            
+        a.load_weights(agent_name, n)
+
+        #start_pose = {'x':11.2, 'y':7.7, 'v':0, 'delta':0, 'theta':0, 'goal':1}
+        env.reset(save_history=True, start_condition=start_condition, car_params=env_dict['car_params'], noise=noise)
+        obs = env.observation
+        done = False
+        score=0
+
+        while not done:
+            if main_dict['learning_method']=='ddpg' or main_dict['learning_method']=='td3':
+                action = a.choose_greedy_action(obs)
+            else:
+                action = a.choose_action(obs)
+
+            next_obs, reward, done = env.take_action(action)
+            score += reward
+            obs = next_obs
+
+            if env.progress>=0.98:
+                done=True
+            
+
+        print('Total score = ', score)
+        print('Progress = ', env.progress)
+
+        state_history.append(env.state_history)
+        pose_history.append(env.pose_history)
+        progress_history.append(env.progress_history)
+        
+        
+        
+    
+
+    xlims = [0,100]
+
+    legend_new = legend.copy()
+    legend_new.insert(0, 'Min and max')
+
+    legend_racetrack = legend.copy()
+    legend_racetrack.insert(0, 'Track centerline')
+
+    # plt.rcParams.update({
+    # "font.family": "serif",  # use serif/main font for text elements
+    # "text.usetex": True,     # use inline math for ticks
+    # "pgf.rcfonts": False,     # don't setup fonts from rc parameters
+    # "font.size": 12
+    # })
+    plt.rcParams['font.family'] = 'serif'
+    plt.rcParams['font.serif'] = ['Times New Roman'] + plt.rcParams['font.serif']
+
+
+    fig, ax = plt.subplots(1, figsize=(5,3.5))
+
+
+    
+    track = mapping.map(env.map_name)
+    ax.imshow(ImageOps.invert(track.gray_im.filter(ImageFilter.FIND_EDGES).filter(ImageFilter.MaxFilter(1))), extent=(0,track.map_width,0,track.map_height), cmap="gray")
+    # ax.plot(env.rx, env.ry, color='gray', linestyle='dashed', label='Centerline')
+    
+    cmap = plt.get_cmap('rainbow')
+    norm = plt.Normalize(env_dict['action_space_dict']['vel_select'][0], env_dict['action_space_dict']['vel_select'][1])
+
+    for i in range(len(agent_names)):
+        # ax.plot(np.array(state_history[i])[:,0], np.array(state_history[i])[:,1], linewidth=1.5, label=legend[i])   
+        
+        for i in range(1, len(state_history[0])):
+            x0, y0 = state_history[0][i-1][0], state_history[0][i-1][1]
+            x1, y1 = state_history[0][i][0], state_history[0][i][1]
+            ax.plot([x0, x1], [y0, y1], '-', color=cmap(norm(state_history[0][i][3])), linewidth=2, alpha=0.8)
+
+
+    # create a mappable suitable for creation of a colorbar
+    mappable = cm.ScalarMappable(norm, cmap)
+    mappable.set_array([])
+    # create the colorbar
+    cb = plt.colorbar(mappable)    
+    cb.set_label('Velocity')
+
+
+
+    prog = np.array([0, 0.2, 0.4, 0.6, 0.8])
+    idx =  np.zeros(len(prog), int)
+    text = ['', '20%', '40%', '60%', '80%']
+
+    for i in range(len(idx)):
+        idx[i] = np.mod(env.start_point+np.round(prog[i]*len(env.rx)), len(env.rx))
+    idx.astype(int)
+    
+    for i in range(len(idx)):
+        ax.text(x=env.rx[idx[i]], y=env.ry[idx[i]], s=text[i], fontsize = 'small', bbox=dict(facecolor='white', edgecolor='black',pad=0.1,boxstyle='round'))
+    
+    ax.vlines(x=env.rx[idx[0]], ymin=env.ry[idx[0]]-1, ymax=env.ry[idx[0]]+1, linestyles='dotted', color='red')
+    ax.text(x=env.rx[idx[0]]-1.2, y=env.ry[idx[0]]+1.3, s='Start/finish', fontsize = 'small', bbox=dict(facecolor='white', edgecolor='black',pad=0.1,boxstyle='round'))
+
+    ax.axis('off')
+    # # https://stackoverflow.com/questions/4700614/how-to-put-the-legend-outside-the-plot
+
+
+
+    # ax[1].hlines(y=env_dict['action_space_dict']['vel_select'][0], xmin=0, xmax=100, colors='black', linestyle='dashed', label='_nolegend_')
+    # ax[1].hlines(y=env_dict['action_space_dict']['vel_select'][1], xmin=0, xmax=100, colors='black', linestyle='dashed', label='_nolegend_')
+    # for i in range(len(agent_names)):
+    #     ax[1].plot(np.array(progress_history[i])*100, np.array(state_history[i])[:,3], linewidth=1.5)
+    # ax[1].set_ylabel('Longitudinal\nvelocity [m/s]')
+    # ax[1].set_xlim(xlims)
+    # ax[1].set_ylim([env_dict['action_space_dict']['vel_select'][0]-0.2, env_dict['action_space_dict']['vel_select'][1]+0.2])
+    # ax[1].grid(True, color='lightgrey')
+    # ax[1].tick_params('both', length=0)
+    # # ax[1].set_xticklabels([])
+    # ax[1].set_xlabel('Progress along centerline [%]')
+    # ax[1].set_ylabel('Velocity [m/s]')
+    
+
+    
+    fig.tight_layout()
+    # fig.subplots_adjust(bottom=0.27) 
+    # plt.figlegend(loc='lower center', ncol=4)
+    
+    plt.show() 
+    # plt.savefig('results/'+filename+'.pgf', format='pgf')
+
+
+agent_names = ['redbull_2']
+ns=[0]
+legend = ['']
+legend_title = ''
+mismatch_parameters = []
+frac_vary = []
+# start_condition = {'x':10, 'y':4.5, 'v':3, 'theta':np.pi, 'delta':0, 'goal':0}
+start_condition = {'x':4.1, 'y':9, 'v':3, 'theta':0, 'delta':0, 'goal':0}
+# start_condition = []
+display_path_velocity_colormap(agent_names, ns, legend_title, legend, mismatch_parameters, frac_vary, start_condition)
+
+
 
 
 def sensitivity_analysis_noise(agent_name, n, start_condition, filename):

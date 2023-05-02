@@ -21,11 +21,11 @@ import os
 
 
 
-agent_name = 'redbull'
+agent_name = 'redbull_2'
 
-main_dict = {'name':agent_name, 'max_episodes':10000, 'max_steps':3e6, 'learning_method':'td3', 'runs':1, 'comment':''}
+main_dict = {'name':agent_name, 'max_episodes':20000, 'max_steps':3e6, 'learning_method':'td3', 'runs':1, 'comment':''}
 
-agent_ddpg_dict = {'alpha':0.000025, 'beta':0.00025, 'tau':0.001, 'gamma':0.99, 'max_size':1000000, 'layer1_size':400, 'layer2_size':300, 'batch_size':150}
+agent_ddpg_dict = {'alpha':0.000025, 'beta':0.00025, 'tau':0.001, 'gamma':0.99, 'max_size':1000000, 'layer1_size':400, 'layer2_size':300, 'batch_size':200}
 
 agent_td3_dict = {'alpha':0.001, 'beta':0.001, 'tau':0.005, 'gamma':0.99, 'update_actor_interval':2, 'warmup':200, 
                     'max_size':1000000, 'layer1_size':400, 'layer2_size':300, 'layer3_size':300, 'batch_size':200, 'noise':0.1}
@@ -34,7 +34,7 @@ car_params =   {'mu': 1.0489, 'C_Sf': 4.718, 'C_Sr': 5.4562, 'lf': 0.15875, 'lr'
                 , 'h': 0.074, 'm': 3.74, 'I': 0.04712, 's_min': -0.4189, 's_max': 0.4189, 'sv_min': -3.2
                 , 'sv_max': 3.2, 'v_switch': 7.319, 'a_max': 9.51, 'v_min':-5.0, 'v_max': 20.0, 'width': 0.31, 'length': 0.58}
 
-reward_signal = {'goal_reached':0, 'out_of_bounds':-1, 'max_steps':0, 'collision':-10, 
+reward_signal = {'goal_reached':0, 'out_of_bounds':-1, 'max_steps':0, 'collision':-2, 
                     'backwards':-0.01, 'park':-1, 'time_step':-0.01, 'progress':0, 'distance':0.3, 
                     'max_progress':0}    
 
@@ -62,7 +62,7 @@ env_dict = {'sim_conf': functions.load_config(sys.path[0], "config")
         , 'save_history': False
         , 'map_name': 'redbull_ring'
         , 'max_steps': 3000
-        , 'control_steps': 20
+        , 'control_steps': 10
         , 'display': False
         , 'velocity_control': False
         , 'velocity_gain':1
@@ -80,13 +80,114 @@ n_test=100
 # a.train()
 # main_multiple.lap_time_test(agent_name=agent_name, n_episodes=n_test, detect_issues=False, initial_conditions=True)
 
-# agent_name = 'train_noise'
+
+# agent_name = 'redbull_3'
 # main_dict['name'] = agent_name
-# env_dict['noise_dict'] = {'xy':0.025, 'theta':0.05, 'v':0.1, 'lidar':0.01}
-# agent_td3_dict['batch_size'] = 150
+# env_dict['control_steps'] = 5
+# agent_td3_dict['layer1_size'] = 600
+# agent_td3_dict['layer2_size'] = 450
 # a = main_multiple.trainingLoop(main_dict, agent_td3_dict, env_dict, load_agent='')
 # a.train()
 # main_multiple.lap_time_test_with_noise(agent_name=agent_name, n_episodes=100, detect_issues=False, initial_conditions=True, noise={'xy':0.025, 'theta':0.05, 'v':0.1, 'lidar':0.01})
+
+# agent_name = 'redbull_4'
+# main_dict['name'] = agent_name
+# env_dict['control_steps'] = 10
+# agent_td3_dict['layer1_size'] = 650
+# agent_td3_dict['layer2_size'] = 450
+# a = main_multiple.trainingLoop(main_dict, agent_td3_dict, env_dict, load_agent='')
+# a.train()
+# main_multiple.lap_time_test_with_noise(agent_name=agent_name, n_episodes=100, detect_issues=False, initial_conditions=True, noise={'xy':0.025, 'theta':0.05, 'v':0.1, 'lidar':0.01})
+
+# agent_name = 'redbull_5'
+# main_dict['name'] = agent_name
+# env_dict['control_steps'] = 5
+# agent_td3_dict['layer1_size'] = 400
+# agent_td3_dict['layer2_size'] = 300
+# action_space_dict['vel_select'] = [2,3]
+# env_dict['reward_signal']['distance'] = 0.4
+# a = main_multiple.trainingLoop(main_dict, agent_td3_dict, env_dict, load_agent='')
+# a.train()
+# main_multiple.lap_time_test_with_noise(agent_name=agent_name, n_episodes=100, detect_issues=False, initial_conditions=True, noise={'xy':0.025, 'theta':0.05, 'v':0.1, 'lidar':0.01})
+
+# agent_name = 'redbull'
+# main_dict['name'] = agent_name
+# env_dict['control_steps'] = 5
+# agent_td3_dict['layer1_size'] = 400
+# agent_td3_dict['layer2_size'] = 300
+# action_space_dict['vel_select'] = [3,5]
+# env_dict['reward_signal']['distance'] = 0.3
+# env_dict['reward_signal']['collision'] = -2
+# a = main_multiple.trainingLoop(main_dict, agent_td3_dict, env_dict, load_agent='')
+# a.train()
+# main_multiple.lap_time_test_with_noise(agent_name=agent_name, n_episodes=100, detect_issues=False, initial_conditions=True, noise={'xy':0.025, 'theta':0.05, 'v':0.1, 'lidar':0.01})
+
+# agent_name = 'redbull_6'
+# main_dict['name'] = agent_name
+# env_dict['control_steps'] = 10
+# agent_td3_dict['layer1_size'] = 400
+# agent_td3_dict['layer2_size'] = 300
+# action_space_dict['vel_select'] = [3,5]
+# env_dict['reward_signal']['distance'] = 0.3
+# env_dict['reward_signal']['collision'] = -10
+# a = main_multiple.trainingLoop(main_dict, agent_td3_dict, env_dict, load_agent='')
+# a.train()
+# main_multiple.lap_time_test_with_noise(agent_name=agent_name, n_episodes=100, detect_issues=False, initial_conditions=True, noise={'xy':0.025, 'theta':0.05, 'v':0.1, 'lidar':0.01})
+
+# agent_name = 'redbull_7'
+# main_dict['name'] = agent_name
+# env_dict['control_steps'] = 10
+# agent_td3_dict['layer1_size'] = 400
+# agent_td3_dict['layer2_size'] = 300
+# action_space_dict['vel_select'] = [3,5]
+# env_dict['reward_signal']['distance'] = 0.25
+# env_dict['reward_signal']['collision'] = -10
+# a = main_multiple.trainingLoop(main_dict, agent_td3_dict, env_dict, load_agent='')
+# a.train()
+# main_multiple.lap_time_test_with_noise(agent_name=agent_name, n_episodes=100, detect_issues=False, initial_conditions=True, noise={'xy':0.025, 'theta':0.05, 'v':0.1, 'lidar':0.01})
+
+agent_name = 'redbull_8'
+main_dict['name'] = agent_name
+env_dict['control_steps'] = 10
+agent_td3_dict['layer1_size'] = 400
+agent_td3_dict['layer2_size'] = 300
+action_space_dict['vel_select'] = [3,5]
+env_dict['reward_signal']['distance'] = 0.25
+env_dict['reward_signal']['collision'] = -5
+a = main_multiple.trainingLoop(main_dict, agent_td3_dict, env_dict, load_agent='')
+a.train()
+main_multiple.lap_time_test_with_noise(agent_name=agent_name, n_episodes=100, detect_issues=False, initial_conditions=True, noise={'xy':0.025, 'theta':0.05, 'v':0.1, 'lidar':0.01})
+
+
+agent_name = 'redbull_9'
+main_dict['name'] = agent_name
+env_dict['control_steps'] = 10
+agent_td3_dict['layer1_size'] = 400
+agent_td3_dict['layer2_size'] = 300
+action_space_dict['vel_select'] = [2,4]
+env_dict['reward_signal']['distance'] = 0.3
+env_dict['reward_signal']['collision'] = -2
+a = main_multiple.trainingLoop(main_dict, agent_td3_dict, env_dict, load_agent='')
+a.train()
+main_multiple.lap_time_test_with_noise(agent_name=agent_name, n_episodes=100, detect_issues=False, initial_conditions=True, noise={'xy':0.025, 'theta':0.05, 'v':0.1, 'lidar':0.01})
+
+agent_name = 'redbull_10'
+main_dict['name'] = agent_name
+env_dict['control_steps'] = 10
+agent_td3_dict['layer1_size'] = 400
+agent_td3_dict['layer2_size'] = 300
+action_space_dict['vel_select'] = [2,4]
+env_dict['reward_signal']['distance'] = 0.3
+env_dict['reward_signal']['collision'] = -10
+a = main_multiple.trainingLoop(main_dict, agent_td3_dict, env_dict, load_agent='')
+a.train()
+main_multiple.lap_time_test_with_noise(agent_name=agent_name, n_episodes=100, detect_issues=False, initial_conditions=True, noise={'xy':0.025, 'theta':0.05, 'v':0.1, 'lidar':0.01})
+
+
+
+
+
+
 
 # agent_name = 'batch_50'
 # main_dict['name'] = agent_name
@@ -380,8 +481,9 @@ n_test=100
 # agent_names = ['porto_ete_v5_gamma_0','porto_ete_v5_gamma_1', 'porto_ete_v5_gamma_2', 'porto_ete_v5_r_collision_5', 'porto_ete_v5_gamma_4']
 # agent_names = ['porto_ete_v5_gamma_2']
 # agent_names = ['porto_ete_v5_alpha_0', 'porto_ete_v5_r_collision_5', 'porto_ete_v5_alpha_1']
-# agent_names = ['redbull']
-agent_names = ['f_agent_3', 'f_agent_5', 'f_agent_10', 'f_agent_20', 'f_agent_50']
+# agent_names = ['redbull_1']
+# agent_names = ['f_agent_3', 'f_agent_5', 'f_agent_10', 'f_agent_20', 'f_agent_50']
+agent_names = ['redbull']
 
 # legend = ['no noise', 'noise']
 # legend = ['180', '220']
@@ -407,9 +509,9 @@ ns=[0,0,0,0,0,0]
 #     print('------------------------------' + '\n' + agent_name + '\n' + '------------------------------')
 #     display_results_multiple.display_train_parameters(agent_name=agent_name)
 
-for agent_name in agent_names:
-    print('------------------------------' + '\n' + agent_name + '\n' + '------------------------------')
-    display_results_multiple.display_lap_results(agent_name=agent_name)
+# for agent_name in agent_names:
+#     print('------------------------------' + '\n' + agent_name + '\n' + '------------------------------')
+#     display_results_multiple.display_lap_results(agent_name=agent_name)
 
 
 mismatch_parameters = [['C_Sr', 'mu'], ['C_Sr', 'mu']]
