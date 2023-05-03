@@ -2039,7 +2039,7 @@ agent_names = ['time_steps']
 agent_names = ['batch_400']
 # agent_names = ['lidar_5', 'lidar_10', 'lidar_20' ,'lidar_50']
 # agent_names = ['lidar_200']
-# agent_names = ['only_LiDAR', 'only_pose', 'batch_150']
+agent_names = ['only_LiDAR', 'only_pose', 'batch_400']
 # agent_names = ['only_LiDAR']
 # agent_names = ['only_pose']
 # agent_names = ['time_steps']
@@ -2070,9 +2070,9 @@ ns=[1,0,0,0,0,0]
 #     print('------------------------------' + '\n' + agent_name + '\n' + '------------------------------')
 #     display_results_multiple.display_train_parameters(agent_name=agent_name)
 
-# for agent_name in agent_names:
-#     print('------------------------------' + '\n' + agent_name + '\n' + '------------------------------')
-#     display_results_multiple.display_lap_results(agent_name=agent_name)
+for agent_name in agent_names:
+    print('------------------------------' + '\n' + agent_name + '\n' + '------------------------------')
+    display_results_multiple.display_lap_results(agent_name=agent_name)
 
 
 mismatch_parameters = [['C_Sr', 'mu'], ['C_Sr', 'mu']]
@@ -2093,9 +2093,9 @@ start_condition = {'x':10, 'y':4.5, 'v':3, 'theta':np.pi, 'delta':0, 'goal':0}
 #                                              legend=legend, mismatch_parameters=mismatch_parameters, frac_vary=frac_vary, noise_dicts=noise_dicts,
 #                                              start_condition=start_condition)
 
-display_results_multiple.display_path_multiple(agent_names=agent_names, ns=ns, legend_title=legend_title,          
-                                             legend=legend, mismatch_parameters=mismatch_parameters, frac_vary=frac_vary, noise_dicts=noise_dicts,
-                                             start_condition=start_condition)
+# display_results_multiple.display_path_multiple(agent_names=agent_names, ns=ns, legend_title=legend_title,          
+#                                              legend=legend, mismatch_parameters=mismatch_parameters, frac_vary=frac_vary, noise_dicts=noise_dicts,
+#                                              start_condition=start_condition)
 
 # display_results_multiple.display_path_mismatch_multiple_by_state(agent_names=agent_names, ns=ns, legend_title=legend_title,          
 #                                              legend=legend, mismatch_parameters=mismatch_parameters, frac_vary=frac_vary, noise_dicts=noise_dicts,
