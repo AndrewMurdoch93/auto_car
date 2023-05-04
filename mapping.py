@@ -147,7 +147,7 @@ class map:
     #def generate_line(self)
 
 def test_map():
-    m = map('torino')
+    m = map('f1_esp')
     m.find_centerline(False)
     rx, ry, ryaw, rk, d = cubic_spline_planner.calc_spline_course(m.centerline[:,0], m.centerline[:,1])
     plt.imshow(m.gray_im, extent=(0,m.map_width,0,m.map_height))

@@ -608,8 +608,8 @@ class environment():
         # plt.imshow(self.im, extent=(0,self.map_width,0,self.map_height))
         plt.imshow(ImageOps.invert(self.track.gray_im.filter(ImageFilter.FIND_EDGES).filter(ImageFilter.MaxFilter(1))), extent=(0,self.track.map_width,0,self.track.map_height), cmap="gray")
         plt.axis('off')
-        plt.xlim([0,16])
-        plt.ylim([0,6])
+        # plt.xlim([0,16])
+        # plt.ylim([0,6])
 
         if self.steering_control==True:
             plt.plot(self.path_tracker.cx, self.path_tracker.cy, color='red', alpha=0.3, linestyle='-.')

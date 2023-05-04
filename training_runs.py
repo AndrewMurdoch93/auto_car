@@ -2047,7 +2047,8 @@ agent_names = ['time_steps']
 # agent_names = ['porto_ete_v5_gamma_0','porto_ete_v5_gamma_1', 'porto_ete_v5_gamma_2', 'porto_ete_v5_r_collision_5', 'porto_ete_v5_gamma_4']
 # agent_names = ['porto_ete_v5_gamma_2']
 # agent_names = ['porto_ete_v5_alpha_0', 'porto_ete_v5_r_collision_5', 'porto_ete_v5_alpha_1']
-agent_names = ['redbull']
+# agent_names = ['redbull']
+# agent_names = ['batch_400']
 
 
 # legend = ['no noise', 'noise']
@@ -2066,9 +2067,9 @@ ns=[0,0,0,0,0,0]
 # display_results_multiple.learning_curve_lap_time_average(agent_names, legend, legend_title, ns)
 # display_results_multiple.learning_curve_reward_average(agent_names, legend, legend_title)
 
-# for agent_name in agent_names:
-#     print('------------------------------' + '\n' + agent_name + '\n' + '------------------------------')
-#     display_results_multiple.display_train_parameters(agent_name=agent_name)
+for agent_name in agent_names:
+    print('------------------------------' + '\n' + agent_name + '\n' + '------------------------------')
+    display_results_multiple.display_train_parameters(agent_name=agent_name)
 
 # for agent_name in agent_names:
 #     print('------------------------------' + '\n' + agent_name + '\n' + '------------------------------')
