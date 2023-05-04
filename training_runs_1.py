@@ -157,6 +157,17 @@ main_multiple.lap_time_test_with_noise(agent_name=agent_name, n_episodes=100, de
 # a = main_multiple.trainingLoop(main_dict, agent_td3_dict, env_dict, load_agent='')
 # a.train()
 # main_multiple.lap_time_test_with_noise(agent_name=agent_name, n_episodes=100, detect_issues=False, initial_conditions=True, noise={'xy':0.025, 'theta':0.05, 'v':0.1, 'lidar':0.01})
+# agent_name = 'redbull_8'
+# main_dict['name'] = agent_name
+# env_dict['control_steps'] = 10
+# agent_td3_dict['layer1_size'] = 400
+# agent_td3_dict['layer2_size'] = 300
+# action_space_dict['vel_select'] = [3,5]
+# env_dict['reward_signal']['distance'] = 0.25
+# env_dict['reward_signal']['collision'] = -5
+# a = main_multiple.trainingLoop(main_dict, agent_td3_dict, env_dict, load_agent='')
+# a.train()
+# main_multiple.lap_time_test_with_noise(agent_name=agent_name, n_episodes=100, detect_issues=False, initial_conditions=True, noise={'xy':0.025, 'theta':0.05, 'v':0.1, 'lidar':0.01})
 
 
 # agent_name = 'redbull_9'
@@ -471,7 +482,7 @@ main_multiple.lap_time_test_with_noise(agent_name=agent_name, n_episodes=100, de
 # agent_names = ['lidar_5', 'lidar_10', 'lidar_20', 'lidar_50', 'lidar_100', 'lidar_200']
 # agent_names = ['train_noise']
 # agent_names = ['batch_150','train_noise']
-# agent_names = ['batch_200']
+# agent_names = ['batch_400']
 # agent_names = ['lidar_200']
 # agent_names = ['only_LiDAR', 'only_pose', 'batch_150']
 # agent_names = ['only_LiDAR']
@@ -490,7 +501,7 @@ agent_names = ['redbull_pete']
 # legend = ['5', '10', '20']
 legend = ['Trained without noise', 'Trained with noise']
 legend_title = ''
-ns=[0,0,0,0,0,0]
+ns=[1,0,0,0,0,0]
 
 # agent_names = ['porto_ete_v5_r_collision_5']
 # legend = []
@@ -514,10 +525,10 @@ ns=[0,0,0,0,0,0]
 #     display_results_multiple.display_lap_results(agent_name=agent_name)
 
 
-mismatch_parameters = [['C_Sr', 'mu'], ['C_Sr', 'mu']]
-frac_vary = [[0, 0], [0, 0]]
-noise_dicts = [{'xy':0.025, 'theta':0.05, 'v':0.1, 'lidar':0.01}, {'xy':0.025, 'theta':0.05, 'v':0.1, 'lidar':0.01}, {'xy':0.025, 'theta':0.05, 'v':0.1, 'lidar':0.01}, {'xy':0.025, 'theta':0.05, 'v':0.1, 'lidar':0.01}]
-# start_condition = {'x':10, 'y':4.5, 'v':3, 'theta':np.pi, 'delta':0, 'goal':0}
+# mismatch_parameters = [['C_Sr', 'mu'], ['C_Sr', 'mu']]
+# frac_vary = [[0, 0], [0, 0]]
+# noise_dicts = [{'xy':0.025, 'theta':0.05, 'v':0.1, 'lidar':0.01}, {'xy':0.025, 'theta':0.05, 'v':0.1, 'lidar':0.01}, {'xy':0.025, 'theta':0.05, 'v':0.1, 'lidar':0.01}, {'xy':0.025, 'theta':0.05, 'v':0.1, 'lidar':0.01}]
+# # start_condition = {'x':10, 'y':4.5, 'v':3, 'theta':np.pi, 'delta':0, 'goal':0}
 
 
 

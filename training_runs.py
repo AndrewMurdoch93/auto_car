@@ -2036,10 +2036,10 @@ agent_names = ['time_steps']
 # agent_names = ['lidar_5', 'lidar_10', 'lidar_20', 'lidar_50', 'lidar_100', 'lidar_200']
 # agent_names = ['train_noise']
 # agent_names = ['batch_150','train_noise']
-# agent_names = ['batch_200']
+agent_names = ['batch_400']
 # agent_names = ['lidar_5', 'lidar_10', 'lidar_20' ,'lidar_50']
 # agent_names = ['lidar_200']
-# agent_names = ['only_LiDAR', 'only_pose', 'batch_150']
+agent_names = ['only_LiDAR', 'only_pose', 'batch_400']
 # agent_names = ['only_LiDAR']
 # agent_names = ['only_pose']
 # agent_names = ['time_steps']
@@ -2049,6 +2049,7 @@ agent_names = ['time_steps']
 # agent_names = ['porto_ete_v5_alpha_0', 'porto_ete_v5_r_collision_5', 'porto_ete_v5_alpha_1']
 # agent_names = ['redbull']
 # agent_names = ['batch_400']
+# agent_names = ['redbull']
 
 
 # legend = ['no noise', 'noise']
@@ -2057,7 +2058,7 @@ agent_names = ['time_steps']
 # legend = ['Trained without noise', 'Trained with noise']
 legend = ['']
 legend_title = ''
-ns=[0,0,0,0,0,0]
+ns=[1,0,0,0,0,0]
 
 # agent_names = ['porto_ete_v5_r_collision_5']
 # legend = []
@@ -2071,21 +2072,21 @@ for agent_name in agent_names:
     print('------------------------------' + '\n' + agent_name + '\n' + '------------------------------')
     display_results_multiple.display_train_parameters(agent_name=agent_name)
 
-# for agent_name in agent_names:
-#     print('------------------------------' + '\n' + agent_name + '\n' + '------------------------------')
-#     display_results_multiple.display_lap_results(agent_name=agent_name)
+for agent_name in agent_names:
+    print('------------------------------' + '\n' + agent_name + '\n' + '------------------------------')
+    display_results_multiple.display_lap_results(agent_name=agent_name)
 
 
 mismatch_parameters = [['C_Sr', 'mu'], ['C_Sr', 'mu']]
 frac_vary = [[0, 0], [0, 0]]
 noise_dicts = [{'xy':0.025, 'theta':0.05, 'v':0.1, 'lidar':0.01}, {'xy':0.025, 'theta':0.05, 'v':0.1, 'lidar':0.01}, {'xy':0.025, 'theta':0.05, 'v':0.1, 'lidar':0.01}, {'xy':0.025, 'theta':0.05, 'v':0.1, 'lidar':0.01}]
-# start_condition = {'x':10, 'y':4.5, 'v':3, 'theta':np.pi, 'delta':0, 'goal':0}
+start_condition = {'x':10, 'y':4.5, 'v':3, 'theta':np.pi, 'delta':0, 'goal':0}
 
 
 
 # Columbia
 # start_condition = {'x':5.7, 'y':7.25, 'v':3, 'theta':0, 'delta':0, 'goal':0}
-start_condition = []
+# start_condition = []
 
 
 # NB!!!! Error: Path is junk when no mismatch is present, when displaying 2 agents

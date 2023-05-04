@@ -151,18 +151,19 @@ def graph_replay_batch_size(agent_names):
 
     
     fig, axs = plt.subplots(figsize=(4.5,2.5))
-    axs.plot(batch_size, train_times, label='Training time')
-    axs.fill_between(x=batch_size, y1=min_train_times,y2=max_train_times, alpha=0.2)
+    # axs.plot(batch_size, train_times, label='Training time')
+    # axs.fill_between(x=batch_size, y1=min_train_times,y2=max_train_times, alpha=0.2)
+    axs.plot(batch_size, collisions*100, label='Failed laps')
     axs.set_xlabel('Batch size')
-    axs.set_ylabel('Training time [minutes]')
-    axs.set_ylim([20,40])
+    axs.set_ylabel('Failed laps [%]')
+    # axs.set_ylim([20,40])
     axs.tick_params(axis=u'both', which=u'both',length=0)
     axs.grid(True, color='lightgrey')
 
     axs1 = axs.twinx()  
-    axs1.plot(batch_size, lap_times, color='orange', label='Test lap time')
+    axs1.plot(batch_size, lap_times, color='orange', label='Lap time')
     axs1.fill_between(x=batch_size, y1=lap_times-std_lap_times,y2=lap_times+std_lap_times, alpha=0.2, color='orange')
-    axs1.set_ylabel('Test lap time [s]')
+    axs1.set_ylabel('Lap time [s]')
     axs1.tick_params(axis=u'both', which=u'both',length=0)
 
     fig.tight_layout()
@@ -172,7 +173,7 @@ def graph_replay_batch_size(agent_names):
     plt.show()
 
 
-# graph_replay_batch_size(['batch_50', 'batch_100', 'batch_150', 'batch_200', 'batch_300', 'batch_400', 'batch_600', 'batch_1000'])
+graph_replay_batch_size(['batch_50', 'batch_100', 'batch_150', 'batch_200', 'batch_300', 'batch_400', 'batch_600', 'batch_1000'])
 
 
 def graph_agent_sample_rate(agent_names):
@@ -238,4 +239,4 @@ def graph_agent_sample_rate(agent_names):
 
 
 agent_names = ['f_agent_3', 'f_agent_5', 'f_agent_10', 'f_agent_20', 'f_agent_50']
-graph_agent_sample_rate(agent_names)
+# graph_agent_sample_rate(agent_names)
