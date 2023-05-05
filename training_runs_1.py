@@ -23,7 +23,7 @@ import os
 
 agent_name = 'f1_esp_ete'
 
-main_dict = {'name':agent_name, 'max_episodes':20000, 'max_steps':3e6, 'learning_method':'td3', 'runs':1, 'comment':''}
+main_dict = {'name':agent_name, 'max_episodes':20000, 'max_steps':3e6, 'learning_method':'td3', 'runs':3, 'comment':''}
 
 agent_ddpg_dict = {'alpha':0.000025, 'beta':0.00025, 'tau':0.001, 'gamma':0.99, 'max_size':1000000, 'layer1_size':400, 'layer2_size':300, 'batch_size':200}
 
@@ -53,7 +53,7 @@ if  steer_control_dict['steering_control'] == True:
     if steer_control_dict['control_strategy'] == 'stanley':
         steer_control_dict['track_dict'] = {'l_front': car_params['lf'], 'k':5, 'max_steer':car_params['s_max']}
 
-lidar_dict = {'is_lidar':True, 'lidar_res':0.1, 'n_beams':10, 'max_range':20, 'fov':np.pi}
+lidar_dict = {'is_lidar':True, 'lidar_res':0.1, 'n_beams':20, 'max_range':20, 'fov':np.pi}
 
 # noise_dict = {'xy':0.025, 'theta':0.05, 'v':0.1, 'lidar':0.01}
 noise_dict = {'xy':0, 'theta':0, 'v':0, 'lidar':0}
@@ -64,7 +64,7 @@ env_dict = {'sim_conf': functions.load_config(sys.path[0], "config")
         , 'max_steps': 10000
         , 'control_steps': 10
         , 'display': False
-        , 'velocity_control': True
+        , 'velocity_control': False
         , 'velocity_gain':1
         , 'steer_control_dict': steer_control_dict
         , 'car_params':car_params
@@ -81,14 +81,60 @@ a.train()
 # main_multiple.lap_time_test(agent_name=agent_name, n_episodes=n_test, detect_issues=False, initial_conditions=True)
 main_multiple.lap_time_test_with_noise(agent_name=agent_name, n_episodes=100, detect_issues=False, initial_conditions=True, noise={'xy':0.025, 'theta':0.05, 'v':0.1, 'lidar':0.01})
 
-# agent_name = 'redbull_3'
-# main_dict['name'] = agent_name
-# env_dict['control_steps'] = 5
-# agent_td3_dict['layer1_size'] = 600
-# agent_td3_dict['layer2_size'] = 450
-# a = main_multiple.trainingLoop(main_dict, agent_td3_dict, env_dict, load_agent='')
-# a.train()
-# main_multiple.lap_time_test_with_noise(agent_name=agent_name, n_episodes=100, detect_issues=False, initial_conditions=True, noise={'xy':0.025, 'theta':0.05, 'v':0.1, 'lidar':0.01})
+agent_name = 'f1_gbr_ete'
+main_dict['name'] = agent_name
+env_dict['map_name'] = 'f1_gbr'
+a = main_multiple.trainingLoop(main_dict, agent_td3_dict, env_dict, load_agent='')
+a.train()
+main_multiple.lap_time_test_with_noise(agent_name=agent_name, n_episodes=100, detect_issues=False, initial_conditions=True, noise={'xy':0.025, 'theta':0.05, 'v':0.1, 'lidar':0.01})
+
+agent_name = 'f1_mco_ete'
+main_dict['name'] = agent_name
+env_dict['map_name'] = 'f1_mco'
+a = main_multiple.trainingLoop(main_dict, agent_td3_dict, env_dict, load_agent='')
+a.train()
+main_multiple.lap_time_test_with_noise(agent_name=agent_name, n_episodes=100, detect_issues=False, initial_conditions=True, noise={'xy':0.025, 'theta':0.05, 'v':0.1, 'lidar':0.01})
+
+
+
+
+agent_name = 'f1_esp_pete'
+main_dict['name'] = agent_name
+env_dict['map_name'] = 'f1_esp'
+env_dict['velocity_control'] = True
+env_dict['steer_control_dict']['steer_control'] = True
+env_dict['steer_control_dict']['path_strategy'] = 'polynomial'  #circle or linear or polynomial or gradient
+env_dict['steer_control_dict']['control_strategy'] = 'pure_pursuit'  #pure_pursuit or stanley
+a = main_multiple.trainingLoop(main_dict, agent_td3_dict, env_dict, load_agent='')
+a.train()
+main_multiple.lap_time_test_with_noise(agent_name=agent_name, n_episodes=100, detect_issues=False, initial_conditions=True, noise={'xy':0.025, 'theta':0.05, 'v':0.1, 'lidar':0.01})
+
+agent_name = 'f1_gbr_pete'
+main_dict['name'] = agent_name
+env_dict['map_name'] = 'f1_gbr'
+a = main_multiple.trainingLoop(main_dict, agent_td3_dict, env_dict, load_agent='')
+a.train()
+main_multiple.lap_time_test_with_noise(agent_name=agent_name, n_episodes=100, detect_issues=False, initial_conditions=True, noise={'xy':0.025, 'theta':0.05, 'v':0.1, 'lidar':0.01})
+
+agent_name = 'f1_mco_pete'
+main_dict['name'] = agent_name
+env_dict['map_name'] = 'f1_mco'
+a = main_multiple.trainingLoop(main_dict, agent_td3_dict, env_dict, load_agent='')
+a.train()
+main_multiple.lap_time_test_with_noise(agent_name=agent_name, n_episodes=100, detect_issues=False, initial_conditions=True, noise={'xy':0.025, 'theta':0.05, 'v':0.1, 'lidar':0.01})
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 # agent_name = 'redbull_4'
 # main_dict['name'] = agent_name

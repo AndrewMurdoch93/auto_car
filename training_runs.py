@@ -2049,7 +2049,7 @@ agent_names = ['only_LiDAR', 'only_pose', 'batch_400']
 # agent_names = ['porto_ete_v5_alpha_0', 'porto_ete_v5_r_collision_5', 'porto_ete_v5_alpha_1']
 # agent_names = ['redbull']
 # agent_names = ['batch_400']
-# agent_names = ['redbull']
+agent_names = ['redbull_2']
 
 
 # legend = ['no noise', 'noise']

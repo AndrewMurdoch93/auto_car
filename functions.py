@@ -755,7 +755,9 @@ if __name__ == '__main__':
     # generate_initial_condition('berlin', 2000, distance_offset=0.2, angle_offset=np.pi/8, vel_select=[3,5])
     # generate_initial_condition('torino', 2000, distance_offset=0.2, angle_offset=np.pi/8, vel_select=[3,5])
     # generate_initial_condition('redbull_ring', 2000, distance_offset=0.2, angle_offset=np.pi/8, vel_select=[3,5])
-    generate_initial_condition('f1_esp', 2000, distance_offset=0.2, angle_offset=np.pi/8, vel_select=[3,5])
+    # generate_initial_condition('f1_esp', 2000, distance_offset=0.2, angle_offset=np.pi/8, vel_select=[3,5])
+    # generate_initial_condition('f1_gbr', 2000, distance_offset=0.2, angle_offset=np.pi/8, vel_select=[3,5])
+    # generate_initial_condition('f1_mco', 2000, distance_offset=0.2, angle_offset=np.pi/8, vel_select=[3,5])
 
     #im = image.imread(image_path)
     #plt.imshow(im, extent=(0,30,0,30))
