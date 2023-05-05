@@ -21,9 +21,9 @@ import os
 
 
 
-agent_name = 'f1_esp_ete'
+agent_name = ''
 
-main_dict = {'name':agent_name, 'max_episodes':20000, 'max_steps':3e6, 'learning_method':'td3', 'runs':3, 'comment':''}
+main_dict = {'name':agent_name, 'max_episodes':20000, 'max_steps':3e6, 'learning_method':'td3', 'runs':1, 'comment':''}
 
 agent_ddpg_dict = {'alpha':0.000025, 'beta':0.00025, 'tau':0.001, 'gamma':0.99, 'max_size':1000000, 'layer1_size':400, 'layer2_size':300, 'batch_size':200}
 
@@ -34,8 +34,8 @@ car_params =   {'mu': 1.0489, 'C_Sf': 4.718, 'C_Sr': 5.4562, 'lf': 0.15875, 'lr'
                 , 'h': 0.074, 'm': 3.74, 'I': 0.04712, 's_min': -0.4189, 's_max': 0.4189, 'sv_min': -3.2
                 , 'sv_max': 3.2, 'v_switch': 7.319, 'a_max': 9.51, 'v_min':-5.0, 'v_max': 20.0, 'width': 0.31, 'length': 0.58}
 
-reward_signal = {'goal_reached':0, 'out_of_bounds':-1, 'max_steps':0, 'collision':-2, 
-                    'backwards':-0.01, 'park':-1, 'time_step':-0.01, 'progress':0, 'distance':0.3, 
+reward_signal = {'goal_reached':0, 'out_of_bounds':-1, 'max_steps':0, 'collision':-10, 
+                    'backwards':-0.01, 'park':-1, 'time_step':-0.01, 'progress':0, 'distance':0.4, 
                     'max_progress':0}    
 
 action_space_dict = {'action_space': 'continuous', 'vel_select':[3,5], 'R_range':[2]}
@@ -60,9 +60,9 @@ noise_dict = {'xy':0, 'theta':0, 'v':0, 'lidar':0}
 
 env_dict = {'sim_conf': functions.load_config(sys.path[0], "config")
         , 'save_history': False
-        , 'map_name': 'f1_esp'
+        , 'map_name': 'porto_1'
         , 'max_steps': 10000
-        , 'control_steps': 10
+        , 'control_steps': 5
         , 'display': False
         , 'velocity_control': False
         , 'velocity_gain':1
@@ -76,52 +76,102 @@ env_dict = {'sim_conf': functions.load_config(sys.path[0], "config")
         } 
 
 n_test=100
-a = main_multiple.trainingLoop(main_dict, agent_td3_dict, env_dict, load_agent='')
-a.train()
+# a = main_multiple.trainingLoop(main_dict, agent_td3_dict, env_dict, load_agent='')
+# a.train()
 # main_multiple.lap_time_test(agent_name=agent_name, n_episodes=n_test, detect_issues=False, initial_conditions=True)
-main_multiple.lap_time_test_with_noise(agent_name=agent_name, n_episodes=100, detect_issues=False, initial_conditions=True, noise={'xy':0.025, 'theta':0.05, 'v':0.1, 'lidar':0.01})
+# main_multiple.lap_time_test_with_noise(agent_name=agent_name, n_episodes=100, detect_issues=False, initial_conditions=True, noise={'xy':0.025, 'theta':0.05, 'v':0.1, 'lidar':0.01})
 
-agent_name = 'f1_gbr_ete'
+# agent_name = 'f1_gbr_ete'
+# main_dict['name'] = agent_name
+# env_dict['map_name'] = 'f1_gbr'
+# a = main_multiple.trainingLoop(main_dict, agent_td3_dict, env_dict, load_agent='')
+# a.train()
+# main_multiple.lap_time_test_with_noise(agent_name=agent_name, n_episodes=100, detect_issues=False, initial_conditions=True, noise={'xy':0.025, 'theta':0.05, 'v':0.1, 'lidar':0.01})
+
+# agent_name = 'f1_mco_ete'
+# main_dict['name'] = agent_name
+# env_dict['map_name'] = 'f1_mco'
+# a = main_multiple.trainingLoop(main_dict, agent_td3_dict, env_dict, load_agent='')
+# a.train()
+# main_multiple.lap_time_test_with_noise(agent_name=agent_name, n_episodes=100, detect_issues=False, initial_conditions=True, noise={'xy':0.025, 'theta':0.05, 'v':0.1, 'lidar':0.01})
+
+
+
+
+# agent_name = 'f1_esp_pete'
+# main_dict['name'] = agent_name
+# env_dict['map_name'] = 'f1_esp'
+# env_dict['velocity_control'] = True
+# env_dict['steer_control_dict']['steer_control'] = True
+# env_dict['steer_control_dict']['path_strategy'] = 'polynomial'  #circle or linear or polynomial or gradient
+# env_dict['steer_control_dict']['control_strategy'] = 'pure_pursuit'  #pure_pursuit or stanley
+# a = main_multiple.trainingLoop(main_dict, agent_td3_dict, env_dict, load_agent='')
+# a.train()
+# main_multiple.lap_time_test_with_noise(agent_name=agent_name, n_episodes=100, detect_issues=False, initial_conditions=True, noise={'xy':0.025, 'theta':0.05, 'v':0.1, 'lidar':0.01})
+
+# agent_name = 'f1_gbr_pete'
+# main_dict['name'] = agent_name
+# env_dict['map_name'] = 'f1_gbr'
+# a = main_multiple.trainingLoop(main_dict, agent_td3_dict, env_dict, load_agent='')
+# a.train()
+# main_multiple.lap_time_test_with_noise(agent_name=agent_name, n_episodes=100, detect_issues=False, initial_conditions=True, noise={'xy':0.025, 'theta':0.05, 'v':0.1, 'lidar':0.01})
+
+# agent_name = 'f1_mco_pete'
+# main_dict['name'] = agent_name
+# env_dict['map_name'] = 'f1_mco'
+# a = main_multiple.trainingLoop(main_dict, agent_td3_dict, env_dict, load_agent='')
+# a.train()
+# main_multiple.lap_time_test_with_noise(agent_name=agent_name, n_episodes=100, detect_issues=False, initial_conditions=True, noise={'xy':0.025, 'theta':0.05, 'v':0.1, 'lidar':0.01})
+
+
+
+# agent_name = 'porto_domain_random_0'
+# main_dict['name'] = agent_name
+# env_dict['map_name'] = 'porto_1'
+# a = main_multiple.trainingLoop(main_dict, agent_td3_dict, env_dict, load_agent='')
+# mismatch_parameters = ['mu']
+# frac_std = [0.05]
+# a.train_domain_randomise(mismatch_parameters, frac_std)
+# main_multiple.lap_time_test_with_noise(agent_name=agent_name, n_episodes=100, detect_issues=False, initial_conditions=True, noise={'xy':0.025, 'theta':0.05, 'v':0.1, 'lidar':0.01})
+
+# agent_name = 'porto_domain_random_01'
+# main_dict['name'] = agent_name
+# env_dict['map_name'] = 'porto_1'
+# a = main_multiple.trainingLoop(main_dict, agent_td3_dict, env_dict, load_agent='')
+# mismatch_parameters = ['mu']
+# frac_std = [0.05]
+# a.train_domain_randomise(mismatch_parameters, frac_std)
+# main_multiple.lap_time_test_with_noise(agent_name=agent_name, n_episodes=100, detect_issues=False, initial_conditions=True, noise={'xy':0.025, 'theta':0.05, 'v':0.1, 'lidar':0.01})
+
+
+agent_name = 'porto_domain_random_1'
 main_dict['name'] = agent_name
-env_dict['map_name'] = 'f1_gbr'
-a = main_multiple.trainingLoop(main_dict, agent_td3_dict, env_dict, load_agent='')
-a.train()
-main_multiple.lap_time_test_with_noise(agent_name=agent_name, n_episodes=100, detect_issues=False, initial_conditions=True, noise={'xy':0.025, 'theta':0.05, 'v':0.1, 'lidar':0.01})
+env_dict['map_name'] = 'porto_1'
+# a = main_multiple.trainingLoop(main_dict, agent_td3_dict, env_dict, load_agent='')
+mismatch_parameters = ['mu']
+frac_std = [0.01]
+# a.train_domain_randomise(mismatch_parameters, frac_std)
+# main_multiple.lap_time_test_with_noise(agent_name=agent_name, n_episodes=100, detect_issues=False, initial_conditions=True, noise={'xy':0.025, 'theta':0.05, 'v':0.1, 'lidar':0.01})
 
-agent_name = 'f1_mco_ete'
-main_dict['name'] = agent_name
-env_dict['map_name'] = 'f1_mco'
-a = main_multiple.trainingLoop(main_dict, agent_td3_dict, env_dict, load_agent='')
-a.train()
-main_multiple.lap_time_test_with_noise(agent_name=agent_name, n_episodes=100, detect_issues=False, initial_conditions=True, noise={'xy':0.025, 'theta':0.05, 'v':0.1, 'lidar':0.01})
+# agent_name = 'porto_domain_random_2'
+# main_dict['name'] = agent_name
+# env_dict['map_name'] = 'porto_1'
+# a = main_multiple.trainingLoop(main_dict, agent_td3_dict, env_dict, load_agent='')
+# mismatch_parameters = ['mu']
+# frac_std = [0.2]
+# a.train_domain_randomise(mismatch_parameters, frac_std)
+# main_multiple.lap_time_test_with_noise(agent_name=agent_name, n_episodes=100, detect_issues=False, initial_conditions=True, noise={'xy':0.025, 'theta':0.05, 'v':0.1, 'lidar':0.01})
 
 
+# n_tests=100
+# mu_frac_variation = np.linspace(-0.5,0.2,10)
 
-
-agent_name = 'f1_esp_pete'
-main_dict['name'] = agent_name
-env_dict['map_name'] = 'f1_esp'
-env_dict['velocity_control'] = True
-env_dict['steer_control_dict']['steer_control'] = True
-env_dict['steer_control_dict']['path_strategy'] = 'polynomial'  #circle or linear or polynomial or gradient
-env_dict['steer_control_dict']['control_strategy'] = 'pure_pursuit'  #pure_pursuit or stanley
-a = main_multiple.trainingLoop(main_dict, agent_td3_dict, env_dict, load_agent='')
-a.train()
-main_multiple.lap_time_test_with_noise(agent_name=agent_name, n_episodes=100, detect_issues=False, initial_conditions=True, noise={'xy':0.025, 'theta':0.05, 'v':0.1, 'lidar':0.01})
-
-agent_name = 'f1_gbr_pete'
-main_dict['name'] = agent_name
-env_dict['map_name'] = 'f1_gbr'
-a = main_multiple.trainingLoop(main_dict, agent_td3_dict, env_dict, load_agent='')
-a.train()
-main_multiple.lap_time_test_with_noise(agent_name=agent_name, n_episodes=100, detect_issues=False, initial_conditions=True, noise={'xy':0.025, 'theta':0.05, 'v':0.1, 'lidar':0.01})
-
-agent_name = 'f1_mco_pete'
-main_dict['name'] = agent_name
-env_dict['map_name'] = 'f1_mco'
-a = main_multiple.trainingLoop(main_dict, agent_td3_dict, env_dict, load_agent='')
-a.train()
-main_multiple.lap_time_test_with_noise(agent_name=agent_name, n_episodes=100, detect_issues=False, initial_conditions=True, noise={'xy':0.025, 'theta':0.05, 'v':0.1, 'lidar':0.01})
+# agent_name = 'porto_domain_random_0'
+# main_multiple.lap_time_test_mismatch(agent_name=agent_name, n_episodes=n_tests, detect_issues=False, initial_conditions=True, parameter='mu', frac_variation=mu_frac_variation)
+# agent_name = 'porto_domain_random_1'
+# main_multiple.lap_time_test_mismatch(agent_name=agent_name, n_episodes=n_tests, detect_issues=False, initial_conditions=True, parameter='mu', frac_variation=mu_frac_variation)
+# agent_name = 'porto_domain_random_2'
+# main_multiple.lap_time_test_mismatch(agent_name=agent_name, n_episodes=n_tests, detect_issues=False, initial_conditions=True, parameter='mu', frac_variation=mu_frac_variation)
 
 
 
@@ -540,7 +590,11 @@ main_multiple.lap_time_test_with_noise(agent_name=agent_name, n_episodes=100, de
 # agent_names = ['porto_ete_v5_alpha_0', 'porto_ete_v5_r_collision_5', 'porto_ete_v5_alpha_1']
 # agent_names = ['redbull_1']
 # agent_names = ['f_agent_3', 'f_agent_5', 'f_agent_10', 'f_agent_20', 'f_agent_50']
-agent_names = ['redbull_pete']
+# agent_names = ['redbull_pete']
+# agent_names = ['porto_domain_random_0']
+agent_names = ['porto_domain_random_1']
+# agent_names = ['porto_domain_random_01']
+
 
 # legend = ['no noise', 'noise']
 # legend = ['180', '220']
@@ -566,9 +620,9 @@ ns=[1,0,0,0,0,0]
 #     print('------------------------------' + '\n' + agent_name + '\n' + '------------------------------')
 #     display_results_multiple.display_train_parameters(agent_name=agent_name)
 
-# for agent_name in agent_names:
-#     print('------------------------------' + '\n' + agent_name + '\n' + '------------------------------')
-#     display_results_multiple.display_lap_results(agent_name=agent_name)
+for agent_name in agent_names:
+    print('------------------------------' + '\n' + agent_name + '\n' + '------------------------------')
+    display_results_multiple.display_lap_results(agent_name=agent_name)
 
 
 # mismatch_parameters = [['C_Sr', 'mu'], ['C_Sr', 'mu']]
