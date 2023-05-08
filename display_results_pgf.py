@@ -514,8 +514,12 @@ def learning_curve_all(agent_names, legend, legend_title, ns, filename, xlim, xs
     
     
     for i in range(np.size(end_episodes, axis=0)):
-        for n in range(np.size(end_episodes, axis=1)):
-            end_episodes[i,n] =  np.where(steps[i][n]==0)[0][0]
+        for n in range(np.size(end_episodes, axis=1)): 
+            if np.any(np.where(steps[i][n]==0))==True:
+                end_episodes[i,n] = np.where(steps[i][n]==0)[0][0]
+            else:
+                end_episodes[i,n] = xlim
+
     end_ep = end_episodes
     end_episodes = np.min(end_episodes, axis=1)
     
@@ -2233,13 +2237,18 @@ def display_path_velocity_colormap(agent_names, ns, legend_title, legend, mismat
 agent_names = ['redbull_2']
 agent_names = ['f1_esp_ete']
 agent_names = ['f1_esp_pete']
+agent_names = ['porto_domain_random']
+agent_names = ['porto_domain_random_01']
+agent_names = ['porto_domain_random_1']
+
+# agent_names = ['batch_400']
 ns=[0]
 legend = ['']
 legend_title = ''
 mismatch_parameters = []
 frac_vary = []
-# start_condition = {'x':10, 'y':4.5, 'v':3, 'theta':np.pi, 'delta':0, 'goal':0}
-start_condition = {'x':4.1, 'y':9, 'v':3, 'theta':0, 'delta':0, 'goal':0}
+start_condition = {'x':10, 'y':4.5, 'v':3, 'theta':np.pi, 'delta':0, 'goal':0}
+# start_condition = {'x':4.1, 'y':9, 'v':3, 'theta':0, 'delta':0, 'goal':0}
 # start_condition = []
 # display_path_velocity_colormap(agent_names, ns, legend_title, legend, mismatch_parameters, frac_vary, start_condition)
 
@@ -3350,13 +3359,10 @@ filename='all_paths_porto'
 
 
 def display_lap_mismatch_results_multiple_mu(agent_names, parameters, legend_title, legend, plot_titles, nom_value, graph, text, filename):
-    
-    plt.rcParams.update({
-    "font.family": "serif",  # use serif/main font for text elements
-    "text.usetex": True,     # use inline math for ticks
-    "pgf.rcfonts": False,     # don't setup fonts from rc parameters
-    "font.size": 12
-    })
+
+    plt.rcParams['font.family'] = 'serif'
+    plt.rcParams['font.serif'] = ['Times New Roman'] + plt.rcParams['font.serif']
+    plt.rc('axes',edgecolor='gray')
 
     fig, axs = plt.subplots(nrows=1, ncols=2, figsize=(5.5,3))
 
@@ -3491,10 +3497,21 @@ def display_lap_mismatch_results_multiple_mu(agent_names, parameters, legend_tit
     if graph==True:
         # plt.show()
         pass   
-    
-    plt.savefig('results/'+filename+'.pgf', format='pgf')
+    plt.show()
+    # plt.savefig('results/'+filename+'.pgf', format='pgf')
 
-agent_names = ['porto_ete_v5_r_collision_5', 'porto_pete_s_polynomial', 'porto_pete_v_k_1_attempt_2', 'porto_pete_sv_p_r_0']    
+# agent_names = ['porto_ete_v5_r_collision_5', 'porto_pete_s_polynomial', 'porto_pete_v_k_1_attempt_2', 'porto_pete_sv_p_r_0']    
+# parameters = ['mu']
+# nom_value = [1.0489]
+# legend_title = ''
+# legend = ['End-to-end', 'Steering control', 'Velocity control', 'Steering and velocity control']
+# plot_titles = parameters
+# graph=True
+# text=False
+# filename = 'mu'
+# display_lap_mismatch_results_multiple_mu(agent_names, parameters, legend_title, legend, plot_titles, nom_value, graph, text, filename)
+
+agent_names = ['porto_domain_random']    
 parameters = ['mu']
 nom_value = [1.0489]
 legend_title = ''
@@ -3504,6 +3521,8 @@ graph=True
 text=False
 filename = 'mu'
 # display_lap_mismatch_results_multiple_mu(agent_names, parameters, legend_title, legend, plot_titles, nom_value, graph, text, filename)
+
+
 
 def plot_frenet_polynomial(filename):
     ds = 0.1
@@ -3732,10 +3751,19 @@ height=2.5
 # height=2.5
 
 
+agent_names = ['porto_domain_random_0']
+legend = ['']
+legend_title = ''
+xlim=3000
+xspace = 1000
+bottom_space = 0.4
+height=2.5
+
 
 ns=[0, 0, 0, 0, 0]
 filename = 'observation_space_1'
 # learning_curve_all(agent_names, legend, legend_title, ns, filename, xlim, xspace, bottom_space, height)
+
 # learning_curve_lap_time_average(agent_names, legend, legend_title, ns, filename, xlim, xspace, bottomspace, height)
 
 
@@ -3779,7 +3807,7 @@ height=2.5
 ns=[0, 0, 0, 0, 0]
 filename = 'observation_space_1'
 # learning_curve_all(agent_names, legend, legend_title, ns, filename, xlim, xspace, bottom_space, height)
-learning_curve_lap_time_average(agent_names, legend, legend_title, ns, filename, xlim, xspace, bottom_space, height)
+# learning_curve_lap_time_average(agent_names, legend, legend_title, ns, filename, xlim, xspace, bottom_space, height)
 
 
 # agent_names = ['porto_ete_v5_r_collision_2', 'porto_ete_v5_r_collision_5']
