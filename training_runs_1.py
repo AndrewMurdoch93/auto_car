@@ -23,7 +23,7 @@ import os
 
 agent_name = ''
 
-main_dict = {'name':agent_name, 'max_episodes':20000, 'max_steps':3e6, 'learning_method':'td3', 'runs':1, 'comment':''}
+main_dict = {'name':agent_name, 'max_episodes':20000, 'max_steps':3e6, 'learning_method':'td3', 'runs':3, 'comment':''}
 
 agent_ddpg_dict = {'alpha':0.000025, 'beta':0.00025, 'tau':0.001, 'gamma':0.99, 'max_size':1000000, 'layer1_size':400, 'layer2_size':300, 'batch_size':200}
 
@@ -34,15 +34,15 @@ car_params =   {'mu': 1.0489, 'C_Sf': 4.718, 'C_Sr': 5.4562, 'lf': 0.15875, 'lr'
                 , 'h': 0.074, 'm': 3.74, 'I': 0.04712, 's_min': -0.4189, 's_max': 0.4189, 'sv_min': -3.2
                 , 'sv_max': 3.2, 'v_switch': 7.319, 'a_max': 9.51, 'v_min':-5.0, 'v_max': 20.0, 'width': 0.31, 'length': 0.58}
 
-reward_signal = {'goal_reached':0, 'out_of_bounds':-1, 'max_steps':0, 'collision':-10, 
-                    'backwards':-0.01, 'park':-1, 'time_step':-0.01, 'progress':0, 'distance':0.4, 
+reward_signal = {'goal_reached':0, 'out_of_bounds':-1, 'max_steps':0, 'collision':-2, 
+                    'backwards':-0.01, 'park':-1, 'time_step':-0.01, 'progress':0, 'distance':0.3, 
                     'max_progress':0}    
 
 action_space_dict = {'action_space': 'continuous', 'vel_select':[3,5], 'R_range':[2]}
 
 #action_space_dict = {'action_space': 'discrete', 'n_waypoints': 10, 'vel_select':[7], 'R_range':[6]}
 
-steer_control_dict = {'steering_control': False, 'wpt_arc':np.pi/2, 'track_width':1}
+steer_control_dict = {'steering_control': True, 'wpt_arc':np.pi/2, 'track_width':1}
 
 if  steer_control_dict['steering_control'] == True:
     steer_control_dict['path_strategy'] = 'polynomial'  #circle or linear or polynomial or gradient
@@ -62,9 +62,9 @@ env_dict = {'sim_conf': functions.load_config(sys.path[0], "config")
         , 'save_history': False
         , 'map_name': 'porto_1'
         , 'max_steps': 10000
-        , 'control_steps': 5
+        , 'control_steps': 10
         , 'display': False
-        , 'velocity_control': False
+        , 'velocity_control': True
         , 'velocity_gain':1
         , 'steer_control_dict': steer_control_dict
         , 'car_params':car_params
@@ -98,30 +98,48 @@ n_test=100
 
 
 
-# agent_name = 'f1_esp_pete'
-# main_dict['name'] = agent_name
-# env_dict['map_name'] = 'f1_esp'
-# env_dict['velocity_control'] = True
-# env_dict['steer_control_dict']['steer_control'] = True
-# env_dict['steer_control_dict']['path_strategy'] = 'polynomial'  #circle or linear or polynomial or gradient
-# env_dict['steer_control_dict']['control_strategy'] = 'pure_pursuit'  #pure_pursuit or stanley
-# a = main_multiple.trainingLoop(main_dict, agent_td3_dict, env_dict, load_agent='')
-# a.train()
-# main_multiple.lap_time_test_with_noise(agent_name=agent_name, n_episodes=100, detect_issues=False, initial_conditions=True, noise={'xy':0.025, 'theta':0.05, 'v':0.1, 'lidar':0.01})
+agent_name = 'f1_esp_pete'
+main_dict['name'] = agent_name
+env_dict['map_name'] = 'f1_esp'
+env_dict['velocity_control'] = True
+env_dict['steer_control_dict']['steer_control'] = True
+env_dict['steer_control_dict']['path_strategy'] = 'polynomial'  #circle or linear or polynomial or gradient
+env_dict['steer_control_dict']['control_strategy'] = 'pure_pursuit'  #pure_pursuit or stanley
+a = main_multiple.trainingLoop(main_dict, agent_td3_dict, env_dict, load_agent='')
+a.train()
+main_multiple.lap_time_test_with_noise(agent_name=agent_name, n_episodes=100, detect_issues=False, initial_conditions=True, noise={'xy':0.025, 'theta':0.05, 'v':0.1, 'lidar':0.01})
 
-# agent_name = 'f1_gbr_pete'
-# main_dict['name'] = agent_name
-# env_dict['map_name'] = 'f1_gbr'
-# a = main_multiple.trainingLoop(main_dict, agent_td3_dict, env_dict, load_agent='')
-# a.train()
-# main_multiple.lap_time_test_with_noise(agent_name=agent_name, n_episodes=100, detect_issues=False, initial_conditions=True, noise={'xy':0.025, 'theta':0.05, 'v':0.1, 'lidar':0.01})
+agent_name = 'f1_gbr_pete'
+main_dict['name'] = agent_name
+env_dict['map_name'] = 'f1_gbr'
+a = main_multiple.trainingLoop(main_dict, agent_td3_dict, env_dict, load_agent='')
+a.train()
+main_multiple.lap_time_test_with_noise(agent_name=agent_name, n_episodes=100, detect_issues=False, initial_conditions=True, noise={'xy':0.025, 'theta':0.05, 'v':0.1, 'lidar':0.01})
 
-# agent_name = 'f1_mco_pete'
-# main_dict['name'] = agent_name
-# env_dict['map_name'] = 'f1_mco'
-# a = main_multiple.trainingLoop(main_dict, agent_td3_dict, env_dict, load_agent='')
-# a.train()
-# main_multiple.lap_time_test_with_noise(agent_name=agent_name, n_episodes=100, detect_issues=False, initial_conditions=True, noise={'xy':0.025, 'theta':0.05, 'v':0.1, 'lidar':0.01})
+agent_name = 'f1_mco_pete'
+main_dict['name'] = agent_name
+env_dict['map_name'] = 'f1_mco'
+a = main_multiple.trainingLoop(main_dict, agent_td3_dict, env_dict, load_agent='')
+a.train()
+main_multiple.lap_time_test_with_noise(agent_name=agent_name, n_episodes=100, detect_issues=False, initial_conditions=True, noise={'xy':0.025, 'theta':0.05, 'v':0.1, 'lidar':0.01})
+
+agent_name = 'f1_aus_pete'
+main_dict['name'] = agent_name
+env_dict['map_name'] = 'redbull_ring'
+a = main_multiple.trainingLoop(main_dict, agent_td3_dict, env_dict, load_agent='')
+a.train()
+main_multiple.lap_time_test_with_noise(agent_name=agent_name, n_episodes=100, detect_issues=False, initial_conditions=True, noise={'xy':0.025, 'theta':0.05, 'v':0.1, 'lidar':0.01})
+
+agent_name = 'f1_aus_ete'
+main_dict['name'] = agent_name
+env_dict['map_name'] = 'redbull_ring'
+env_dict['velocity_control'] = False
+env_dict['steer_control_dict']['steer_control'] = False
+a = main_multiple.trainingLoop(main_dict, agent_td3_dict, env_dict, load_agent='')
+a.train()
+main_multiple.lap_time_test_with_noise(agent_name=agent_name, n_episodes=100, detect_issues=False, initial_conditions=True, noise={'xy':0.025, 'theta':0.05, 'v':0.1, 'lidar':0.01})
+
+
 
 
 

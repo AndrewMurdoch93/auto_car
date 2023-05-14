@@ -35,7 +35,7 @@ import display_results_multiple
 class trainingLoop():
    def __init__(self, main_dict, agent_dict, env_dict, load_agent):
       
-      self.max_actions=350000
+      self.max_actions=150000
 
       self.main_dict = main_dict
       self.agent_dict = agent_dict
