@@ -2136,7 +2136,8 @@ def display_lap_mismatch_results_multiple_C_S_fr(agent_names, parameters, legend
 
 
 # agent_names = ['porto_ete_v5_r_collision_5', 'porto_pete_s_polynomial', 'porto_pete_v_k_1_attempt_2', 'porto_pete_sv_p_r_0']    
-agent_names = ['porto_ete_v5_r_collision_5', 'porto_pete_sv_p_r_0']    
+# agent_names = ['porto_ete_v5_r_collision_5', 'porto_pete_sv_p_r_0'] 
+agent_names = ['f1_esp_ete']
 # parameters = ['mu', 'C_S']
 # nom_value = [1.0489, 1]
 # parameters = ['C_Sf', 'C_Sr']
@@ -2158,14 +2159,14 @@ nom_value = [1.0489]
 
 
 legend_title = ''
-legend = ['End-to-end', 'Steering and velocity control']
+legend = ['End-to-end']
 plot_titles = parameters
 graph=True
 text=False
 
 # display_lap_mismatch_results_multiple_1(agent_names, parameters, legend_title, legend, plot_titles, nom_value, graph, text)
 # mu
-# display_lap_mismatch_results_multiple_mu(agent_names, parameters, legend_title, legend, plot_titles, nom_value, graph, text)
+display_lap_mismatch_results_multiple_mu(agent_names, parameters, legend_title, legend, plot_titles, nom_value, graph, text)
 # C_S
 # display_lap_mismatch_results_multiple_C_S(agent_names, parameters, legend_title, legend, plot_titles, nom_value, graph, text)
 # C_Sfr

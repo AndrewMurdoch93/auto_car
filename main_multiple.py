@@ -604,7 +604,7 @@ def test(agent_name, n_episodes, detect_issues, initial_conditions):
    start_conditions = pickle.load(infile)
    infile.close()
 
-   env_dict['max_steps'] = 2000
+   env_dict['max_steps'] = 20000
 
    #env = environment(env_dict, start_condition={'x':15,'y':5,'theta':0,'goal':0})
    env = environment(env_dict)
@@ -752,7 +752,7 @@ def lap_time_test(agent_name, n_episodes, detect_issues, initial_conditions):
    start_conditions = pickle.load(infile)
    infile.close()
 
-   env_dict['max_steps'] = 2000
+   env_dict['max_steps'] = 20000
    
    
    #env = environment(env_dict, start_condition={'x':15,'y':5,'theta':0,'goal':0})
@@ -888,7 +888,7 @@ def lap_time_test_with_noise(agent_name, n_episodes, detect_issues, initial_cond
    start_conditions = pickle.load(infile)
    infile.close()
 
-   env_dict['max_steps'] = 2000
+   env_dict['max_steps'] = 20000
    
    
    #env = environment(env_dict, start_condition={'x':15,'y':5,'theta':0,'goal':0})
@@ -1031,7 +1031,7 @@ def lap_time_test_mismatch(agent_name, n_episodes, detect_issues, initial_condit
    start_conditions = pickle.load(infile)
    infile.close()
 
-   env_dict['max_steps'] = 2000
+   env_dict['max_steps'] = 20000
 
    #env = environment(env_dict, start_condition={'x':15,'y':5,'theta':0,'goal':0})
    

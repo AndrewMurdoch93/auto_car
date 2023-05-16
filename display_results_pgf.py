@@ -2159,11 +2159,12 @@ def display_path_velocity_colormap(agent_names, ns, legend_title, legend, mismat
     # "pgf.rcfonts": False,     # don't setup fonts from rc parameters
     # "font.size": 12
     # })
+
     plt.rcParams['font.family'] = 'serif'
     plt.rcParams['font.serif'] = ['Times New Roman'] + plt.rcParams['font.serif']
 
 
-    fig, ax = plt.subplots(1, figsize=(5,3.5))
+    fig, ax = plt.subplots(1, figsize=(5.5, 2.5))
 
 
     
@@ -2180,7 +2181,7 @@ def display_path_velocity_colormap(agent_names, ns, legend_title, legend, mismat
         for i in range(1, len(state_history[0])):
             x0, y0 = state_history[0][i-1][0], state_history[0][i-1][1]
             x1, y1 = state_history[0][i][0], state_history[0][i][1]
-            ax.plot([x0, x1], [y0, y1], '-', color=cmap(norm(state_history[0][i][3])), linewidth=2, alpha=0.8)
+            ax.plot([x0, x1], [y0, y1], '-', color=cmap(norm(state_history[0][i][3])), linewidth=1, alpha=0.8)
 
 
     # create a mappable suitable for creation of a colorbar
@@ -2200,11 +2201,11 @@ def display_path_velocity_colormap(agent_names, ns, legend_title, legend, mismat
         idx[i] = np.mod(env.start_point+np.round(prog[i]*len(env.rx)), len(env.rx))
     idx.astype(int)
     
-    for i in range(len(idx)):
-        ax.text(x=env.rx[idx[i]], y=env.ry[idx[i]], s=text[i], fontsize = 'small', bbox=dict(facecolor='white', edgecolor='black',pad=0.1,boxstyle='round'))
+    # for i in range(len(idx)):
+    #     ax.text(x=env.rx[idx[i]], y=env.ry[idx[i]], s=text[i], fontsize = 'small', bbox=dict(facecolor='white', edgecolor='black',pad=0.1,boxstyle='round'))
     
     ax.vlines(x=env.rx[idx[0]], ymin=env.ry[idx[0]]-1, ymax=env.ry[idx[0]]+1, linestyles='dotted', color='red')
-    ax.text(x=env.rx[idx[0]]-1.2, y=env.ry[idx[0]]+1.3, s='Start/finish', fontsize = 'small', bbox=dict(facecolor='white', edgecolor='black',pad=0.1,boxstyle='round'))
+    # ax.text(x=env.rx[idx[0]]-1.2, y=env.ry[idx[0]]+1.3, s='Start/finish', fontsize = 'small', bbox=dict(facecolor='white', edgecolor='black',pad=0.1,boxstyle='round'))
 
     ax.axis('off')
     # # https://stackoverflow.com/questions/4700614/how-to-put-the-legend-outside-the-plot
@@ -2234,20 +2235,41 @@ def display_path_velocity_colormap(agent_names, ns, legend_title, legend, mismat
     # plt.savefig('results/'+filename+'.pgf', format='pgf')
 
 
-agent_names = ['redbull_2']
+# agent_names = ['redbull_2']
+# agent_names = ['f1_esp_ete']
+# agent_names = ['f1_esp_pete']
+# agent_names = ['porto_domain_random']
+# agent_names = ['porto_domain_random_01']
+# agent_names = ['porto_domain_random_1']
+
+# agent_names = ['f1_gbr_ete']
+
 agent_names = ['f1_esp_ete']
-agent_names = ['f1_esp_pete']
-agent_names = ['porto_domain_random']
-agent_names = ['porto_domain_random_01']
-agent_names = ['porto_domain_random_1']
+start_condition = {'x':24.3, 'y':24.6, 'v':3, 'theta':0, 'delta':0, 'goal':0}
+
+# agent_names = ['f1_mco_ete']
+# start_condition = {'x':18, 'y':48.7, 'v':3, 'theta':0, 'delta':0, 'goal':0}
+
+# agent_names = ['f1_aus_ete']
+
+# agent_names = ['f1_gbr_pete']
+
+# agent_names = ['f1_esp_pete']
+# start_condition = {'x':24.3, 'y':24.6, 'v':3, 'theta':0, 'delta':0, 'goal':0}
+
+# agent_names = ['f1_mco_pete']
+# start_condition = {'x':18, 'y':48.7, 'v':3, 'theta':0, 'delta':0, 'goal':0}
+
+# agent_names = ['f1_aus_pete']
+
 
 # agent_names = ['batch_400']
 ns=[0]
 legend = ['']
 legend_title = ''
-mismatch_parameters = []
-frac_vary = []
-start_condition = {'x':10, 'y':4.5, 'v':3, 'theta':np.pi, 'delta':0, 'goal':0}
+mismatch_parameters = ['mu']
+frac_vary = [-0.4]
+# start_condition = {'x':10, 'y':4.5, 'v':3, 'theta':np.pi, 'delta':0, 'goal':0}
 # start_condition = {'x':4.1, 'y':9, 'v':3, 'theta':0, 'delta':0, 'goal':0}
 # start_condition = []
 display_path_velocity_colormap(agent_names, ns, legend_title, legend, mismatch_parameters, frac_vary, start_condition)
