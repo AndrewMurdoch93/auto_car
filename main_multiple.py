@@ -138,8 +138,8 @@ class trainingLoop():
       n_actions = np.zeros([self.runs, self.max_episodes])
       terminal_poses = np.zeros([self.runs, self.max_episodes, 2])
 
-      eval_interval = 100
-      eval_n_episodes = 5
+      eval_interval = 5
+      eval_n_episodes = 1
       eval_steps = np.zeros([self.runs, int(self.max_episodes/eval_interval)])
       eval_lap_times = np.zeros([self.runs, int(self.max_episodes/eval_interval), eval_n_episodes])
       eval_collisions = np.ones([self.runs, int(self.max_episodes/eval_interval), eval_n_episodes])
@@ -292,15 +292,15 @@ class trainingLoop():
             
 
             # Evaluate agent
-            if episode%eval_interval==0:
-               eval_steps[n, int(episode/eval_interval)-1] = np.sum(steps[n,:])
-               eval_lap_times[n, int(episode/eval_interval)-1], eval_collisions[n, int(episode/eval_interval)-1] = self.evaluate(n_episodes=eval_n_episodes)
+            # if episode%eval_interval==0:
+            #    eval_steps[n, int(episode/eval_interval)-1] = np.sum(steps[n,:])
+            #    eval_lap_times[n, int(episode/eval_interval)-1], eval_collisions[n, int(episode/eval_interval)-1] = self.evaluate(n_episodes=eval_n_episodes)
 
-               outfile=open(self.evaluation_results_file_name, 'wb')
-               pickle.dump(eval_steps, outfile)
-               pickle.dump(eval_lap_times, outfile)
-               pickle.dump(eval_collisions, outfile)
-               outfile.close()
+            #    outfile=open(self.evaluation_results_file_name, 'wb')
+            #    pickle.dump(eval_steps, outfile)
+            #    pickle.dump(eval_lap_times, outfile)
+            #    pickle.dump(eval_collisions, outfile)
+            #    outfile.close()
 
 
             if episode%10==0:
