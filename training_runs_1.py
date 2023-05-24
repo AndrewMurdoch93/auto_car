@@ -166,10 +166,49 @@ n_test=100
 # a.train()
 # main_multiple.lap_time_test_with_noise(agent_name=agent_name, n_episodes=100, detect_issues=False, initial_conditions=True, noise={'xy':0.025, 'theta':0.05, 'v':0.1, 'lidar':0.01})
 
-# agent_name = 'f1_esp_pete_f_20'
+# agent_name = 'f1_esp_pete_eval'
 # main_dict['name'] = agent_name
 # env_dict['map_name'] = 'f1_esp'
-# env_dict['control_steps'] = 5
+# env_dict['control_steps'] = 10
+# a = main_multiple.trainingLoop(main_dict, agent_td3_dict, env_dict, load_agent='')
+# a.train()
+# main_multiple.lap_time_test_with_noise(agent_name=agent_name, n_episodes=100, detect_issues=False, initial_conditions=True, noise={'xy':0.025, 'theta':0.05, 'v':0.1, 'lidar':0.01})
+
+# agent_name = 'f1_esp_pete_ls_05'
+# main_dict['name'] = agent_name
+# env_dict['map_name'] = 'f1_esp'
+# env_dict['control_steps'] = 10
+# env_dict['steer_control_dict']['track_dict']['Lfc'] = 0.5
+# a = main_multiple.trainingLoop(main_dict, agent_td3_dict, env_dict, load_agent='')
+# a.train()
+# main_multiple.lap_time_test_with_noise(agent_name=agent_name, n_episodes=100, detect_issues=False, initial_conditions=True, noise={'xy':0.025, 'theta':0.05, 'v':0.1, 'lidar':0.01})
+
+# agent_name = 'f1_esp_pete_ls_1'
+# main_dict['name'] = agent_name
+# env_dict['map_name'] = 'f1_esp'
+# env_dict['steer_control_dict']['track_dict']['Lfc'] = 1
+# a = main_multiple.trainingLoop(main_dict, agent_td3_dict, env_dict, load_agent='')
+# a.train()
+# main_multiple.lap_time_test_with_noise(agent_name=agent_name, n_episodes=100, detect_issues=False, initial_conditions=True, noise={'xy':0.025, 'theta':0.05, 'v':0.1, 'lidar':0.01})
+
+# agent_name = 'f1_esp_pete_ls_1'
+# main_dict['name'] = agent_name
+# env_dict['map_name'] = 'f1_esp'
+# env_dict['steer_control_dict']['track_dict']['Lfc'] = 1.5
+# a = main_multiple.trainingLoop(main_dict, agent_td3_dict, env_dict, load_agent='')
+# a.train()
+# main_multiple.lap_time_test_with_noise(agent_name=agent_name, n_episodes=100, detect_issues=False, initial_conditions=True, noise={'xy':0.025, 'theta':0.05, 'v':0.1, 'lidar':0.01})
+
+
+
+
+
+
+
+# agent_name = 'f1_esp_pete_f_33'
+# main_dict['name'] = agent_name
+# env_dict['map_name'] = 'f1_esp'
+# env_dict['control_steps'] = 3
 # # env_dict['reward_signal']['collision']
 # a = main_multiple.trainingLoop(main_dict, agent_td3_dict, env_dict, load_agent='')
 # a.train()
@@ -206,6 +245,15 @@ n_test=100
 # a.train()
 # main_multiple.lap_time_test_with_noise(agent_name=agent_name, n_episodes=100, detect_issues=False, initial_conditions=True, noise={'xy':0.025, 'theta':0.05, 'v':0.1, 'lidar':0.01})
 
+# agent_name = 'f1_esp_pete_r_p_5'
+# main_dict['name'] = agent_name
+# main_dict['runs'] = 3
+# env_dict['map_name'] = 'f1_esp'
+# env_dict['control_steps'] = 10
+# env_dict['reward_signal']['collision'] = -5
+# a = main_multiple.trainingLoop(main_dict, agent_td3_dict, env_dict, load_agent='')
+# a.train()
+# main_multiple.lap_time_test_with_noise(agent_name=agent_name, n_episodes=100, detect_issues=False, initial_conditions=True, noise={'xy':0.025, 'theta':0.05, 'v':0.1, 'lidar':0.01})
 
 # agent_name = 'f1_esp_pete_r_d_2'
 # main_dict['name'] = agent_name
@@ -217,66 +265,76 @@ n_test=100
 # a.train()
 # main_multiple.lap_time_test_with_noise(agent_name=agent_name, n_episodes=100, detect_issues=False, initial_conditions=True, noise={'xy':0.025, 'theta':0.05, 'v':0.1, 'lidar':0.01})
 
-agent_name = 'f1_esp_pete_r_d_25'
-main_dict['name'] = agent_name
-main_dict['runs'] = 3
-env_dict['map_name'] = 'f1_esp'
-env_dict['control_steps'] = -2
-env_dict['reward_signal']['distance'] = 0.25
-a = main_multiple.trainingLoop(main_dict, agent_td3_dict, env_dict, load_agent='')
-a.train()
-main_multiple.lap_time_test_with_noise(agent_name=agent_name, n_episodes=100, detect_issues=False, initial_conditions=True, noise={'xy':0.025, 'theta':0.05, 'v':0.1, 'lidar':0.01})
+# agent_name = 'f1_esp_pete_r_d_2'
+# main_dict['name'] = agent_name
+# main_dict['runs'] = 3
+# env_dict['map_name'] = 'f1_esp'
+# env_dict['control_steps'] = -2
+# env_dict['reward_signal']['distance'] = 0.2
+# a = main_multiple.trainingLoop(main_dict, agent_td3_dict, env_dict, load_agent='')
+# a.train()
+# main_multiple.lap_time_test_with_noise(agent_name=agent_name, n_episodes=100, detect_issues=False, initial_conditions=True, noise={'xy':0.025, 'theta':0.05, 'v':0.1, 'lidar':0.01})
+
+# agent_name = 'f1_esp_pete_r_d_25'
+# main_dict['name'] = agent_name
+# main_dict['runs'] = 3
+# env_dict['map_name'] = 'f1_esp'
+# env_dict['control_steps'] = -2
+# env_dict['reward_signal']['distance'] = 0.25
+# a = main_multiple.trainingLoop(main_dict, agent_td3_dict, env_dict, load_agent='')
+# a.train()
+# main_multiple.lap_time_test_with_noise(agent_name=agent_name, n_episodes=100, detect_issues=False, initial_conditions=True, noise={'xy':0.025, 'theta':0.05, 'v':0.1, 'lidar':0.01})
 
 
-agent_name = 'f1_esp_pete_bs_200'
-main_dict['name'] = agent_name
-main_dict['runs'] = 3
-env_dict['map_name'] = 'f1_esp'
-env_dict['control_steps'] = -2
-env_dict['reward_signal']['distance'] = 0.3
-agent_td3_dict['batch_size'] = 200
-a = main_multiple.trainingLoop(main_dict, agent_td3_dict, env_dict, load_agent='')
-a.train()
-main_multiple.lap_time_test_with_noise(agent_name=agent_name, n_episodes=100, detect_issues=False, initial_conditions=True, noise={'xy':0.025, 'theta':0.05, 'v':0.1, 'lidar':0.01})
+# agent_name = 'f1_esp_pete_bs_200'
+# main_dict['name'] = agent_name
+# main_dict['runs'] = 3
+# env_dict['map_name'] = 'f1_esp'
+# env_dict['control_steps'] = -2
+# env_dict['reward_signal']['distance'] = 0.3
+# agent_td3_dict['batch_size'] = 200
+# a = main_multiple.trainingLoop(main_dict, agent_td3_dict, env_dict, load_agent='')
+# a.train()
+# main_multiple.lap_time_test_with_noise(agent_name=agent_name, n_episodes=100, detect_issues=False, initial_conditions=True, noise={'xy':0.025, 'theta':0.05, 'v':0.1, 'lidar':0.01})
 
 
-agent_name = 'f1_esp_pete_bs_600'
-main_dict['name'] = agent_name
-main_dict['runs'] = 3
-env_dict['map_name'] = 'f1_esp'
-env_dict['control_steps'] = -2
-env_dict['reward_signal']['distance'] = 0.3
-agent_td3_dict['batch_size'] = 600
-a = main_multiple.trainingLoop(main_dict, agent_td3_dict, env_dict, load_agent='')
-a.train()
-main_multiple.lap_time_test_with_noise(agent_name=agent_name, n_episodes=100, detect_issues=False, initial_conditions=True, noise={'xy':0.025, 'theta':0.05, 'v':0.1, 'lidar':0.01})
+# agent_name = 'f1_esp_pete_bs_600'
+# main_dict['name'] = agent_name
+# main_dict['runs'] = 3
+# env_dict['map_name'] = 'f1_esp'
+# env_dict['control_steps'] = -2
+# env_dict['reward_signal']['distance'] = 0.3
+# agent_td3_dict['batch_size'] = 600
+# a = main_multiple.trainingLoop(main_dict, agent_td3_dict, env_dict, load_agent='')
+# a.train()
+# main_multiple.lap_time_test_with_noise(agent_name=agent_name, n_episodes=100, detect_issues=False, initial_conditions=True, noise={'xy':0.025, 'theta':0.05, 'v':0.1, 'lidar':0.01})
 
 
-agent_name = 'f1_esp_pete_nn_plus'
-main_dict['name'] = agent_name
-main_dict['runs'] = 3
-env_dict['map_name'] = 'f1_esp'
-env_dict['control_steps'] = -2
-env_dict['reward_signal']['distance'] = 0.3
-agent_td3_dict['batch_size'] = 400
-agent_td3_dict['layer1_size'] = 500
-agent_td3_dict['layer1_size'] = 400
-a = main_multiple.trainingLoop(main_dict, agent_td3_dict, env_dict, load_agent='')
-a.train()
-main_multiple.lap_time_test_with_noise(agent_name=agent_name, n_episodes=100, detect_issues=False, initial_conditions=True, noise={'xy':0.025, 'theta':0.05, 'v':0.1, 'lidar':0.01})
+# agent_name = 'f1_esp_pete_nn_plus'
+# main_dict['name'] = agent_name
+# main_dict['runs'] = 3
+# env_dict['map_name'] = 'f1_esp'
+# env_dict['control_steps'] = -2
+# env_dict['reward_signal']['distance'] = 0.3
+# agent_td3_dict['batch_size'] = 400
+# agent_td3_dict['layer1_size'] = 500
+# agent_td3_dict['layer1_size'] = 400
+# a = main_multiple.trainingLoop(main_dict, agent_td3_dict, env_dict, load_agent='')
+# a.train()
+# main_multiple.lap_time_test_with_noise(agent_name=agent_name, n_episodes=100, detect_issues=False, initial_conditions=True, noise={'xy':0.025, 'theta':0.05, 'v':0.1, 'lidar':0.01})
 
-agent_name = 'f1_esp_pete_nn_minus'
-main_dict['name'] = agent_name
-main_dict['runs'] = 3
-env_dict['map_name'] = 'f1_esp'
-env_dict['control_steps'] = -2
-env_dict['reward_signal']['distance'] = 0.3
-agent_td3_dict['batch_size'] = 400
-agent_td3_dict['layer1_size'] = 300
-agent_td3_dict['layer1_size'] = 200
-a = main_multiple.trainingLoop(main_dict, agent_td3_dict, env_dict, load_agent='')
-a.train()
-main_multiple.lap_time_test_with_noise(agent_name=agent_name, n_episodes=100, detect_issues=False, initial_conditions=True, noise={'xy':0.025, 'theta':0.05, 'v':0.1, 'lidar':0.01})
+# agent_name = 'f1_esp_pete_nn_minus'
+# main_dict['name'] = agent_name
+# main_dict['runs'] = 3
+# env_dict['map_name'] = 'f1_esp'
+# env_dict['control_steps'] = -2
+# env_dict['reward_signal']['distance'] = 0.3
+# agent_td3_dict['batch_size'] = 400
+# agent_td3_dict['layer1_size'] = 300
+# agent_td3_dict['layer1_size'] = 200
+# a = main_multiple.trainingLoop(main_dict, agent_td3_dict, env_dict, load_agent='')
+# a.train()
+# main_multiple.lap_time_test_with_noise(agent_name=agent_name, n_episodes=100, detect_issues=False, initial_conditions=True, noise={'xy':0.025, 'theta':0.05, 'v':0.1, 'lidar':0.01})
 
 
 
@@ -809,6 +867,7 @@ main_multiple.lap_time_test_with_noise(agent_name=agent_name, n_episodes=100, de
 
 # agent_names = ['f1_gbr_pete']
 agent_names = ['f1_esp_pete']
+agent_names = ['f1_esp_pete_eval']
 # agent_names = ['f1_mco_pete']
 # agent_names = ['f1_aus_pete']
 # agent_names = ['porto_domain_random_1', 'porto_domain_random_01']
@@ -838,9 +897,9 @@ ns=[0,0,0,0,0,0]
 #     print('------------------------------' + '\n' + agent_name + '\n' + '------------------------------')
 #     display_results_multiple.display_train_parameters(agent_name=agent_name)
 
-for agent_name in agent_names:
-    print('------------------------------' + '\n' + agent_name + '\n' + '------------------------------')
-    display_results_multiple.display_lap_results(agent_name=agent_name)
+# for agent_name in agent_names:
+#     print('------------------------------' + '\n' + agent_name + '\n' + '------------------------------')
+#     display_results_multiple.display_lap_results(agent_name=agent_name)
 
 
 mismatch_parameters = [['C_Sr', 'mu'], ['C_Sr', 'mu']]

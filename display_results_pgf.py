@@ -683,26 +683,34 @@ def learning_curve_all(agent_names, legend, legend_title, ns, filename, xlim, xs
     
     # ax[0].ticklabel_format(style='scientific', axis='x', scilimits=(0,0), useMathText=True, useOffset=True)
     # ax[1].ticklabel_format(style='scientific', axis='x', scilimits=(0,0), useMathText=True, useOffset=True)
-    ax[2].ticklabel_format(style='scientific', axis='x', scilimits=(0,0), useMathText=True, useOffset=True)
+    # ax[2].ticklabel_format(style='scientific', axis='x', scilimits=(0,0), useMathText=True, useOffset=True)
     #plt.ticklabel_format(style='scientific', axis='x', scilimits=(0,0))
     
-    xax1000 = np.arange(0,xlim+1000,xspace)
-    xax1 = (xax1000/1000).astype(int)
+    # xax1000 = np.arange(0,xlim+1000,xspace)
+    # xax1 = (xax1000/1000).astype(int)
 
-    ax[0].set_xticks(ticks=xax1000, labels=xax1)
-    ax[1].set_xticks(ticks=xax1000, labels=xax1)
-    ax[2].set_xticks(xax1000)
+    # ax[0].set_xticks(ticks=xax1000, labels=xax1)
+    # ax[1].set_xticks(ticks=xax1000, labels=xax1)
+    # ax[2].set_xticks(xax1000)
+
+    xax1000 = np.arange(0,xlim,xspace)
+    # xax1 = (xax1000/100).astype(int)
+
+    ax[0].set_xticks(ticks=xax1000)
+    ax[1].set_xticks(ticks=xax1000)
+    ax[2].set_xticks(ticks=xax1000)
     
-    ax[0].set_yticks(ticks=[0,25,50,75,100], labels=[0,25,50,75,100])
-    ax[1].set_yticks(ticks=[5,6,7,8,9,10], labels=[5,6,7,8,9,10])
-    ax[2].set_yticks(ticks=[-10, -5, 0, 5], labels=[-10, -5, 0, 5])
+    
+    # ax[0].set_yticks(ticks=[0,25,50,75,100], labels=[0,25,50,75,100])
+    # ax[1].set_yticks(ticks=[5,6,7,8,9,10], labels=[5,6,7,8,9,10])
+    # ax[2].set_yticks(ticks=[-10, -5, 0, 5], labels=[-10, -5, 0, 5])
 
     # y_title=-0.5
 
     for i in range(len(agent_names)):
         end_episode = end_episodes[i] 
-        ax[0].plot(np.arange(0,end_episode,100), np.array(avg_coll[i][0:end_episode])[np.arange(0,end_episode,100)]*100)
-        ax[0].fill_between(x=np.arange(end_episode)[np.arange(0,end_episode,100)], y1=np.array(upper_fill_coll[i][0])[np.arange(0,end_episode,100)]*100, y2=np.array(lower_fill_coll[i][0])[np.arange(0,end_episode,100)]*100, alpha=0.15, label='_nolegend_')
+        ax[0].plot(np.arange(0,end_episode,1), np.array(avg_coll[i][0:end_episode])[np.arange(0,end_episode,1)]*100)
+        ax[0].fill_between(x=np.arange(end_episode)[np.arange(0,end_episode,1)], y1=np.array(upper_fill_coll[i][0])[np.arange(0,end_episode,1)]*100, y2=np.array(lower_fill_coll[i][0])[np.arange(0,end_episode,1)]*100, alpha=0.15, label='_nolegend_')
     
     ax[0].hlines(y=100, xmin=0, xmax=np.max(end_episodes), colors='black', linestyle='dashed')
     ax[0].hlines(y=0, xmin=0, xmax=np.max(end_episodes), colors='black', linestyle='dashed')
@@ -717,8 +725,8 @@ def learning_curve_all(agent_names, legend, legend_title, ns, filename, xlim, xs
 
     for i in range(np.size(end_ep, axis=0)):
         end_episode = end_episodes[i] 
-        ax[1].plot(np.arange(0,end_episode,100), (np.array(steps_y_avg_smoothed[i])*0.01)[np.arange(0,end_episode,100)])
-        ax[1].fill_between(x=np.arange(0,end_episode,100), y1=np.array(upper_fill[i][0])[np.arange(0,end_episode,100)]*0.01, y2=np.array(lower_fill[i][0])[np.arange(0,end_episode,100)]*0.01, alpha=0.15, label='_nolegend_')
+        ax[1].plot(np.arange(0,end_episode,1), (np.array(steps_y_avg_smoothed[i])*0.01)[np.arange(0,end_episode,1)])
+        ax[1].fill_between(x=np.arange(0,end_episode,1), y1=np.array(upper_fill[i][0])[np.arange(0,end_episode,1)]*0.01, y2=np.array(lower_fill[i][0])[np.arange(0,end_episode,1)]*0.01, alpha=0.15, label='_nolegend_')
 
 
     ax[1].set_xlabel('Episodes')
@@ -726,13 +734,13 @@ def learning_curve_all(agent_names, legend, legend_title, ns, filename, xlim, xs
     ax[1].grid(True)
     ax[1].tick_params('both', length=0)
     ax[1].set_xlim([0,xlim])
-    ax[1].set_ylim([6,10])
+    # ax[1].set_ylim([6,10])
     ax[1].set_ylabel('Lap time [s]')
 
     for i in range(np.size(end_ep, axis=0)):
         end_episode = end_episodes[i] 
-        ax[2].plot(np.arange(0,end_episode,100), np.array(avg_score[i])[np.arange(0,end_episode,100)])
-        ax[2].fill_between(x=np.arange(0,end_episode,100), y1=np.array(score_upper_fill[i][0])[np.arange(0,end_episode,100)], y2=np.array(score_lower_fill[i][0])[np.arange(0,end_episode,100)], alpha=0.15, label='_nolegend_')
+        ax[2].plot(np.arange(0,end_episode,1), np.array(avg_score[i])[np.arange(0,end_episode,1)])
+        ax[2].fill_between(x=np.arange(0,end_episode,1), y1=np.array(score_upper_fill[i][0])[np.arange(0,end_episode,1)], y2=np.array(score_lower_fill[i][0])[np.arange(0,end_episode,1)], alpha=0.15, label='_nolegend_')
 
       
     ax[2].set_title('(c)', fontdict={'fontsize': 10})
@@ -4143,19 +4151,19 @@ height=2.5
 # height=2.5
 
 
-agent_names = ['batch_400']
-legend = ['End-to-end', 'Partial end-to-end']
-legend_title = ''
-xlim=3000
-xspace = 500
-bottom_space = 0.4
-height=2.5
+# agent_names = ['batch_400']
+# legend = ['End-to-end', 'Partial end-to-end']
+# legend_title = ''
+# xlim=3000
+# xspace = 500
+# bottom_space = 0.4
+# height=2.5
 
-agent_names = ['batch_400', 'f1_esp_ete', 'f1_mco_ete']
+agent_names = ['f1_esp_pete']
 legend = ['Porto', 'Barcelona-Catalunya', 'Monaco']
 legend_title = ''
-xlim=1500
-xspace = 300
+xlim=300
+xspace = 100
 bottom_space = 0.37
 height=2.2
 
@@ -4163,7 +4171,7 @@ ns=[0, 0, 0, 0, 0]
 filename = 'observation_space_1'
 learning_curve_all(agent_names, legend, legend_title, ns, filename, xlim, xspace, bottom_space, height)
 
-learning_curve_lap_time_average(agent_names, legend, legend_title, ns, filename, xlim, xspace, bottom_space, height)
+# learning_curve_lap_time_average(agent_names, legend, legend_title, ns, filename, xlim, xspace, bottom_space, height)
 
 
 # agent_names = ['porto_ete_cs_1', 'porto_ete_cs_5', 'porto_ete_cs_10', 'porto_ete_cs_15', 'porto_ete_LiDAR_10', 'porto_ete_cs_25']
