@@ -305,6 +305,7 @@ class agent(object):
 
         global Transition_dtype
         global blank_trans 
+        
         Transition_dtype = np.dtype([('timestep', np.int32), ('state', np.float32, (self.agent_dict['input_dims'])), ('action', np.int64), ('reward', np.float32), ('next_state', np.float32, (self.agent_dict['input_dims'])), ('done', np.bool_)])
         blank_trans = (0, np.zeros((12), dtype=np.float32), 0, 0.0,  np.zeros(12), False)
         #self.memory = PrioritisedReplayBuffer(self.agent_dict['max_mem_size'], self.agent_dict['input_dims'], self.agent_dict['batch_size'], self.agent_dict['replay_alpha'])

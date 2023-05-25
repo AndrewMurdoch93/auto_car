@@ -183,7 +183,7 @@ def graph_agent_sample_rate(agent_names):
     plt.rcParams['font.serif'] = ['Times New Roman'] + plt.rcParams['font.serif']
     plt.rc('axes',edgecolor='gray')
 
-    sample_rate = np.array([2,5,10,20])
+    sample_rate = np.array([2,5,10,20,33])
     train_times = np.zeros(len(agent_names))
     min_train_times = np.zeros(len(agent_names))
     max_train_times = np.zeros(len(agent_names))
@@ -217,16 +217,17 @@ def graph_agent_sample_rate(agent_names):
         lap_times[i] = np.nanmean(agent_lap_times)
         std_lap_times[i] = np.nanstd(agent_lap_times)
     
-    fig, axs1 = plt.subplots(figsize=(4.5,2.5))
-    # axs.plot(sample_rate, train_times, label='Training time')
-    # # axs.fill_between(x=xaxis, y1=,y2=, alpha=0.2)
-    # axs.set_xlabel('Agent sample rate [Hz]')
-    # axs.set_ylabel('Training time [minutes]')
+    fig, axs = plt.subplots(figsize=(4.5,2.5))
+    axs.plot(sample_rate, lap_times, label='Lap time')
+    # axs.fill_between(x=xaxis, y1=,y2=, alpha=0.2)
+    axs.set_xlabel('Agent sample rate [Hz]')
+    axs.set_ylabel('Lap time [minutes]')
     # axs.set_ylim([0,20])
-    # axs.tick_params(axis=u'both', which=u'both',length=0)
-    # axs.grid(True, color='lightgrey')
+    axs.tick_params(axis=u'both', which=u'both',length=0)
+    axs.grid(True, color='lightgrey')
     
-    # axs1 = axs.twinx()  
+    
+    axs1 = axs.twinx()  
     axs1.plot(sample_rate, collisions*100, color='orange', label='Failed laps')
     # axs1.fill_between(x=sample_rate, y1=lap_times-std_lap_times,y2=lap_times+std_lap_times, alpha=0.2, color='orange')
     axs1.set_ylabel('Failed laps [%]')
@@ -242,5 +243,5 @@ def graph_agent_sample_rate(agent_names):
 
 
 # agent_names = ['f_agent_3', 'f_agent_5', 'f_agent_10', 'f_agent_20', 'f_agent_50']
-agent_names = ['f1_esp_pete_f_2', 'f1_esp_pete_f_5', 'f1_esp_pete',  'f1_esp_pete_f_20']
-graph_agent_sample_rate(agent_names)
+agent_names = ['f1_esp_pete_f_2', 'f1_esp_pete_f_5', 'f1_esp_pete',  'f1_esp_pete_f_20', 'f1_esp_pete_f_33']
+# graph_agent_sample_rate(agent_names)

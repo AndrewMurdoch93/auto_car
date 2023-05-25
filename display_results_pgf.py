@@ -46,7 +46,7 @@ import matplotlib.colors as mcolors
 def learning_curve_lap_time_average(agent_names, legend, legend_title, ns, filename, xlim, xspace, bottom_space, height):
     legend_coll = legend.copy()
     legend_coll.append('Min and max')
-    window = 500
+    window = 10
     steps = [[] for _ in range(len(agent_names))]
     steps_x_axis = [[] for _ in range(len(agent_names))]
     n_actions_x_axis  = [[] for _ in range(len(agent_names))]
@@ -225,25 +225,25 @@ def learning_curve_lap_time_average(agent_names, legend, legend_title, ns, filen
     # fig, ax = plt.subplots(1, 3, figsize=(5.5,2.65))
     
     # ax[0].ticklabel_format(style='scientific', axis='x', scilimits=(0,0), useMathText=True, useOffset=True)
-    ax[1].ticklabel_format(style='scientific', axis='x', scilimits=(0,0), useMathText=True, useOffset=True)
+    # ax[1].ticklabel_format(style='scientific', axis='x', scilimits=(0,0), useMathText=True, useOffset=True)
     # ax[2].ticklabel_format(style='scientific', axis='x', scilimits=(0,0), useMathText=True, useOffset=True)
     # plt.ticklabel_format(style='scientific', axis='x', scilimits=(0,0))
     
-    xax1000 = np.arange(0,xlim+1000,xspace)
-    xax1 = (xax1000/1000).astype(int)
+    # xax1000 = np.arange(0,xlim+1000,xspace)
+    # xax1 = (xax1000/1000).astype(int)
 
-    ax[0].set_xticks(ticks=xax1000, labels=xax1)
-    ax[1].set_xticks(ticks=xax1000)
+    # ax[0].set_xticks(ticks=xax1000, labels=xax1)
+    # ax[1].set_xticks(ticks=xax1000)
 
     ax[0].set_yticks(ticks=[0,25,50,75,100], labels=[0,25,50,75,100])
-    ax[1].set_yticks(ticks=[5,6,7,8,9], labels=[5,6,7,8,9])
+    # ax[1].set_yticks(ticks=[5,6,7,8,9], labels=[5,6,7,8,9])
 
     # y_title=-0.5
 
     for i in range(len(agent_names)):
         end_episode = end_episodes[i] 
-        ax[0].plot(np.arange(0,end_episode,100), np.array(avg_coll[i][0:end_episode])[np.arange(0,end_episode,100)]*100)
-        ax[0].fill_between(x=np.arange(end_episode)[np.arange(0,end_episode,100)], y1=np.array(upper_fill_coll[i][0])[np.arange(0,end_episode,100)]*100, y2=np.array(lower_fill_coll[i][0])[np.arange(0,end_episode,100)]*100, alpha=0.15, label='_nolegend_')
+        ax[0].plot(np.arange(0,end_episode,1), np.array(avg_coll[i][0:end_episode])[np.arange(0,end_episode,1)]*100)
+        ax[0].fill_between(x=np.arange(end_episode)[np.arange(0,end_episode,1)], y1=np.array(upper_fill_coll[i][0])[np.arange(0,end_episode,1)]*100, y2=np.array(lower_fill_coll[i][0])[np.arange(0,end_episode,1)]*100, alpha=0.15, label='_nolegend_')
     
     ax[0].hlines(y=100, xmin=0, xmax=np.max(end_episodes), colors='black', linestyle='dashed')
     ax[0].hlines(y=0, xmin=0, xmax=np.max(end_episodes), colors='black', linestyle='dashed')
@@ -258,8 +258,8 @@ def learning_curve_lap_time_average(agent_names, legend, legend_title, ns, filen
 
     for i in range(np.size(end_ep, axis=0)):
         end_episode = end_episodes[i] 
-        ax[1].plot(np.arange(0,end_episode,100), (np.array(steps_y_avg_smoothed[i])*0.01)[np.arange(0,end_episode,100)])
-        ax[1].fill_between(x=np.arange(0,end_episode,100), y1=np.array(upper_fill[i][0])[np.arange(0,end_episode,100)]*0.01, y2=np.array(lower_fill[i][0])[np.arange(0,end_episode,100)]*0.01, alpha=0.15, label='_nolegend_')
+        ax[1].plot(np.arange(0,end_episode,1), (np.array(steps_y_avg_smoothed[i])*0.01)[np.arange(0,end_episode,1)])
+        ax[1].fill_between(x=np.arange(0,end_episode,1), y1=np.array(upper_fill[i][0])[np.arange(0,end_episode,1)]*0.01, y2=np.array(lower_fill[i][0])[np.arange(0,end_episode,1)]*0.01, alpha=0.15, label='_nolegend_')
 
 
     ax[1].set_title('(b)', fontdict={'fontsize': 10})
@@ -285,6 +285,8 @@ def learning_curve_lap_time_average(agent_names, legend, legend_title, ns, filen
 
     fig.tight_layout()
     fig.subplots_adjust(bottom=bottom_space+0.03) 
+    ax[0].text(x=100,y=-50,s='Episodes')
+    
     # fig.subplots_adjust(right=0.8) 
     # fig.subplots_adjust(left=0.2) 
     plt.figlegend(legend, title=legend_title, loc = 'lower center', ncol=5)
@@ -298,7 +300,7 @@ def learning_curve_reward_average(agent_names, legend, legend_title):
     
     legend_coll = legend.copy()
     legend_coll.append('Min and max')
-    window = 500
+    window = 10
     steps = [[] for _ in range(len(agent_names))]
     steps_x_axis = [[] for _ in range(len(agent_names))]
     n_actions_x_axis  = [[] for _ in range(len(agent_names))]
@@ -504,7 +506,7 @@ def learning_curve_all(agent_names, legend, legend_title, ns, filename, xlim, xs
 
     legend_coll = legend.copy()
     legend_coll.append('Min and max')
-    window = 500
+    window = 10
     steps = [[] for _ in range(len(agent_names))]
     steps_x_axis = [[] for _ in range(len(agent_names))]
     n_actions_x_axis  = [[] for _ in range(len(agent_names))]
@@ -2376,11 +2378,11 @@ def display_path_velocity_colormap(agent_names, ns, legend_title, legend, mismat
 
 # agent_names = ['f1_gbr_pete']
 
-# agent_names = ['f1_esp_pete']
-# start_condition = {'x':24.3, 'y':24.6, 'v':3, 'theta':0, 'delta':0, 'goal':0}
+agent_names = ['f1_esp_pete_eval']
+start_condition = {'x':24.3, 'y':24.6, 'v':3, 'theta':0, 'delta':0, 'goal':0}
 
-agent_names = ['f1_mco_pete']
-start_condition = {'x':18, 'y':48.7, 'v':3, 'theta':0, 'delta':0, 'goal':0}
+# agent_names = ['f1_mco_pete']
+# start_condition = {'x':18, 'y':48.7, 'v':3, 'theta':0, 'delta':0, 'goal':0}
 
 # agent_names = ['f1_aus_pete']
 
@@ -2390,7 +2392,7 @@ ns=[0]
 legend = ['']
 legend_title = ''
 mismatch_parameters = ['mu']
-frac_vary = [-0.5]
+frac_vary = [0]
 # start_condition = {'x':10, 'y':4.5, 'v':3, 'theta':np.pi, 'delta':0, 'goal':0}
 # start_condition = {'x':4.1, 'y':9, 'v':3, 'theta':0, 'delta':0, 'goal':0}
 # start_condition = []
@@ -3225,13 +3227,14 @@ filename = 'noise_vary'
 
 
 def display_lap_unknown_mass(agent_names, legend, filename):
+
     
-    plt.rcParams.update({
-    "font.family": "serif",  # use serif/main font for text elements
-    "text.usetex": True,     # use inline math for ticks
-    "pgf.rcfonts": False,     # don't setup fonts from rc parameters
-    "font.size": 12
-    })
+    # plt.rcParams.update({
+    # "font.family": "serif",  # use serif/main font for text elements
+    # "text.usetex": True,     # use inline math for ticks
+    # "pgf.rcfonts": False,     # don't setup fonts from rc parameters
+    # "font.size": 12
+    # })
     
     fig, axs = plt.subplots(1, figsize=(5.5,3))
 
@@ -3285,8 +3288,11 @@ def display_lap_unknown_mass(agent_names, legend, filename):
     fig.tight_layout()
     fig.subplots_adjust(bottom=0.35) 
     plt.figlegend(legend,loc='lower center', ncol=2)
-    # plt.show()
-    plt.savefig('results/'+filename+'.pgf', format='pgf')
+    plt.show()
+    # plt.savefig('results/'+filename+'.pgf', format='pgf')
+
+
+
 
 def display_lap_unknown_mass_time(agent_names, legend, filename):
     
@@ -3391,10 +3397,10 @@ def display_lap_unknown_mass_time(agent_names, legend, filename):
     plt.savefig('results/'+filename+'.pgf', format='pgf')
 
 
-agent_names = ['porto_ete_v5_r_collision_5', 'porto_pete_s_polynomial', 'porto_pete_v_k_1_attempt_2', 'porto_pete_sv_p_r_0']    
+agent_names = ['porto_ete_v5_r_collision_5', 'porto_pete_sv_p_r_0']    
 legend = ['End-to-end', 'Steering control', 'Velocity control', 'Steering and velocity control']
 filename = 'unknown_mass'
-# display_lap_unknown_mass_time(agent_names, legend, filename)
+display_lap_unknown_mass(agent_names, legend, filename)
 
 
 def display_path_mismatch_multiple(agent_names, ns, legend_title, legend, mismatch_parameters, frac_vary, noise_dicts, start_condition, filename):
@@ -4159,18 +4165,22 @@ height=2.5
 # bottom_space = 0.4
 # height=2.5
 
-agent_names = ['f1_esp_pete']
-legend = ['Porto', 'Barcelona-Catalunya', 'Monaco']
-legend_title = ''
-xlim=300
-xspace = 100
-bottom_space = 0.37
-height=2.2
+# agent_names = ['f1_esp_pete']
+# agent_names = ['f1_esp_pete_r_p_1', 'f1_esp_pete', 'f1_esp_pete_r_p_5']
+agent_names = ['f1_esp_pete_r_d_2', 'f1_esp_pete_r_d_25', 'f1_esp_pete']
+
+legend = ['0.2', '0.25', '0.3']
+# legend = ['-1', '-2', '-5']
+legend_title = 'Distance reward ($r_{\mathrm{dist}}$)'
+# legend_title = 'Collision penalty ($r_{\mathrm{collision}}$)'
+xlim=100
+xspace = 25
+bottom_space = 0.4
+height=2.5
 
 ns=[0, 0, 0, 0, 0]
 filename = 'observation_space_1'
-learning_curve_all(agent_names, legend, legend_title, ns, filename, xlim, xspace, bottom_space, height)
-
+# learning_curve_all(agent_names, legend, legend_title, ns, filename, xlim, xspace, bottom_space, height)
 # learning_curve_lap_time_average(agent_names, legend, legend_title, ns, filename, xlim, xspace, bottom_space, height)
 
 
