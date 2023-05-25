@@ -1896,36 +1896,12 @@ def display_lap_mismatch_results_multiple_C_S(agent_names, parameters, legend_ti
         plt.show()   
 
 def display_lap_mismatch_results_multiple_C_S_fr(agent_names, parameters, legend_title, legend, plot_titles, nom_value, graph, text):
-    size=12
-    plt.rc('font', size=size)          # controls default text sizes
-    plt.rc('axes', titlesize=size)     # fontsize of the axes title
-    plt.rc('axes', labelsize=size)    # fontsize of the x and y labels
-    plt.rc('xtick', labelsize=size)    # fontsize of the tick labels
-    plt.rc('ytick', labelsize=size)    # fontsize of the tick labels
-    plt.rc('legend', fontsize=size)    # legend fontsize
-    plt.rc('figure', titlesize=size)  # fontsize of the figure title
+   
+   
+    plt.rcParams['font.family'] = 'serif'
+    plt.rcParams['font.serif'] = ['Times New Roman'] + plt.rcParams['font.serif']
 
-
-    fig, axs = plt.subplots(nrows=3, ncols=2, figsize=(5.5,7))
-    # font = {'family' : 'serif',
-    #     'size'   : 12}
-    plt.rc('font', size=size)          # controls default text sizes
-    plt.rc('axes', titlesize=size)     # fontsize of the axes title
-    plt.rc('axes', labelsize=size)    # fontsize of the x and y labels
-    plt.rc('xtick', labelsize=size)    # fontsize of the tick labels
-    plt.rc('ytick', labelsize=size)    # fontsize of the tick labels
-    plt.rc('legend', fontsize=size)    # legend fontsize
-    plt.rc('figure', titlesize=size)  # fontsize of the figure title
-
-    # fig= plt.figure(figsize=(5.5, 7))    
-    # gs = plt.GridSpec(nrows=3, ncols=2, height_ratios=[1, 1, 2])
-    # axs1 = fig.add_subplot(gs[0,:])
-    # axs2 = fig.add_subplot(gs[1,:])
-    # axs3 = fig.add_subplot(gs[2,:])
-    # axs4 = fig.add_subplot(gs[1,1])
-    # axs5 = fig.add_subplot(gs[2,0])
-    # axs6 = fig.add_subplot(gs[2,1])
-    # axs = [axs1, axs2, axs3]
+    fig, axs = plt.subplots(nrows=1, ncols=3, figsize=(5.5,2.8))
 
 
     for j, parameter in enumerate(parameters):
@@ -1996,79 +1972,76 @@ def display_lap_mismatch_results_multiple_C_S_fr(agent_names, parameters, legend
          
             if j==2:
                 #plot collisions
-                axs[2,0].plot(nom_value[0]*(1+results_dict['frac_variation']), avg_col_filter*100, alpha=0.8)
-                axs[2,0].fill_between(nom_value[0]*(1+results_dict['frac_variation']), (avg_col_filter+dev_col_filter)*100, (avg_col_filter-dev_col_filter)*100, alpha=0.2, label='_nolegend_')
+                axs[2].plot(nom_value[0]*(1+results_dict['frac_variation']), avg_col_filter*100, alpha=0.8)
+                axs[2].fill_between(nom_value[0]*(1+results_dict['frac_variation']), (avg_col_filter+dev_col_filter)*100, (avg_col_filter-dev_col_filter)*100, alpha=0.2, label='_nolegend_')
                 # plot lap times
-                axs[2,1].plot(nom_value[0]*(1+results_dict['frac_variation']), avg_times, alpha=0.8)
-                axs[2,1].fill_between(nom_value[0]*(1+results_dict['frac_variation']), (avg_times+dev_times), (avg_times-dev_times), alpha=0.2, label='_nolegend_')
+                # axs[2,1].plot(nom_value[0]*(1+results_dict['frac_variation']), avg_times, alpha=0.8)
+                # axs[2,1].fill_between(nom_value[0]*(1+results_dict['frac_variation']), (avg_times+dev_times), (avg_times-dev_times), alpha=0.2, label='_nolegend_')
             else:
                 # plot collisions
-                axs[j,0].plot(nom_value[j]*(1+results_dict['frac_variation']), avg_col_filter*100, alpha=0.8)
-                axs[j,0].fill_between(nom_value[j]*(1+results_dict['frac_variation']), (avg_col_filter+dev_col_filter)*100, (avg_col_filter-dev_col_filter)*100, alpha=0.2, label='_nolegend_')
+                axs[j].plot(nom_value[j]*(1+results_dict['frac_variation']), avg_col_filter*100, alpha=0.8)
+                axs[j].fill_between(nom_value[j]*(1+results_dict['frac_variation']), (avg_col_filter+dev_col_filter)*100, (avg_col_filter-dev_col_filter)*100, alpha=0.2, label='_nolegend_')
                 # plot lap times
-                axs[j,1].plot(nom_value[j]*(1+results_dict['frac_variation']), avg_times, alpha=0.8)
-                axs[j,1].fill_between(nom_value[j]*(1+results_dict['frac_variation']), (avg_times+dev_times), (avg_times-dev_times), alpha=0.2, label='_nolegend_')
+                # axs[j,1].plot(nom_value[j]*(1+results_dict['frac_variation']), avg_times, alpha=0.8)
+                # axs[j,1].fill_between(nom_value[j]*(1+results_dict['frac_variation']), (avg_times+dev_times), (avg_times-dev_times), alpha=0.2, label='_nolegend_')
 
 
 
     color='grey'
 
-    axs[0,0].set_ylim([40,105])
-    axs[1,0].set_ylim([25,105])
-    axs[0,1].set_ylim([5.5,6.8])
-    axs[1,1].set_ylim([5.5,6.8])
+    # axs[0].set_ylim([40,105])
 
-    axs[0,0].text(x=nom_value[0]-0.25, y=50, s='nominal\n  value', fontsize = 'small', bbox=dict(facecolor='white', edgecolor='black',pad=0.1,boxstyle='round'))
-    axs[0,1].text(x=nom_value[0]-0.25, y=6.4, s='nominal\n  value', fontsize = 'small', bbox=dict(facecolor='white', edgecolor='black',pad=0.1,boxstyle='round'))
 
-    axs[0,0].set_title('                                                      '+'Front tire stiffness')
-    axs[1,0].set_title('                                                      '+'Rear tire stiffness')
-    axs[2,0].set_title('                                                      '+'Front and rear tire stiffness')
+    axs[0].text(x=nom_value[0]-0.25, y=10, s='nominal\n  value', fontsize = 'small', bbox=dict(facecolor='white', edgecolor='black',pad=0.1,boxstyle='round'))
+    axs[1].text(x=nom_value[1]-0.4, y=10, s='nominal\n  value', fontsize = 'small', bbox=dict(facecolor='white', edgecolor='black',pad=0.1,boxstyle='round'))
+    axs[2].text(x=nom_value[0]-0.3, y=91, s='nominal\n  value', fontsize = 'small', bbox=dict(facecolor='white', edgecolor='black',pad=0.1,boxstyle='round'))
+   
+
+    # axs[0].set_title('Front tire stiffness')
+    # axs[1].set_title('Rear tire stiffness')
+    # axs[2].set_title('Front and rear tire stiffness')
     
     for i in range(2):
-        for j in range(2):
-            axs[i,j].grid(True)
-            
-            if i==1:
-                axs[i,j].set_xlim([4.1,6.8])
-            else:
-                axs[i,j].set_xlim([3.7,5.7])
+        axs[i].grid(True)
+        
+        if i==1:
+            axs[i].set_xlim([4.1,6.8])
+        else:
+            axs[i].set_xlim([3.7,5.7])
 
-            axs[i,j].spines['bottom'].set_color(color)
-            axs[i,j].spines['top'].set_color(color) 
-            axs[i,j].spines['right'].set_color(color)
-            axs[i,j].spines['left'].set_color(color)
+        axs[i].spines['bottom'].set_color(color)
+        axs[i].spines['top'].set_color(color) 
+        axs[i].spines['right'].set_color(color)
+        axs[i].spines['left'].set_color(color)
 
-            axs[i,j].tick_params('both', length=0)
-            axs[i,j].tick_params('both', length=0)
+        axs[i].tick_params('both', length=0)
 
-            if i==1:
-                axs[i,0].vlines(x=nom_value[1], ymin=0, ymax=105, color='black', linestyle='--')
-                axs[i,1].vlines(x=nom_value[1], ymin=4, ymax=8, color='black', linestyle='--')
-            else:
-                axs[i,0].vlines(x=nom_value[0], ymin=0, ymax=105, color='black', linestyle='--')
-                axs[i,1].vlines(x=nom_value[0], ymin=4, ymax=8, color='black', linestyle='--')
+        if i==1:
+            axs[i].vlines(x=nom_value[1], ymin=0, ymax=105, color='black', linestyle='--')
+        else:
+            axs[i].vlines(x=nom_value[0], ymin=0, ymax=105, color='black', linestyle='--')
+        
+        if i == 0:
+            axs[i].set(xlabel=r'$C_{S,f},  \left[\frac{1}{rad}\right]$')
+        elif i ==1:
+            axs[i].set(xlabel=r'$C_{S,r},  \left[\frac{1}{rad}\right]$')
 
-            if i == 0:
-                axs[i,j].set(xlabel='C_{S,f},  \left[\frac{1}{rad}\right]')
-            if i == 1:
-                axs[i,j].set(xlabel='C_{S,r},  \left[\frac{1}{rad}\right]')            
-
-        axs[i,0].set_ylabel('Successful laps [%]')
-        axs[i,1].set_ylabel('Time [s]')
+        axs[i].set_ylabel('Successful laps [%]')
 
 
-    axs[2,0].grid(True)
-    axs[2,1].grid(True)
-    axs[2,0].set_xlim([3.7,5.7])
-    axs[2,1].set_xlim([3.7,5.7])
+
+    axs[2].grid(True)
+    axs[2].grid(True)
+    axs[2].set_xlim([3.7,5.7])
+    axs[2].set_xlim([3.7,5.7])
 
     axsbotticks = [4,4.5,5,5.5]
-    axs[2,0].set_xticks(ticks=axsbotticks)
+    axs[2].set_xticks(ticks=axsbotticks)
     
-    axstop = axs[2,0].twiny()
+    axstop = axs[2].twiny()
     axstopticks = 1-(5.7-np.array(axsbotticks))/2
-    
+    axstop.tick_params('both', length=0)
+
     valmin = nom_value[1]*(1+results_dict['frac_variation'])[0]
     valmax = nom_value[1]*(1+results_dict['frac_variation'])[-1]
     axsmin = axstopticks[0]
@@ -2077,61 +2050,55 @@ def display_lap_mismatch_results_multiple_C_S_fr(agent_names, parameters, legend
 
     axstop.set_xticks(ticks=axstopticks, labels=np.round(axstoplabels,1))
 
-    axstop1 = axs[2,1].twiny()
-    axstop1.set_xticks(ticks=axstopticks, labels=np.round(axstoplabels,1))
-
-    axs[2,0].yaxis.set_major_formatter(FormatStrFormatter('%.0f'))
-    axs[2,1].yaxis.set_major_formatter(FormatStrFormatter('%.1f'))
-    axs[2,0].tick_params('both', length=0)
-    axs[2,1].tick_params('both', length=0)
-    color='grey'
-    axs[2,0].spines['bottom'].set_color(color)
-    axs[2,0].spines['top'].set_color(color) 
-    axs[2,0].spines['right'].set_color(color)
-    axs[2,0].spines['left'].set_color(color)
-    axs[2,1].spines['bottom'].set_color(color)
-    axs[2,1].spines['top'].set_color(color) 
-    axs[2,1].spines['right'].set_color(color)
-    axs[2,1].spines['left'].set_color(color)
-
     axstop.spines['bottom'].set_color(color)
-    axstop.spines['top'].set_color(color) 
-    axstop.spines['right'].set_color(color)
+    axstop.spines['top'].set_color(color)
     axstop.spines['left'].set_color(color)
-    axstop1.spines['bottom'].set_color(color)
-    axstop1.spines['top'].set_color(color) 
-    axstop1.spines['right'].set_color(color)
-    axstop1.spines['left'].set_color(color)
-    axstop.tick_params('both', length=0)
-    axstop1.tick_params('both', length=0)
+    axstop.spines['right'].set_color(color)
 
-    axs[2,0].set(ylabel='Successful laps [%]') 
-    axs[2,1].set(ylabel='Times [s]') 
+    axs[2].yaxis.set_major_formatter(FormatStrFormatter('%.0f'))
+
+    axs[2].tick_params('both', length=0)
+
+    color='grey'
+    axs[2].spines['bottom'].set_color(color)
+    axs[2].spines['top'].set_color(color) 
+    axs[2].spines['right'].set_color(color)
+    axs[2].spines['left'].set_color(color)
+
+
+    axs[2].set(ylabel='Successful laps [%]') 
+
     
-    axs[2,0].set(xlabel='C_{S,f},  \left[\frac{1}{rad}\right]') 
-    axs[2,1].set(xlabel='C_{S,f},  \left[\frac{1}{rad}\right]')
-    axstop.set(xlabel='C_{S,r},  \left[\frac{1}{rad}\right]')
-    axstop1.set(xlabel='C_{S,r},  \left[\frac{1}{rad}\right]')
+    axs[2].set(xlabel=r'$C_{S,f},  \left[\frac{1}{rad}\right]$') 
 
-    axs[2,0].vlines(x=nom_value[0], ymin=90, ymax=105, color='black', linestyle='--')
+    axstop.set(xlabel=r'$C_{S,r},  \left[\frac{1}{rad}\right]$')
+
+
+    axs[2].vlines(x=nom_value[0], ymin=90, ymax=105, color='black', linestyle='--')
     # axs[2,0].text(x=nom_value[0]-0.25, y=91, s='nominal\n  value', fontsize = 'small', bbox=dict(facecolor='white', edgecolor='black',pad=0.1,boxstyle='round'))
-    axs[2,0].set_ylim([90,101])
+    axs[2].set_ylim([90,101])
 
-    axs[2,1].vlines(x=nom_value[0], ymin=5, ymax=8, color='black', linestyle='--')
+    # axs[2,1].vlines(x=nom_value[0], ymin=5, ymax=8, color='black', linestyle='--')
     # axs[2,1].text(x=nom_value[0]-0.25, y=6.4, s='nominal\n  value', fontsize = 'small', bbox=dict(facecolor='white', edgecolor='black',pad=0.1,boxstyle='round'))
-    axs[2,1].set_ylim([5.5,6.8])
+    # axs[2,1].set_ylim([5.5,6.8])
 
-    # fig.subplots_adjust(bottom=0.15,hspace=None) 
+    # fig.subplots_adjust(top=0.8, bottom=0.4, hspace=1, wspace=0.5) 
+    # fig.tight_layout()
+    # fig.subplots_adjust(bottom=0.15,hspace=1.5,left=0.25,right=0.75) 
     fig.tight_layout()
-    fig.subplots_adjust(bottom=0.15,hspace=1) 
+    fig.subplots_adjust(top=0.7, bottom=0.35, hspace=1, wspace=0.5) 
     plt.figlegend(legend,loc='lower center', ncol=2)
     
     # axs[0,0].set_title('')
     # axs[1,0].set_title('')
     # axs[2,0].set_title('')
 
-    axs[1,0].set_xticks(ticks=[4.4,5.1,5.8,6.5])
-    axs[1,1].set_xticks(ticks=[4.4,5.1,5.8,6.5])
+    # axs[1].set_xticks(ticks=[4.4,5.1,5.8,6.5])
+
+    axs[0].text(x=nom_value[0], y=180, s='(a)')
+    axs[1].text(x=nom_value[1], y=180, s='(b)')
+    axs[1].text(x=nom_value[0]+4.5, y=180, s='(c)')
+
 
     if graph==True:
         plt.show()   
