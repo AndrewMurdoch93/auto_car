@@ -1244,12 +1244,12 @@ def graph_lap_results(agent_names):
     # plt.title('Lap success rate for ' + param + ' mismatch')
     # plt.show()
 
-agent_names = ['circle_pete_sv', 'circle_pete_s', 'circle_pete_v', 'circle_ete', 
-            'columbia_pete_sv', 'columbia_pete_s', 'columbia_pete_v', 'columbia_ete',
-            'porto_pete_sv', 'porto_pete_s', 'porto_pete_v', 'porto_ete',
-            'berlin_pete_sv', 'berlin_pete_s', 'berlin_pete_v', 'berlin_ete',
-            'torino_pete_sv', 'torino_pete_s', 'torino_pete_v', 'torino_ete',
-            'redbull_ring_pete_sv', 'redbull_ring_pete_s', 'redbull_ring_pete_v', 'redbull_ring_ete']      
+# agent_names = ['circle_pete_sv', 'circle_pete_s', 'circle_pete_v', 'circle_ete', 
+#             'columbia_pete_sv', 'columbia_pete_s', 'columbia_pete_v', 'columbia_ete',
+#             'porto_pete_sv', 'porto_pete_s', 'porto_pete_v', 'porto_ete',
+#             'berlin_pete_sv', 'berlin_pete_s', 'berlin_pete_v', 'berlin_ete',
+#             'torino_pete_sv', 'torino_pete_s', 'torino_pete_v', 'torino_ete',
+#             'redbull_ring_pete_sv', 'redbull_ring_pete_s', 'redbull_ring_pete_v', 'redbull_ring_ete']      
 
 # agent_names = ['circle_pete_sv_1', 'circle_pete_s_1', 'circle_pete_v_1', 'circle_ete_1', 
 #          'columbia_pete_sv_1', 'columbia_pete_s_1', 'columbia_pete_v_1', 'columbia_ete_1',
@@ -2139,8 +2139,8 @@ def display_lap_mismatch_results_multiple_C_S_fr(agent_names, parameters, legend
 
 
 # agent_names = ['porto_ete_v5_r_collision_5', 'porto_pete_s_polynomial', 'porto_pete_v_k_1_attempt_2', 'porto_pete_sv_p_r_0']    
-# agent_names = ['porto_ete_v5_r_collision_5', 'porto_pete_sv_p_r_0'] 
-agent_names = ['porto_ete_v5_r_collision_5', 'f1_esp_ete', 'f1_mco_ete']
+agent_names = ['porto_ete_v5_r_collision_5', 'porto_pete_sv_p_r_0'] 
+# agent_names = ['porto_ete_v5_r_collision_5', 'f1_esp_ete', 'f1_mco_ete']
 # parameters = ['mu', 'C_S']
 # nom_value = [1.0489, 1]
 # parameters = ['C_Sf', 'C_Sr']
@@ -2148,13 +2148,13 @@ agent_names = ['porto_ete_v5_r_collision_5', 'f1_esp_ete', 'f1_mco_ete']
 # parameters = ['lf', 'h', 'm', 'I']
 # parameters = ['sv', 'a_max']
 # nom_value = [3.2, 9.51]
-parameters = ['mu']
-nom_value = [1.0489]
+# parameters = ['mu']
+# nom_value = [1.0489]
 # parameters = ['C_S']
 # nom_value = [4.718, 5.4562]
 
-# parameters = ['C_Sf', 'C_Sr', 'C_S']
-# nom_value = [4.718, 5.4562]
+parameters = ['C_Sf', 'C_Sr', 'C_S']
+nom_value = [4.718, 5.4562]
 
 # parameters = ['C_Sr']
 # nom_value = [5.4562]
@@ -2162,7 +2162,8 @@ nom_value = [1.0489]
 
 
 legend_title = ''
-legend = ['Porto', 'Barcelona-Catalunya', 'Monaco']
+# legend = ['Porto', 'Barcelona-Catalunya', 'Monaco']
+legend = ['End-to-end', 'Partial end-to-end']
 plot_titles = parameters
 graph=True
 text=False
@@ -2173,7 +2174,7 @@ text=False
 # C_S
 # display_lap_mismatch_results_multiple_C_S(agent_names, parameters, legend_title, legend, plot_titles, nom_value, graph, text)
 # C_Sfr
-# display_lap_mismatch_results_multiple_C_S_fr(agent_names, parameters, legend_title, legend, plot_titles, nom_value, graph, text)
+display_lap_mismatch_results_multiple_C_S_fr(agent_names, parameters, legend_title, legend, plot_titles, nom_value, graph, text)
 
 
 def display_lap_unknown_mass(agent_names, legend):
@@ -5298,9 +5299,9 @@ mismatch_parameters = ['unknown_mass']
 frac_vary = [0]
 noise_dicts = [{'xy':0.025, 'theta':0.05, 'v':0.1, 'lidar':0.01}]
 start_condition = {'x':10, 'y':4.5, 'v':3, 'theta':np.pi, 'delta':0, 'goal':0}
-display_path_mismatch_multiple_by_agent_4(agent_names=agent_names, ns=ns, legend_title=legend_title,          
-                                             legend=legend, mismatch_parameters=mismatch_parameters, frac_vary=frac_vary, noise_dicts=noise_dicts,
-                                             start_condition=start_condition)
+# display_path_mismatch_multiple_by_agent_4(agent_names=agent_names, ns=ns, legend_title=legend_title,          
+#                                              legend=legend, mismatch_parameters=mismatch_parameters, frac_vary=frac_vary, noise_dicts=noise_dicts,
+#                                              start_condition=start_condition)
 
 
 
