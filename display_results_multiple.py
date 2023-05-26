@@ -1992,9 +1992,9 @@ def display_lap_mismatch_results_multiple_C_S_fr(agent_names, parameters, legend
     # axs[0].set_ylim([40,105])
 
 
-    axs[0].text(x=nom_value[0]-0.25, y=10, s='nominal\n  value', fontsize = 'small', bbox=dict(facecolor='white', edgecolor='black',pad=0.1,boxstyle='round'))
-    axs[1].text(x=nom_value[1]-0.4, y=10, s='nominal\n  value', fontsize = 'small', bbox=dict(facecolor='white', edgecolor='black',pad=0.1,boxstyle='round'))
-    axs[2].text(x=nom_value[0]-0.3, y=91, s='nominal\n  value', fontsize = 'small', bbox=dict(facecolor='white', edgecolor='black',pad=0.1,boxstyle='round'))
+    # axs[0].text(x=nom_value[0]-0.25, y=10, s='nominal\n  value', fontsize = 'small', bbox=dict(facecolor='white', edgecolor='black',pad=0.1,boxstyle='round'))
+    # axs[1].text(x=nom_value[1]-0.4, y=10, s='nominal\n  value', fontsize = 'small', bbox=dict(facecolor='white', edgecolor='black',pad=0.1,boxstyle='round'))
+    # axs[2].text(x=nom_value[0]-0.3, y=91, s='nominal\n  value', fontsize = 'small', bbox=dict(facecolor='white', edgecolor='black',pad=0.1,boxstyle='round'))
    
 
     # axs[0].set_title('Front tire stiffness')
@@ -2016,19 +2016,21 @@ def display_lap_mismatch_results_multiple_C_S_fr(agent_names, parameters, legend
 
         axs[i].tick_params('both', length=0)
 
+        axs[i].set_ylim([50,105])
+
         if i==1:
             axs[i].vlines(x=nom_value[1], ymin=0, ymax=105, color='black', linestyle='--')
         else:
             axs[i].vlines(x=nom_value[0], ymin=0, ymax=105, color='black', linestyle='--')
         
         if i == 0:
-            axs[i].set(xlabel=r'$C_{S,f},  \left[\frac{1}{rad}\right]$')
+            axs[i].set(xlabel=r'$C_{S,f} \ \ [\mathrm{rad}^{-1}]$')
         elif i ==1:
-            axs[i].set(xlabel=r'$C_{S,r},  \left[\frac{1}{rad}\right]$')
+            axs[i].set(xlabel=r'$C_{S,r} \ \ [\mathrm{rad}^{-1}]$')
 
         axs[i].set_ylabel('Successful laps [%]')
 
-
+    
 
     axs[2].grid(True)
     axs[2].grid(True)
@@ -2069,9 +2071,9 @@ def display_lap_mismatch_results_multiple_C_S_fr(agent_names, parameters, legend
     axs[2].set(ylabel='Successful laps [%]') 
 
     
-    axs[2].set(xlabel=r'$C_{S,f},  \left[\frac{1}{rad}\right]$') 
+    axs[2].set(xlabel=r'$C_{S,f} \ \ [\mathrm{rad}^{-1}]$') 
 
-    axstop.set(xlabel=r'$C_{S,r},  \left[\frac{1}{rad}\right]$')
+    axstop.set(xlabel=r'$C_{S,r} \ \ [\mathrm{rad}^{-1}]$')
 
 
     axs[2].vlines(x=nom_value[0], ymin=90, ymax=105, color='black', linestyle='--')
@@ -2087,7 +2089,7 @@ def display_lap_mismatch_results_multiple_C_S_fr(agent_names, parameters, legend
     # fig.subplots_adjust(bottom=0.15,hspace=1.5,left=0.25,right=0.75) 
     fig.tight_layout()
     fig.subplots_adjust(top=0.7, bottom=0.35, hspace=1, wspace=0.5) 
-    plt.figlegend(legend,loc='lower center', ncol=2)
+    plt.figlegend(legend, loc='lower center', ncol=3)
     
     # axs[0,0].set_title('')
     # axs[1,0].set_title('')
@@ -2095,19 +2097,115 @@ def display_lap_mismatch_results_multiple_C_S_fr(agent_names, parameters, legend
 
     # axs[1].set_xticks(ticks=[4.4,5.1,5.8,6.5])
 
-    axs[0].text(x=nom_value[0], y=180, s='(a)')
-    axs[1].text(x=nom_value[1], y=180, s='(b)')
-    axs[1].text(x=nom_value[0]+4.5, y=180, s='(c)')
+    axs[0].text(x=nom_value[0], y=135, s='(a)')
+    axs[1].text(x=nom_value[1], y=135, s='(b)')
+    axs[1].text(x=nom_value[0]+4.5, y=135, s='(c)')
 
 
     if graph==True:
         plt.show()   
 
 
+def display_lap_mismatch_results_multiple_mu_2(agent_names, legend):
+    
+    nom_value = 1.0489
+
+
+    plt.rcParams['font.family'] = 'serif'
+    plt.rcParams['font.serif'] = ['Times New Roman'] + plt.rcParams['font.serif']
+
+    fig, axs = plt.subplots(nrows=1, ncols=2, figsize=(5.5,2.5))
+
+
+    for agent in agent_names:
+        
+        #infile = open('lap_results_mismatch/' + agent + '_new/' + parameter, 'rb')
+        infile = open('lap_results_mismatch/' + agent + '/' + 'mu', 'rb')
+        results_dict = pickle.load(infile)
+        infile.close() 
+
+        n_episodes = len(results_dict['collision_results'][0,0,:])
+        n_param = len(results_dict['collision_results'][0,:,0])
+        n_runs = len(results_dict['collision_results'][:,0,0])
+
+        avg_col = np.zeros(n_param)
+        dev_col = np.zeros(n_param)
+
+        avg_time = np.zeros(n_param)
+        dev_time = np.zeros(n_param)
+
+        for i in range(n_param):
+            
+            cols = results_dict['collision_results']
+            times = results_dict['times_results']
+            times[cols==1]=np.nan
+            
+            avg_col[i] = np.round(np.sum(np.logical_not(results_dict['collision_results'][:,i,:]))/(n_episodes*n_runs), 2)
+            failures = np.count_nonzero(results_dict['collision_results'][:,i,:].flatten())
+            successes = n_episodes*n_runs - failures
+            dev_col[i] = np.sqrt(n_episodes*(successes/n_episodes)*((failures)/n_episodes))/(n_episodes*n_runs)
+            
+
+        avg_times = np.nanmean(times,axis=(0,2))
+        dev_times = np.nanstd(times,axis=(0,2))
+
+        avg_col_filter = functions.savitzky_golay(avg_col, 5, 2)
+        dev_col_filter = functions.savitzky_golay(dev_col, 5, 2)
+
+        avg_times_filter = functions.savitzky_golay(avg_times, 5, 2)
+        dev_times_filter = functions.savitzky_golay(dev_times, 5, 2)
+
+      
+
+        if agent=='porto_ete_v5_r_collision_5' or agent=='f1_esp_ete'or agent=='f1_mco_ete':
+            axs[0].plot(nom_value*(1+results_dict['frac_variation']), avg_col*100, alpha=0.8)
+            axs[0].fill_between(nom_value*(1+results_dict['frac_variation']), (avg_col+dev_col)*100, (avg_col-dev_col)*100, alpha=0.2, label='_nolegend_')
+        if agent=='porto_pete_sv_p_r_0' or agent=='f1_esp_pete'or agent=='f1_mco_pete':
+            axs[1].plot(nom_value*(1+results_dict['frac_variation']), avg_col*100, alpha=0.8)
+            axs[1].fill_between(nom_value*(1+results_dict['frac_variation']), (avg_col+dev_col)*100, (avg_col-dev_col)*100, alpha=0.2, label='_nolegend_')
+
+
+    for i in [0,1]:
+        axs[i].grid(True)
+
+        axs[i].yaxis.set_major_formatter(FormatStrFormatter('%.0f'))
+        axs[i].tick_params('both', length=0)
+
+        color='grey'
+        axs[i].spines['bottom'].set_color(color)
+        axs[i].spines['top'].set_color(color) 
+        axs[i].spines['right'].set_color(color)
+        axs[i].spines['left'].set_color(color)
+
+        axs[i].set(ylabel='Successful laps [%]')
+        axs[i].set(xlabel='Friction coefficient, $\mu$') 
+
+        axs[i].set_xlim([0.3,1.2])
+        axs[i].set_ylim([-5,105])
+
+        axs[i].vlines(x=nom_value, ymin=-50, ymax=150, color='black', linestyle='--')
+        axs[i].vlines(x=0.8, ymin=-50, ymax=150, color='black', linestyle='--')
+        axs[i].vlines(x=0.53, ymin=-50, ymax=150, color='black', linestyle='--')
+
+        axs[i].text(x=0.95, y=10, s='Nominal\n   value', fontsize = 'small', verticalalignment='center', bbox=dict(facecolor='white', edgecolor='black',pad=0.1,boxstyle='round'))
+        axs[i].text(x=0.7, y=10, s='   Dry\nasphalt', fontsize = 'small', verticalalignment='center', bbox=dict(facecolor='white', edgecolor='black',pad=0.1,boxstyle='round'))
+        axs[i].text(x=0.4, y=10, s='   Wet\nasphalt', fontsize = 'small', verticalalignment='center', bbox=dict(facecolor='white', edgecolor='black',pad=0.1,boxstyle='round'))
+
+
+
+
+
+    fig.tight_layout()
+    fig.subplots_adjust(bottom=0.32) 
+    plt.figlegend(legend,loc='lower center', ncol=3)
+    if graph==True:
+        plt.show()   
+
+
 
 # agent_names = ['porto_ete_v5_r_collision_5', 'porto_pete_s_polynomial', 'porto_pete_v_k_1_attempt_2', 'porto_pete_sv_p_r_0']    
-agent_names = ['porto_ete_v5_r_collision_5', 'porto_pete_sv_p_r_0'] 
-# agent_names = ['porto_ete_v5_r_collision_5', 'f1_esp_ete', 'f1_mco_ete']
+# agent_names = ['porto_ete_v5_r_collision_5', 'porto_pete_sv_p_r_0'] 
+agent_names = ['porto_ete_v5_r_collision_5', 'f1_esp_ete', 'f1_mco_ete', 'porto_pete_sv_p_r_0']
 # parameters = ['mu', 'C_S']
 # nom_value = [1.0489, 1]
 # parameters = ['C_Sf', 'C_Sr']
@@ -2115,13 +2213,13 @@ agent_names = ['porto_ete_v5_r_collision_5', 'porto_pete_sv_p_r_0']
 # parameters = ['lf', 'h', 'm', 'I']
 # parameters = ['sv', 'a_max']
 # nom_value = [3.2, 9.51]
-# parameters = ['mu']
-# nom_value = [1.0489]
+parameters = ['mu']
+nom_value = [1.0489]
 # parameters = ['C_S']
 # nom_value = [4.718, 5.4562]
 
-parameters = ['C_Sf', 'C_Sr', 'C_S']
-nom_value = [4.718, 5.4562]
+# parameters = ['C_Sf', 'C_Sr', 'C_S']
+# nom_value = [4.718, 5.4562]
 
 # parameters = ['C_Sr']
 # nom_value = [5.4562]
@@ -2129,8 +2227,8 @@ nom_value = [4.718, 5.4562]
 
 
 legend_title = ''
-# legend = ['Porto', 'Barcelona-Catalunya', 'Monaco']
-legend = ['End-to-end', 'Partial end-to-end']
+legend = ['Porto', 'Barcelona-Catalunya', 'Monaco']
+# legend = ['End-to-end', 'Partial end-to-end', 'Nominal $C_{S,i}$ value']
 plot_titles = parameters
 graph=True
 text=False
@@ -2138,10 +2236,12 @@ text=False
 # display_lap_mismatch_results_multiple_1(agent_names, parameters, legend_title, legend, plot_titles, nom_value, graph, text)
 # mu
 # display_lap_mismatch_results_multiple_mu(agent_names, parameters, legend_title, legend, plot_titles, nom_value, graph, text)
+display_lap_mismatch_results_multiple_mu_2(agent_names, legend)
 # C_S
 # display_lap_mismatch_results_multiple_C_S(agent_names, parameters, legend_title, legend, plot_titles, nom_value, graph, text)
 # C_Sfr
-display_lap_mismatch_results_multiple_C_S_fr(agent_names, parameters, legend_title, legend, plot_titles, nom_value, graph, text)
+# display_lap_mismatch_results_multiple_C_S_fr(agent_names, parameters, legend_title, legend, plot_titles, nom_value, graph, text)
+
 
 
 def display_lap_unknown_mass(agent_names, legend):
@@ -4914,17 +5014,17 @@ def display_path_mismatch_multiple_by_agent_2(agent_names, ns, legend_title, leg
             idx+=1  
 
         # Plot Steering angle of end-to-end agent
-        ax[1,0].set(ylabel='Steering \nangle \n[rads]')
-        idx=0
-        for _ in range(2):
-            ax[1,0].plot(np.array(progress_history[idx])*100, np.array(state_history[idx])[:,2], linewidth=1.5, alpha=alpha)  
-            idx+=1  
+        # ax[1,0].set(ylabel='Steering \nangle \n[rads]')
+        # idx=0
+        # for _ in range(2):
+        #     ax[1,0].plot(np.array(progress_history[idx])*100, np.array(state_history[idx])[:,2], linewidth=1.5, alpha=alpha)  
+        #     idx+=1  
 
         # Plot steering angle of partial end-to-end agent with steering and velocity control
-        idx=6
-        for _ in range(2):
-            ax[1,1].plot(np.array(progress_history[idx])*100, np.array(state_history[idx])[:,2], linewidth=1.5, alpha=alpha)  
-            idx+=1  
+        # idx=6
+        # for _ in range(2):
+        #     ax[1,1].plot(np.array(progress_history[idx])*100, np.array(state_history[idx])[:,2], linewidth=1.5, alpha=alpha)  
+        #     idx+=1  
 
         
         # # Plot velocity of end-to-end agent
@@ -4943,18 +5043,18 @@ def display_path_mismatch_multiple_by_agent_2(agent_names, ns, legend_title, leg
         
 
         # # Plot slip angle of end-to-end agent
-        # ax[3,0].set(xlabel='Progress along centerline', ylabel='Slip angle \n[rads]')
-        # idx=0
-        # for _ in range(2):
-        #     ax[3,0].plot(np.array(progress_history[idx])*100, np.array(state_history[idx])[:,6], linewidth=1.5, alpha=alpha)  
-        #     idx+=1  
+        ax[1,0].set(xlabel='Progress along centerline', ylabel='Slip angle \n[rads]')
+        idx=0
+        for _ in range(2):
+            ax[1,0].plot(np.array(progress_history[idx])*100, np.array(state_history[idx])[:,6], linewidth=1.5, alpha=alpha)  
+            idx+=1  
 
         # # Plot velocity of partial end-to-end agent with steering and velocity control
-        # ax[3,1].set(xlabel='Progress along centerline')
-        # idx=6
-        # for _ in range(2):
-        #     ax[3,1].plot(np.array(progress_history[idx])*100, np.array(state_history[idx])[:,6], linewidth=1.5, alpha=alpha)  
-        #     idx+=1  
+        ax[1,1].set(xlabel='Progress along centerline')
+        idx=6
+        for _ in range(2):
+            ax[1,1].plot(np.array(progress_history[idx])*100, np.array(state_history[idx])[:,6], linewidth=1.5, alpha=alpha)  
+            idx+=1  
 
 
     
@@ -4980,11 +5080,13 @@ def display_path_mismatch_multiple_by_agent_2(agent_names, ns, legend_title, leg
                 if plt_idx_1==1:
                     ax[plt_idx_0,plt_idx_1].set_yticklabels([])
 
+        ax[1,0].set_ylim([-0.5,0.5])
+        ax[1,1].set_ylim([-0.5,0.5])
         
         ax[0,0].set_title('End-to-end')
         ax[0,1].set_title('Partial end-to-end')
-        ax[1,0].set_xlabel('Progress along centerline')
-        ax[1,1].set_xlabel('Progress along centerline')
+        ax[1,0].set_xlabel('Progress along centerline [%]')
+        ax[1,1].set_xlabel('Progress along centerline [%]')
         fig.tight_layout()
         fig.subplots_adjust(bottom=0.3) 
         plt.figlegend(legend, loc='lower center', ncol=2, labelspacing=0.7)
@@ -4994,13 +5096,14 @@ def display_path_mismatch_multiple_by_agent_2(agent_names, ns, legend_title, leg
 
 
 agent_names = ['porto_ete_v5_r_collision_5', 'porto_pete_s_polynomial', 'porto_pete_v_k_1_attempt_2', 'porto_pete_sv_p_r_0']    
-legend = ['Nominal tire stiffness', 'Decreased tire stiffness']
+legend = ['Nominal $C_{S,r}$', 'Decreased $C_{S,r}$']
 legend_title = ''
 ns=[2,1,0,0]
-mismatch_parameters = ['unknown_mass']
-frac_vary = [0]
+mismatch_parameters = ['C_Sr']
+frac_vary = [-0.2]
 noise_dicts = [{'xy':0.025, 'theta':0.05, 'v':0.1, 'lidar':0.01}]
-start_condition = {'x':10, 'y':4.5, 'v':3, 'theta':np.pi, 'delta':0, 'goal':0}
+# start_condition = {'x':10, 'y':4.5, 'v':3, 'theta':np.pi, 'delta':0, 'goal':0}
+start_condition = {'x':8.9, 'y':2.7, 'v':3, 'theta':0, 'delta':0, 'goal':0}
 # display_path_mismatch_multiple_by_agent_2(agent_names=agent_names, ns=ns, legend_title=legend_title,          
 #                                              legend=legend, mismatch_parameters=mismatch_parameters, frac_vary=frac_vary, noise_dicts=noise_dicts,
 #                                              start_condition=start_condition)
