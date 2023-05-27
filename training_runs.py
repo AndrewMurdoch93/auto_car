@@ -2430,9 +2430,11 @@ if True:
     # agent_names = ['porto_pete_sv_p_r_0']
 
 
-    n_tests=100
+    n_tests=10
     # frac_variation = np.linspace(-0.2,0.2,21)
-    mu_frac_variation = np.linspace(-0.5,0,5)
+    # mu_frac_variation = np.linspace(-0.5,0,5)
+    mu_frac_variation = np.array([-0.5,-0.4,-0.3])
+    
     # frac_variation = np.array([-2, -1, -0.5, 0.5, 1])
 
     # agent_name = 'porto_domain_random'
@@ -2487,8 +2489,38 @@ if True:
 
 
 
-    agent_name = 'f1_esp_pete'
-    main_multiple.lap_time_test_mismatch(agent_name=agent_name, n_episodes=n_tests, detect_issues=False, initial_conditions=True, parameter='mu', frac_variation=mu_frac_variation)
+   
+    # agent_name = 'f1_esp_pete_r_p_1'
+    # main_multiple.lap_time_test_mismatch(agent_name=agent_name, n_episodes=n_tests, detect_issues=False, initial_conditions=True, parameter='mu', frac_variation=mu_frac_variation)
+    
+    # agent_name = 'f1_esp_pete_r_p_5'
+    # main_multiple.lap_time_test_mismatch(agent_name=agent_name, n_episodes=n_tests, detect_issues=False, initial_conditions=True, parameter='mu', frac_variation=mu_frac_variation)
+    
+    # agent_name = 'f1_esp_pete_r_d_2'
+    # main_multiple.lap_time_test_mismatch(agent_name=agent_name, n_episodes=n_tests, detect_issues=False, initial_conditions=True, parameter='mu', frac_variation=mu_frac_variation)
+    
+    # agent_name = 'f1_esp_pete_r_d_25'
+    # main_multiple.lap_time_test_mismatch(agent_name=agent_name, n_episodes=n_tests, detect_issues=False, initial_conditions=True, parameter='mu', frac_variation=mu_frac_variation)
+    
+    # agent_name = 'f1_esp_pete_bs_200'
+    # main_multiple.lap_time_test_mismatch(agent_name=agent_name, n_episodes=n_tests, detect_issues=False, initial_conditions=True, parameter='mu', frac_variation=mu_frac_variation)
+    
+    # agent_name = 'f1_esp_pete_bs_600'
+    # main_multiple.lap_time_test_mismatch(agent_name=agent_name, n_episodes=n_tests, detect_issues=False, initial_conditions=True, parameter='mu', frac_variation=mu_frac_variation)
+    
+    # agent_name = 'f1_esp_pete_nn_plus'
+    # main_multiple.lap_time_test_mismatch(agent_name=agent_name, n_episodes=n_tests, detect_issues=False, initial_conditions=True, parameter='mu', frac_variation=mu_frac_variation)
+    
+    # agent_name = 'f1_esp_pete_nn_minus'
+    # main_multiple.lap_time_test_mismatch(agent_name=agent_name, n_episodes=n_tests, detect_issues=False, initial_conditions=True, parameter='mu', frac_variation=mu_frac_variation)
+    
+    # agent_name = 'f1_esp_pete_f_5'
+    # main_multiple.lap_time_test_mismatch(agent_name=agent_name, n_episodes=n_tests, detect_issues=False, initial_conditions=True, parameter='mu', frac_variation=mu_frac_variation)
+    
+    # agent_name = 'f1_esp_pete_f_20'
+    # main_multiple.lap_time_test_mismatch(agent_name=agent_name, n_episodes=n_tests, detect_issues=False, initial_conditions=True, parameter='mu', frac_variation=mu_frac_variation)
+    
+
     # main_multiple.lap_time_test_mismatch(agent_name=agent_name, n_episodes=n_tests, detect_issues=False, initial_conditions=True, parameter='C_Sf', frac_variation=frac_variation)
     # main_multiple.lap_time_test_mismatch(agent_name=agent_name, n_episodes=n_tests, detect_issues=False, initial_conditions=True, parameter='C_Sr', frac_variation=frac_variation)
     # main_multiple.lap_time_test_mismatch(agent_name=agent_name, n_episodes=n_tests, detect_issues=False, initial_conditions=True, parameter='C_S', frac_variation=frac_variation)

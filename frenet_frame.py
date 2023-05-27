@@ -173,7 +173,7 @@ def plot_frenet_polynomial():
 
 def plot_frenet_path():
     
-    map_name='porto_1'
+    map_name='f1_esp'
     agent_names = ['porto_pete_sv_p_r_0']
     ns = [0]
     mismatch_parameters = []
