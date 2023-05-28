@@ -2254,7 +2254,7 @@ text=False
 # display_lap_mismatch_results_multiple_1(agent_names, parameters, legend_title, legend, plot_titles, nom_value, graph, text)
 # mu
 # display_lap_mismatch_results_multiple_mu(agent_names, parameters, legend_title, legend, plot_titles, nom_value, graph, text)
-# display_lap_mismatch_results_multiple_mu_2(agent_names, legend)
+display_lap_mismatch_results_multiple_mu_2(agent_names, legend)
 # C_S
 # display_lap_mismatch_results_multiple_C_S(agent_names, parameters, legend_title, legend, plot_titles, nom_value, graph, text)
 # C_Sfr
@@ -4735,9 +4735,9 @@ frac_vary = [[-0.3],[-0.5]]
 noise_dicts = [{'xy':0.025, 'theta':0.05, 'v':0.1, 'lidar':0.01}]
 
 
-display_path_mismatch_multiple_by_agent(agent_names=agent_names, ns=ns, legend_title=legend_title,          
-                                        legend=legend, mismatch_parameters=mismatch_parameters, frac_vary=frac_vary, noise_dicts=noise_dicts,
-                                        start_condition=start_condition)
+# display_path_mismatch_multiple_by_agent(agent_names=agent_names, ns=ns, legend_title=legend_title,          
+#                                         legend=legend, mismatch_parameters=mismatch_parameters, frac_vary=frac_vary, noise_dicts=noise_dicts,
+#                                         start_condition=start_condition)
 
 
 

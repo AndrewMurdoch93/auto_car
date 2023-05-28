@@ -918,7 +918,7 @@ n_test=10
 # agent_names = ['f1_aus_ete']
 
 # agent_names = ['f1_gbr_pete']
-agent_names = ['f1_esp_pete_r_p_5', 'f1_esp_pete_r_p_5', 'f1_esp_pete_r_p_5']
+# agent_names = ['f1_esp_pete_r_p_5', 'f1_esp_pete_r_p_5', 'f1_esp_pete_r_p_5']
 # agent_names = ['f1_esp_ete', 'f1_esp_ete', 'f1_esp_ete']
 # agent_names = ['f1_esp_pete_eval']
 # agent_names = ['f1_mco_pete']
@@ -956,9 +956,9 @@ legend_title = ''
 #     print('------------------------------' + '\n' + agent_name + '\n' + '------------------------------')
 #     display_results_multiple.display_train_parameters(agent_name=agent_name)
 
-# for agent_name in agent_names:
-#     print('------------------------------' + '\n' + agent_name + '\n' + '------------------------------')
-#     display_results_multiple.display_lap_results(agent_name=agent_name)
+for agent_name in agent_names:
+    print('------------------------------' + '\n' + agent_name + '\n' + '------------------------------')
+    display_results_multiple.display_lap_results(agent_name=agent_name)
 
 
 mismatch_parameters = [['mu'], ['mu'], ['mu']]
