@@ -831,7 +831,7 @@ n_test=100
 # agent_names = ['f1_aus_ete']
 
 # agent_names = ['f1_gbr_pete']
-agent_names = ['f1_esp_pete']
+# agent_names = ['f1_esp_pete']
 # agent_names = ['f1_esp_pete_eval']
 # agent_names = ['f1_mco_pete']
 # agent_names = ['f1_aus_pete']
@@ -842,18 +842,21 @@ agent_names = ['f1_esp_pete']
 # agent_names = ['f1_esp_pete_r_p_1', 'f1_esp_pete', 'f1_esp_pete_r_p_5']
 
 
-# agent_names = ['f1_esp_pete_f_20']
+agent_names = ['f1_esp_pete_f_2', 'f1_esp_pete_f_5', 'f1_esp_pete_eval', 'f1_esp_pete_f_20', 'f1_esp_pete_f_33', 'f1_esp_pete_f_33']
+agent_names = ['f1_esp_pete_nn_plus', 'f1_esp_pete_nn_minus']
+agent_names = ['f1_esp_pete_bs_200', 'f1_esp_pete_eval', 'f1_esp_pete_bs_600']
 
 # legend = ['no noise', 'noise']
 # legend = ['180', '220']
 # legend = ['5', '10', '20']
-legend = ['-1', '-2', '-5']
-legend_title = r'Standard deviation of road surface friction coefficient, $\mu$'
+# legend = ['-1', '-2', '-5']
+# legend_title = r'Standard deviation of road surface friction coefficient, $\mu$'
 ns=[0,0,0,0,0,0]
 
 # agent_names = ['porto_ete_v5_r_collision_5']
-# legend = []
-# legend_title = ''
+legend = ['2', '5', '10', '20', '33']
+# legend = ['600', '200']
+legend_title = ''
 # ns=[0]
 
 
@@ -868,9 +871,9 @@ display_results_multiple.learning_curve_reward_average(agent_names, legend, lege
 #     print('------------------------------' + '\n' + agent_name + '\n' + '------------------------------')
 #     display_results_multiple.display_train_parameters(agent_name=agent_name)
 
-# for agent_name in agent_names:
-#     print('------------------------------' + '\n' + agent_name + '\n' + '------------------------------')
-#     display_results_multiple.display_lap_results(agent_name=agent_name)
+for agent_name in agent_names:
+    print('------------------------------' + '\n' + agent_name + '\n' + '------------------------------')
+    display_results_multiple.display_lap_results(agent_name=agent_name)
 
 
 mismatch_parameters = [['C_Sr', 'mu'], ['C_Sr', 'mu']]

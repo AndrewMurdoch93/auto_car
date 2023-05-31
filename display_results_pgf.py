@@ -3400,7 +3400,7 @@ def display_lap_unknown_mass_time(agent_names, legend, filename):
 agent_names = ['porto_ete_v5_r_collision_5', 'porto_pete_sv_p_r_0']    
 legend = ['End-to-end', 'Steering control', 'Velocity control', 'Steering and velocity control']
 filename = 'unknown_mass'
-display_lap_unknown_mass(agent_names, legend, filename)
+# display_lap_unknown_mass(agent_names, legend, filename)
 
 
 def display_path_mismatch_multiple(agent_names, ns, legend_title, legend, mismatch_parameters, frac_vary, noise_dicts, start_condition, filename):
@@ -4176,15 +4176,30 @@ agent_names = ['f1_esp_pete_r_d_2', 'f1_esp_pete_r_d_25', 'f1_esp_pete']
 legend = ['0.2', '0.25', '0.3']
 # legend = ['-1', '-2', '-5']
 legend_title = 'Distance reward ($r_{\mathrm{dist}}$)'
+legend_title = 'Agent sample rate, $f_{\mathrm{agent}}$'
 # legend_title = 'Collision penalty ($r_{\mathrm{collision}}$)'
-xlim=100
+
+
+
+
+agent_names = ['f1_esp_pete_f_2', 'f1_esp_pete_f_5', 'f1_esp_pete_eval', 'f1_esp_pete_f_20']
+legend = ['2', '5', '10', '20']
+
+# agent_names = ['f1_esp_pete_nn_plus', 'f1_esp_pete_nn_minus']
+# leganed =['600', '400', '200']
+
+# agent_names = ['f1_esp_pete_bs_200', 'f1_esp_pete_bs_600']
+# legend = ['200', '400', '600']
+
+
+xlim=50
 xspace = 25
 bottom_space = 0.4
 height=2.5
 
-ns=[0, 0, 0, 0, 0]
+ns=[0, 0, 0, 0, 0, 0]
 filename = 'observation_space_1'
-# learning_curve_all(agent_names, legend, legend_title, ns, filename, xlim, xspace, bottom_space, height)
+learning_curve_all(agent_names, legend, legend_title, ns, filename, xlim, xspace, bottom_space, height)
 # learning_curve_lap_time_average(agent_names, legend, legend_title, ns, filename, xlim, xspace, bottom_space, height)
 
 
