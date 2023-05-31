@@ -303,7 +303,7 @@ class trainingLoop():
             #    outfile.close()
 
 
-            if episode%10==0:
+            if episode%1==0:
                if self.learning_method=='dqn' or self.learning_method=='dueling_dqn' or self.learning_method=='dueling_ddqn' or self.learning_method=='rainbow':
                   print(f"{'Run':3s} {n:2.0f} {'| Episode':8s} {episode:5.0f} {'| Score':8s} {score:6.2f} {'| Progress':12s} {self.env.progress:3.2f} {'| collision ':13s} {self.env.collision} {'| Average score':15s} {avg_score:6.2f} {'| Average progress':18s} {avg_progress:3.2f} {'| Epsilon':9s} {self.agent.epsilon:.2f}")
                if self.learning_method=='reinforce' or self.learning_method=='actor_critic_sep' or self.learning_method=='actor_critic_com' or self.learning_method=='actor_critic_cont' or self.learning_method=='ddpg' or self.learning_method=='td3':
@@ -990,7 +990,7 @@ def lap_time_test_with_noise(agent_name, n_episodes, detect_issues, initial_cond
          times[n, episode] = time
          collisions[n, episode] = collision 
             
-         if episode%10==0:
+         if episode%1==0:
             print('Lap test episode', episode, '| Lap time = %.2f' % time, '| Score = %.2f' % score)
 
    outfile=open(results_file_name, 'wb')
@@ -1020,6 +1020,7 @@ def lap_time_test_mismatch(agent_name, n_episodes, detect_issues, initial_condit
    infile.close()
    init_car_params = env_dict['car_params']
    
+   # env_dict['steer_control_dict']['track_width'] = 0.7
 
    if initial_conditions==True:
       start_condition_file_name = 'test_initial_condition/' + env_dict['map_name']
@@ -1156,7 +1157,7 @@ def lap_time_test_mismatch(agent_name, n_episodes, detect_issues, initial_condit
             param_dict['times_results'][n, v_i, episode] = time
             param_dict['collision_results'][n, v_i, episode] = collision
 
-            if episode%10==0:
+            if episode%1==0:
                print('Lap test episode', episode, '| Lap time = %.2f' % time, '| Score = %.2f' % score, '| Fail = %.2f' %collision)
 
    outfile=open(results_file, 'wb')

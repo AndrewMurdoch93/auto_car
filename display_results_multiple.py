@@ -2140,10 +2140,23 @@ def display_lap_mismatch_results_multiple_mu_2(agent_names, legend):
             times = results_dict['times_results']
             times[cols==1]=np.nan
             
-            avg_col[i] = np.round(np.sum(np.logical_not(results_dict['collision_results'][:,i,:]))/(n_episodes*n_runs), 2)
-            failures = np.count_nonzero(results_dict['collision_results'][:,i,:].flatten())
-            successes = n_episodes*n_runs - failures
-            dev_col[i] = np.sqrt(n_episodes*(successes/n_episodes)*((failures)/n_episodes))/(n_episodes*n_runs)
+            if agent=='f1_esp_pete_r_p_5':
+                avg_col[i] = np.round(np.sum(np.logical_not(results_dict['collision_results'][np.array([0,2]),i,:]))/(n_episodes*2), 2)
+                failures = np.count_nonzero(results_dict['collision_results'][np.array([0,2]),i,:].flatten())
+                successes = n_episodes*n_runs - failures
+                dev_col[i] = np.sqrt(n_episodes*(successes/n_episodes)*((failures)/n_episodes))/(n_episodes*2)
+            
+            elif agent=='f1_mco_pete_mu_4':
+                avg_col[i] = np.round(np.sum(np.logical_not(results_dict['collision_results'][np.array([0,2]),i,:]))/(n_episodes*2), 2)
+                failures = np.count_nonzero(results_dict['collision_results'][np.array([0,2]),i,:].flatten())
+                successes = n_episodes*n_runs - failures
+                dev_col[i] = np.sqrt(n_episodes*(successes/n_episodes)*((failures)/n_episodes))/(n_episodes*2)
+           
+            else:
+                avg_col[i] = np.round(np.sum(np.logical_not(results_dict['collision_results'][:,i,:]))/(n_episodes*n_runs), 2)
+                failures = np.count_nonzero(results_dict['collision_results'][:,i,:].flatten())
+                successes = n_episodes*n_runs - failures
+                dev_col[i] = np.sqrt(n_episodes*(successes/n_episodes)*((failures)/n_episodes))/(n_episodes*n_runs)
             
 
         avg_times = np.nanmean(times,axis=(0,2))
@@ -2160,7 +2173,10 @@ def display_lap_mismatch_results_multiple_mu_2(agent_names, legend):
         if agent=='porto_ete_v5_r_collision_5' or agent=='f1_esp_ete'or agent=='f1_mco_ete':
             axs[0].plot(nom_value*(1+results_dict['frac_variation']), avg_col*100, alpha=0.8)
             axs[0].fill_between(nom_value*(1+results_dict['frac_variation']), (avg_col+dev_col)*100, (avg_col-dev_col)*100, alpha=0.2, label='_nolegend_')
-        if agent=='porto_pete_sv_p_r_0' or agent=='f1_esp_pete'or agent=='f1_mco_pete':
+        elif agent=='porto_pete_sv_p_r_0' or agent=='f1_esp_pete'or agent=='f1_mco_pete_mu_4':
+            axs[1].plot(nom_value*(1+results_dict['frac_variation']), avg_col*100, alpha=0.8)
+            axs[1].fill_between(nom_value*(1+results_dict['frac_variation']), (avg_col+dev_col)*100, (avg_col-dev_col)*100, alpha=0.2, label='_nolegend_')
+        else:
             axs[1].plot(nom_value*(1+results_dict['frac_variation']), avg_col*100, alpha=0.8)
             axs[1].fill_between(nom_value*(1+results_dict['frac_variation']), (avg_col+dev_col)*100, (avg_col-dev_col)*100, alpha=0.2, label='_nolegend_')
 
@@ -2189,8 +2205,10 @@ def display_lap_mismatch_results_multiple_mu_2(agent_names, legend):
 
         axs[i].text(x=0.95, y=10, s='Nominal\n   value', fontsize = 'small', verticalalignment='center', bbox=dict(facecolor='white', edgecolor='black',pad=0.1,boxstyle='round'))
         axs[i].text(x=0.7, y=10, s='   Dry\nasphalt', fontsize = 'small', verticalalignment='center', bbox=dict(facecolor='white', edgecolor='black',pad=0.1,boxstyle='round'))
-        axs[i].text(x=0.4, y=10, s='   Wet\nasphalt', fontsize = 'small', verticalalignment='center', bbox=dict(facecolor='white', edgecolor='black',pad=0.1,boxstyle='round'))
+        axs[i].text(x=0.45, y=10, s='   Wet\nasphalt', fontsize = 'small', verticalalignment='center', bbox=dict(facecolor='white', edgecolor='black',pad=0.1,boxstyle='round'))
 
+    axs[0].set_title('End-to-end')
+    axs[1].set_title('Partial end-to-end')
 
 
 
@@ -2205,7 +2223,7 @@ def display_lap_mismatch_results_multiple_mu_2(agent_names, legend):
 
 # agent_names = ['porto_ete_v5_r_collision_5', 'porto_pete_s_polynomial', 'porto_pete_v_k_1_attempt_2', 'porto_pete_sv_p_r_0']    
 # agent_names = ['porto_ete_v5_r_collision_5', 'porto_pete_sv_p_r_0'] 
-agent_names = ['porto_ete_v5_r_collision_5', 'f1_esp_ete', 'f1_mco_ete', 'porto_pete_sv_p_r_0']
+agent_names = ['porto_ete_v5_r_collision_5', 'f1_esp_ete', 'f1_mco_ete', 'porto_pete_sv_p_r_0', 'f1_esp_pete_r_p_5', 'f1_mco_pete_mu_4']
 # parameters = ['mu', 'C_S']
 # nom_value = [1.0489, 1]
 # parameters = ['C_Sf', 'C_Sr']
@@ -3218,141 +3236,6 @@ def display_lap_mismatch_results_box(agent_names, parameters, legend_title, lege
 
 
 
-# def display_moving_agent(agent_name, load_history=False, n=0):
-
-#     durations = []
-
-#     infile = open('environments/' + agent_name, 'rb')
-#     env_dict = pickle.load(infile)
-#     infile.close()
-#     env_dict['max_steps']=3000
-#     #env_dict['architecture'] = 'pete'
-#     env_dict['reward_signal']['max_progress'] = 0
-
-#     env = environment(env_dict)
-#     env.reset(save_history=True, start_condition=[], car_params=env_dict['car_params'])
-    
-#     infile = open('agents/' + agent_name + '/' + agent_name + '_params', 'rb')
-#     agent_dict = pickle.load(infile)
-#     infile.close()
-#     agent_dict['layer3_size']=300
-
-#     infile = open('train_parameters/' + agent_name, 'rb')
-#     main_dict = pickle.load(infile)
-#     infile.close()
-
-#     if main_dict['learning_method']=='dqn':
-#         agent_dict['epsilon'] = 0
-#         a = agent_dqn.agent(agent_dict)
-#     if main_dict['learning_method']=='reinforce':
-#         a = agent_reinforce.PolicyGradientAgent(agent_dict)
-#     if main_dict['learning_method']=='actor_critic_sep':
-#         a = agent_actor_critic.actor_critic_separated(agent_dict)
-#     if  main_dict['learning_method']=='actor_critic_com':
-#         a = agent_actor_critic.actor_critic_combined(agent_dict)
-#     if main_dict['learning_method']=='actor_critic_cont':
-#         a = agent_actor_critic_continuous.agent_separate(agent_dict)
-#     if main_dict['learning_method'] == 'dueling_dqn':
-#         agent_dict['epsilon'] = 0
-#         a = agent_dueling_dqn.agent(agent_dict)
-#     if main_dict['learning_method'] == 'dueling_ddqn':
-#         agent_dict['epsilon'] = 0
-#         a = agent_dueling_ddqn.agent(agent_dict)
-#     if main_dict['learning_method'] == 'rainbow':
-#         agent_dict['epsilon'] = 0
-#         a = agent_rainbow.agent(agent_dict)
-#     if main_dict['learning_method'] == 'ddpg':
-#         a = agent_ddpg.agent(agent_dict)
-#     if main_dict['learning_method'] == 'td3':
-#         a = agent_td3.agent(agent_dict)
-       
-#     a.load_weights(agent_name, n)
-
-#     if load_history==True:
-#         env.load_history_func()
-    
-#     else:
-#         env.reset(save_history=True, start_condition=[], car_params=env_dict['car_params'])
-#         obs = env.observation
-#         done = False
-#         score=0
-
-#         while not done:
-            
-#             start_action = time.time()
-            
-#             if main_dict['learning_method']=='ddpg' or main_dict['learning_method']=='td3':
-#                 action = a.choose_greedy_action(obs)
-#             else:
-#                 action = a.choose_action(obs)
-            
-#             end_action = time.time()
-            
-#             action_duration = end_action - start_action
-#             durations.append(action_duration)
-
-#             next_obs, reward, done = env.take_action(action)
-#             score += reward
-#             obs = next_obs
-        
-#         print('\nTotal score = ', score)
-
-#     image_path = sys.path[0] + '/maps/' + env.map_name + '.png'
-#     im = image.imread(image_path)
-#     plt.imshow(im, extent=(0,30,0,30))
-    
-#     #outfile=open('action_durations/' + agent_name + 'debug', 'wb')
-#     #pickle.dump(durations, outfile)
-#     #outfile.close()
-    
-#     print(np.average(np.array(durations)[np.nonzero(np.array(durations))][1:-1]))  #duration without zeros and first action
-#     print(np.average(np.array(durations)[1:-1]))
-    
-#     for i in range(len(env.pose_history)):
-#         plt.cla()
-#         plt.imshow(im, extent=(0,env.map_width,0,env.map_height))
-#         sh=env.pose_history[i]
-#         plt.arrow(sh[0], sh[1], 0.5*math.cos(sh[2]), 0.5*math.sin(sh[2]), head_length=0.5, head_width=0.5, shape='full', ec='None', fc='blue')
-#         plt.arrow(sh[0], sh[1], 0.5*math.cos(sh[2]+sh[3]), 0.5*math.sin(sh[2]+sh[3]), head_length=0.5, head_width=0.5, shape='full',ec='None', fc='red')
-#         plt.plot(sh[0], sh[1], 'o')
-#         #wh = env.waypoint_history[i]
-#         #plt.plot(wh[0], wh[1], 'x')
-#         #gh = env.goal_history[i]
-#         #plt.plot([gh[0]-env.s, gh[0]+env.s, gh[0]+env.s, gh[0]-env.s, gh[0]-env.s], [gh[1]-env.s, gh[1]-env.s, gh[1]+env.s, gh[1]+env.s, gh[1]-env.s], 'r')
-        
-#         if env_dict['velocity_control']==True and env_dict['steer_control_dict']['steering_control']==True:
-#             lph = env.local_path_history[i]
-#             plt.plot(lph[0], lph[1])
-        
-#         plt.plot(env.rx, env.ry)
-
-#         cph = env.closest_point_history[i]
-#         plt.plot(env.rx[cph], env.ry[cph], 'x')
-        
-#         if env_dict['lidar_dict']['is_lidar']==True:
-#             lh = env.lidar_coords_history[i]
-#             for coord in lh:
-#                 plt.plot(coord[0], coord[1], 'xb')
-        
-#         plt.plot(np.array(env.pose_history)[0:i,0], np.array(env.pose_history)[0:i,1])
-        
-#         ph = env.progress_history[i]
-#         ah = env.action_step_history[i]
-        
-#         #wpt, v_ref = env.convert_action_to_coord(strategy='local', action=ah)
-#         #print('v =', sh[4])
-
-#         #plt.legend(["position", "waypoint", "goal area", "heading", "steering angle"])
-#         plt.xlabel('x coordinate')
-#         plt.ylabel('y coordinate')
-#         plt.xlim([0,env.map_width])
-#         plt.ylim([0,env.map_height])
-#         #plt.grid(True)
-#         plt.title('Episode history')
-#         #print('Progress = ', ph)
-#         plt.pause(0.001)
-
-
 def display_path(agent_name, load_history=False, n=0):
     
     agent_file_name = 'agents/' + agent_name
@@ -3487,6 +3370,7 @@ def display_collision_distribution(agent_name):
 # display_collision_distribution('only_LiDAR')
 # display_collision_distribution('only_pose')
 # display_collision_distribution('batch_150')
+# display_collision_distribution('f1_esp_ete')
 
 
 def display_moving_agent(agent_names, ns, legend_title, legend, mismatch_parameters, frac_vary, noise_dicts, start_condition):
@@ -3904,7 +3788,7 @@ def display_path_multiple(agent_names, ns, legend_title, legend, mismatch_parame
         #         ax.plot(j[0], j[1], alpha=0.5, linestyle='dashdot', color='red')
         #         ax.plot(j[0][0], j[1][0], alpha=0.5, color='red', marker='s')
 
-        ax.plot(np.array(state_history[i])[:,0], np.array(state_history[i])[:,1], linewidth=1.5, alpha=alpha)   
+        ax.plot(np.array(state_history[i])[:,0], np.array(state_history[i])[:,1], linewidth=1, alpha=alpha)   
         # ax.plot(np.array(pose_history[i])[:,0][np.arange(0,len(local_path_history[i]),40)], np.array(pose_history[i])[:,1][np.arange(0,len(local_path_history[i]),40)], 'x')
         
         #ax.plot(np.array(pose_history[i])[:,0], np.array(pose_history[i])[:,1], linewidth=1.5, alpha=alpha)    
@@ -3920,11 +3804,12 @@ def display_path_multiple(agent_names, ns, legend_title, legend, mismatch_parame
     # for i in range(len(idx)):
     #     plt.text(x=env.rx[idx[i]], y=env.ry[idx[i]], s=text[i], fontsize = 'small', bbox=dict(facecolor='white', edgecolor='black',pad=0.1,boxstyle='round'))
 
-    ax.vlines(x=env.rx[idx[0]], ymin=env.ry[idx[0]]-1, ymax=env.ry[idx[0]]+1, linestyles='dotted', color='red')
-    ax.text(x=env.rx[idx[0]]-1.2, y=env.ry[idx[0]]+1.3, s='Start/finish', fontsize = 'small', bbox=dict(facecolor='white', edgecolor='black',pad=0.1,boxstyle='round'))
+    # ax.vlines(x=env.rx[idx[0]], ymin=env.ry[idx[0]]-1, ymax=env.ry[idx[0]]+1, linestyles='dotted', color='red')
+    # ax.text(x=env.rx[idx[0]]-1.2, y=env.ry[idx[0]]+1.3, s='Start/finish', fontsize = 'small', bbox=dict(facecolor='white', edgecolor='black',pad=0.1,boxstyle='round'))
+
 
     fig.tight_layout()
-    fig.subplots_adjust(left=0.2, right=0.8) 
+    # fig.subplots_adjust(left=0.2, right=0.8) 
     plt.figlegend(legend, title=legend_title, loc = 'lower center', ncol=3)
 
 
@@ -4296,10 +4181,12 @@ def display_path_mismatch_multiple_by_state(agent_names, ns, legend_title, legen
     plt.show()     
 
 
-agent_names = ['porto_ete_v5_r_collision_5', 'porto_pete_s_polynomial', 'porto_pete_v_k_1_attempt_2', 'porto_pete_sv_p_r_0']    
+# agent_names = ['porto_ete_v5_r_collision_5', 'porto_pete_s_polynomial', 'porto_pete_v_k_1_attempt_2', 'porto_pete_sv_p_r_0']    
+# agent_names = ['porto_ete_v5_r_collision_5', 'f1_esp_ete', 'f1_mco_ete', 'porto_pete_sv_p_r_0', 'f1_esp_pete_r_p_5', 'f1_mco_pete_mu_4']
+# agent_names = [ 'f1_esp_ete',  'f1_esp_ete', 'f1_esp_pete_r_p_5', 'f1_esp_pete_r_p_5']
 legend = ['No model error', 'Increased front tire \ncornering stiffness']
 legend_title = ''
-ns=[0,1,0,1]
+ns=[0,0,0,0]
 # mismatch_parameters = ['unknown_mass', 'mu', 'C_Sf', 'C_Sr']
 # frac_vary = [0, -0.1, 0.1, -0.1]
 mismatch_parameters = ['C_Sf']
@@ -4334,7 +4221,7 @@ def display_path_mismatch_multiple_by_agent(agent_names, ns, legend_title, legen
         for mis_idx in range(1+len(mismatch_parameters)):
             car_params = env_dict['car_params'].copy()
     
-            if mis_idx == 1:
+            if mis_idx >= 1:
                 for par, var in zip(mismatch_parameters[lap_idx], frac_vary[lap_idx]):
                     if par == 'unknown_mass':
                         mass=car_params['m']*0.1
@@ -4770,7 +4657,7 @@ def display_path_mismatch_multiple_by_agent(agent_names, ns, legend_title, legen
 
     if True:
         
-        fig, ax =   plt.subplots(nrows=1, ncols=2, figsize=(5.5,2))
+        fig, ax =   plt.subplots(nrows=1, ncols=2, figsize=(5.5,2.8))
      
         prog = np.array([0, 0.2, 0.4, 0.6, 0.8])
         idx =  np.zeros(len(prog), int)
@@ -4802,38 +4689,52 @@ def display_path_mismatch_multiple_by_agent(agent_names, ns, legend_title, legen
         # Plot path of partial end-to-end agent with steering and velocity control
         ax[1].axis('off')
         ax[1].imshow(ImageOps.invert(track.gray_im.filter(ImageFilter.FIND_EDGES).filter(ImageFilter.MaxFilter(1))), extent=(0,track.map_width,0,track.map_height), cmap="gray")
-        i=[9,10,11]
+        
+        i=[3,4,5]
         for idx in i:
-            
             # if local_path_history[idx] and idx==7:
             #     for j in np.array(local_path_history[idx])[np.arange(0,len(local_path_history[idx]),40)]:
             #         ax[0,1].plot(j[0], j[1], alpha=0.5, linestyle='dashdot', color='red')
             #         ax[0,1].plot(j[0][0], j[1][0], alpha=0.5, color='red', marker='s')
 
-            if idx==9:
+            if idx==3:
                 ax[1].plot(np.array(state_history[idx])[:,0], np.array(state_history[idx])[:,1], linewidth=1.5, alpha=alpha)  
             else:
                 ax[1].plot(np.array(state_history[idx])[:,0], np.array(state_history[idx])[:,1], linewidth=1.5, alpha=alpha, linestyle='--') 
             
+        ax[0].set_xlim([47,74])
+        ax[0].set_ylim([0,27])
+        ax[1].set_xlim([47,74])
+        ax[1].set_ylim([0,27])
+
 
         ax[0].set_title('End-to-end')
-        ax[1].set_title('Steering and velocity control')
+        ax[1].set_title('Partial end-to-end')
         fig.tight_layout()
-        fig.subplots_adjust(bottom=0.05) 
-        plt.figlegend(legend, loc='lower center', ncol=3, labelspacing=0.7)
+        fig.subplots_adjust(bottom=0.1) 
+        plt.figlegend(legend, loc='lower center', ncol=3)
         plt.show()     
 
     
 
 
-agent_names = ['porto_ete_v5_r_collision_5', 'porto_pete_s_polynomial', 'porto_pete_v_k_1_attempt_2', 'porto_pete_sv_p_r_0']    
-legend = ['No model error', 'Wet asphalt', 'Dry asphalt']
+# agent_names = ['porto_ete_v5_r_collision_5', 'porto_pete_s_polynomial', 'porto_pete_v_k_1_attempt_2', 'porto_pete_sv_p_r_0'] 
+# start_condition = {'x':10, 'y':4.5, 'v':3, 'theta':np.pi, 'delta':0, 'goal':0}
+
+
+# agent_names = ['porto_ete_v5_r_collision_5', 'f1_esp_ete', 'f1_mco_ete', 'porto_pete_sv_p_r_0', 'f1_esp_pete_r_p_5', 'f1_mco_pete_mu_4']
+
+agent_names = [ 'f1_esp_ete', 'f1_esp_pete_r_p_5']
+start_condition = {'x':24.3, 'y':24.6, 'v':3, 'theta':0, 'delta':0, 'goal':0}
+
+legend = ['Nominal surface', 'Dry asphalt', 'Wet asphalt']
 legend_title = ''
-ns=[0,1,0,1]
+ns=[0,0,0,0]
 mismatch_parameters = [['mu'], ['mu']]
-frac_vary = [[-0.5], [-0.3]]
+frac_vary = [[-0.3],[-0.5]]
 noise_dicts = [{'xy':0.025, 'theta':0.05, 'v':0.1, 'lidar':0.01}]
-start_condition = {'x':10, 'y':4.5, 'v':3, 'theta':np.pi, 'delta':0, 'goal':0}
+
+
 # display_path_mismatch_multiple_by_agent(agent_names=agent_names, ns=ns, legend_title=legend_title,          
 #                                         legend=legend, mismatch_parameters=mismatch_parameters, frac_vary=frac_vary, noise_dicts=noise_dicts,
 #                                         start_condition=start_condition)
@@ -5375,191 +5276,6 @@ start_condition = {'x':10, 'y':4.5, 'v':3, 'theta':np.pi, 'delta':0, 'goal':0}
 
 
 
-def display_path_mismatch_multiple_by_agent_1(agent_names, ns, legend_title, legend, mismatch_parameters, frac_vary, noise_dicts, start_condition):
-    
-    pose_history = []
-    progress_history = []
-    state_history = []
-    local_path_history = []
-    action_step_history = []
-    
-
-    for agent_name, n, i in zip(agent_names, ns, range(len(agent_names))):
-
-        infile = open('environments/' + agent_name, 'rb')
-        env_dict = pickle.load(infile)
-        infile.close()
-        # Compensate for changes to reward structure
-        env_dict['reward_signal']['max_progress'] = 0
-        
-        # Model mismatches
-
-        for mis_idx in range(2):
-            car_params = env_dict['car_params'].copy()
-    
-            if mis_idx == 1:
-                for par, var in zip(mismatch_parameters, frac_vary):
-                    if par == 'unknown_mass':
-                        mass=car_params['m']*0.1
-                        m_new = car_params['m'] + mass
-                        lf_new = (car_params['m']*car_params['lf']+mass*var) / (m_new)
-                        I_new = car_params['I'] + car_params['m']*abs(lf_new-car_params['lf'])**2 + mass*abs(lf_new-var)**2
-                        car_params['m'] = m_new
-                        car_params['lf'] = lf_new
-                        car_params['I'] = I_new
-                    elif par == 'C_S':
-                        car_params['C_Sf'] *= 1+var
-                        car_params['C_Sr'] *= 1+var
-                    elif par == 'l_f':
-                        axle_length = car_params['lf']+car_params['lr']
-                        car_params['lf'] *= 1+var
-                        car_params['lr'] =  axle_length - car_params['lf']
-                    elif par == 'sv':
-                        car_params['sv_max'] *= 1+var
-                        car_params['sv_min'] *= 1+var    
-                    else:
-                        car_params[par] *= 1+var
-
-            
-            noise_dict = noise_dicts[0]
-
-            env = environment(env_dict)
-            if start_condition:
-                env.reset(save_history=True, start_condition=start_condition, car_params=car_params, noise=noise_dict)
-            else:
-                env.reset(save_history=True, start_condition=[], car_params=car_params, noise=noise_dict)
-
-            infile = open('agents/' + agent_name + '/' + agent_name + '_params', 'rb')
-            agent_dict = pickle.load(infile)
-            infile.close()
-
-            infile = open('train_parameters/' + agent_name, 'rb')
-            main_dict = pickle.load(infile)
-            infile.close()
-            
-            if i==0 and not start_condition:
-                infile = open('test_initial_condition/' + env_dict['map_name'], 'rb')
-                start_conditions = pickle.load(infile)
-                infile.close()
-                start_condition = random.choice(start_conditions)
-
-            if main_dict['learning_method']=='dqn':
-                agent_dict['epsilon'] = 0
-                a = agent_dqn.agent(agent_dict)
-            if main_dict['learning_method']=='reinforce':
-                a = agent_reinforce.PolicyGradientAgent(agent_dict)
-            if main_dict['learning_method']=='actor_critic_sep':
-                a = agent_actor_critic.actor_critic_separated(agent_dict)
-            if  main_dict['learning_method']=='actor_critic_com':
-                a = agent_actor_critic.actor_critic_combined(agent_dict)
-            if main_dict['learning_method']=='actor_critic_cont':
-                a = agent_actor_critic_continuous.agent_separate(agent_dict)
-            if main_dict['learning_method'] == 'dueling_dqn':
-                agent_dict['epsilon'] = 0
-                a = agent_dueling_dqn.agent(agent_dict)
-            if main_dict['learning_method'] == 'dueling_ddqn':
-                agent_dict['epsilon'] = 0
-                a = agent_dueling_ddqn.agent(agent_dict)
-            if main_dict['learning_method'] == 'rainbow':
-                agent_dict['epsilon'] = 0
-                a = agent_rainbow.agent(agent_dict)
-            if main_dict['learning_method'] == 'ddpg':
-                a = agent_ddpg.agent(agent_dict)
-            if main_dict['learning_method'] == 'td3':
-                a = agent_td3.agent(agent_dict)
-                
-            a.load_weights(agent_name, n)
-
-            #start_pose = {'x':11.2, 'y':7.7, 'v':0, 'delta':0, 'theta':0, 'goal':1}
-            env.reset(save_history=True, start_condition=start_condition, car_params=car_params, noise=noise_dict)
-            obs = env.observation
-            done = False
-            score = 0
-
-            while not done:
-                if main_dict['learning_method']=='ddpg' or main_dict['learning_method']=='td3':
-                    action = a.choose_greedy_action(obs)
-                else:
-                    action = a.choose_action(obs)
-
-                next_obs, reward, done = env.take_action(action)
-                score += reward
-                obs = next_obs
-
-                if env.progress>=0.98:
-                    done=True
-                
-
-            print('Total score = ', score)
-            print('Progress = ', env.progress)
-            print('Collision = ', env.collision)
-
-            state_history.append(env.state_history)
-            pose_history.append(env.pose_history)
-            progress_history.append(env.progress_history)
-            local_path_history.append(env.local_path_history)
-            action_step_history.append(env.action_step_history)
-        
-        
-    plt.rcParams['font.family'] = 'serif'
-    plt.rcParams['font.serif'] = ['Times New Roman'] + plt.rcParams['font.serif']
-
-    legend_new = legend.copy()
-    legend_new.insert(0, 'Min and max')
-
-    size = (4,2.5)
-    alpha=0.7
-    track = mapping.map(env.map_name)
-
-    if True:
-        
-        fig, ax =   plt.subplots(nrows=1, ncols=1, figsize=size)
-     
-        prog = np.array([0, 0.2, 0.4, 0.6, 0.8])
-        idx =  np.zeros(len(prog), int)
-        text = ['', '20%', '40%', '60%', '80%']
-        for i in range(len(idx)):
-            idx[i] = np.mod(env.start_point+np.round(prog[i]*len(env.rx)), len(env.rx))
-        idx.astype(int)
-        for i in range(len(idx)):
-            ax.text(x=env.rx[idx[i]], y=env.ry[idx[i]], s=text[i], fontsize = 'small', bbox=dict(facecolor='white', edgecolor='black',pad=0.1,boxstyle='round'))
-        for i in range(len(idx)):
-            ax.text(x=env.rx[idx[i]], y=env.ry[idx[i]], s=text[i], fontsize = 'small', bbox=dict(facecolor='white', edgecolor='black',pad=0.1,boxstyle='round'))
-        ax.vlines(x=env.rx[idx[0]], ymin=env.ry[idx[0]]-1, ymax=env.ry[idx[0]]+1, linestyles='dotted', color='red', label='_nolegend_')
-        # ax[0,0].text(x=env.rx[idx[0]]-1.2, y=env.ry[idx[0]]+1.3, s='Start/finish', fontsize = 'small', bbox=dict(facecolor='white', edgecolor='black',pad=0.1,boxstyle='round'))
-        ax.vlines(x=env.rx[idx[0]], ymin=env.ry[idx[0]]-1, ymax=env.ry[idx[0]]+1, linestyles='dotted', color='red', label='_nolegend_')
-        # ax[0,1].text(x=env.rx[idx[0]]-1.2, y=env.ry[idx[0]]+1.3, s='Start/finish', fontsize = 'small', bbox=dict(facecolor='white', edgecolor='black',pad=0.1,boxstyle='round'))
-
-
-
-    
-        # Plot path of partial end-to-end agent with steering and velocity control
-        ax.axis('off')
-        ax.imshow(ImageOps.invert(track.gray_im.filter(ImageFilter.FIND_EDGES).filter(ImageFilter.MaxFilter(1))), extent=(0,track.map_width,0,track.map_height), cmap="gray")
-        idx=6
-        for _ in range(2):
-            ax.plot(np.array(state_history[idx])[:,0], np.array(state_history[idx])[:,1], linewidth=1.5, alpha=alpha)  
-            idx+=1  
-
-        fig.tight_layout()
-        # fig.subplots_adjust(bottom=0.3) 
-        plt.figlegend(legend, loc='lower center', ncol=2, labelspacing=0.7)
-        plt.show()     
-
-    
-
-
-agent_names = ['porto_ete_v5_r_collision_5', 'porto_pete_s_polynomial', 'porto_pete_v_k_1_attempt_2', 'porto_pete_sv_p_r_0']    
-legend = ['No mass', 'Mass placed above front axle']
-legend_title = ''
-ns=[2,1,0,0]
-mismatch_parameters = ['C_Sr']
-frac_vary = [-0.2]
-noise_dicts = [{'xy':0.025, 'theta':0.05, 'v':0.1, 'lidar':0.01}]
-start_condition = {'x':10, 'y':4.5, 'v':3, 'theta':np.pi, 'delta':0, 'goal':0}
-# display_path_mismatch_multiple_by_agent_1(agent_names=agent_names, ns=ns, legend_title=legend_title,          
-#                                              legend=legend, mismatch_parameters=mismatch_parameters, frac_vary=frac_vary, noise_dicts=noise_dicts,
-#                                              start_condition=start_condition)
 
 
 
