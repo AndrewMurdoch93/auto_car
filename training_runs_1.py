@@ -23,7 +23,7 @@ import os
 
 agent_name = 'f1_mco_pete_3'
 
-main_dict = {'name':agent_name, 'max_episodes':20000, 'max_steps':3e6, 'learning_method':'td3', 'runs':3, 'comment':''}
+main_dict = {'name':agent_name, 'max_episodes':20000, 'max_steps':3e6, 'learning_method':'td3', 'runs':1, 'comment':''}
 
 agent_ddpg_dict = {'alpha':0.000025, 'beta':0.00025, 'tau':0.001, 'gamma':0.99, 'max_size':1000000, 'layer1_size':400, 'layer2_size':300, 'batch_size':200}
 
@@ -34,8 +34,8 @@ car_params =   {'mu': 1.0489, 'C_Sf': 4.718, 'C_Sr': 5.4562, 'lf': 0.15875, 'lr'
                 , 'h': 0.074, 'm': 3.74, 'I': 0.04712, 's_min': -0.4189, 's_max': 0.4189, 'sv_min': -3.2
                 , 'sv_max': 3.2, 'v_switch': 7.319, 'a_max': 9.51, 'v_min':-5.0, 'v_max': 20.0, 'width': 0.31, 'length': 0.58}
 
-reward_signal = {'goal_reached':0, 'out_of_bounds':-1, 'max_steps':0, 'collision':-2, 
-                    'backwards':-0.01, 'park':-1, 'time_step':-0.01, 'progress':0, 'distance':0.3, 
+reward_signal = {'goal_reached':0, 'out_of_bounds':-1, 'max_steps':0, 'collision':-5, 
+                    'backwards':-0.01, 'park':-1, 'time_step':-0.01, 'progress':0, 'distance':0.25, 
                     'max_progress':0}    
 
 action_space_dict = {'action_space': 'continuous', 'vel_select':[3,5], 'R_range':[2]}
@@ -60,7 +60,7 @@ noise_dict = {'xy':0, 'theta':0, 'v':0, 'lidar':0}
 
 env_dict = {'sim_conf': functions.load_config(sys.path[0], "config")
         , 'save_history': False
-        , 'map_name': 'f1_mco'
+        , 'map_name': 'f1_esp'
         , 'max_steps': 20000
         , 'control_steps': 10
         , 'display': False
@@ -76,12 +76,93 @@ env_dict = {'sim_conf': functions.load_config(sys.path[0], "config")
         } 
 
 mu_frac_variation = np.array([-0.5,-0.4,-0.3,-0.2,-0.1,0])
-n_test=10
+n_test=100
+
 # a = main_multiple.trainingLoop(main_dict, agent_td3_dict, env_dict, load_agent='')
 # a.train()
 # main_multiple.lap_time_test(agent_name=agent_name, n_episodes=n_test, detect_issues=False, initial_conditions=True)
 # main_multiple.lap_time_test_with_noise(agent_name=agent_name, n_episodes=100, detect_issues=False, initial_conditions=True, noise={'xy':0.025, 'theta':0.05, 'v':0.1, 'lidar':0.01})
 # main_multiple.lap_time_test_mismatch(agent_name=agent_name, n_episodes=n_test, detect_issues=False, initial_conditions=True, parameter='mu', frac_variation=mu_frac_variation)
+
+
+
+
+agent_name = 'f1_esp_pete_vmax_4'
+main_dict['name'] = agent_name
+env_dict['map_name'] = 'f1_esp'
+env_dict['action_space_dict']['vel_select'] = [3,4]
+a = main_multiple.trainingLoop(main_dict, agent_td3_dict, env_dict, load_agent='')
+a.train()
+main_multiple.lap_time_test_with_noise(agent_name=agent_name, n_episodes=n_test, detect_issues=False, initial_conditions=True, noise={'xy':0.025, 'theta':0.05, 'v':0.1, 'lidar':0.01})
+# main_multiple.lap_time_test_mismatch(agent_name=agent_name, n_episodes=n_test, detect_issues=False, initial_conditions=True, parameter='mu', frac_variation=mu_frac_variation)
+
+agent_name = 'f1_esp_pete_vmax_6'
+main_dict['name'] = agent_name
+env_dict['map_name'] = 'f1_esp'
+env_dict['action_space_dict']['vel_select'] = [3,6]
+a = main_multiple.trainingLoop(main_dict, agent_td3_dict, env_dict, load_agent='')
+a.train()
+main_multiple.lap_time_test_with_noise(agent_name=agent_name, n_episodes=n_test, detect_issues=False, initial_conditions=True, noise={'xy':0.025, 'theta':0.05, 'v':0.1, 'lidar':0.01})
+# main_multiple.lap_time_test_mismatch(agent_name=agent_name, n_episodes=n_test, detect_issues=False, initial_conditions=True, parameter='mu', frac_variation=mu_frac_variation)
+
+
+
+agent_name = 'f1_esp_pete_kv_05'
+main_dict['name'] = agent_name
+env_dict['map_name'] = 'f1_esp'
+env_dict['action_space_dict']['vel_select'] = [3,6]
+env_dict['velocity_gain'] = 0.5
+a = main_multiple.trainingLoop(main_dict, agent_td3_dict, env_dict, load_agent='')
+a.train()
+main_multiple.lap_time_test_with_noise(agent_name=agent_name, n_episodes=n_test, detect_issues=False, initial_conditions=True, noise={'xy':0.025, 'theta':0.05, 'v':0.1, 'lidar':0.01})
+# main_multiple.lap_time_test_mismatch(agent_name=agent_name, n_episodes=n_test, detect_issues=False, initial_conditions=True, parameter='mu', frac_variation=mu_frac_variation)
+
+agent_name = 'f1_esp_pete_kv_2'
+main_dict['name'] = agent_name
+env_dict['map_name'] = 'f1_esp'
+env_dict['velocity_gain'] = 2
+a = main_multiple.trainingLoop(main_dict, agent_td3_dict, env_dict, load_agent='')
+a.train()
+main_multiple.lap_time_test_with_noise(agent_name=agent_name, n_episodes=n_test, detect_issues=False, initial_conditions=True, noise={'xy':0.025, 'theta':0.05, 'v':0.1, 'lidar':0.01})
+# main_multiple.lap_time_test_mismatch(agent_name=agent_name, n_episodes=n_test, detect_issues=False, initial_conditions=True, parameter='mu', frac_variation=mu_frac_variation)
+
+
+
+
+
+agent_name = 'f1_esp_pete_lc_05'
+main_dict['name'] = agent_name
+env_dict['map_name'] = 'f1_esp'
+env_dict['velocity_gain'] = 1
+env_dict['steer_control_dict']['Lfc'] = 0.5
+a = main_multiple.trainingLoop(main_dict, agent_td3_dict, env_dict, load_agent='')
+a.train()
+main_multiple.lap_time_test_with_noise(agent_name=agent_name, n_episodes=n_test, detect_issues=False, initial_conditions=True, noise={'xy':0.025, 'theta':0.05, 'v':0.1, 'lidar':0.01})
+# main_multiple.lap_time_test_mismatch(agent_name=agent_name, n_episodes=n_test, detect_issues=False, initial_conditions=True, parameter='mu', frac_variation=mu_frac_variation)
+
+agent_name = 'f1_esp_pete_lc_15'
+main_dict['name'] = agent_name
+env_dict['map_name'] = 'f1_esp'
+env_dict['velocity_gain'] = 1
+env_dict['steer_control_dict']['Lfc'] = 1.5
+a = main_multiple.trainingLoop(main_dict, agent_td3_dict, env_dict, load_agent='')
+a.train()
+main_multiple.lap_time_test_with_noise(agent_name=agent_name, n_episodes=n_test, detect_issues=False, initial_conditions=True, noise={'xy':0.025, 'theta':0.05, 'v':0.1, 'lidar':0.01})
+# main_multiple.lap_time_test_mismatch(agent_name=agent_name, n_episodes=n_test, detect_issues=False, initial_conditions=True, parameter='mu', frac_variation=mu_frac_variation)
+
+agent_name = 'f1_esp_pete_lc_2'
+main_dict['name'] = agent_name
+env_dict['map_name'] = 'f1_esp'
+env_dict['velocity_gain'] = 1
+env_dict['steer_control_dict']['Lfc'] = 1.5
+a = main_multiple.trainingLoop(main_dict, agent_td3_dict, env_dict, load_agent='')
+a.train()
+main_multiple.lap_time_test_with_noise(agent_name=agent_name, n_episodes=n_test, detect_issues=False, initial_conditions=True, noise={'xy':0.025, 'theta':0.05, 'v':0.1, 'lidar':0.01})
+# main_multiple.lap_time_test_mismatch(agent_name=agent_name, n_episodes=n_test, detect_issues=False, initial_conditions=True, parameter='mu', frac_variation=mu_frac_variation)
+
+
+
+
 
 
 # agent_name = 'f1_mco_pete_mu_1'
