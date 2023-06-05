@@ -2598,8 +2598,8 @@ def display_path_slip_colormap(agent_names, ns, legend_title, legend, mismatch_p
     # ax.text(x=env.rx[idx[0]]-1.2, y=env.ry[idx[0]]+1.3, s='Start/finish', fontsize = 'small', bbox=dict(facecolor='white', edgecolor='black',pad=0.1,boxstyle='round'))
 
     ax.axis('off')
-    ax.set_xlim([42,55])
-    ax.set_ylim([3,23])
+    # ax.set_xlim([42,55])
+    # ax.set_ylim([3,23])
 
     # # https://stackoverflow.com/questions/4700614/how-to-put-the-legend-outside-the-plot
 
@@ -2640,23 +2640,36 @@ def display_path_slip_colormap(agent_names, ns, legend_title, legend, mismatch_p
 # agent_names = ['f1_esp_ete']
 # start_condition = {'x':24.3, 'y':24.6, 'v':3, 'theta':0, 'delta':0, 'goal':0}
 
-agent_names = ['f1_mco_ete']
-start_condition = {'x':18, 'y':48.7, 'v':3, 'theta':0, 'delta':0, 'goal':0}
+# agent_names = ['f1_mco_ete']
+# start_condition = {'x':18, 'y':48.7, 'v':3, 'theta':0, 'delta':0, 'goal':0}
 
 # agent_names = ['f1_aus_ete']
 
 # agent_names = ['f1_gbr_pete']
 
-# agent_names = ['f1_esp_pete']
+# agent_names = ['f1_esp_pete_r_p_5']
 # start_condition = {'x':24.3, 'y':24.6, 'v':3, 'theta':0, 'delta':0, 'goal':0}
 
-agent_names = ['f1_mco_pete']
-start_condition = {'x':18, 'y':48.7, 'v':3, 'theta':0, 'delta':0, 'goal':0}
+# agent_names = ['f1_mco_pete']
+# start_condition = {'x':18, 'y':48.7, 'v':3, 'theta':0, 'delta':0, 'goal':0}
 
 # agent_names = ['f1_aus_pete']
 
 
 # agent_names = ['batch_400']
+
+# agent_names = ['f1_esp_pete_vmax_4']
+# legend = ['4']
+# legend_title = 'Maximum velocity'
+# start_condition = {'x':24.3, 'y':24.6, 'v':3, 'theta':0, 'delta':0, 'goal':0}
+
+# agent_names = ['f1_esp_pete_vmax_6']
+# legend = ['6']
+# legend_title = 'Maximum velocity'
+# start_condition = {'x':24.3, 'y':24.6, 'v':3, 'theta':0, 'delta':0, 'goal':0}
+
+
+
 ns=[0]
 legend = ['']
 legend_title = ''
@@ -4435,6 +4448,12 @@ legend_title = 'Agent sample rate, $f_{\mathrm{agent}}$'
 
 agent_names = ['f1_esp_pete_f_2', 'f1_esp_pete_f_5', 'f1_esp_pete_eval', 'f1_esp_pete_f_20']
 legend = ['2', '5', '10', '20']
+
+
+agent_names = ['f1_esp_pete_lc_05', 'f1_esp_pete_lc_15']
+legend = ['0.5', '1', '1.5']
+legend_title = 'Look-ahead distance [m]'
+
 
 # agent_names = ['f1_esp_pete_nn_plus', 'f1_esp_pete_nn_minus']
 # leganed =['600', '400', '200']
