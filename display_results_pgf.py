@@ -46,7 +46,7 @@ import matplotlib.colors as mcolors
 def learning_curve_lap_time_average(agent_names, legend, legend_title, ns, filename, xlim, xspace, bottom_space, height):
     legend_coll = legend.copy()
     legend_coll.append('Min and max')
-    window = 10
+    window = 50
     steps = [[] for _ in range(len(agent_names))]
     steps_x_axis = [[] for _ in range(len(agent_names))]
     n_actions_x_axis  = [[] for _ in range(len(agent_names))]
@@ -282,15 +282,17 @@ def learning_curve_lap_time_average(agent_names, legend, legend_title, ns, filen
     # ax[2].set_ylabel('Reward')
 
 
-
+    # plt.figlegend(legend, title=legend_title, loc = 'lower center', ncol=5)
     fig.tight_layout()
     fig.subplots_adjust(bottom=bottom_space+0.03) 
-    ax[0].text(x=100,y=-50,s='Episodes')
+    # ax[0].text(x=100,y=-50,s='Episodes')
     
     # fig.subplots_adjust(right=0.8) 
     # fig.subplots_adjust(left=0.2) 
-    plt.figlegend(legend, title=legend_title, loc = 'lower center', ncol=5)
-    ax[0].text(x=3000, y=-40, s='Episodes')
+    plt.figlegend(legend, title=legend_title, loc = 'lower center', ncol=5, borderpad=1.1)
+    
+    
+    ax[0].text(x=420, y=-45, s='Episodes')
     plt.show()
     # plt.savefig('results/'+filename+'.pgf', format='pgf')
 
@@ -506,7 +508,7 @@ def learning_curve_all(agent_names, legend, legend_title, ns, filename, xlim, xs
 
     legend_coll = legend.copy()
     legend_coll.append('Min and max')
-    window = 10
+    window = 100
     steps = [[] for _ in range(len(agent_names))]
     steps_x_axis = [[] for _ in range(len(agent_names))]
     n_actions_x_axis  = [[] for _ in range(len(agent_names))]
@@ -2302,20 +2304,24 @@ def display_path_velocity_colormap(agent_names, ns, legend_title, legend, mismat
     cmap = plt.get_cmap('rainbow')
     norm = plt.Normalize(env_dict['action_space_dict']['vel_select'][0], env_dict['action_space_dict']['vel_select'][1])
 
-    for i in range(len(agent_names)):
+    for a in range(len(agent_names)):
         # ax.plot(np.array(state_history[i])[:,0], np.array(state_history[i])[:,1], linewidth=1.5, label=legend[i])   
         
         
-        if env_dict['steer_control_dict']['steering_control']:
-            for j in np.array(local_path_history[i])[np.arange(0,len(local_path_history[i]),40)]:
-                ax.plot(j[0], j[1], alpha=0.2, linestyle='dashdot', color='red')
-                # ax.plot(j[0][0], j[1][0], alpha=0.5, color='red', marker='s')
+        # if env_dict['steer_control_dict']['steering_control']:
+        #     for j in np.array(local_path_history[i])[np.arange(0,len(local_path_history[i]),40)]:
+        #         ax.plot(j[0], j[1], alpha=0.2, linestyle='dashdot', color='red')
+        #         # ax.plot(j[0][0], j[1][0], alpha=0.5, color='red', marker='s')
 
-
-        for i in range(1, len(state_history[0])):
-            x0, y0 = state_history[0][i-1][0], state_history[0][i-1][1]
-            x1, y1 = state_history[0][i][0], state_history[0][i][1]
-            ax.plot([x0, x1], [y0, y1], '-', color=cmap(norm(state_history[0][i][3])), linewidth=1, alpha=0.8)
+        if a==0:
+            for i in range(1, len(state_history[a])):
+                x0, y0 = state_history[a][i-1][0], state_history[a][i-1][1]
+                x1, y1 = state_history[a][i][0], state_history[a][i][1]
+                
+                ax.plot([x0, x1], [y0, y1], '-', color=cmap(norm(state_history[a][i][3])), linewidth=1, alpha=0.8)
+            
+        if a==1:
+            ax.plot(np.array(state_history[a])[:,0], np.array(state_history[a])[:,1], '--', linewidth=1, alpha=0.5)
 
 
     # create a mappable suitable for creation of a colorbar
@@ -2392,22 +2398,26 @@ def display_path_velocity_colormap(agent_names, ns, legend_title, legend, mismat
 # agent_names = ['f1_esp_pete_r_p_5']
 # start_condition = {'x':24.3, 'y':24.6, 'v':3, 'theta':0, 'delta':0, 'goal':0}
 
-agent_names = ['f1_mco_pete']
+# agent_names = ['f1_esp_pete_r_p_5', 'f1_esp_ete']
+# start_condition = {'x':24.3, 'y':24.6, 'v':3, 'theta':0, 'delta':0, 'goal':0}
+
+
+agent_names = ['f1_mco_pete_mu_2', 'f1_mco_ete']
 start_condition = {'x':18, 'y':48.7, 'v':3, 'theta':0, 'delta':0, 'goal':0}
 
 # agent_names = ['f1_aus_pete']
 
 
 # agent_names = ['batch_400']
-ns=[2]
+ns=[0,0]
 legend = ['']
 legend_title = ''
-mismatch_parameters = ['mu']
-frac_vary = [-0.5]
+mismatch_parameters = ['mu','mu']
+frac_vary = [0,0]
 # start_condition = {'x':10, 'y':4.5, 'v':3, 'theta':np.pi, 'delta':0, 'goal':0}
 # start_condition = {'x':4.1, 'y':9, 'v':3, 'theta':0, 'delta':0, 'goal':0}
 # start_condition = []
-# display_path_velocity_colormap(agent_names, ns, legend_title, legend, mismatch_parameters, frac_vary, start_condition)
+display_path_velocity_colormap(agent_names, ns, legend_title, legend, mismatch_parameters, frac_vary, start_condition)
 
 
 def symmetrical_colormap(cmap_settings, new_name = None ):
@@ -4422,19 +4432,18 @@ height=2.5
 
 # agent_names = ['f1_esp_pete']
 # agent_names = ['f1_esp_pete_r_p_1', 'f1_esp_pete', 'f1_esp_pete_r_p_5']
-agent_names = ['f1_esp_pete_r_d_2', 'f1_esp_pete_r_d_25', 'f1_esp_pete']
+# agent_names = ['f1_esp_pete_r_d_2', 'f1_esp_pete_r_d_25', 'f1_esp_pete']
 
-legend = ['0.2', '0.25', '0.3']
+# legend = ['0.2', '0.25', '0.3']
 # legend = ['-1', '-2', '-5']
-legend_title = 'Distance reward ($r_{\mathrm{dist}}$)'
-legend_title = 'Agent sample rate, $f_{\mathrm{agent}}$'
+# legend_title = 'Distance reward ($r_{\mathrm{dist}}$)'
+# legend_title = 'Agent sample rate, $f_{\mathrm{agent}}$'
 # legend_title = 'Collision penalty ($r_{\mathrm{collision}}$)'
 
 
 
 
-agent_names = ['f1_esp_pete_f_2', 'f1_esp_pete_f_5', 'f1_esp_pete_eval', 'f1_esp_pete_f_20']
-legend = ['2', '5', '10', '20']
+
 
 # agent_names = ['f1_esp_pete_nn_plus', 'f1_esp_pete_nn_minus']
 # leganed =['600', '400', '200']
@@ -4442,15 +4451,36 @@ legend = ['2', '5', '10', '20']
 # agent_names = ['f1_esp_pete_bs_200', 'f1_esp_pete_bs_600']
 # legend = ['200', '400', '600']
 
+agent_names = ['porto_pete_sv_p_r_0', 'f1_esp_pete_r_p_5', 'f1_mco_pete_mu_4']
 
-xlim=50
-xspace = 25
+legend_title = 'Track'
+legend = ['Porto', 'Barcelona-Catalunya', 'Monaco']
+
+
+agent_names = ['batch_400',  'porto_pete_sv_p_r_0']
+xlim=3000
+xspace = 1000
+
+
+agent_names = ['f1_esp_ete',  'f1_esp_pete_r_p_5']
+xlim=400
+xspace = 100
+
+# agent_names = ['f1_mco_ete', 'f1_mco_pete_mu_1']
+# xlim=400
+# xspace = 100
+
+legend_title = ''
+legend = ["End-to-end", "Partial end-to-end"]
+
+# xlim=400
+# xspace = 100
 bottom_space = 0.4
 height=2.5
 
 ns=[0, 0, 0, 0, 0, 0]
 filename = 'observation_space_1'
-learning_curve_all(agent_names, legend, legend_title, ns, filename, xlim, xspace, bottom_space, height)
+# learning_curve_all(agent_names, legend, legend_title, ns, filename, xlim, xspace, bottom_space, height)
 # learning_curve_lap_time_average(agent_names, legend, legend_title, ns, filename, xlim, xspace, bottom_space, height)
 
 

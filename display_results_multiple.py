@@ -3321,47 +3321,63 @@ def display_path(agent_name, load_history=False, n=0):
     plt.show()
 
 
-def display_collision_distribution(agent_name):
+def display_collision_distribution(agent_names):
 
-    terminal_poses_file_name = 'terminal_poses/' + agent_name
+    plt.rcParams['font.family'] = 'serif'
+    plt.rcParams['font.serif'] = ['Times New Roman'] + plt.rcParams['font.serif']
 
-    infile = open('environments/' + agent_name, 'rb')
-    env_dict = pickle.load(infile)
-    infile.close()
-
-    infile = open(terminal_poses_file_name, 'rb')
-    terminal_poses = pickle.load(infile)
-    infile.close()
-
-    end_episode = np.where(terminal_poses[0]==0)[0][0]
-    print('End episode = ', end_episode)
-    env = environment(env_dict)
-    
     figure_size = (4,2)
     plt.figure(1, figsize=figure_size)
     ax = plt.subplot(111)
 
-    track = mapping.map(env.map_name)
-    occupancy_grid = track.occupancy_grid
-    map_height = track.map_height
-    map_width = track.map_width
-    map_res = track.resolution
+    colors = ['blue', 'red']
 
-    crashes = []
+    for idx, agent_name in enumerate(agent_names):
+        
+        terminal_poses_file_name = 'terminal_poses/' + agent_name
 
-    for loc in terminal_poses[0,:]:
-        x=loc[0]
-        y=loc[1]
-        if functions.occupied_cell(x, y, occupancy_grid, map_res, map_height)==True and x!=0 and y!=0:
-            crashes.append([x,y])
-    
-    print('Number of crashes = ', len(crashes))
+        infile = open('environments/' + agent_name, 'rb')
+        env_dict = pickle.load(infile)
+        infile.close()
 
-    ax.imshow(ImageOps.invert(track.gray_im.filter(ImageFilter.FIND_EDGES).filter(ImageFilter.MaxFilter(1))), extent=(0,track.map_width,0,track.map_height), cmap="gray")
-    ax.plot(env.rx, env.ry, color='gray', linestyle='dashed')
-    ax.plot(np.array(crashes)[0:end_episode,0], np.array(crashes)[0:end_episode,1], 'rx')
+        infile = open(terminal_poses_file_name, 'rb')
+        terminal_poses = pickle.load(infile)
+        infile.close()
+
+        end_episode = np.where(terminal_poses[0]==0)[0][0]
+        print('End episode = ', end_episode)
+        env = environment(env_dict)
+
+        track = mapping.map(env.map_name)
+        occupancy_grid = track.occupancy_grid
+        map_height = track.map_height
+        map_width = track.map_width
+        map_res = track.resolution
+
+        crashes = []
+
+        for loc in terminal_poses[0,:]:
+            x=loc[0]
+            y=loc[1]
+            if functions.occupied_cell(x, y, occupancy_grid, map_res, map_height)==True and x!=0 and y!=0:
+                crashes.append([x,y])
+        
+        print('Number of crashes = ', len(crashes))
+
+        ax.plot(np.array(crashes)[0:end_episode,0], np.array(crashes)[0:end_episode,1], 'rx', color=colors[idx])
+
+
+    # ax.imshow(ImageOps.invert(track.gray_im.filter(ImageFilter.FIND_EDGES).filter(ImageFilter.MaxFilter(1))), extent=(0,track.map_width,0,track.map_height), cmap="gray")
+    # ax.plot(env.rx, env.ry, color='gray', linestyle='dashed')
+    #   ax.plot(np.array(crashes)[0:end_episode,0], np.array(crashes)[0:end_episode,1], 'rx')
     #sns.jointplot(x=np.array(terminal_poses)[:,0],y=np.array(terminal_poses)[:,1], kind="hex", alpha=0.5)
+    
+    ax.imshow(ImageOps.invert(track.gray_im.filter(ImageFilter.FIND_EDGES).filter(ImageFilter.MaxFilter(1))), extent=(0,track.map_width,0,track.map_height), cmap="gray")
+    # ax.plot(env.rx, env.ry, color='gray', linestyle='dashed')
     ax.axis('off')
+    
+    plt.figlegend(['End-to-end', 'Partial end-to-end'], loc = 'lower center', ncol=2, borderpad=1.1)
+    plt.subplots_adjust(bottom=0.2) 
     plt.show()
 
 
@@ -3371,6 +3387,7 @@ def display_collision_distribution(agent_name):
 # display_collision_distribution('only_pose')
 # display_collision_distribution('batch_150')
 # display_collision_distribution('f1_esp_ete')
+# display_collision_distribution(['f1_esp_ete', 'f1_esp_pete_r_p_5'])
 
 
 def display_moving_agent(agent_names, ns, legend_title, legend, mismatch_parameters, frac_vary, noise_dicts, start_condition):
@@ -3804,13 +3821,13 @@ def display_path_multiple(agent_names, ns, legend_title, legend, mismatch_parame
     # for i in range(len(idx)):
     #     plt.text(x=env.rx[idx[i]], y=env.ry[idx[i]], s=text[i], fontsize = 'small', bbox=dict(facecolor='white', edgecolor='black',pad=0.1,boxstyle='round'))
 
-    # ax.vlines(x=env.rx[idx[0]], ymin=env.ry[idx[0]]-1, ymax=env.ry[idx[0]]+1, linestyles='dotted', color='red')
+    ax.vlines(x=env.rx[idx[0]], ymin=env.ry[idx[0]]-1, ymax=env.ry[idx[0]]+1, linestyles='dotted', color='red')
     # ax.text(x=env.rx[idx[0]]-1.2, y=env.ry[idx[0]]+1.3, s='Start/finish', fontsize = 'small', bbox=dict(facecolor='white', edgecolor='black',pad=0.1,boxstyle='round'))
 
 
     fig.tight_layout()
-    # fig.subplots_adjust(left=0.2, right=0.8) 
-    plt.figlegend(legend, title=legend_title, loc = 'lower center', ncol=3)
+    fig.subplots_adjust(bottom=0.2) 
+    plt.figlegend(legend, title=legend_title, loc = 'lower center', ncol=3, borderpad=1.1)
 
 
 
