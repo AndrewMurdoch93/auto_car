@@ -1970,6 +1970,7 @@ if True:
     # noise = {'xy':0.025, 'theta':0.05, 'v':0.1, 'lidar':0.01}
     # main_multiple.lap_time_test_with_noise(agent_name=agent_name, n_episodes=n_test, detect_issues=False, initial_conditions=True, noise=noise)
 
+
     
     pass
 
@@ -2433,7 +2434,7 @@ if True:
     n_tests=10
     # frac_variation = np.linspace(-0.2,0.2,21)
     # mu_frac_variation = np.linspace(-0.5,0,5)
-    mu_frac_variation = np.array([-0.5,-0.4,-0.3])
+    mu_frac_variation = np.array([-0.5,-0.4])
     
     # frac_variation = np.array([-2, -1, -0.5, 0.5, 1])
 
@@ -2520,6 +2521,21 @@ if True:
     # agent_name = 'f1_esp_pete_f_20'
     # main_multiple.lap_time_test_mismatch(agent_name=agent_name, n_episodes=n_tests, detect_issues=False, initial_conditions=True, parameter='mu', frac_variation=mu_frac_variation)
     
+    # agent_name = 'f1_esp_pete_kv_05'
+    # main_multiple.lap_time_test_mismatch(agent_name=agent_name, n_episodes=n_tests, detect_issues=False, initial_conditions=True, parameter='mu', frac_variation=mu_frac_variation)
+    
+    # agent_name = 'f1_esp_pete_kv_2'
+    # main_multiple.lap_time_test_mismatch(agent_name=agent_name, n_episodes=n_tests, detect_issues=False, initial_conditions=True, parameter='mu', frac_variation=mu_frac_variation)
+   
+
+    agent_name = 'f1_esp_pete_lc_05'
+    main_multiple.lap_time_test_mismatch(agent_name=agent_name, n_episodes=n_tests, detect_issues=False, initial_conditions=True, parameter='mu', frac_variation=mu_frac_variation)
+    
+    agent_name = 'f1_esp_pete_lc_2'
+    main_multiple.lap_time_test_mismatch(agent_name=agent_name, n_episodes=n_tests, detect_issues=False, initial_conditions=True, parameter='mu', frac_variation=mu_frac_variation)
+    
+
+
 
     # main_multiple.lap_time_test_mismatch(agent_name=agent_name, n_episodes=n_tests, detect_issues=False, initial_conditions=True, parameter='C_Sf', frac_variation=frac_variation)
     # main_multiple.lap_time_test_mismatch(agent_name=agent_name, n_episodes=n_tests, detect_issues=False, initial_conditions=True, parameter='C_Sr', frac_variation=frac_variation)

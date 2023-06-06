@@ -46,7 +46,7 @@ import matplotlib.colors as mcolors
 def learning_curve_lap_time_average(agent_names, legend, legend_title, ns, filename, xlim, xspace, bottom_space, height):
     legend_coll = legend.copy()
     legend_coll.append('Min and max')
-    window = 50
+    window = 10
     steps = [[] for _ in range(len(agent_names))]
     steps_x_axis = [[] for _ in range(len(agent_names))]
     n_actions_x_axis  = [[] for _ in range(len(agent_names))]
@@ -289,10 +289,10 @@ def learning_curve_lap_time_average(agent_names, legend, legend_title, ns, filen
     
     # fig.subplots_adjust(right=0.8) 
     # fig.subplots_adjust(left=0.2) 
-    plt.figlegend(legend, title=legend_title, loc = 'lower center', ncol=5, borderpad=1.1)
+    plt.figlegend(legend, title=legend_title, loc = 'lower center', ncol=5, borderpad=0.5)
     
     
-    ax[0].text(x=420, y=-45, s='Episodes')
+    ax[0].text(x=100, y=-45, s='Episodes')
     plt.show()
     # plt.savefig('results/'+filename+'.pgf', format='pgf')
 
@@ -508,7 +508,7 @@ def learning_curve_all(agent_names, legend, legend_title, ns, filename, xlim, xs
 
     legend_coll = legend.copy()
     legend_coll.append('Min and max')
-    window = 100
+    window = 10
     steps = [[] for _ in range(len(agent_names))]
     steps_x_axis = [[] for _ in range(len(agent_names))]
     n_actions_x_axis  = [[] for _ in range(len(agent_names))]
@@ -713,9 +713,15 @@ def learning_curve_all(agent_names, legend, legend_title, ns, filename, xlim, xs
 
     for i in range(len(agent_names)):
         end_episode = end_episodes[i] 
-        ax[0].plot(np.arange(0,end_episode,1), np.array(avg_coll[i][0:end_episode])[np.arange(0,end_episode,1)]*100)
-        ax[0].fill_between(x=np.arange(end_episode)[np.arange(0,end_episode,1)], y1=np.array(upper_fill_coll[i][0])[np.arange(0,end_episode,1)]*100, y2=np.array(lower_fill_coll[i][0])[np.arange(0,end_episode,1)]*100, alpha=0.15, label='_nolegend_')
-    
+        
+        if i == 0:
+            ax[0].plot(np.arange(0,end_episode,1), np.array(avg_coll[i][0:end_episode])[np.arange(0,end_episode,1)]*100, color='grey', linestyle='--')
+            ax[0].fill_between(x=np.arange(end_episode)[np.arange(0,end_episode,1)], y1=np.array(upper_fill_coll[i][0])[np.arange(0,end_episode,1)]*100, y2=np.array(lower_fill_coll[i][0])[np.arange(0,end_episode,1)]*100, alpha=0.15, color='grey', label='_nolegend_')
+        else:
+            ax[0].plot(np.arange(0,end_episode,1), np.array(avg_coll[i][0:end_episode])[np.arange(0,end_episode,1)]*100)
+            ax[0].fill_between(x=np.arange(end_episode)[np.arange(0,end_episode,1)], y1=np.array(upper_fill_coll[i][0])[np.arange(0,end_episode,1)]*100, y2=np.array(lower_fill_coll[i][0])[np.arange(0,end_episode,1)]*100, alpha=0.15, label='_nolegend_')
+        
+
     ax[0].hlines(y=100, xmin=0, xmax=np.max(end_episodes), colors='black', linestyle='dashed')
     ax[0].hlines(y=0, xmin=0, xmax=np.max(end_episodes), colors='black', linestyle='dashed')
     ax[0].set_ylim([-5, 105])
@@ -729,8 +735,13 @@ def learning_curve_all(agent_names, legend, legend_title, ns, filename, xlim, xs
 
     for i in range(np.size(end_ep, axis=0)):
         end_episode = end_episodes[i] 
-        ax[1].plot(np.arange(0,end_episode,1), (np.array(steps_y_avg_smoothed[i])*0.01)[np.arange(0,end_episode,1)])
-        ax[1].fill_between(x=np.arange(0,end_episode,1), y1=np.array(upper_fill[i][0])[np.arange(0,end_episode,1)]*0.01, y2=np.array(lower_fill[i][0])[np.arange(0,end_episode,1)]*0.01, alpha=0.15, label='_nolegend_')
+        if i == 0:
+            ax[1].plot(np.arange(0,end_episode,1), (np.array(steps_y_avg_smoothed[i])*0.01)[np.arange(0,end_episode,1)], color='grey', linestyle='--')
+            ax[1].fill_between(x=np.arange(0,end_episode,1), y1=np.array(upper_fill[i][0])[np.arange(0,end_episode,1)]*0.01, y2=np.array(lower_fill[i][0])[np.arange(0,end_episode,1)]*0.01, alpha=0.15, color='grey', label='_nolegend_')
+
+        else:
+            ax[1].plot(np.arange(0,end_episode,1), (np.array(steps_y_avg_smoothed[i])*0.01)[np.arange(0,end_episode,1)])
+            ax[1].fill_between(x=np.arange(0,end_episode,1), y1=np.array(upper_fill[i][0])[np.arange(0,end_episode,1)]*0.01, y2=np.array(lower_fill[i][0])[np.arange(0,end_episode,1)]*0.01, alpha=0.15, label='_nolegend_')
 
 
     ax[1].set_xlabel('Episodes')
@@ -743,8 +754,13 @@ def learning_curve_all(agent_names, legend, legend_title, ns, filename, xlim, xs
 
     for i in range(np.size(end_ep, axis=0)):
         end_episode = end_episodes[i] 
-        ax[2].plot(np.arange(0,end_episode,1), np.array(avg_score[i])[np.arange(0,end_episode,1)])
-        ax[2].fill_between(x=np.arange(0,end_episode,1), y1=np.array(score_upper_fill[i][0])[np.arange(0,end_episode,1)], y2=np.array(score_lower_fill[i][0])[np.arange(0,end_episode,1)], alpha=0.15, label='_nolegend_')
+        
+        if i == 0:
+            ax[2].plot(np.arange(0,end_episode,1), np.array(avg_score[i])[np.arange(0,end_episode,1)], color='grey', linestyle='--')
+            ax[2].fill_between(x=np.arange(0,end_episode,1), y1=np.array(score_upper_fill[i][0])[np.arange(0,end_episode,1)], y2=np.array(score_lower_fill[i][0])[np.arange(0,end_episode,1)], alpha=0.15, color='grey', label='_nolegend_')
+        else:
+            ax[2].plot(np.arange(0,end_episode,1), np.array(avg_score[i])[np.arange(0,end_episode,1)])
+            ax[2].fill_between(x=np.arange(0,end_episode,1), y1=np.array(score_upper_fill[i][0])[np.arange(0,end_episode,1)], y2=np.array(score_lower_fill[i][0])[np.arange(0,end_episode,1)], alpha=0.15, label='_nolegend_')
 
       
     ax[2].set_title('(c)', fontdict={'fontsize': 10})
@@ -2417,7 +2433,7 @@ frac_vary = [0,0]
 # start_condition = {'x':10, 'y':4.5, 'v':3, 'theta':np.pi, 'delta':0, 'goal':0}
 # start_condition = {'x':4.1, 'y':9, 'v':3, 'theta':0, 'delta':0, 'goal':0}
 # start_condition = []
-display_path_velocity_colormap(agent_names, ns, legend_title, legend, mismatch_parameters, frac_vary, start_condition)
+# display_path_velocity_colormap(agent_names, ns, legend_title, legend, mismatch_parameters, frac_vary, start_condition)
 
 
 def symmetrical_colormap(cmap_settings, new_name = None ):
@@ -3805,12 +3821,7 @@ def display_path_mismatch_multiple(agent_names, ns, legend_title, legend, mismat
         
 
 
-    plt.rcParams.update({
-    "font.family": "serif",  # use serif/main font for text elements
-    "text.usetex": True,     # use inline math for ticks
-    "pgf.rcfonts": False,     # don't setup fonts from rc parameters
-    "font.size": 12
-    })
+
 
     fig, ax =   plt.subplots(nrows=2, ncols=2, figsize=(5.5,2.8))
     plt_idx=0
@@ -4459,10 +4470,11 @@ height=2.5
 
 
 
-agent_names = ['f1_esp_pete_lc_05', 'f1_esp_pete_lc_15']
+agent_names = ['f1_esp_pete_lc_05', 'f1_esp_pete_r_p_5', 'f1_esp_pete_lc_15']
 legend = ['0.5', '1', '1.5']
 legend_title = 'Look-ahead distance [m]'
-
+xlim=100
+xspace = 25
 
 # agent_names = ['f1_esp_pete_nn_plus', 'f1_esp_pete_nn_minus']
 # leganed =['600', '400', '200']
@@ -4470,30 +4482,41 @@ legend_title = 'Look-ahead distance [m]'
 # agent_names = ['f1_esp_pete_bs_200', 'f1_esp_pete_bs_600']
 # legend = ['200', '400', '600']
 
-agent_names = ['porto_pete_sv_p_r_0', 'f1_esp_pete_r_p_5', 'f1_mco_pete_mu_4']
+# agent_names = ['porto_pete_sv_p_r_0', 'f1_esp_pete_r_p_5', 'f1_mco_pete_mu_4']
 
-legend_title = 'Track'
-legend = ['Porto', 'Barcelona-Catalunya', 'Monaco']
-
-
-agent_names = ['batch_400',  'porto_pete_sv_p_r_0']
-xlim=3000
-xspace = 1000
+# legend_title = 'Track'
+# legend = ['Porto', 'Barcelona-Catalunya', 'Monaco']
 
 
-agent_names = ['f1_esp_ete',  'f1_esp_pete_r_p_5']
-xlim=400
-xspace = 100
+# agent_names = ['batch_400',  'porto_pete_sv_p_r_0']
+# xlim=3000
+# xspace = 1000
+
+
+# agent_names = ['f1_esp_ete',  'f1_esp_pete_r_p_5']
+# xlim=400
+# xspace = 100
 
 # agent_names = ['f1_mco_ete', 'f1_mco_pete_mu_1']
 # xlim=400
 # xspace = 100
 
-legend_title = ''
-legend = ["End-to-end", "Partial end-to-end"]
+# agent_names = ['f1_esp_pete_kv_05', 'f1_esp_pete_r_p_5', 'f1_esp_pete_kv_2']
+# legend = ['0.5', '1', '2']
+# legend_title = 'Velocity controller gain, $k_{v}$'
 
-# xlim=400
-# xspace = 100
+
+agent_names = ['f1_esp_ete', 'f1_esp_pete_steer', 'f1_esp_pete_velocity', 'f1_esp_pete_r_p_5']
+legend = ['End-to-end', 'Only steering', 'Only velocity', 'Both']
+legend_title = 'Algorithm'
+xlim=200
+xspace = 50
+
+# legend_title = ''
+# legend = ["End-to-end", "Partial end-to-end"]
+
+# xlim=100
+# xspace = 25
 bottom_space = 0.4
 height=2.5
 

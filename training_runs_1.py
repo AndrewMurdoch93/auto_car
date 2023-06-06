@@ -130,61 +130,61 @@ agent_name = 'f1_mco_pete_mu_2'
 
 
 
-# agent_name = 'f1_esp_pete_lc_05'
-# main_dict['name'] = agent_name
-# env_dict['map_name'] = 'f1_esp'
-# env_dict['velocity_gain'] = 1
-# env_dict['steer_control_dict']['Lfc'] = 0.5
-# a = main_multiple.trainingLoop(main_dict, agent_td3_dict, env_dict, load_agent='')
-# a.train()
-# main_multiple.lap_time_test_with_noise(agent_name=agent_name, n_episodes=n_test, detect_issues=False, initial_conditions=True, noise={'xy':0.025, 'theta':0.05, 'v':0.1, 'lidar':0.01})
-# # main_multiple.lap_time_test_mismatch(agent_name=agent_name, n_episodes=n_test, detect_issues=False, initial_conditions=True, parameter='mu', frac_variation=mu_frac_variation)
+agent_name = 'f1_esp_pete_lc_05'
+main_dict['name'] = agent_name
+env_dict['map_name'] = 'f1_esp'
+env_dict['velocity_gain'] = 1
+env_dict['steer_control_dict']['track_dict']['Lfc'] = 0.5
+a = main_multiple.trainingLoop(main_dict, agent_td3_dict, env_dict, load_agent='')
+a.train()
+main_multiple.lap_time_test_with_noise(agent_name=agent_name, n_episodes=n_test, detect_issues=False, initial_conditions=True, noise={'xy':0.025, 'theta':0.05, 'v':0.1, 'lidar':0.01})
+# main_multiple.lap_time_test_mismatch(agent_name=agent_name, n_episodes=n_test, detect_issues=False, initial_conditions=True, parameter='mu', frac_variation=mu_frac_variation)
 
-# agent_name = 'f1_esp_pete_lc_15'
-# main_dict['name'] = agent_name
-# env_dict['map_name'] = 'f1_esp'
-# env_dict['velocity_gain'] = 1
-# env_dict['steer_control_dict']['Lfc'] = 1.5
-# a = main_multiple.trainingLoop(main_dict, agent_td3_dict, env_dict, load_agent='')
-# a.train()
-# main_multiple.lap_time_test_with_noise(agent_name=agent_name, n_episodes=n_test, detect_issues=False, initial_conditions=True, noise={'xy':0.025, 'theta':0.05, 'v':0.1, 'lidar':0.01})
-# # main_multiple.lap_time_test_mismatch(agent_name=agent_name, n_episodes=n_test, detect_issues=False, initial_conditions=True, parameter='mu', frac_variation=mu_frac_variation)
+agent_name = 'f1_esp_pete_lc_15'
+main_dict['name'] = agent_name
+env_dict['map_name'] = 'f1_esp'
+env_dict['velocity_gain'] = 1
+env_dict['steer_control_dict']['track_dict']['Lfc'] = 1.5
+a = main_multiple.trainingLoop(main_dict, agent_td3_dict, env_dict, load_agent='')
+a.train()
+main_multiple.lap_time_test_with_noise(agent_name=agent_name, n_episodes=n_test, detect_issues=False, initial_conditions=True, noise={'xy':0.025, 'theta':0.05, 'v':0.1, 'lidar':0.01})
+# main_multiple.lap_time_test_mismatch(agent_name=agent_name, n_episodes=n_test, detect_issues=False, initial_conditions=True, parameter='mu', frac_variation=mu_frac_variation)
 
 # agent_name = 'f1_esp_pete_lc_2'
 # main_dict['name'] = agent_name
 # env_dict['map_name'] = 'f1_esp'
 # env_dict['velocity_gain'] = 1
-# env_dict['steer_control_dict']['Lfc'] = 1.5
+# env_dict['steer_control_dict']['track_dict']['Lfc'] = 2
 # a = main_multiple.trainingLoop(main_dict, agent_td3_dict, env_dict, load_agent='')
 # a.train()
 # main_multiple.lap_time_test_with_noise(agent_name=agent_name, n_episodes=n_test, detect_issues=False, initial_conditions=True, noise={'xy':0.025, 'theta':0.05, 'v':0.1, 'lidar':0.01})
 # # main_multiple.lap_time_test_mismatch(agent_name=agent_name, n_episodes=n_test, detect_issues=False, initial_conditions=True, parameter='mu', frac_variation=mu_frac_variation)
 
 
-agent_name = 'f1_esp_pete_steer'
-main_dict['name'] = agent_name
-env_dict['map_name'] = 'f1_esp'
-env_dict['velocity_gain'] = 1
-env_dict['steer_control_dict']['Lfc'] = 1
-env_dict['velocity_control'] = False
-a = main_multiple.trainingLoop(main_dict, agent_td3_dict, env_dict, load_agent='')
-a.train()
-main_multiple.lap_time_test_with_noise(agent_name=agent_name, n_episodes=n_test, detect_issues=False, initial_conditions=True, noise={'xy':0.025, 'theta':0.05, 'v':0.1, 'lidar':0.01})
-# main_multiple.lap_time_test_mismatch(agent_name=agent_name, n_episodes=n_test, detect_issues=False, initial_conditions=True, parameter='mu', frac_variation=mu_frac_variation)
+# agent_name = 'f1_esp_pete_steer'
+# main_dict['name'] = agent_name
+# env_dict['map_name'] = 'f1_esp'
+# env_dict['velocity_gain'] = 1
+# env_dict['steer_control_dict']['Lfc'] = 1
+# env_dict['velocity_control'] = False
+# a = main_multiple.trainingLoop(main_dict, agent_td3_dict, env_dict, load_agent='')
+# a.train()
+# main_multiple.lap_time_test_with_noise(agent_name=agent_name, n_episodes=n_test, detect_issues=False, initial_conditions=True, noise={'xy':0.025, 'theta':0.05, 'v':0.1, 'lidar':0.01})
+# # main_multiple.lap_time_test_mismatch(agent_name=agent_name, n_episodes=n_test, detect_issues=False, initial_conditions=True, parameter='mu', frac_variation=mu_frac_variation)
 
 
-agent_name = 'f1_esp_pete_velocity'
-main_dict['name'] = agent_name
-env_dict['map_name'] = 'f1_esp'
-env_dict['velocity_gain'] = 1
-env_dict['steer_control_dict']['Lfc'] = 1
-env_dict['velocity_control'] = False
-env_dict['steer_control_dict']['steering_control'] = False
-env_dict['reward_signal']['collision'] = -2
-a = main_multiple.trainingLoop(main_dict, agent_td3_dict, env_dict, load_agent='')
-a.train()
-main_multiple.lap_time_test_with_noise(agent_name=agent_name, n_episodes=n_test, detect_issues=False, initial_conditions=True, noise={'xy':0.025, 'theta':0.05, 'v':0.1, 'lidar':0.01})
-# main_multiple.lap_time_test_mismatch(agent_name=agent_name, n_episodes=n_test, detect_issues=False, initial_conditions=True, parameter='mu', frac_variation=mu_frac_variation)
+# agent_name = 'f1_esp_pete_velocity'
+# main_dict['name'] = agent_name
+# env_dict['map_name'] = 'f1_esp'
+# env_dict['velocity_gain'] = 1
+# env_dict['steer_control_dict']['Lfc'] = 1
+# env_dict['velocity_control'] = False
+# env_dict['steer_control_dict']['steering_control'] = False
+# env_dict['reward_signal']['collision'] = -2
+# a = main_multiple.trainingLoop(main_dict, agent_td3_dict, env_dict, load_agent='')
+# a.train()
+# main_multiple.lap_time_test_with_noise(agent_name=agent_name, n_episodes=n_test, detect_issues=False, initial_conditions=True, noise={'xy':0.025, 'theta':0.05, 'v':0.1, 'lidar':0.01})
+# # main_multiple.lap_time_test_mismatch(agent_name=agent_name, n_episodes=n_test, detect_issues=False, initial_conditions=True, parameter='mu', frac_variation=mu_frac_variation)
 
 
 
@@ -1042,33 +1042,48 @@ agent_names = ['f1_esp_pete_f_2', 'f1_esp_pete_f_5', 'f1_esp_pete_eval', 'f1_esp
 agent_names = ['f1_esp_pete_nn_plus', 'f1_esp_pete_nn_minus']
 agent_names = ['f1_esp_pete_bs_200', 'f1_esp_pete_eval', 'f1_esp_pete_bs_600']
 agent_names = ['f1_mco_pete_mu_4']
-
+agent_names = ['f1_mco_ete', 'f1_mco_pete_mu_4']
 
 # legend = ['no noise', 'noise']
 # legend = ['180', '220']
 # legend = ['5', '10', '20']
-legend = ['Nominal surface', 'Dry asphalt', 'Wet asphalt']
+# legend = ['Nominal surface', 'Dry asphalt', 'Wet asphalt']
 # legend_title = r'Standard deviation of road surface friction coefficient, $\mu$'
-ns=[2,0,0,0,0,0]
+ns=[0,0,0,0,0,0]
+
 
 # agent_names = ['porto_ete_v5_r_collision_5']
-# legend = []
+legend = ['End-to-end', 'Partial end-to-end']
 legend_title = ''
 # ns=[0]
 
 
-agent_names = ['f1_esp_pete_lc_05', 'f1_esp_pete_r_p_5', 'f1_esp_pete_lc_15']
-legend = ['0.5', '1', '1.5']
-legend_title = 'Look-ahead distance [m]'
+# agent_names = ['f1_esp_pete_lc_05', 'f1_esp_pete_r_p_5', 'f1_esp_pete_lc_15']
+# legend = ['0.5', '1', '1.5']
+# legend_title = 'Look-ahead distance [m]'
+
+
+# agent_names = ['f1_esp_pete_kv_05', 'f1_esp_pete_r_p_5', 'f1_esp_pete_kv_2']
+# legend = ['0.5', '1', '2']
+# legend_title = 'Velocity controller gain, $k_{v}$'
 
 
 # agent_names = ['f1_esp_pete_vmax_4', 'f1_esp_pete_r_p_5' , 'f1_esp_pete_vmax_6']
 # legend = ['4', '5', '6']
 # legend_title = 'Maximum velocity'
 
-agent_names = ['f1_esp_ete', 'f1_esp_pete_r_p_5']
-agent_names = ['f1_mco_ete', 'f1_mco_pete_mu_2']
-legend = ['End-to-end', 'Partial end-to-end']
+# agent_names = ['f1_esp_ete', 'f1_esp_pete_r_p_5']
+# agent_names = ['f1_mco_ete', 'f1_mco_pete_mu_2']
+# legend = ['End-to-end', 'Partial end-to-end']
+
+# agent_names = ['f1_esp_pete_steer', 'f1_esp_pete_velocity', 'f1_esp_pete_r_p_5']
+# legend = ['Only steering', 'Only velocity', 'Both']
+# legend_title = 'Algorithm'
+
+
+agent_names = ['f1_esp_ete', 'f1_esp_pete_steer', 'f1_esp_pete_velocity', 'f1_esp_pete_r_p_5']
+legend = ['End-to-end', 'Only velocity', 'Only steering', 'Both']
+legend_title = 'Algorithm'
 
 # display_results_multiple.learning_curve_lap_time_average(agent_names, legend, legend_title, ns)
 # display_results_multiple.learning_curve_reward_average(agent_names, legend, legend_title)
@@ -1086,25 +1101,31 @@ mismatch_parameters = [['mu'], ['mu'], ['mu'], ['mu']]
 frac_vary = [[0],[0],[0], [0]]
 noise_dicts = [{'xy':0.025, 'theta':0.05, 'v':0.1, 'lidar':0.01}, {'xy':0.025, 'theta':0.05, 'v':0.1, 'lidar':0.01}, {'xy':0.025, 'theta':0.05, 'v':0.1, 'lidar':0.01}, {'xy':0.025, 'theta':0.05, 'v':0.1, 'lidar':0.01}]
 # start_condition = {'x':10, 'y':4.5, 'v':3, 'theta':np.pi, 'delta':0, 'goal':0}
-# start_condition = {'x':24.3, 'y':24.6, 'v':3, 'theta':0, 'delta':0, 'goal':0}
-start_condition = {'x':18, 'y':48.7, 'v':3, 'theta':0, 'delta':0, 'goal':0}
+start_condition = {'x':24.3, 'y':24.6, 'v':3, 'theta':0, 'delta':0, 'goal':0}
+# start_condition = {'x':18, 'y':48.7, 'v':3, 'theta':0, 'delta':0, 'goal':0}
 
 # Columbia
 # start_condition = {'x':5.7, 'y':7.25, 'v':3, 'theta':0, 'delta':0, 'goal':0}
 # start_condition = []
 
 
-# NB!!!! Error: Path is junk when no mismatch is present, when displaying 2 agents
 
 # display_results_multiple.display_moving_agent(agent_names=agent_names, ns=ns, legend_title=legend_title,          
 #                                              legend=legend, mismatch_parameters=mismatch_parameters, frac_vary=frac_vary, noise_dicts=noise_dicts,
 #                                              start_condition=start_condition)
 
-display_results_multiple.display_path_multiple(agent_names=agent_names, ns=ns, legend_title=legend_title,          
-                                             legend=legend, mismatch_parameters=mismatch_parameters, frac_vary=frac_vary, noise_dicts=noise_dicts,
-                                             start_condition=start_condition)
+# display_results_multiple.display_path_multiple(agent_names=agent_names, ns=ns, legend_title=legend_title,          
+#                                              legend=legend, mismatch_parameters=mismatch_parameters, frac_vary=frac_vary, noise_dicts=noise_dicts,
+#                                              start_condition=start_condition)
 
 # display_results_multiple.display_path_mismatch_multiple_by_state(agent_names=agent_names, ns=ns, legend_title=legend_title,          
 #                                              legend=legend, mismatch_parameters=mismatch_parameters, frac_vary=frac_vary, noise_dicts=noise_dicts,
 #                                              start_condition=start_condition)
 
+# display_results_multiple.display_path_multiple_2(agent_names=agent_names, ns=ns, legend_title=legend_title,          
+#                                              legend=legend, mismatch_parameters=mismatch_parameters, frac_vary=frac_vary, noise_dicts=noise_dicts,
+#                                              start_condition=start_condition)
+
+# display_results_multiple.display_path_twice_multiple(agent_names=agent_names, ns=ns, legend_title=legend_title,          
+#                                              legend=legend, mismatch_parameters=mismatch_parameters, frac_vary=frac_vary, noise_dicts=noise_dicts,
+#                                              start_condition=start_condition)
