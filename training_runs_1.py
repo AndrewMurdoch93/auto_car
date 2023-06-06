@@ -76,7 +76,7 @@ env_dict = {'sim_conf': functions.load_config(sys.path[0], "config")
         } 
 
 mu_frac_variation = np.array([-0.5,-0.4,-0.3,-0.2,-0.1,0])
-n_test=100
+n_test=10
 agent_name = 'f1_mco_pete_mu_2'
 # a = main_multiple.trainingLoop(main_dict, agent_td3_dict, env_dict, load_agent='')
 # a.train()
@@ -130,24 +130,24 @@ agent_name = 'f1_mco_pete_mu_2'
 
 
 
-agent_name = 'f1_esp_pete_lc_05'
-main_dict['name'] = agent_name
-env_dict['map_name'] = 'f1_esp'
-env_dict['velocity_gain'] = 1
-env_dict['steer_control_dict']['track_dict']['Lfc'] = 0.5
-a = main_multiple.trainingLoop(main_dict, agent_td3_dict, env_dict, load_agent='')
-a.train()
-main_multiple.lap_time_test_with_noise(agent_name=agent_name, n_episodes=n_test, detect_issues=False, initial_conditions=True, noise={'xy':0.025, 'theta':0.05, 'v':0.1, 'lidar':0.01})
+# agent_name = 'f1_esp_pete_lc_05'
+# main_dict['name'] = agent_name
+# env_dict['map_name'] = 'f1_esp'
+# env_dict['velocity_gain'] = 1
+# env_dict['steer_control_dict']['track_dict']['Lfc'] = 0.5
+# a = main_multiple.trainingLoop(main_dict, agent_td3_dict, env_dict, load_agent='')
+# a.train()
+# main_multiple.lap_time_test_with_noise(agent_name=agent_name, n_episodes=n_test, detect_issues=False, initial_conditions=True, noise={'xy':0.025, 'theta':0.05, 'v':0.1, 'lidar':0.01})
 # main_multiple.lap_time_test_mismatch(agent_name=agent_name, n_episodes=n_test, detect_issues=False, initial_conditions=True, parameter='mu', frac_variation=mu_frac_variation)
 
-agent_name = 'f1_esp_pete_lc_15'
-main_dict['name'] = agent_name
-env_dict['map_name'] = 'f1_esp'
-env_dict['velocity_gain'] = 1
-env_dict['steer_control_dict']['track_dict']['Lfc'] = 1.5
-a = main_multiple.trainingLoop(main_dict, agent_td3_dict, env_dict, load_agent='')
-a.train()
-main_multiple.lap_time_test_with_noise(agent_name=agent_name, n_episodes=n_test, detect_issues=False, initial_conditions=True, noise={'xy':0.025, 'theta':0.05, 'v':0.1, 'lidar':0.01})
+# agent_name = 'f1_esp_pete_lc_15'
+# main_dict['name'] = agent_name
+# env_dict['map_name'] = 'f1_esp'
+# env_dict['velocity_gain'] = 1
+# env_dict['steer_control_dict']['track_dict']['Lfc'] = 1.5
+# a = main_multiple.trainingLoop(main_dict, agent_td3_dict, env_dict, load_agent='')
+# a.train()
+# main_multiple.lap_time_test_with_noise(agent_name=agent_name, n_episodes=n_test, detect_issues=False, initial_conditions=True, noise={'xy':0.025, 'theta':0.05, 'v':0.1, 'lidar':0.01})
 # main_multiple.lap_time_test_mismatch(agent_name=agent_name, n_episodes=n_test, detect_issues=False, initial_conditions=True, parameter='mu', frac_variation=mu_frac_variation)
 
 # agent_name = 'f1_esp_pete_lc_2'

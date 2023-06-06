@@ -3330,7 +3330,7 @@ def display_collision_distribution(agent_names):
     plt.figure(1, figsize=figure_size)
     ax = plt.subplot(111)
 
-    colors = ['blue', 'red']
+    colors = ['tab:blue', 'tab:orange']
 
     for idx, agent_name in enumerate(agent_names):
         
@@ -3387,7 +3387,7 @@ def display_collision_distribution(agent_names):
 # display_collision_distribution('only_pose')
 # display_collision_distribution('batch_150')
 # display_collision_distribution('f1_esp_ete')
-# display_collision_distribution(['f1_esp_ete', 'f1_esp_pete_r_p_5'])
+display_collision_distribution(['f1_esp_ete', 'f1_esp_pete_r_p_5'])
 
 
 def display_moving_agent(agent_names, ns, legend_title, legend, mismatch_parameters, frac_vary, noise_dicts, start_condition):
@@ -5929,5 +5929,286 @@ def display_path_twice_multiple(agent_names, ns, legend_title, legend, mismatch_
 
 
 
+def learning_curve_lap_time_tracks(agent_names, legend, legend_title, ns, xlim, xspace, bottom_space, height):
+    legend_coll = legend.copy()
+    legend_coll.append('Min and max')
+    window = 50
+    steps = [[] for _ in range(len(agent_names))]
+    steps_x_axis = [[] for _ in range(len(agent_names))]
+    n_actions_x_axis  = [[] for _ in range(len(agent_names))]
+    steps_no_coll = [[] for _ in range(len(agent_names))]
+    avg_steps_no_coll = [[] for _ in range(len(agent_names))]
+    std_steps_no_coll = [[] for _ in range(len(agent_names))]
+    upper_fill_steps_no_coll = [[] for _ in range(len(agent_names))]
+    lower_fill_steps_no_coll = [[] for _ in range(len(agent_names))]
+    
+    max_steps_no_coll = [[] for _ in range(len(agent_names))]
+    collisions = [[] for _ in range(len(agent_names))]
+    avg_time = [[] for _ in range(len(agent_names))]
+    avg_coll = [[] for _ in range(len(agent_names))]
+    std_coll = [[] for _ in range(len(agent_names))]
+    upper_fill_coll = [[] for _ in range(len(agent_names))]
+    lower_fill_coll = [[] for _ in range(len(agent_names))]
+    
+    n_actions = [[] for _ in range(len(agent_names))]
+
+    avg_steps = [[] for _ in range(len(agent_names))]
+    avg_n_actions = [[] for _ in range(len(agent_names))]
+    avg_collisions = [[] for _ in range(len(agent_names))]
+
+    steps_avg_x_axis = [[] for _ in range(len(agent_names))]
+    times = [[] for _ in range(len(agent_names))]
+    
+    avg_success = [[] for _ in range(len(agent_names))]
+    std_success = [[] for _ in range(len(agent_names))]
+    upper_fill_success = [[] for _ in range(len(agent_names))]
+    lower_fill_success = [[] for _ in range(len(agent_names))]
+
+    scores = [[] for _ in range(len(agent_names))]
+    avg_scores = [[] for _ in range(len(agent_names))]
+    avg_score = [[] for _ in range(len(agent_names))]
+    std_score = [[] for _ in range(len(agent_names))]
+    score_upper_fill = [[] for _ in range(len(agent_names))]
+    score_lower_fill = [[] for _ in range(len(agent_names))]
+
+
+    for i in range(len(agent_names)):
+        agent_name = agent_names[i]
+        train_results_file_name = 'train_results/' + agent_name
+        infile = open(train_results_file_name, 'rb')
+        
+        scores[i] = pickle.load(infile)
+        _ = pickle.load(infile)
+        t = pickle.load(infile)
+        s = pickle.load(infile)
+        c = pickle.load(infile)
+        n = pickle.load(infile)
+        infile.close()
+        
+        for x in range(len(t)):
+            times[i].append(t[x][0:10000])
+            steps[i].append(s[x][0:10000])
+            collisions[i].append(c[x][0:10000])
+            n_actions[i].append(n[x][0:10000])
+
+        # times_uniform = []
+        # steps_uniform = []
+        # collisions_uniform = []
+        # n_actions_uniform = []
+        
+        # for t,s,c,n in zip(times[i],steps[i],collisions[i],n_actions[i]):
+        #     times_uniform.append(t[0:10000])
+        #     steps_uniform.append(s[0:10000])
+        #     collisions_uniform.append(c[0:10000])
+        #     n_actions_uniform.append(n[0:10000])
+        
+
+        avg_steps[i] = np.average(steps[i],axis=0)
+        avg_n_actions[i] = np.average(n_actions[i],axis=0)
+        avg_collisions[i] = np.average(collisions[i],axis=0)
+        steps_avg_x_axis[i] = np.average(steps[i],axis=0)
+        avg_scores[i] = np.average(scores[i],axis=0)
+        #avg_success[i] = np.average(np.logical_not(collisions[i]),axis=0)*100
+
+        for j in range(len(collisions[i][ns[i]])):
+            if j <= window:
+                x = 0
+            else:
+                x = j-window 
+            avg_coll[i].append(np.mean(avg_collisions[i][x:j+1]))
+            avg_time[i].append(np.mean(steps[i][ns[i]][x:j+1]))
+            std_coll[i].append(np.std(avg_collisions[i][x:j+1]))
+            avg_score[i].append(np.mean(avg_scores[i][x:j+1]))
+            std_score[i].append(np.std(avg_scores[i][x:j+1]))
+            #std_success[i].append(np.std(avg_collisions[i][x:j+1]))
+
+        upper_fill_coll[i].append(np.array(avg_coll[i])+np.array(std_coll[i]))
+        lower_fill_coll[i].append(np.array(avg_coll[i])-np.array(std_coll[i]))
+
+        score_upper_fill[i].append(np.array(avg_score[i])+np.array(std_score[i]))
+        score_lower_fill[i].append(np.array(avg_score[i])-np.array(std_score[i]))
+        #upper_fill_success[i].append(np.array(avg_success[i])+np.array(std_success[i]))
+        #lower_fill_success[i].append(np.array(avg_success[i])-np.array(std_success[i]))
+
+        steps_x_axis[i] = np.cumsum(steps[i][ns[i]])[np.logical_not(collisions[i][ns[i]])]
+        n_actions_x_axis[i] = np.cumsum(n_actions[i][ns[i]])[np.logical_not(collisions[i][ns[i]])]
+        steps_no_coll[i] = steps[i][ns[i]][np.logical_not(collisions[i][ns[i]])]
+
+        for j in range(len(steps_x_axis[i])):
+            if j <= window:
+                x = 0
+            else:
+                x = j-window 
+            avg_steps_no_coll[i].append(np.mean(steps_no_coll[i][x:j+1]))
+            std_steps_no_coll[i].append(np.std(steps_no_coll[i][x:j+1]))
+            #max_steps_no_coll[i].append(np.max(steps_no_coll[i][x:j+1]))
+        
+        upper_fill_steps_no_coll[i].append(np.array(avg_steps_no_coll[i]) + np.array(std_steps_no_coll[i])) 
+        lower_fill_steps_no_coll[i].append(np.array(avg_steps_no_coll[i]) - np.array(std_steps_no_coll[i])) 
+
+
+    # end_episodes = np.zeros(len(agent_names), int)
+    # for i in range(len(agent_names)):
+    #     end_episodes[i] =  np.where(steps[i][ns[i]]==0)[0][0]
+
+    end_episodes = np.zeros((np.size(np.array(steps),axis=0), np.size(np.array(steps),axis=1)), int)
+    # end_episodes = np.zeros(np.size(steps,axis=0), np.size(steps,axis=1), int)
+    
+    
+    for i in range(np.size(end_episodes, axis=0)):
+        for n in range(np.size(end_episodes, axis=1)):
+            
+            if np.any(np.where(steps[i][n]==0))==True:
+                end_episodes[i,n] = np.where(steps[i][n]==0)[0][0]
+            else:
+                end_episodes[i,n] = xlim
+
+    end_ep = end_episodes
+    end_episodes = np.min(end_episodes, axis=1)
+    
+    steps_y = steps.copy()
+    steps_y_avg_smoothed = [[] for _ in range(len(agent_names))]
+    steps_y_std = [[] for _ in range(len(agent_names))]
+    upper_fill = [[] for _ in range(len(agent_names))]
+    lower_fill = [[] for _ in range(len(agent_names))]
+
+    for i in range(np.size(end_ep, axis=0)):
+        for n in range(np.size(end_ep, axis=1)):
+            steps_y[i][n][collisions[i][n]==1]=np.nan
+    steps_y_avg = np.array(steps_y)
+    steps_y_avg = np.nanmean(steps_y_avg, axis=1)
+
+    for i in range(np.size(end_ep, axis=0)):
+        for j in range(len(steps_y_avg[i])):
+                if j <= window:
+                    x = 0
+                else:
+                    x = j-window 
+                steps_y_avg_smoothed[i].append(np.nanmean(steps_y_avg[i][x:j+1]))
+                steps_y_std[i].append(np.nanstd(steps_y_avg[i][x:j+1]))
+        
+        upper_fill[i].append(np.array(steps_y_avg_smoothed[i])+np.array(steps_y_std[i]))
+        lower_fill[i].append(np.array(steps_y_avg_smoothed[i])-np.array(steps_y_std[i]))
+
+    #font = {'family' : 'normal',
+
+
+
+    # plt.rcParams.update({
+    # "font.family": "serif",  # use serif/main font for text elements
+    # "text.usetex": True,     # use inline math for ticks
+    # "pgf.rcfonts": False,     # don't setup fonts from rc parameters
+    # "font.size": 12
+    # })
+
+    plt.rcParams['font.family'] = 'serif'
+    plt.rcParams['font.serif'] = ['Times New Roman'] + plt.rcParams['font.serif']
+
+    size = (5.5,height)
+
+    plt.rc('axes',edgecolor='gray')
+    fig, ax = plt.subplots(1, 2, figsize=size)
+    # fig, ax = plt.subplots(1, 3, figsize=(5.5,2.65))
+    
+    # ax[0].ticklabel_format(style='scientific', axis='x', scilimits=(0,0), useMathText=True, useOffset=True)
+    # ax[1].ticklabel_format(style='scientific', axis='x', scilimits=(0,0), useMathText=True, useOffset=True)
+    # ax[2].ticklabel_format(style='scientific', axis='x', scilimits=(0,0), useMathText=True, useOffset=True)
+    # plt.ticklabel_format(style='scientific', axis='x', scilimits=(0,0))
+    
+    # xax1000 = np.arange(0,xlim+1000,xspace)
+    # xax1 = (xax1000/1000).astype(int)
+
+    # ax[0].set_xticks(ticks=xax1000, labels=xax1)
+    # ax[1].set_xticks(ticks=xax1000)
+
+    ax[0].set_yticks(ticks=[0,25,50,75,100], labels=[0,25,50,75,100])
+    # ax[1].set_yticks(ticks=[5,6,7,8,9], labels=[5,6,7,8,9])
+
+    # y_title=-0.5
+
+    for i in range(len(agent_names)):
+        end_episode = end_episodes[i] 
+        if i==0:
+            ax[0].plot(np.arange(0,end_episode,1), np.array(avg_coll[i][0:end_episode])[np.arange(0,end_episode,1)]*100, linestyle='--', color='tab:blue')
+            ax[0].fill_between(x=np.arange(end_episode)[np.arange(0,end_episode,1)], y1=np.array(upper_fill_coll[i][0])[np.arange(0,end_episode,1)]*100, y2=np.array(lower_fill_coll[i][0])[np.arange(0,end_episode,1)]*100, alpha=0.15, label='_nolegend_', color='tab:blue')
+        if i==1:
+            ax[0].plot(np.arange(0,end_episode,1), np.array(avg_coll[i][0:end_episode])[np.arange(0,end_episode,1)]*100, linestyle='--', color='tab:orange')
+            ax[0].fill_between(x=np.arange(end_episode)[np.arange(0,end_episode,1)], y1=np.array(upper_fill_coll[i][0])[np.arange(0,end_episode,1)]*100, y2=np.array(lower_fill_coll[i][0])[np.arange(0,end_episode,1)]*100, alpha=0.15, label='_nolegend_', color='tab:orange')
+        if i==2:
+            ax[0].plot(np.arange(0,end_episode,1), np.array(avg_coll[i][0:end_episode])[np.arange(0,end_episode,1)]*100, color='tab:blue')
+            ax[0].fill_between(x=np.arange(end_episode)[np.arange(0,end_episode,1)], y1=np.array(upper_fill_coll[i][0])[np.arange(0,end_episode,1)]*100, y2=np.array(lower_fill_coll[i][0])[np.arange(0,end_episode,1)]*100, alpha=0.15, label='_nolegend_', color='tab:blue')
+        if i==3:
+            ax[0].plot(np.arange(0,end_episode,1), np.array(avg_coll[i][0:end_episode])[np.arange(0,end_episode,1)]*100, color='tab:orange')
+            ax[0].fill_between(x=np.arange(end_episode)[np.arange(0,end_episode,1)], y1=np.array(upper_fill_coll[i][0])[np.arange(0,end_episode,1)]*100, y2=np.array(lower_fill_coll[i][0])[np.arange(0,end_episode,1)]*100, alpha=0.15, label='_nolegend_', color='tab:orange')
     
 
+    ax[0].hlines(y=100, xmin=0, xmax=np.max(end_episodes), colors='black', linestyle='dashed')
+    ax[0].hlines(y=0, xmin=0, xmax=np.max(end_episodes), colors='black', linestyle='dashed')
+    ax[0].set_ylim([-5, 105])
+    ax[0].set_title('(a)', fontdict={'fontsize': 10})
+    ax[0].tick_params('both', length=0)
+    ax[0].grid(True)
+    ax[0].set_xlim([0,xlim])
+    ax[0].set_ylabel('Failed laps [%]')
+    # ax[0].set_xlabel('Episodes')
+    
+
+    for i in range(np.size(end_ep, axis=0)):
+        end_episode = end_episodes[i] 
+        if i==0:
+            ax[1].plot(np.arange(0,end_episode,1), (np.array(steps_y_avg_smoothed[i])*0.01)[np.arange(0,end_episode,1)], linestyle='--', color='tab:blue')
+            ax[1].fill_between(x=np.arange(0,end_episode,1), y1=np.array(upper_fill[i][0])[np.arange(0,end_episode,1)]*0.01, y2=np.array(lower_fill[i][0])[np.arange(0,end_episode,1)]*0.01, alpha=0.15, label='_nolegend_', color='tab:blue')
+        if i==1:
+            ax[1].plot(np.arange(0,end_episode,1), (np.array(steps_y_avg_smoothed[i])*0.01)[np.arange(0,end_episode,1)], linestyle='--', color='tab:orange')
+            ax[1].fill_between(x=np.arange(0,end_episode,1), y1=np.array(upper_fill[i][0])[np.arange(0,end_episode,1)]*0.01, y2=np.array(lower_fill[i][0])[np.arange(0,end_episode,1)]*0.01, alpha=0.15, label='_nolegend_', color='tab:orange')
+        if i==2:
+            ax[1].plot(np.arange(0,end_episode,1), (np.array(steps_y_avg_smoothed[i])*0.01)[np.arange(0,end_episode,1)], color='tab:blue')
+            ax[1].fill_between(x=np.arange(0,end_episode,1), y1=np.array(upper_fill[i][0])[np.arange(0,end_episode,1)]*0.01, y2=np.array(lower_fill[i][0])[np.arange(0,end_episode,1)]*0.01, alpha=0.15, label='_nolegend_', color='tab:blue')
+        if i==3:
+            ax[1].plot(np.arange(0,end_episode,1), (np.array(steps_y_avg_smoothed[i])*0.01)[np.arange(0,end_episode,1)], color='tab:orange')
+            ax[1].fill_between(x=np.arange(0,end_episode,1), y1=np.array(upper_fill[i][0])[np.arange(0,end_episode,1)]*0.01, y2=np.array(lower_fill[i][0])[np.arange(0,end_episode,1)]*0.01, alpha=0.15, label='_nolegend_', color='tab:orange' )
+
+
+    ax[1].set_title('(b)', fontdict={'fontsize': 10})
+    ax[1].grid(True)
+    ax[1].tick_params('both', length=0)
+    ax[1].set_xlim([0,xlim])
+    # ax[1].set_ylim([5,9])
+    ax[1].set_ylabel('Lap time [s]')
+
+    # for i in range(np.size(end_ep, axis=0)):
+    #     end_episode = end_episodes[i] 
+    #     ax[2].plot(np.arange(0,end_episode,100), np.array(avg_score[i])[np.arange(0,end_episode,100)])
+    #     ax[2].fill_between(x=np.arange(0,end_episode,100), y1=np.array(score_upper_fill[i][0])[np.arange(0,end_episode,100)], y2=np.array(score_lower_fill[i][0])[np.arange(0,end_episode,100)], alpha=0.15, label='_nolegend_')
+
+      
+    # ax[2].set_title('(c)', fontdict={'fontsize': 10})
+    # ax[2].grid(True)
+    # ax[2].tick_params('both', length=0)
+    # ax[2].set_xlim([0,xlim])
+    # ax[2].set_ylabel('Reward')
+
+
+    # plt.figlegend(legend, title=legend_title, loc = 'lower center', ncol=5)
+    fig.tight_layout()
+    fig.subplots_adjust(bottom=bottom_space+0.03) 
+    # ax[0].text(x=100,y=-50,s='Episodes')
+    
+    # fig.subplots_adjust(right=0.8) 
+    # fig.subplots_adjust(left=0.2) 
+    plt.figlegend(legend, title=legend_title, loc = 'lower center', ncol=2, borderpad=0.5)
+    
+    
+    ax[0].text(x=420, y=-45, s='Episodes')
+    plt.show()
+
+
+agent_names = ['batch_400', 'porto_pete_sv_p_r_0', 'f1_mco_ete', 'f1_mco_pete_mu_2']
+legend = ['Porto, end-to-end', 'Porto, partial end-to-end', 'Monaco, end-to-end', 'Monaco, partial end-to-end']
+legend_title = ''
+xlim=400
+xspace = xlim/4
+bottom_space = 0.4
+height=2.6
+
+learning_curve_lap_time_tracks(agent_names, legend, legend_title, ns, xlim, xspace, bottom_space, height)
