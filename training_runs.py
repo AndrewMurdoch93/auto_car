@@ -2024,8 +2024,16 @@ if True:
 # agent_names = ['porto_ete_v5_r_collision_5']
 # agent_names = ['porto_pete_sv_p_r_0']
 
-agent_names = ['porto_ete_only_LiDAR']
-agent_names = ['porto_ete_no_LiDAR']
+
+# agent_names = ['porto_ete_only_LiDAR']
+# agent_names = ['porto_ete_no_LiDAR']
+# agent_names = ['sample_3hz'] 
+# agent_names = ['porto_ete_v5_r_collision_5_noise']
+# agent_names = ['sample_5hz']
+agent_names = ['sample_5hz_large_batch']
+# agent_names = ['batch_size_1']
+
+agent_names = ['']
 legend = ['End-to-end']
 legend_title = ''
 ns=[0]
@@ -2048,7 +2056,7 @@ ns=[0]
 
 
 mismatch_parameters = [['C_Sr', 'mu']]
-frac_vary = [[0, 0]]
+frac_vary = [[-0.1, -0.3]]
 noise_dicts = [{'xy':0.025, 'theta':0.05, 'v':0.1, 'lidar':0.01}, {'xy':0.025, 'theta':0.05, 'v':0.1, 'lidar':0.01}, {'xy':0.025, 'theta':0.05, 'v':0.1, 'lidar':0.01}, {'xy':0.025, 'theta':0.05, 'v':0.1, 'lidar':0.01}]
 start_condition = {'x':10, 'y':4.5, 'v':3, 'theta':np.pi, 'delta':0, 'goal':0}
 
@@ -2065,9 +2073,9 @@ start_condition = {'x':10, 'y':4.5, 'v':3, 'theta':np.pi, 'delta':0, 'goal':0}
 #                                              legend=legend, mismatch_parameters=mismatch_parameters, frac_vary=frac_vary, noise_dicts=noise_dicts,
 #                                              start_condition=start_condition)
 
-# display_results_multiple.display_path_multiple(agent_names=agent_names, ns=ns, legend_title=legend_title,          
-#                                              legend=legend, mismatch_parameters=mismatch_parameters, frac_vary=frac_vary, noise_dicts=noise_dicts,
-#                                              start_condition=start_condition)
+display_results_multiple.display_path_multiple(agent_names=agent_names, ns=ns, legend_title=legend_title,          
+                                             legend=legend, mismatch_parameters=mismatch_parameters, frac_vary=frac_vary, noise_dicts=noise_dicts,
+                                             start_condition=start_condition)
 
 # display_results_multiple.display_path_mismatch_multiple_by_state(agent_names=agent_names, ns=ns, legend_title=legend_title,          
 #                                              legend=legend, mismatch_parameters=mismatch_parameters, frac_vary=frac_vary, noise_dicts=noise_dicts,
