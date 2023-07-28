@@ -1,3 +1,4 @@
+from cProfile import label
 import functions
 import numpy as np
 from matplotlib import  pyplot as plt
@@ -20,6 +21,11 @@ from numba.experimental import jitclass
 import pickle
 import mapping
 import cubic_spline_planner
+import display_results_multiple
+from environment import environment
+
+
+
 
 def plot_frenet_polynomial():
     map_name='porto_1'
@@ -162,49 +168,148 @@ def plot_frenet_polynomial():
     plt.show()
 
 
-# map_name='porto_1'
-
-# track = mapping.map(map_name)
-# occupancy_grid = track.occupancy_grid
-# map_height = track.map_height
-# map_width = track.map_width
-# map_res = track.resolution
-
-# track.find_centerline()
-# goal_x = track.centerline[:,0]
-# goal_y = track.centerline[:,1]
-# rx, ry, ryaw, rk, d, csp = functions.generate_line(goal_x, goal_y)
-
-# LiDAR = functions.lidar_scan(lidar_res=0.1, n_beams=2, max_range=10, fov=np.pi, occupancy_grid=occupancy_grid, map_res=map_res, map_height=map_height)
-
-# LiDAR_dists = np.zeros((len(rx),2))
-
-# for idx, (x,y,theta)  in enumerate(zip(rx,ry,ryaw)):
-#     lidar_dists, lidar_coords = LiDAR.get_scan(x, y, theta)
-#     LiDAR_dists[idx,0] = lidar_dists[0]
-#     LiDAR_dists[idx,1] = lidar_dists[1]
-
-# plt.rcParams['font.family'] = 'serif'
-# plt.rcParams['font.serif'] = ['Times New Roman'] + plt.rcParams['font.serif']
-
-# fig, ax = plt.subplots()
-
-# ax.plot(d, LiDAR_dists[:,0], color='black') #top boundary
-# ax.plot(d, -LiDAR_dists[:,1], color='black') #Bottom boundary
-
-# ax.plot(d, np.zeros(len(d)), color='grey', linestyle='dashed') #centerline
-
-# ax.vlines(x=0, ymin=-1, ymax=1, color='red', linestyle='dashed') #start
-# ax.vlines(x=d[-1], ymin=-1, ymax=1, color='red', linestyle='dashed') #start
-
-# ax.text(x=0-1, y=1, s='Start', bbox=dict(facecolor='white', edgecolor='black',pad=0.1,boxstyle='round'))
-# ax.text(x=d[-1]-1, y=1, s='Finish', bbox=dict(facecolor='white', edgecolor='black',pad=0.1,boxstyle='round'))
-
-# ax.axis('off')
-# # ax.grid(True)
 
 
-# plt.show()
+
+def plot_frenet_path():
+    
+    map_name='f1_esp'
+    agent_names = ['porto_pete_sv_p_r_0']
+    ns = [0]
+    mismatch_parameters = []
+    frac_vary = []
+    noise_dicts = [{'xy':0.025, 'theta':0.05, 'v':0.1, 'lidar':0.01}]
+    start_condition = {'x':8.9, 'y':2.8, 'v':3, 'theta':0, 'delta':0, 'goal':0}
+    figure_size = (5.5,3.2)
+
+    infile = open('environments/' + agent_names[0], 'rb')
+    env_dict = pickle.load(infile)
+    infile.close()
+    env = environment(env_dict)
+
+    track = mapping.map(map_name)
+    occupancy_grid = track.occupancy_grid
+    map_height = track.map_height
+    map_width = track.map_width
+    map_res = track.resolution
+
+    track.find_centerline()
+    goal_x = track.centerline[:,0]
+    goal_y = track.centerline[:,1]
+    rx, ry, ryaw, rk, ds, csp = functions.generate_line(goal_x, goal_y)
+
+    LiDAR = functions.lidar_scan(lidar_res=0.1, n_beams=2, max_range=10, fov=np.pi, occupancy_grid=occupancy_grid, map_res=map_res, map_height=map_height)
+
+    LiDAR_dists = np.zeros((len(rx),2))
+
+    for idx, (x,y,theta)  in enumerate(zip(rx,ry,ryaw)):
+        lidar_dists, lidar_coords = LiDAR.get_scan(x, y, theta)
+        LiDAR_dists[idx,0] = lidar_dists[0]
+        LiDAR_dists[idx,1] = lidar_dists[1]
+        
+    
+    state_history = display_results_multiple.eval_lap(agent_names, ns, mismatch_parameters, frac_vary, noise_dicts, start_condition)
+
+    x = np.array(state_history[0])[:,0]
+    y = np.array(state_history[0])[:,1]
+
+    s = np.zeros(len(x))
+    n = np.zeros(len(y))
+
+    for i in range(len(s)):
+        (s[i], ind, n[i]) = functions.convert_xy_to_sn(rx, ry, ryaw, x[i], y[i], 0.1)
+
+    # s_ = s-s[0]
+    # s_=np.mod(s_,np.max(s_))
+
+    plt.rcParams['font.family'] = 'serif'
+    plt.rcParams['font.serif'] = ['Times New Roman'] + plt.rcParams['font.serif']
+
+
+
+    fig1, ax = plt.subplots(1, 2, figsize=figure_size)
+     
+    color='grey'
+    ax[1].tick_params(axis=u'both', which=u'both',length=0)
+    ax[1].spines['bottom'].set_color(color)
+    ax[1].spines['top'].set_color(color) 
+    ax[1].spines['right'].set_color(color)
+    ax[1].spines['left'].set_color(color)
+
+    # ax.set_xticks(ticks=[], labels=[])
+    # ax.set_yticks(ticks=[], labels=[])
+
+    ax[1].plot(ds, LiDAR_dists[:,0], color='black') #top boundary
+    ax[1].plot(ds, -LiDAR_dists[:,1], color='black', label='Track boundary') #Bottom boundary
+
+    ax[1].plot(ds, np.zeros(len(ds)), color='grey', linestyle='dashed', label='Centerline') #centerline
+
+    ax[1].vlines(x=0, ymin=-1, ymax=1, color='red', linestyle='dashed', label='Start/ finish') #start
+    ax[1].vlines(x=ds[-1], ymin=-1, ymax=1, color='red', linestyle='dashed', label='_nolegend_') #start
+
+    # ax1.text(x=0-1, y=1, s='Start', bbox=dict(facecolor='white', edgecolor='black',pad=0.1,boxstyle='round'))
+    # ax1.text(x=ds[-1]-1, y=1, s='Finish', bbox=dict(facecolor='white', edgecolor='black',pad=0.1,boxstyle='round'))
+
+    ax[1].plot(s[5:-5],n[5:-5], label='Vehicle trajectory')
+    ax[1].set_xlabel('Distance along \n centerline, $n$')
+    ax[1].set_ylabel('Distance perpendicular \n to centerline, $s$')
+    # ax[1].set_title('(b)')
+    ax[1].text(x=15,y=2,s='(b)')
+    ax[0].text(x=8,y=9.5,s='(a)')
+
+
+    # fig2, ax2 = plt.subplots(1, figsize=figure_size)
+    ax[0].axis('off')
+    # ax[0].set_title('(a)')
+    # ax.tick_params(axis='both', colors='lightgrey')
+    # ax.spines['bottom'].set_color('lightgrey')
+    # ax.spines['top'].set_color('lightgrey') 
+    # ax.spines['right'].set_color('lightgrey')
+    # ax.spines['left'].set_color('lightgrey')
+
+    ax[0].tick_params(axis=u'both', which=u'both',length=0)
+    
+    track = mapping.map(map_name)
+    ax[0].imshow(ImageOps.invert(track.gray_im.filter(ImageFilter.FIND_EDGES).filter(ImageFilter.MaxFilter(1))), extent=(0,track.map_width,0,track.map_height), cmap="gray")
+    # ax.plot(env.rx, env.ry, color='gray', linestyle='dashed')
+    alpha=0.7
+
+    ax[0].plot(rx, ry, linestyle='--', color='grey', label='_nolegend_')
+
+    for i in range(len(agent_names)):
+   
+        # if env_dict['steer_control_dict']['steering_control']:
+        #     for j in np.array(local_path_history[i])[np.arange(0,len(local_path_history[i]),20)]:
+        #         ax.plot(j[0], j[1], alpha=0.5, linestyle='dashdot', color='red')
+        #         ax.plot(j[0][0], j[1][0], alpha=0.5, color='red', marker='s')
+
+        ax[0].plot(np.array(state_history[i])[:,0], np.array(state_history[i])[:,1], linewidth=1.5, alpha=alpha, label='_nolegend_')   
+        # ax.plot(np.array(pose_history[i])[:,0][np.arange(0,len(local_path_history[i]),40)], np.array(pose_history[i])[:,1][np.arange(0,len(local_path_history[i]),40)], 'x')
+        
+        #ax.plot(np.array(pose_history[i])[:,0], np.array(pose_history[i])[:,1], linewidth=1.5, alpha=alpha)    
+
+    # prog = np.array([0, 0.2, 0.4, 0.6, 0.8])
+    # idx =  np.zeros(len(prog), int)
+    # text = ['Start', '20%', '40%', '60%', '80%']
+
+    # for i in range(len(idx)):
+    #     idx[i] = np.mod(env.start_point+np.round(prog[i]*len(env.rx)), len(env.rx))
+    # idx.astype(int)
+    
+    # # for i in range(len(idx)):
+    # #     plt.text(x=env.rx[idx[i]], y=env.ry[idx[i]], s=text[i], fontsize = 'small', bbox=dict(facecolor='white', edgecolor='black',pad=0.1,boxstyle='round'))
+
+    # ax2.vlines(x=env.rx[idx[0]], ymin=env.ry[idx[0]]-1, ymax=env.ry[idx[0]]+1, linestyles='dotted', color='red')
+    # ax2.text(x=env.rx[idx[0]]-1.2, y=env.ry[idx[0]]+1.3, s='Start/finish', fontsize = 'small', bbox=dict(facecolor='white', edgecolor='black',pad=0.1,boxstyle='round'))
+
+    ax[0].vlines(x=rx[0], ymin=ry[0]-1.2, ymax=ry[0]+1, linestyles='dashed', color='red', label='_nolegend_')
+
+
+    fig1.tight_layout() 
+    plt.figlegend(loc = 'lower center', ncol=2)
+    fig1.subplots_adjust(bottom=0.37) 
+
+    plt.show()
 
 
 
@@ -212,4 +317,5 @@ def plot_frenet_polynomial():
 
 if __name__ == '__main__':
     
-    plot_frenet_polynomial()
+    # plot_frenet_polynomial()
+    plot_frenet_path()

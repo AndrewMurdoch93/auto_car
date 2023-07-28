@@ -35,6 +35,8 @@ import display_results_multiple
 class trainingLoop():
    def __init__(self, main_dict, agent_dict, env_dict, load_agent):
       
+      self.max_actions=50000
+
       self.main_dict = main_dict
       self.agent_dict = agent_dict
       self.env_dict = env_dict
@@ -136,11 +138,12 @@ class trainingLoop():
       n_actions = np.zeros([self.runs, self.max_episodes])
       terminal_poses = np.zeros([self.runs, self.max_episodes, 2])
 
-      eval_interval = 100
-      eval_n_episodes = 20
+      eval_interval = 5
+      eval_n_episodes = 1
       eval_steps = np.zeros([self.runs, int(self.max_episodes/eval_interval)])
       eval_lap_times = np.zeros([self.runs, int(self.max_episodes/eval_interval), eval_n_episodes])
-      eval_collisions = np.zeros([self.runs, int(self.max_episodes/eval_interval), eval_n_episodes])
+      eval_collisions = np.ones([self.runs, int(self.max_episodes/eval_interval), eval_n_episodes])
+
 
       for n in range(self.runs):
          
@@ -160,8 +163,9 @@ class trainingLoop():
          episode=0
          
          # while np.sum(steps[n,:])<self.max_steps and episode<self.max_episodes and ((self.env.collision==True and episode>0) or (self.env.collision==False and episode==0)):
-         while np.sum(steps[n,:])<self.max_steps and episode<self.max_episodes:
-           
+         # while np.sum(steps[n,:])<self.max_steps and episode<self.max_episodes:
+         while np.sum(n_actions[n,:])<self.max_actions and episode<self.max_episodes:
+
             self.env.reset(save_history=True, start_condition=[], car_params=car_params, get_lap_time=False, noise=self.noise)  #Reset the environment every episode
             obs = self.env.observation      #Records starting state
             done = False
@@ -285,10 +289,214 @@ class trainingLoop():
                outfile=open(self.terminal_poses_filename, 'wb')
                pickle.dump(terminal_poses, outfile)
                outfile.close()
+            
 
-            # if episode%100==0 and episode!=0:
+            # Evaluate agent
+            # if episode%eval_interval==0:
             #    eval_steps[n, int(episode/eval_interval)-1] = np.sum(steps[n,:])
             #    eval_lap_times[n, int(episode/eval_interval)-1], eval_collisions[n, int(episode/eval_interval)-1] = self.evaluate(n_episodes=eval_n_episodes)
+
+            #    outfile=open(self.evaluation_results_file_name, 'wb')
+            #    pickle.dump(eval_steps, outfile)
+            #    pickle.dump(eval_lap_times, outfile)
+            #    pickle.dump(eval_collisions, outfile)
+            #    outfile.close()
+
+
+            if episode%1==0:
+               if self.learning_method=='dqn' or self.learning_method=='dueling_dqn' or self.learning_method=='dueling_ddqn' or self.learning_method=='rainbow':
+                  print(f"{'Run':3s} {n:2.0f} {'| Episode':8s} {episode:5.0f} {'| Score':8s} {score:6.2f} {'| Progress':12s} {self.env.progress:3.2f} {'| collision ':13s} {self.env.collision} {'| Average score':15s} {avg_score:6.2f} {'| Average progress':18s} {avg_progress:3.2f} {'| Epsilon':9s} {self.agent.epsilon:.2f}")
+               if self.learning_method=='reinforce' or self.learning_method=='actor_critic_sep' or self.learning_method=='actor_critic_com' or self.learning_method=='actor_critic_cont' or self.learning_method=='ddpg' or self.learning_method=='td3':
+                  print(f"{'Run':3s} {n:2.0f} {'| Episode':8s} {episode:5.0f} {'| Score':8s} {score:6.2f} {'| Progress':12s} {self.env.progress:3.2f} {'| collision ':13s} {self.env.collision} {'| Average score':15s} {avg_score:6.2f} {'| Average progress':18s} {avg_progress:3.2f}")
+
+            episode+=1
+               
+         self.save_agent(n)
+
+      outfile=open(self.train_results_file_name, 'wb')
+      pickle.dump(scores, outfile)
+      pickle.dump(progress, outfile)
+      pickle.dump(times, outfile)
+      pickle.dump(steps, outfile)
+      pickle.dump(collisions, outfile)
+      pickle.dump(n_actions, outfile)
+      outfile.close()
+
+      outfile=open(self.terminal_poses_filename, 'wb')
+      pickle.dump(terminal_poses, outfile)
+      outfile.close()
+
+
+
+
+
+      #outfile=open(self.action_durations_name, 'wb')
+      #pickle.dump(durations, outfile)
+      #outfile.close()
+
+   def train_domain_randomise(self, mismatch_parameters, frac_std):
+
+      print('Training agent: ', self.main_dict['name'])
+      
+      self.env_dict['name'] = self.main_dict['name']
+
+      #self.env = environment(self.env_dict, start_condition={'x':15,'y':5,'theta':0,'goal':0})
+      self.env = environment(self.env_dict)
+      self.env.reset(save_history=False, start_condition=[], car_params=self.env_dict['car_params'], get_lap_time=False, noise=self.noise)
+      
+      self.agent_dict['name'] = self.main_dict['name']
+      self.agent_dict['input_dims'] = len(self.env.observation)
+      self.agent_dict['n_actions'] = self.env.num_actions
+
+      self.old_ave_score = -np.inf
+      self.old_ave_progress = -np.inf
+      self.best_ave_progress = -np.inf
+      self.best_ave_score = -np.inf
+
+     
+      if self.learning_method == 'td3':
+         self.agent = agent_td3.agent(self.agent_dict)
+      if self.load_agent:
+         self.agent.load_weights(self.load_agent)
+
+      outfile = open('environments/' + self.agent_name, 'wb')
+      pickle.dump(self.env_dict, outfile)
+      outfile.close()
+
+      outfile = open('train_parameters/' + self.agent_name, 'wb')
+      pickle.dump(self.main_dict, outfile)
+      outfile.close()
+
+      outfile = open(self.agent_params_file, 'wb')
+      pickle.dump(self.agent_dict, outfile)
+      outfile.close()
+
+      scores = np.zeros([self.runs, self.max_episodes])
+      progress = np.zeros([self.runs, self.max_episodes])
+      times = np.zeros([self.runs, self.max_episodes])
+      steps = np.zeros([self.runs, self.max_episodes])
+      collisions = np.zeros([self.runs, self.max_episodes])
+      n_actions = np.zeros([self.runs, self.max_episodes])
+      terminal_poses = np.zeros([self.runs, self.max_episodes, 2])
+
+      eval_interval = 100
+      eval_n_episodes = 50
+      eval_steps = np.zeros([self.runs, int(self.max_episodes/eval_interval)])
+      eval_lap_times = np.zeros([self.runs, int(self.max_episodes/eval_interval), eval_n_episodes])
+      eval_collisions = np.ones([self.runs, int(self.max_episodes/eval_interval), eval_n_episodes])
+
+
+      for n in range(self.runs):
+         
+         #if self.learning_method == 'rainbow':
+         #   self.agent_dict['epsilon'] = 1
+         #   self.replay_beta_0=self.agent_dict['replay_beta_0']
+         #   self.replay_beta=self.replay_beta_0
+         if self.main_dict['learning_method']=='td3':
+            self.agent = agent_td3.agent(self.agent_dict)
+
+         car_params = self.env_dict['car_params'].copy()
+
+         episode=0
+         
+         # while np.sum(steps[n,:])<self.max_steps and episode<self.max_episodes and ((self.env.collision==True and episode>0) or (self.env.collision==False and episode==0)):
+         # while np.sum(steps[n,:])<self.max_steps and episode<self.max_episodes:
+         while np.sum(n_actions[n,:])<self.max_actions and episode<self.max_episodes:
+            
+
+            # Model mismatches
+            
+            mass=car_params['m']*0.1
+
+            if mismatch_parameters:
+                  for par, var in zip(mismatch_parameters, frac_std):
+                     var=np.random.normal(0,frac_std)[0]
+                     
+                     if par == 'unknown_mass':
+                        m_new = car_params['m'] + mass
+                        lf_new = (car_params['m']*car_params['lf']+mass*var) / (m_new)
+                        I_new = car_params['I'] + car_params['m']*abs(lf_new-car_params['lf'])**2 + mass*abs(lf_new-var)**2
+                        car_params['m'] = m_new
+                        car_params['lf'] = lf_new
+                        car_params['I'] = I_new
+                     elif par == 'C_S':
+                        car_params['C_Sf'] *= 1+var
+                        car_params['C_Sr'] *= 1+var
+                     elif par == 'l_f':
+                        axle_length = car_params['lf']+car_params['lr']
+                        car_params['lf'] *= 1+var
+                        car_params['lr'] =  axle_length - car_params['lf']
+                     elif par == 'sv':
+                        car_params['sv_max'] *= 1+var
+                        car_params['sv_min'] *= 1+var    
+                     else:
+                        car_params[par] *= 1+var
+
+            self.env.reset(save_history=True, start_condition=[], car_params=car_params, get_lap_time=False, noise=self.noise)  #Reset the environment every episode
+            obs = self.env.observation      #Records starting state
+            done = False
+            score = 0
+            n_act = 0                       #Initialise score counter for every episode
+            start_time = time.time()
+            
+            #For every planning time step in the episode
+            if self.learning_method == 'ddpg' or self.learning_method == 'td3':
+               while not done: 
+                  #t1 = time.time()
+                  action = self.agent.choose_action(obs)    #Select an action
+                  #t2 = time.time()
+                  n_act+=1
+                  next_obs, reward, done = self.env.take_action(action) #Environment executes action
+                  self.agent.store_transition(obs, action, reward, next_obs, int(done))
+                  self.agent.learn()  #Learn using state transition history
+                  obs = next_obs  #Update the state
+                  score+=reward
+                  #self.agent.decrease_noise_factor()
+             
+            
+            end_time = time.time()
+            
+            terminal_poses[n, episode, 0] = self.env.x
+            terminal_poses[n, episode, 1] = self.env.y
+
+            times[n, episode] = end_time-start_time
+
+            scores[n, episode] = score
+            #scores.append(score)
+            avg_score = np.mean(scores[n, episode-100:episode])
+
+            progress[n, episode] = self.env.progress
+            #progress.append(self.env.progress)
+            avg_progress = np.mean(progress[n, episode-100:episode])
+
+            steps[n, episode] = self.env.steps
+            n_actions[n, episode] = n_act
+
+            collisions[n, episode] = self.env.collision
+
+            if episode%100==0 and episode!=0:
+
+               self.save_agent(n)
+
+               outfile=open(self.train_results_file_name, 'wb')
+               pickle.dump(scores, outfile)
+               pickle.dump(progress, outfile)
+               pickle.dump(times, outfile)
+               pickle.dump(steps, outfile)
+               pickle.dump(collisions, outfile)
+               pickle.dump(n_actions, outfile)
+               outfile.close()
+
+               outfile=open(self.terminal_poses_filename, 'wb')
+               pickle.dump(terminal_poses, outfile)
+               outfile.close()
+            
+
+            # Evaluate agent
+            # if episode%eval_interval==0 and episode!=0:
+            #    eval_steps[n, int(episode/eval_interval)-1] = np.sum(steps[n,:])
+            #    eval_lap_times[n, int(episode/eval_interval)-1], eval_collisions[n, int(episode/eval_interval)-1] = self.evaluate(n_episodes=eval_n_episodes)
+
 
             #    outfile=open(self.evaluation_results_file_name, 'wb')
             #    pickle.dump(eval_steps, outfile)
@@ -322,20 +530,25 @@ class trainingLoop():
 
 
 
+
+
       #outfile=open(self.action_durations_name, 'wb')
       #pickle.dump(durations, outfile)
       #outfile.close()
+
 
    def evaluate(self, n_episodes):
       
       print(f"{'Evaluating agent for '}{n_episodes}{' episodes'}")
       
       lap_times = np.zeros(n_episodes)
-      collisions = np.zeros(n_episodes)
+      collisions = np.ones(n_episodes)
       
+      car_params = self.env_dict['car_params']
+
       for episode in range(n_episodes):
          
-         self.env.reset(save_history=True, start_condition=[], car_params=self.env_dict['car_params'],get_lap_time=False)
+         self.env.reset(save_history=True, start_condition=[], car_params=car_params, get_lap_time=False, noise={'xy':0.025, 'theta':0.05, 'v':0.1, 'lidar':0.01})
          obs = self.env.observation
          done = False
          score=0
@@ -358,13 +571,14 @@ class trainingLoop():
       print('Evaluation lap time is: ' + str(np.round(lap_time, 2)) + ', collision rate is: ' + str(np.round(collision, 2)) )
 
       return lap_times, collisions
-      
+
 
    def save_agent(self, n):
       self.agent.save_agent(self.main_dict['name'], n)
       print("Agent " + self.main_dict['name'] + ", n = " + str(n) + " was saved")
 
-   
+
+
 def test(agent_name, n_episodes, detect_issues, initial_conditions):
 
    results_file_name = 'test_results/' + agent_name 
@@ -389,7 +603,7 @@ def test(agent_name, n_episodes, detect_issues, initial_conditions):
    start_conditions = pickle.load(infile)
    infile.close()
 
-   env_dict['max_steps'] = 2000
+   env_dict['max_steps'] = 20000
 
    #env = environment(env_dict, start_condition={'x':15,'y':5,'theta':0,'goal':0})
    env = environment(env_dict)
@@ -537,7 +751,7 @@ def lap_time_test(agent_name, n_episodes, detect_issues, initial_conditions):
    start_conditions = pickle.load(infile)
    infile.close()
 
-   env_dict['max_steps'] = 2000
+   env_dict['max_steps'] = 20000
    
    
    #env = environment(env_dict, start_condition={'x':15,'y':5,'theta':0,'goal':0})
@@ -650,8 +864,6 @@ def lap_time_test(agent_name, n_episodes, detect_issues, initial_conditions):
    outfile.close()
 
 
-
-
 def lap_time_test_with_noise(agent_name, n_episodes, detect_issues, initial_conditions, noise):
 
    results_file_name = 'lap_results_with_noise/' + agent_name
@@ -675,7 +887,7 @@ def lap_time_test_with_noise(agent_name, n_episodes, detect_issues, initial_cond
    start_conditions = pickle.load(infile)
    infile.close()
 
-   env_dict['max_steps'] = 2000
+   env_dict['max_steps'] = 20000
    
    
    #env = environment(env_dict, start_condition={'x':15,'y':5,'theta':0,'goal':0})
@@ -778,16 +990,13 @@ def lap_time_test_with_noise(agent_name, n_episodes, detect_issues, initial_cond
          times[n, episode] = time
          collisions[n, episode] = collision 
             
-         if episode%10==0:
+         if episode%1==0:
             print('Lap test episode', episode, '| Lap time = %.2f' % time, '| Score = %.2f' % score)
 
    outfile=open(results_file_name, 'wb')
    pickle.dump(times, outfile)
    pickle.dump(collisions, outfile)
    outfile.close()
-
-
-
 
 
 def lap_time_test_mismatch(agent_name, n_episodes, detect_issues, initial_conditions, parameter, frac_variation):
@@ -811,6 +1020,7 @@ def lap_time_test_mismatch(agent_name, n_episodes, detect_issues, initial_condit
    infile.close()
    init_car_params = env_dict['car_params']
    
+   # env_dict['steer_control_dict']['track_width'] = 0.7
 
    if initial_conditions==True:
       start_condition_file_name = 'test_initial_condition/' + env_dict['map_name']
@@ -821,7 +1031,7 @@ def lap_time_test_mismatch(agent_name, n_episodes, detect_issues, initial_condit
    start_conditions = pickle.load(infile)
    infile.close()
 
-   env_dict['max_steps'] = 2000
+   env_dict['max_steps'] = 20000
 
    #env = environment(env_dict, start_condition={'x':15,'y':5,'theta':0,'goal':0})
    
@@ -947,15 +1157,12 @@ def lap_time_test_mismatch(agent_name, n_episodes, detect_issues, initial_condit
             param_dict['times_results'][n, v_i, episode] = time
             param_dict['collision_results'][n, v_i, episode] = collision
 
-            if episode%10==0:
+            if episode%1==0:
                print('Lap test episode', episode, '| Lap time = %.2f' % time, '| Score = %.2f' % score, '| Fail = %.2f' %collision)
 
    outfile=open(results_file, 'wb')
    pickle.dump(param_dict, outfile)
    outfile.close()
-
-
-
 
 
 def lap_time_test_unknown_mass(agent_name, n_episodes, detect_issues, initial_conditions, mass, distances):
@@ -1091,7 +1298,6 @@ def lap_time_test_unknown_mass(agent_name, n_episodes, detect_issues, initial_co
    outfile.close()
 
    
-
 def lap_time_test_noise(agent_name, n_episodes, detect_issues, initial_conditions, noise_param, noise_std):
 
    results_dir = 'lap_results_noise/' + agent_name
