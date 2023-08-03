@@ -21,10 +21,9 @@ import os
 
 
 
-agent_name = 'f1_mco_pete_3'
+agent_name = 'f1_porto_ete_1'
 
-main_dict = {'name':agent_name, 'max_episodes':20000, 'max_steps':3e6, 'learning_method':'td3', 'runs':3, 'comment':''}
-main_dict = {'name':agent_name, 'max_episodes':10000, 'max_steps':3e6, 'learning_method':'td3', 'runs':1, 'comment':''}
+main_dict = {'name':agent_name, 'max_episodes':20000, 'max_steps':3e6, 'learning_method':'td3', 'runs':10, 'comment':''}
 
 agent_ddpg_dict = {'alpha':0.000025, 'beta':0.00025, 'tau':0.001, 'gamma':0.99, 'max_size':1000000, 'layer1_size':400, 'layer2_size':300, 'batch_size':200}
 
@@ -37,15 +36,15 @@ car_params =   {'mu': 1.0489, 'C_Sf': 4.718, 'C_Sr': 5.4562, 'lf': 0.15875, 'lr'
                 , 'h': 0.074, 'm': 3.74, 'I': 0.04712, 's_min': -0.4189, 's_max': 0.4189, 'sv_min': -3.2
                 , 'sv_max': 3.2, 'v_switch': 7.319, 'a_max': 9.51, 'v_min':-5.0, 'v_max': 20.0, 'width': 0.31, 'length': 0.58}
 
-reward_signal = {'goal_reached':0, 'out_of_bounds':-1, 'max_steps':0, 'collision':-5, 
-                    'backwards':-0.01, 'park':-1, 'time_step':-0.01, 'progress':0, 'distance':0.3, 
+reward_signal = {'goal_reached':0, 'out_of_bounds':-1, 'max_steps':0, 'collision':-10, 
+                    'backwards':-0.01, 'park':-1, 'time_step':-0.01, 'progress':0, 'distance':0.25, 
                     'max_progress':0}    
 
 action_space_dict = {'action_space': 'continuous', 'vel_select':[3,5], 'R_range':[2]}
 
 #action_space_dict = {'action_space': 'discrete', 'n_waypoints': 10, 'vel_select':[7], 'R_range':[6]}
 
-steer_control_dict = {'steering_control': True, 'wpt_arc':np.pi/2, 'track_width':0.9}
+steer_control_dict = {'steering_control': False, 'wpt_arc':np.pi/2, 'track_width':0.9}
 
 if  steer_control_dict['steering_control'] == True:
     steer_control_dict['path_strategy'] = 'polynomial'  #circle or linear or polynomial or gradient
@@ -63,11 +62,11 @@ noise_dict = {'xy':0, 'theta':0, 'v':0, 'lidar':0}
 
 env_dict = {'sim_conf': functions.load_config(sys.path[0], "config")
         , 'save_history': False
-        , 'map_name': 'f1_esp'
+        , 'map_name': 'porto_1'
         , 'max_steps': 20000
-        , 'control_steps': 10
+        , 'control_steps': 20
         , 'display': False
-        , 'velocity_control': True
+        , 'velocity_control': False
         , 'velocity_gain':1
         , 'steer_control_dict': steer_control_dict
         , 'car_params':car_params
@@ -80,7 +79,14 @@ env_dict = {'sim_conf': functions.load_config(sys.path[0], "config")
 
 mu_frac_variation = np.array([-0.5,-0.4,-0.3,-0.2,-0.1,0])
 n_test=10
-agent_name = 'f1_mco_pete_mu_2'
+# a = main_multiple.trainingLoop(main_dict, agent_td3_dict, env_dict, load_agent='')
+# a.train()
+# main_multiple.lap_time_test(agent_name=agent_name, n_episodes=n_test, detect_issues=False, initial_conditions=True)
+# main_multiple.lap_time_test_with_noise(agent_name=agent_name, n_episodes=100, detect_issues=False, initial_conditions=True, noise={'xy':0.025, 'theta':0.05, 'v':0.1, 'lidar':0.01})
+
+
+
+# agent_name = 'f1_mco_pete_mu_2'
 # a = main_multiple.trainingLoop(main_dict, agent_td3_dict, env_dict, load_agent='')
 # a.train()
 # main_multiple.lap_time_test(agent_name=agent_name, n_episodes=n_test, detect_issues=False, initial_conditions=True)
@@ -1047,11 +1053,13 @@ agent_name = 'f1_mco_pete_mu_2'
 # agent_names = ['f1_esp_pete_r_p_1', 'f1_esp_pete', 'f1_esp_pete_r_p_5']
 
 
-agent_names = ['f1_esp_pete_f_2', 'f1_esp_pete_f_5', 'f1_esp_pete_eval', 'f1_esp_pete_f_20', 'f1_esp_pete_f_33', 'f1_esp_pete_f_33']
-agent_names = ['f1_esp_pete_nn_plus', 'f1_esp_pete_nn_minus']
-agent_names = ['f1_esp_pete_bs_200', 'f1_esp_pete_eval', 'f1_esp_pete_bs_600']
-agent_names = ['f1_mco_pete_mu_4']
-agent_names = ['f1_mco_ete', 'f1_mco_pete_mu_4']
+# agent_names = ['f1_esp_pete_f_2', 'f1_esp_pete_f_5', 'f1_esp_pete_eval', 'f1_esp_pete_f_20', 'f1_esp_pete_f_33', 'f1_esp_pete_f_33']
+# agent_names = ['f1_esp_pete_nn_plus', 'f1_esp_pete_nn_minus']
+# agent_names = ['f1_esp_pete_bs_200', 'f1_esp_pete_eval', 'f1_esp_pete_bs_600']
+# agent_names = ['f1_mco_pete_mu_4']
+# agent_names = ['f1_mco_ete', 'f1_mco_pete_mu_4']
+
+agent_names = ['f1_porto_ete_1']
 
 # legend = ['no noise', 'noise']
 # legend = ['180', '220']
@@ -1090,12 +1098,12 @@ legend_title = ''
 # legend_title = 'Algorithm'
 
 
-agent_names = ['f1_esp_ete', 'f1_esp_pete_steer', 'f1_esp_pete_velocity', 'f1_esp_pete_r_p_5']
-legend = ['End-to-end', 'Only velocity', 'Only steering', 'Both']
-legend_title = 'Algorithm'
+# agent_names = ['f1_esp_ete', 'f1_esp_pete_steer', 'f1_esp_pete_velocity', 'f1_esp_pete_r_p_5']
+# legend = ['End-to-end', 'Only velocity', 'Only steering', 'Both']
+# legend_title = 'Algorithm'
 
 # display_results_multiple.learning_curve_lap_time_average(agent_names, legend, legend_title, ns)
-# display_results_multiple.learning_curve_reward_average(agent_names, legend, legend_title)
+display_results_multiple.learning_curve_reward_average(agent_names, legend, legend_title)
 
 # for agent_name in agent_names:
 #     print('------------------------------' + '\n' + agent_name + '\n' + '------------------------------')
@@ -1107,79 +1115,11 @@ legend_title = 'Algorithm'
 
 
 mismatch_parameters = [['mu'], ['mu'], ['mu'], ['mu']]
-frac_vary = [[0],[0],[0], [0]]
+frac_vary = [[0],[0],[0],[0]]
 noise_dicts = [{'xy':0.025, 'theta':0.05, 'v':0.1, 'lidar':0.01}, {'xy':0.025, 'theta':0.05, 'v':0.1, 'lidar':0.01}, {'xy':0.025, 'theta':0.05, 'v':0.1, 'lidar':0.01}, {'xy':0.025, 'theta':0.05, 'v':0.1, 'lidar':0.01}]
 # start_condition = {'x':10, 'y':4.5, 'v':3, 'theta':np.pi, 'delta':0, 'goal':0}
 start_condition = {'x':24.3, 'y':24.6, 'v':3, 'theta':0, 'delta':0, 'goal':0}
 # start_condition = {'x':18, 'y':48.7, 'v':3, 'theta':0, 'delta':0, 'goal':0}
-
-# Columbia
-# start_condition = {'x':5.7, 'y':7.25, 'v':3, 'theta':0, 'delta':0, 'goal':0}
-# start_condition = []
-# #LiDAR and pose
-# agent_name = 'sample_3hz'
-# main_dict['name'] = agent_name
-# main_dict['only_lidar'] = False
-# lidar_dict['is_lidar'] = True
-# main_dict['lidar_dict'] = lidar_dict
-# main_dict['control_steps'] = 33
-# a = main_multiple.trainingLoop(main_dict, agent_td3_dict, env_dict, load_agent='')
-# a.train()
-# main_multiple.lap_time_test(agent_name=agent_name, n_episodes=100, detect_issues=False, initial_conditions=True)
-
-# agent_name = 'sample_5hz'
-# main_dict['name'] = agent_name
-# main_dict['only_lidar'] = False
-# lidar_dict['is_lidar'] = True
-# main_dict['lidar_dict'] = lidar_dict
-# main_dict['control_steps'] = 20
-# a = main_multiple.trainingLoop(main_dict, agent_td3_dict, env_dict, load_agent='')
-# a.train()
-# main_multiple.lap_time_test(agent_name=agent_name, n_episodes=100, detect_issues=False, initial_conditions=True)
-
-agent_name = 'sample_5hz_large_batch'
-main_dict['name'] = agent_name
-main_dict['only_lidar'] = False
-lidar_dict['is_lidar'] = True
-main_dict['lidar_dict'] = lidar_dict
-main_dict['control_steps'] = 20
-a = main_multiple.trainingLoop(main_dict, agent_td3_dict, env_dict, load_agent='')
-a.train()
-main_multiple.lap_time_test(agent_name=agent_name, n_episodes=100, detect_issues=False, initial_conditions=True)
-
-
-agent_name = 'sample_10hz_large_batch'
-main_dict['name'] = agent_name
-main_dict['only_lidar'] = False
-lidar_dict['is_lidar'] = True
-main_dict['lidar_dict'] = lidar_dict
-main_dict['control_steps'] = 10
-a = main_multiple.trainingLoop(main_dict, agent_td3_dict, env_dict, load_agent='')
-a.train()
-main_multiple.lap_time_test(agent_name=agent_name, n_episodes=100, detect_issues=False, initial_conditions=True)
-
-
-# agent_name = 'sample_5hz_large_batch'
-# main_dict['name'] = agent_name
-# main_dict['only_lidar'] = False
-# lidar_dict['is_lidar'] = True
-# main_dict['lidar_dict'] = lidar_dict
-# main_dict['control_steps'] = 20
-# a = main_multiple.trainingLoop(main_dict, agent_td3_dict, env_dict, load_agent='')
-# a.train()
-# main_multiple.lap_time_test(agent_name=agent_name, n_episodes=100, detect_issues=False, initial_conditions=True)
-
-
-# agent_name = 'sample_10hz_large_batch'
-# main_dict['name'] = agent_name
-# main_dict['only_lidar'] = False
-# lidar_dict['is_lidar'] = True
-# main_dict['lidar_dict'] = lidar_dict
-# main_dict['control_steps'] = 10
-# a = main_multiple.trainingLoop(main_dict, agent_td3_dict, env_dict, load_agent='')
-# a.train()
-# main_multiple.lap_time_test(agent_name=agent_name, n_episodes=100, detect_issues=False, initial_conditions=True)
-
 
 
 

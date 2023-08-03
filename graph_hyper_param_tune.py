@@ -78,26 +78,46 @@ def graph_eval_time_steps(agent_names):
             std_lap_times[n] =  np.std(eval_lap_times[:,n][mask])
             collisions[n] = np.average(mask)*100
             # std_collisions[n] = np.std(mask)*100
-        pass
         
+        collisions=100-collisions
+
         xaxis = np.average(eval_steps,axis=0)/(10)
         
-        axs.plot(xaxis, avg_lap_times, label='Lap time')
-        axs.fill_between(x=xaxis, y1=avg_lap_times-std_lap_times,y2=avg_lap_times+std_lap_times, alpha=0.2)
-        axs.set_xlabel('MDP time steps')
-        axs.set_ylabel('Lap time [s]')
+        # axs.plot(xaxis, avg_lap_times, label='Lap time')
+        # axs.fill_between(x=xaxis, y1=avg_lap_times-std_lap_times,y2=avg_lap_times+std_lap_times, alpha=0.2)
+        # axs.set_xlabel('MDP time steps')
+        # axs.set_ylabel('Lap time [s]')
+        # axs.tick_params(axis=u'both', which=u'both',length=0)
+        # axs.grid(True, color='lightgrey')
+        # axs.ticklabel_format(style='scientific', axis='x', scilimits=(0,0), useMathText=True, useOffset=True)
+        # # axs.set_ylim([40,50])
+
+        # axs1 = axs.twinx()  
+        # axs1.plot(xaxis, collisions, color='orange', label='Successful laps')
+        # # axs1.set_ylim([80,101])
+        # axs1.set_ylabel('Successful laps [%]')
+        # axs1.tick_params(axis=u'both', which=u'both',length=0)
+
+        axs.plot(xaxis, collisions, color='orange', label='Failed laps')
+        # axs1.set_ylim([80,101])
+        axs.set_ylabel('Failed laps [%]')
         axs.tick_params(axis=u'both', which=u'both',length=0)
+        axs.set_xlabel('MDP time steps')
         axs.grid(True, color='lightgrey')
-        axs.ticklabel_format(style='scientific', axis='x', scilimits=(0,0), useMathText=True, useOffset=True)
-        axs.set_ylim([40,50])
+
+        # axs.set_ylim([40,50])
 
         axs1 = axs.twinx()  
-        axs1.plot(xaxis, collisions, color='orange', label='Successful laps')
-        # axs1.set_ylim([80,101])
-        axs1.set_ylabel('Successful laps [%]')
+        axs1.plot(xaxis, avg_lap_times, label='Lap time')
+        # axs1.fill_between(x=xaxis, y1=avg_lap_times-std_lap_times,y2=avg_lap_times+std_lap_times, alpha=0.2)
+        axs1.set_ylabel('Lap time [s]')
         axs1.tick_params(axis=u'both', which=u'both',length=0)
 
-        
+        axs1.ticklabel_format(style='scientific', axis='x', scilimits=(0,0), useMathText=True, useOffset=True)
+
+
+
+
         fig.tight_layout()
         fig.subplots_adjust(bottom=0.35) 
         plt.figlegend(loc = 'lower center', ncol=3)    
@@ -105,7 +125,8 @@ def graph_eval_time_steps(agent_names):
     plt.show()
 
 
-# graph_eval_time_steps(['f1_esp_pete_eval'])
+# graph_eval_time_steps(['porto_ete_eval'])
+# graph_eval_time_steps(['porto_ete_v5_r_collision_5'])
 
 
 
@@ -116,6 +137,7 @@ def graph_replay_batch_size(agent_names):
     plt.rc('axes',edgecolor='gray')
 
     batch_size = np.array([50,100,150,200,300,400,600,1000])
+    # batch_size = np.array([3, 5, 10, 20, 50])
     train_times = np.zeros(len(agent_names))
     min_train_times = np.zeros(len(agent_names))
     max_train_times = np.zeros(len(agent_names))
@@ -156,6 +178,7 @@ def graph_replay_batch_size(agent_names):
     # axs.fill_between(x=batch_size, y1=min_train_times,y2=max_train_times, alpha=0.2)
     axs.plot(batch_size, collisions*100, label='Failed laps')
     axs.set_xlabel('Batch size')
+    # axs.set_xlabel('Agent sample rate [Hz]')
     axs.set_ylabel('Failed laps [%]')
     # axs.set_ylim([20,40])
     axs.tick_params(axis=u'both', which=u'both',length=0)
@@ -163,7 +186,7 @@ def graph_replay_batch_size(agent_names):
 
     axs1 = axs.twinx()  
     axs1.plot(batch_size, lap_times, color='orange', label='Lap time')
-    axs1.fill_between(x=batch_size, y1=lap_times-std_lap_times,y2=lap_times+std_lap_times, alpha=0.2, color='orange')
+    # axs1.fill_between(x=batch_size, y1=lap_times-std_lap_times,y2=lap_times+std_lap_times, alpha=0.2, color='orange')
     axs1.set_ylabel('Lap time [s]')
     axs1.tick_params(axis=u'both', which=u'both',length=0)
 
@@ -174,7 +197,8 @@ def graph_replay_batch_size(agent_names):
     plt.show()
 
 
-# graph_replay_batch_size(['batch_50', 'batch_100', 'batch_150', 'batch_200', 'batch_300', 'batch_400', 'batch_600', 'batch_1000'])
+graph_replay_batch_size(['batch_50', 'batch_100', 'batch_150', 'batch_200', 'batch_300', 'batch_400', 'batch_600', 'batch_1000'])
+# graph_replay_batch_size(['f_agent_3', 'f_agent_5', 'f_agent_10', 'f_agent_20', 'f_agent_50'])
 
 
 def graph_agent_sample_rate(agent_names):
@@ -232,7 +256,7 @@ def graph_agent_sample_rate(agent_names):
     # axs1.fill_between(x=sample_rate, y1=lap_times-std_lap_times,y2=lap_times+std_lap_times, alpha=0.2, color='orange')
     axs1.set_ylabel('Failed laps [%]')
     axs1.tick_params(axis=u'both', which=u'both',length=0)
-    axs1.set_ylim([0,20])
+    # axs1.set_ylim([0,20])
 
     fig.tight_layout()
     fig.subplots_adjust(bottom=0.35) 
@@ -242,6 +266,6 @@ def graph_agent_sample_rate(agent_names):
 
 
 
-# agent_names = ['f_agent_3', 'f_agent_5', 'f_agent_10', 'f_agent_20', 'f_agent_50']
-agent_names = ['f1_esp_pete_f_2', 'f1_esp_pete_f_5', 'f1_esp_pete',  'f1_esp_pete_f_20', 'f1_esp_pete_f_33']
+agent_names = ['f_agent_3', 'f_agent_5', 'f_agent_10', 'f_agent_20', 'f_agent_50']
+# agent_names = ['f1_esp_pete_f_2', 'f1_esp_pete_f_5', 'f1_esp_pete',  'f1_esp_pete_f_20', 'f1_esp_pete_f_33']
 # graph_agent_sample_rate(agent_names)

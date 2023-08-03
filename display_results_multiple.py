@@ -709,7 +709,7 @@ def learning_curve_reward_average(agent_names, legend, legend_title):
     
     legend_new = legend.copy()
     legend_new.append('Min and max')
-    window = 10
+    window = 100
     
     steps = [[] for _ in range(len(agent_names))]
     avg_steps = [[] for _ in range(len(agent_names))]
@@ -3387,7 +3387,7 @@ def display_collision_distribution(agent_names):
 # display_collision_distribution('only_pose')
 # display_collision_distribution('batch_150')
 # display_collision_distribution('f1_esp_ete')
-display_collision_distribution(['f1_esp_ete', 'f1_esp_pete_r_p_5'])
+# display_collision_distribution(['f1_esp_ete', 'f1_esp_pete_r_p_5'])
 
 
 def display_moving_agent(agent_names, ns, legend_title, legend, mismatch_parameters, frac_vary, noise_dicts, start_condition):
@@ -6211,4 +6211,4 @@ xspace = xlim/4
 bottom_space = 0.4
 height=2.6
 
-learning_curve_lap_time_tracks(agent_names, legend, legend_title, ns, xlim, xspace, bottom_space, height)
+# learning_curve_lap_time_tracks(agent_names, legend, legend_title, ns, xlim, xspace, bottom_space, height)

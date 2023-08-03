@@ -138,7 +138,7 @@ class trainingLoop():
       n_actions = np.zeros([self.runs, self.max_episodes])
       terminal_poses = np.zeros([self.runs, self.max_episodes, 2])
 
-      eval_interval = 5
+      eval_interval = 100
       eval_n_episodes = 1
       eval_steps = np.zeros([self.runs, int(self.max_episodes/eval_interval)])
       eval_lap_times = np.zeros([self.runs, int(self.max_episodes/eval_interval), eval_n_episodes])
@@ -163,8 +163,8 @@ class trainingLoop():
          episode=0
          
          # while np.sum(steps[n,:])<self.max_steps and episode<self.max_episodes and ((self.env.collision==True and episode>0) or (self.env.collision==False and episode==0)):
-         # while np.sum(steps[n,:])<self.max_steps and episode<self.max_episodes:
-         while np.sum(n_actions[n,:])<self.max_actions and episode<self.max_episodes:
+         while np.sum(steps[n,:])<self.max_steps and episode<self.max_episodes:
+         # while np.sum(n_actions[n,:])<self.max_actions and episode<self.max_episodes:
 
             self.env.reset(save_history=True, start_condition=[], car_params=car_params, get_lap_time=False, noise=self.noise)  #Reset the environment every episode
             obs = self.env.observation      #Records starting state
@@ -303,11 +303,11 @@ class trainingLoop():
             #    outfile.close()
 
 
-            if episode%1==0:
+            if episode%10==0:
                if self.learning_method=='dqn' or self.learning_method=='dueling_dqn' or self.learning_method=='dueling_ddqn' or self.learning_method=='rainbow':
-                  print(f"{'Run':3s} {n:2.0f} {'| Episode':8s} {episode:5.0f} {'| Score':8s} {score:6.2f} {'| Progress':12s} {self.env.progress:3.2f} {'| collision ':13s} {self.env.collision} {'| Average score':15s} {avg_score:6.2f} {'| Average progress':18s} {avg_progress:3.2f} {'| Epsilon':9s} {self.agent.epsilon:.2f}")
+                  print(f"{'Run':3s} {n:2.0f} {'| Episode':8s} {episode:5.0f} {'| Time step':12s} {np.sum(steps[n,:]):5.0f} {'| Score':8s} {score:6.2f} {'| Progress':12s} {self.env.progress:3.2f} {'| collision ':13s} {self.env.collision} {'| Average score':15s} {avg_score:6.2f} {'| Average progress':18s} {avg_progress:3.2f} {'| Epsilon':9s} {self.agent.epsilon:.2f}")
                if self.learning_method=='reinforce' or self.learning_method=='actor_critic_sep' or self.learning_method=='actor_critic_com' or self.learning_method=='actor_critic_cont' or self.learning_method=='ddpg' or self.learning_method=='td3':
-                  print(f"{'Run':3s} {n:2.0f} {'| Episode':8s} {episode:5.0f} {'| Score':8s} {score:6.2f} {'| Progress':12s} {self.env.progress:3.2f} {'| collision ':13s} {self.env.collision} {'| Average score':15s} {avg_score:6.2f} {'| Average progress':18s} {avg_progress:3.2f}")
+                  print(f"{'Run':3s} {n:2.0f} {'| Episode':8s} {episode:5.0f} {'| Time step':12s} {np.sum(steps[n,:]):5.0f} {'| Elapsed time':15s} {np.sum(times[n,:]/60):5.0f} {'| Score':8s} {score:6.2f} {'| Progress':12s} {self.env.progress:3.2f} {'| collision ':13s} {self.env.collision} {'| Average score':15s} {avg_score:6.2f} {'| Average progress':18s} {avg_progress:3.2f}")
 
             episode+=1
                
