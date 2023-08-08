@@ -2418,8 +2418,8 @@ def display_path_velocity_colormap(agent_names, ns, legend_title, legend, mismat
 # start_condition = {'x':24.3, 'y':24.6, 'v':3, 'theta':0, 'delta':0, 'goal':0}
 
 
-agent_names = ['f1_mco_pete_mu_2', 'f1_mco_ete']
-start_condition = {'x':18, 'y':48.7, 'v':3, 'theta':0, 'delta':0, 'goal':0}
+# agent_names = ['f1_mco_pete_mu_2', 'f1_mco_ete']
+# start_condition = {'x':18, 'y':48.7, 'v':3, 'theta':0, 'delta':0, 'goal':0}
 
 # agent_names = ['f1_aus_pete']
 
@@ -2937,11 +2937,11 @@ ns=[0]
 legend = ['']
 legend_title = ''
 mismatch_parameters = ['mu']
-frac_vary = [-0.4]
+frac_vary = [0]
 # start_condition = {'x':10, 'y':4.5, 'v':3, 'theta':np.pi, 'delta':0, 'goal':0}
 # start_condition = {'x':4.1, 'y':9, 'v':3, 'theta':0, 'delta':0, 'goal':0}
 # start_condition = []
-# display_path_mismatch_compare_colormap(agent_names, ns, legend_title, legend, mismatch_parameters, frac_vary, start_condition)
+display_path_mismatch_compare_colormap(agent_names, ns, legend_title, legend, mismatch_parameters, frac_vary, start_condition)
 
 
 

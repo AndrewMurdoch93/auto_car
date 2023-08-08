@@ -1037,6 +1037,7 @@ def display_train_parameters(agent_name):
     for key in agent_dict:
         print(key, ': ', agent_dict[key])
 
+
 def display_lap_results(agent_name):
 
     path = 'lap_results/' + agent_name
@@ -1243,6 +1244,7 @@ def graph_lap_results(agent_names):
     # p.legend(handles, legend ,title=legend_title, loc='lower left')
     # plt.title('Lap success rate for ' + param + ' mismatch')
     # plt.show()
+
 
 # agent_names = ['circle_pete_sv', 'circle_pete_s', 'circle_pete_v', 'circle_ete', 
 #             'columbia_pete_sv', 'columbia_pete_s', 'columbia_pete_v', 'columbia_ete',
@@ -3781,7 +3783,7 @@ def display_path_multiple(agent_names, ns, legend_title, legend, mismatch_parame
 
 
 
-    fig, ax = plt.subplots(1, figsize=(5,2.7))
+    fig, ax = plt.subplots(1, figsize=(5.5,2))
     
     ax.axis('off')
     
@@ -3828,9 +3830,9 @@ def display_path_multiple(agent_names, ns, legend_title, legend, mismatch_parame
     # ax.set_ylim([0,27])
 
     fig.tight_layout()
-    fig.subplots_adjust(bottom=0.2) 
-    plt.figlegend(legend, title=legend_title, loc = 'lower center', ncol=3, borderpad=1.1)
-
+    fig.subplots_adjust(right=0.5) 
+    # plt.figlegend(legend, title=legend_title, loc = 'lower center', ncol=3, borderpad=1.4)
+    plt.figlegend(legend, title=legend_title, loc = 'right', ncol=3, borderpad=1.4)
 
 
 

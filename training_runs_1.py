@@ -83,7 +83,7 @@ n_test=10
 # a = main_multiple.trainingLoop(main_dict, agent_td3_dict, env_dict, load_agent='')
 # a.train()
 # main_multiple.lap_time_test(agent_name=agent_name, n_episodes=n_test, detect_issues=False, initial_conditions=True)
-main_multiple.lap_time_test_with_noise(agent_name=agent_name, n_episodes=100, detect_issues=False, initial_conditions=True, noise={'xy':0.025, 'theta':0.05, 'v':0.1, 'lidar':0.01})
+# main_multiple.lap_time_test_with_noise(agent_name=agent_name, n_episodes=100, detect_issues=False, initial_conditions=True, noise={'xy':0.025, 'theta':0.05, 'v':0.1, 'lidar':0.01})
 
 
 
@@ -1047,7 +1047,7 @@ main_multiple.lap_time_test_with_noise(agent_name=agent_name, n_episodes=100, de
 # agent_names = ['f1_esp_pete_eval']
 # agent_names = ['f1_mco_pete']
 # agent_names = ['f1_aus_pete']
-# agent_names = ['porto_domain_random_1', 'porto_domain_random_01']
+agent_names = ['porto_domain_random_1', 'porto_domain_random_01']
 # agent_names = ['f1_esp_pete_f_2']
 
 
@@ -1060,19 +1060,20 @@ main_multiple.lap_time_test_with_noise(agent_name=agent_name, n_episodes=100, de
 # agent_names = ['f1_mco_pete_mu_4']
 # agent_names = ['f1_mco_ete', 'f1_mco_pete_mu_4']
 
-agent_names = ['f1_porto_ete_1']
+# agent_names = ['f1_porto_ete_1']
 
 # legend = ['no noise', 'noise']
 # legend = ['180', '220']
 # legend = ['5', '10', '20']
 # legend = ['Nominal surface', 'Dry asphalt', 'Wet asphalt']
-# legend_title = r'Standard deviation of road surface friction coefficient, $\mu$'
+legend_title = 'Standard deviation of road surface \n friction coefficient during training'
+legend = ['0.01', '0.05']
 ns=[0,0,0,0,0,0]
 
 
 # agent_names = ['porto_ete_v5_r_collision_5']
-legend = ['End-to-end', 'Partial end-to-end']
-legend_title = ''
+# legend = ['End-to-end', 'Partial end-to-end']
+# legend_title = ''
 # ns=[0]
 
 
@@ -1110,16 +1111,16 @@ legend_title = ''
 #     print('------------------------------' + '\n' + agent_name + '\n' + '------------------------------')
 #     display_results_multiple.display_train_parameters(agent_name=agent_name)
 
-for agent_name in agent_names:
-    print('------------------------------' + '\n' + agent_name + '\n' + '------------------------------')
-    display_results_multiple.display_lap_results(agent_name=agent_name)
+# for agent_name in agent_names:
+#     print('------------------------------' + '\n' + agent_name + '\n' + '------------------------------')
+#     display_results_multiple.display_lap_results(agent_name=agent_name)
 
 
 mismatch_parameters = [['mu'], ['mu'], ['mu'], ['mu']]
 frac_vary = [[0],[0],[0],[0]]
 noise_dicts = [{'xy':0.025, 'theta':0.05, 'v':0.1, 'lidar':0.01}, {'xy':0.025, 'theta':0.05, 'v':0.1, 'lidar':0.01}, {'xy':0.025, 'theta':0.05, 'v':0.1, 'lidar':0.01}, {'xy':0.025, 'theta':0.05, 'v':0.1, 'lidar':0.01}]
-# start_condition = {'x':10, 'y':4.5, 'v':3, 'theta':np.pi, 'delta':0, 'goal':0}
-start_condition = {'x':24.3, 'y':24.6, 'v':3, 'theta':0, 'delta':0, 'goal':0}
+start_condition = {'x':10, 'y':4.5, 'v':3, 'theta':np.pi, 'delta':0, 'goal':0}
+# start_condition = {'x':24.3, 'y':24.6, 'v':3, 'theta':0, 'delta':0, 'goal':0}
 # start_condition = {'x':18, 'y':48.7, 'v':3, 'theta':0, 'delta':0, 'goal':0}
 
 
@@ -1129,9 +1130,9 @@ start_condition = {'x':24.3, 'y':24.6, 'v':3, 'theta':0, 'delta':0, 'goal':0}
 #                                              legend=legend, mismatch_parameters=mismatch_parameters, frac_vary=frac_vary, noise_dicts=noise_dicts,
 #                                              start_condition=start_condition)
 
-# display_results_multiple.display_path_multiple(agent_names=agent_names, ns=ns, legend_title=legend_title,          
-#                                              legend=legend, mismatch_parameters=mismatch_parameters, frac_vary=frac_vary, noise_dicts=noise_dicts,
-#                                              start_condition=start_condition)
+display_results_multiple.display_path_multiple(agent_names=agent_names, ns=ns, legend_title=legend_title,          
+                                             legend=legend, mismatch_parameters=mismatch_parameters, frac_vary=frac_vary, noise_dicts=noise_dicts,
+                                             start_condition=start_condition)
 
 # display_results_multiple.display_path_mismatch_multiple_by_state(agent_names=agent_names, ns=ns, legend_title=legend_title,          
 #                                              legend=legend, mismatch_parameters=mismatch_parameters, frac_vary=frac_vary, noise_dicts=noise_dicts,
