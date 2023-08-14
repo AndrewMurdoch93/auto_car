@@ -21,9 +21,9 @@ import os
 
 
 
-agent_name = 'f1_porto_ete_1'
+agent_name = 'f1_mco_ete_10'
 
-main_dict = {'name':agent_name, 'max_episodes':20000, 'max_steps':4e6, 'learning_method':'td3', 'runs':10, 'comment':''}
+main_dict = {'name':agent_name, 'max_episodes':20000, 'max_steps':4e5, 'learning_method':'td3', 'runs':10, 'comment':''}
 
 agent_ddpg_dict = {'alpha':0.000025, 'beta':0.00025, 'tau':0.001, 'gamma':0.99, 'max_size':1000000, 'layer1_size':400, 'layer2_size':300, 'batch_size':200}
 
@@ -37,8 +37,8 @@ car_params =   {'mu': 1.0489, 'C_Sf': 4.718, 'C_Sr': 5.4562, 'lf': 0.15875, 'lr'
                 , 'h': 0.074, 'm': 3.74, 'I': 0.04712, 's_min': -0.4189, 's_max': 0.4189, 'sv_min': -3.2
                 , 'sv_max': 3.2, 'v_switch': 7.319, 'a_max': 9.51, 'v_min':-5.0, 'v_max': 20.0, 'width': 0.31, 'length': 0.58}
 
-reward_signal = {'goal_reached':0, 'out_of_bounds':-1, 'max_steps':0, 'collision':-10, 
-                    'backwards':-0.01, 'park':-1, 'time_step':-0.01, 'progress':0, 'distance':0.25, 
+reward_signal = {'goal_reached':0, 'out_of_bounds':-1, 'max_steps':0, 'collision':-2, 
+                    'backwards':-0.01, 'park':-1, 'time_step':-0.01, 'progress':0, 'distance':0.3, 
                     'max_progress':0}    
 
 action_space_dict = {'action_space': 'continuous', 'vel_select':[3,5], 'R_range':[2]}
@@ -63,9 +63,9 @@ noise_dict = {'xy':0, 'theta':0, 'v':0, 'lidar':0}
 
 env_dict = {'sim_conf': functions.load_config(sys.path[0], "config")
         , 'save_history': False
-        , 'map_name': 'porto_1'
+        , 'map_name': 'f1_mco'
         , 'max_steps': 20000
-        , 'control_steps': 20
+        , 'control_steps': 10
         , 'display': False
         , 'velocity_control': False
         , 'velocity_gain':1
@@ -78,21 +78,21 @@ env_dict = {'sim_conf': functions.load_config(sys.path[0], "config")
         , 'noise_dict':noise_dict
         } 
 
-mu_frac_variation = np.array([-0.5,-0.4,-0.3,-0.2,-0.1,0])
-n_test=10
-# a = main_multiple.trainingLoop(main_dict, agent_td3_dict, env_dict, load_agent='')
-# a.train()
+# mu_frac_variation = np.array([-0.5,-0.4,-0.3,-0.2,-0.1,0])
+n_test=1
+a = main_multiple.trainingLoop(main_dict, agent_td3_dict, env_dict, load_agent='')
+a.train()
 # main_multiple.lap_time_test(agent_name=agent_name, n_episodes=n_test, detect_issues=False, initial_conditions=True)
-# main_multiple.lap_time_test_with_noise(agent_name=agent_name, n_episodes=100, detect_issues=False, initial_conditions=True, noise={'xy':0.025, 'theta':0.05, 'v':0.1, 'lidar':0.01})
+main_multiple.lap_time_test_with_noise(agent_name=agent_name, n_episodes=n_test, detect_issues=False, initial_conditions=True, noise={'xy':0.025, 'theta':0.05, 'v':0.1, 'lidar':0.01})
 
 
 
-# agent_name = 'f1_mco_pete_mu_2'
-# a = main_multiple.trainingLoop(main_dict, agent_td3_dict, env_dict, load_agent='')
-# a.train()
-# main_multiple.lap_time_test(agent_name=agent_name, n_episodes=n_test, detect_issues=False, initial_conditions=True)
-# main_multiple.lap_time_test_with_noise(agent_name=agent_name, n_episodes=100, detect_issues=False, initial_conditions=True, noise={'xy':0.025, 'theta':0.05, 'v':0.1, 'lidar':0.01})
-# main_multiple.lap_time_test_mismatch(agent_name=agent_name, n_episodes=n_test, detect_issues=False, initial_conditions=True, parameter='mu', frac_variation=mu_frac_variation)
+agent_name = 'f1_esp_ete_10'
+main_dict['name'] = agent_name
+env_dict['map_name'] = 'f1_esp'
+a = main_multiple.trainingLoop(main_dict, agent_td3_dict, env_dict, load_agent='')
+a.train()
+main_multiple.lap_time_test_with_noise(agent_name=agent_name, n_episodes=n_test, detect_issues=False, initial_conditions=True, noise={'xy':0.025, 'theta':0.05, 'v':0.1, 'lidar':0.01})
 
 
 
@@ -1047,7 +1047,7 @@ n_test=10
 # agent_names = ['f1_esp_pete_eval']
 # agent_names = ['f1_mco_pete']
 # agent_names = ['f1_aus_pete']
-agent_names = ['porto_domain_random_1', 'porto_domain_random_01']
+# agent_names = ['porto_domain_random_1', 'porto_domain_random_01']
 # agent_names = ['f1_esp_pete_f_2']
 
 
@@ -1130,9 +1130,9 @@ start_condition = {'x':10, 'y':4.5, 'v':3, 'theta':np.pi, 'delta':0, 'goal':0}
 #                                              legend=legend, mismatch_parameters=mismatch_parameters, frac_vary=frac_vary, noise_dicts=noise_dicts,
 #                                              start_condition=start_condition)
 
-display_results_multiple.display_path_multiple(agent_names=agent_names, ns=ns, legend_title=legend_title,          
-                                             legend=legend, mismatch_parameters=mismatch_parameters, frac_vary=frac_vary, noise_dicts=noise_dicts,
-                                             start_condition=start_condition)
+# display_results_multiple.display_path_multiple(agent_names=agent_names, ns=ns, legend_title=legend_title,          
+#                                              legend=legend, mismatch_parameters=mismatch_parameters, frac_vary=frac_vary, noise_dicts=noise_dicts,
+#                                              start_condition=start_condition)
 
 # display_results_multiple.display_path_mismatch_multiple_by_state(agent_names=agent_names, ns=ns, legend_title=legend_title,          
 #                                              legend=legend, mismatch_parameters=mismatch_parameters, frac_vary=frac_vary, noise_dicts=noise_dicts,

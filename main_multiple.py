@@ -303,7 +303,7 @@ class trainingLoop():
             #    outfile.close()
 
 
-            if episode%10==0:
+            if episode%1==0:
                if self.learning_method=='dqn' or self.learning_method=='dueling_dqn' or self.learning_method=='dueling_ddqn' or self.learning_method=='rainbow':
                   print(f"{'Run':3s} {n:2.0f} {'| Episode':8s} {episode:5.0f} {'| Time step':12s} {np.sum(steps[n,:]):5.0f} {'| Score':8s} {score:6.2f} {'| Progress':12s} {self.env.progress:3.2f} {'| collision ':13s} {self.env.collision} {'| Average score':15s} {avg_score:6.2f} {'| Average progress':18s} {avg_progress:3.2f} {'| Epsilon':9s} {self.agent.epsilon:.2f}")
                if self.learning_method=='reinforce' or self.learning_method=='actor_critic_sep' or self.learning_method=='actor_critic_com' or self.learning_method=='actor_critic_cont' or self.learning_method=='ddpg' or self.learning_method=='td3':
