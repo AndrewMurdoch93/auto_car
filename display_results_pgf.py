@@ -508,7 +508,7 @@ def learning_curve_all(agent_names, legend, legend_title, ns, filename, xlim, xs
 
     legend_coll = legend.copy()
     legend_coll.append('Min and max')
-    window = 10
+    window = 50
     steps = [[] for _ in range(len(agent_names))]
     steps_x_axis = [[] for _ in range(len(agent_names))]
     n_actions_x_axis  = [[] for _ in range(len(agent_names))]
@@ -714,13 +714,13 @@ def learning_curve_all(agent_names, legend, legend_title, ns, filename, xlim, xs
     for i in range(len(agent_names)):
         end_episode = end_episodes[i] 
         
-        if i == 0:
-            ax[0].plot(np.arange(0,end_episode,1), np.array(avg_coll[i][0:end_episode])[np.arange(0,end_episode,1)]*100, color='grey', linestyle='--')
-            ax[0].fill_between(x=np.arange(end_episode)[np.arange(0,end_episode,1)], y1=np.array(upper_fill_coll[i][0])[np.arange(0,end_episode,1)]*100, y2=np.array(lower_fill_coll[i][0])[np.arange(0,end_episode,1)]*100, alpha=0.15, color='grey', label='_nolegend_')
-        else:
-            ax[0].plot(np.arange(0,end_episode,1), np.array(avg_coll[i][0:end_episode])[np.arange(0,end_episode,1)]*100)
-            ax[0].fill_between(x=np.arange(end_episode)[np.arange(0,end_episode,1)], y1=np.array(upper_fill_coll[i][0])[np.arange(0,end_episode,1)]*100, y2=np.array(lower_fill_coll[i][0])[np.arange(0,end_episode,1)]*100, alpha=0.15, label='_nolegend_')
-        
+        # if i == 0:
+        #     ax[0].plot(np.arange(0,end_episode,1), np.array(avg_coll[i][0:end_episode])[np.arange(0,end_episode,1)]*100, color='grey', linestyle='--')
+        #     ax[0].fill_between(x=np.arange(end_episode)[np.arange(0,end_episode,1)], y1=np.array(upper_fill_coll[i][0])[np.arange(0,end_episode,1)]*100, y2=np.array(lower_fill_coll[i][0])[np.arange(0,end_episode,1)]*100, alpha=0.15, color='grey', label='_nolegend_')
+        # else:
+        ax[0].plot(np.arange(0,end_episode,1), np.array(avg_coll[i][0:end_episode])[np.arange(0,end_episode,1)]*100)
+        ax[0].fill_between(x=np.arange(end_episode)[np.arange(0,end_episode,1)], y1=np.array(upper_fill_coll[i][0])[np.arange(0,end_episode,1)]*100, y2=np.array(lower_fill_coll[i][0])[np.arange(0,end_episode,1)]*100, alpha=0.15, label='_nolegend_')
+    
 
     ax[0].hlines(y=100, xmin=0, xmax=np.max(end_episodes), colors='black', linestyle='dashed')
     ax[0].hlines(y=0, xmin=0, xmax=np.max(end_episodes), colors='black', linestyle='dashed')
@@ -735,13 +735,13 @@ def learning_curve_all(agent_names, legend, legend_title, ns, filename, xlim, xs
 
     for i in range(np.size(end_ep, axis=0)):
         end_episode = end_episodes[i] 
-        if i == 0:
-            ax[1].plot(np.arange(0,end_episode,1), (np.array(steps_y_avg_smoothed[i])*0.01)[np.arange(0,end_episode,1)], color='grey', linestyle='--')
-            ax[1].fill_between(x=np.arange(0,end_episode,1), y1=np.array(upper_fill[i][0])[np.arange(0,end_episode,1)]*0.01, y2=np.array(lower_fill[i][0])[np.arange(0,end_episode,1)]*0.01, alpha=0.15, color='grey', label='_nolegend_')
+        # if i == 0:
+        #     ax[1].plot(np.arange(0,end_episode,1), (np.array(steps_y_avg_smoothed[i])*0.01)[np.arange(0,end_episode,1)], color='grey', linestyle='--')
+        #     ax[1].fill_between(x=np.arange(0,end_episode,1), y1=np.array(upper_fill[i][0])[np.arange(0,end_episode,1)]*0.01, y2=np.array(lower_fill[i][0])[np.arange(0,end_episode,1)]*0.01, alpha=0.15, color='grey', label='_nolegend_')
 
-        else:
-            ax[1].plot(np.arange(0,end_episode,1), (np.array(steps_y_avg_smoothed[i])*0.01)[np.arange(0,end_episode,1)])
-            ax[1].fill_between(x=np.arange(0,end_episode,1), y1=np.array(upper_fill[i][0])[np.arange(0,end_episode,1)]*0.01, y2=np.array(lower_fill[i][0])[np.arange(0,end_episode,1)]*0.01, alpha=0.15, label='_nolegend_')
+        # else:
+        ax[1].plot(np.arange(0,end_episode,1), (np.array(steps_y_avg_smoothed[i])*0.01)[np.arange(0,end_episode,1)])
+        ax[1].fill_between(x=np.arange(0,end_episode,1), y1=np.array(upper_fill[i][0])[np.arange(0,end_episode,1)]*0.01, y2=np.array(lower_fill[i][0])[np.arange(0,end_episode,1)]*0.01, alpha=0.15, label='_nolegend_')
 
 
     ax[1].set_xlabel('Episodes')
@@ -755,12 +755,12 @@ def learning_curve_all(agent_names, legend, legend_title, ns, filename, xlim, xs
     for i in range(np.size(end_ep, axis=0)):
         end_episode = end_episodes[i] 
         
-        if i == 0:
-            ax[2].plot(np.arange(0,end_episode,1), np.array(avg_score[i])[np.arange(0,end_episode,1)], color='grey', linestyle='--')
-            ax[2].fill_between(x=np.arange(0,end_episode,1), y1=np.array(score_upper_fill[i][0])[np.arange(0,end_episode,1)], y2=np.array(score_lower_fill[i][0])[np.arange(0,end_episode,1)], alpha=0.15, color='grey', label='_nolegend_')
-        else:
-            ax[2].plot(np.arange(0,end_episode,1), np.array(avg_score[i])[np.arange(0,end_episode,1)])
-            ax[2].fill_between(x=np.arange(0,end_episode,1), y1=np.array(score_upper_fill[i][0])[np.arange(0,end_episode,1)], y2=np.array(score_lower_fill[i][0])[np.arange(0,end_episode,1)], alpha=0.15, label='_nolegend_')
+        # if i == 0:
+        #     ax[2].plot(np.arange(0,end_episode,1), np.array(avg_score[i])[np.arange(0,end_episode,1)], color='grey', linestyle='--')
+        #     ax[2].fill_between(x=np.arange(0,end_episode,1), y1=np.array(score_upper_fill[i][0])[np.arange(0,end_episode,1)], y2=np.array(score_lower_fill[i][0])[np.arange(0,end_episode,1)], alpha=0.15, color='grey', label='_nolegend_')
+        # else:
+        ax[2].plot(np.arange(0,end_episode,1), np.array(avg_score[i])[np.arange(0,end_episode,1)])
+        ax[2].fill_between(x=np.arange(0,end_episode,1), y1=np.array(score_upper_fill[i][0])[np.arange(0,end_episode,1)], y2=np.array(score_lower_fill[i][0])[np.arange(0,end_episode,1)], alpha=0.15, label='_nolegend_')
 
       
     ax[2].set_title('(c)', fontdict={'fontsize': 10})
@@ -2941,7 +2941,7 @@ frac_vary = [0]
 # start_condition = {'x':10, 'y':4.5, 'v':3, 'theta':np.pi, 'delta':0, 'goal':0}
 # start_condition = {'x':4.1, 'y':9, 'v':3, 'theta':0, 'delta':0, 'goal':0}
 # start_condition = []
-display_path_mismatch_compare_colormap(agent_names, ns, legend_title, legend, mismatch_parameters, frac_vary, start_condition)
+# display_path_mismatch_compare_colormap(agent_names, ns, legend_title, legend, mismatch_parameters, frac_vary, start_condition)
 
 
 
@@ -4506,11 +4506,15 @@ xspace = 25
 # legend_title = 'Velocity controller gain, $k_{v}$'
 
 
-agent_names = ['f1_esp_ete', 'f1_esp_pete_steer', 'f1_esp_pete_velocity', 'f1_esp_pete_r_p_5']
-legend = ['End-to-end', 'Only steering', 'Only velocity', 'Both']
-legend_title = 'Algorithm'
-xlim=200
-xspace = 50
+# agent_names = ['f1_esp_ete', 'f1_esp_pete_steer', 'f1_esp_pete_velocity', 'f1_esp_pete_r_p_5']
+# legend = ['End-to-end', 'Only steering', 'Only velocity', 'Both']
+# legend_title = 'Algorithm'
+# xlim=200
+# xspace = 50
+
+agent_names = ['f1_esp_ete_10', 'f1_mco_ete_10', 'f1_porto_ete_1']
+xlim = 1100
+xspace = 250
 
 # legend_title = ''
 # legend = ["End-to-end", "Partial end-to-end"]
@@ -4521,8 +4525,8 @@ bottom_space = 0.4
 height=2.5
 
 ns=[0, 0, 0, 0, 0, 0]
-filename = 'observation_space_1'
-# learning_curve_all(agent_names, legend, legend_title, ns, filename, xlim, xspace, bottom_space, height)
+filename = 'ete'
+learning_curve_all(agent_names, legend, legend_title, ns, filename, xlim, xspace, bottom_space, height)
 # learning_curve_lap_time_average(agent_names, legend, legend_title, ns, filename, xlim, xspace, bottom_space, height)
 
 

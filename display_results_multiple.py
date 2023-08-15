@@ -709,7 +709,7 @@ def learning_curve_reward_average(agent_names, legend, legend_title):
     
     legend_new = legend.copy()
     legend_new.append('Min and max')
-    window = 100
+    window = 10
     
     steps = [[] for _ in range(len(agent_names))]
     avg_steps = [[] for _ in range(len(agent_names))]
