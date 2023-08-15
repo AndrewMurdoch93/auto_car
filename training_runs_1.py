@@ -1066,8 +1066,8 @@ env_dict['map_name'] = 'f1_esp'
 # agent_names = ['f1_mco_ete_10']
 # agent_names = ['f1_porto_ete_1']
 
-# agent_names = ['f1_porto_ete_1', 'f1_esp_ete_10', 'f1_mco_ete_10']
-agent_names = ['f1_esp_pete_10', 'f1_mco_pete_10']
+agent_names = ['f1_porto_ete_1', 'f1_esp_ete_10', 'f1_mco_ete_10']
+# agent_names = ['f1_esp_pete_10', 'f1_mco_pete_10']
 
 # legend = ['no noise', 'noise']
 # legend = ['180', '220']
@@ -1122,9 +1122,9 @@ legend = ['Porto', 'Barcelona-Catalunya', 'Monaco']
 #     print('------------------------------' + '\n' + agent_name + '\n' + '------------------------------')
 #     display_results_multiple.display_train_parameters(agent_name=agent_name)
 
-for agent_name in agent_names:
-    print('------------------------------' + '\n' + agent_name + '\n' + '------------------------------')
-    display_results_multiple.display_lap_results(agent_name=agent_name)
+# for agent_name in agent_names:
+#     print('------------------------------' + '\n' + agent_name + '\n' + '------------------------------')
+#     display_results_multiple.display_lap_results(agent_name=agent_name)
 
 
 mismatch_parameters = [['mu'], ['mu'], ['mu'], ['mu']]
@@ -1134,7 +1134,7 @@ noise_dicts = [{'xy':0.025, 'theta':0.05, 'v':0.1, 'lidar':0.01}, {'xy':0.025, '
 # start_condition = {'x':24.3, 'y':24.6, 'v':3, 'theta':0, 'delta':0, 'goal':0}
 start_condition = {'x':18, 'y':48.7, 'v':3, 'theta':0, 'delta':0, 'goal':0}
 
-
+f1_esp_mco_10_1
 
 
 # display_results_multiple.display_moving_agent(agent_names=agent_names, ns=ns, legend_title=legend_title,          

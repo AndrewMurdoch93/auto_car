@@ -218,7 +218,7 @@ def learning_curve_lap_time_average(agent_names, legend, legend_title, ns, filen
     plt.rcParams['font.family'] = 'serif'
     plt.rcParams['font.serif'] = ['Times New Roman'] + plt.rcParams['font.serif']
 
-    size = (4,height)
+    size = (5.5,height)
 
     plt.rc('axes',edgecolor='gray')
     fig, ax = plt.subplots(1, 2, figsize=size)
@@ -240,10 +240,13 @@ def learning_curve_lap_time_average(agent_names, legend, legend_title, ns, filen
 
     # y_title=-0.5
 
+    colors = ['#1f77b4', '#1f77b4', '#ff7f0e', '#ff7f0e']
+    linestyles = ['solid', 'dashed', 'solid', 'dashed']
+
     for i in range(len(agent_names)):
         end_episode = end_episodes[i] 
-        ax[0].plot(np.arange(0,end_episode,1), np.array(avg_coll[i][0:end_episode])[np.arange(0,end_episode,1)]*100)
-        ax[0].fill_between(x=np.arange(end_episode)[np.arange(0,end_episode,1)], y1=np.array(upper_fill_coll[i][0])[np.arange(0,end_episode,1)]*100, y2=np.array(lower_fill_coll[i][0])[np.arange(0,end_episode,1)]*100, alpha=0.15, label='_nolegend_')
+        ax[0].plot(np.arange(0,end_episode,1), np.array(avg_coll[i][0:end_episode])[np.arange(0,end_episode,1)]*100, color=colors[i], linestyle=linestyles[i])
+        ax[0].fill_between(x=np.arange(end_episode)[np.arange(0,end_episode,1)], y1=np.array(upper_fill_coll[i][0])[np.arange(0,end_episode,1)]*100, y2=np.array(lower_fill_coll[i][0])[np.arange(0,end_episode,1)]*100, alpha=0.15, label='_nolegend_', color=colors[i])
     
     ax[0].hlines(y=100, xmin=0, xmax=np.max(end_episodes), colors='black', linestyle='dashed')
     ax[0].hlines(y=0, xmin=0, xmax=np.max(end_episodes), colors='black', linestyle='dashed')
@@ -258,8 +261,8 @@ def learning_curve_lap_time_average(agent_names, legend, legend_title, ns, filen
 
     for i in range(np.size(end_ep, axis=0)):
         end_episode = end_episodes[i] 
-        ax[1].plot(np.arange(0,end_episode,1), (np.array(steps_y_avg_smoothed[i])*0.01)[np.arange(0,end_episode,1)])
-        ax[1].fill_between(x=np.arange(0,end_episode,1), y1=np.array(upper_fill[i][0])[np.arange(0,end_episode,1)]*0.01, y2=np.array(lower_fill[i][0])[np.arange(0,end_episode,1)]*0.01, alpha=0.15, label='_nolegend_')
+        ax[1].plot(np.arange(0,end_episode,1), (np.array(steps_y_avg_smoothed[i])*0.01)[np.arange(0,end_episode,1)], color=colors[i], linestyle=linestyles[i])
+        ax[1].fill_between(x=np.arange(0,end_episode,1), y1=np.array(upper_fill[i][0])[np.arange(0,end_episode,1)]*0.01, y2=np.array(lower_fill[i][0])[np.arange(0,end_episode,1)]*0.01, alpha=0.15, label='_nolegend_', color=colors[i])
 
 
     ax[1].set_title('(b)', fontdict={'fontsize': 10})
@@ -289,10 +292,10 @@ def learning_curve_lap_time_average(agent_names, legend, legend_title, ns, filen
     
     # fig.subplots_adjust(right=0.8) 
     # fig.subplots_adjust(left=0.2) 
-    plt.figlegend(legend, title=legend_title, loc = 'lower center', ncol=5, borderpad=0.5)
+    plt.figlegend(legend, title=legend_title, loc = 'lower center', ncol=2, borderpad=0.5)
     
     
-    ax[0].text(x=100, y=-45, s='Episodes')
+    ax[0].text(x=420, y=-45, s='Episodes')
     plt.show()
     # plt.savefig('results/'+filename+'.pgf', format='pgf')
 
@@ -4472,7 +4475,7 @@ height=2.5
 
 agent_names = ['f1_esp_pete_lc_05', 'f1_esp_pete_r_p_5', 'f1_esp_pete_lc_15']
 legend = ['0.5', '1', '1.5']
-legend_title = 'Look-ahead distance [m]'
+# legend_title = 'Look-ahead distance [m]'
 xlim=100
 xspace = 25
 
@@ -4512,9 +4515,11 @@ xspace = 25
 # xlim=200
 # xspace = 50
 
-agent_names = ['f1_esp_ete_10', 'f1_mco_ete_10', 'f1_porto_ete_1']
-xlim = 1100
-xspace = 250
+agent_names = ['f1_esp_ete_10', 'f1_mco_ete_10', 'f1_esp_pete_10', 'f1_mco_pete_10']
+legend = ['Barcelona-Catalunya, end-to-end', 'Monaco, end-to-end', 'Barcelona-Catalunya, partial end-to-end', 'Monaco, partial end-to-end']
+legend_title = ''
+xlim = 400
+xspace = 100
 
 # legend_title = ''
 # legend = ["End-to-end", "Partial end-to-end"]
@@ -4526,8 +4531,8 @@ height=2.5
 
 ns=[0, 0, 0, 0, 0, 0]
 filename = 'ete'
-learning_curve_all(agent_names, legend, legend_title, ns, filename, xlim, xspace, bottom_space, height)
-# learning_curve_lap_time_average(agent_names, legend, legend_title, ns, filename, xlim, xspace, bottom_space, height)
+# learning_curve_all(agent_names, legend, legend_title, ns, filename, xlim, xspace, bottom_space, height)
+learning_curve_lap_time_average(agent_names, legend, legend_title, ns, filename, xlim, xspace, bottom_space, height)
 
 
 # agent_names = ['porto_ete_cs_1', 'porto_ete_cs_5', 'porto_ete_cs_10', 'porto_ete_cs_15', 'porto_ete_LiDAR_10', 'porto_ete_cs_25']

@@ -3346,7 +3346,7 @@ def display_collision_distribution(agent_names):
         terminal_poses = pickle.load(infile)
         infile.close()
 
-        end_episode = np.where(terminal_poses[0]==0)[0][0]
+        end_episode = np.where(terminal_poses[4]==0)[0][0]
         print('End episode = ', end_episode)
         env = environment(env_dict)
 
@@ -3389,7 +3389,9 @@ def display_collision_distribution(agent_names):
 # display_collision_distribution('only_pose')
 # display_collision_distribution('batch_150')
 # display_collision_distribution('f1_esp_ete')
-# display_collision_distribution(['f1_esp_ete', 'f1_esp_pete_r_p_5'])
+# display_collision_distribution(['f1_esp_ete_10', 'f1_esp_pete_10'])
+
+
 
 
 def display_moving_agent(agent_names, ns, legend_title, legend, mismatch_parameters, frac_vary, noise_dicts, start_condition):
