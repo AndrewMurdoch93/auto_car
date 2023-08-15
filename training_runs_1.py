@@ -21,9 +21,9 @@ import os
 
 
 
-agent_name = 'f1_mco_ete_10'
+agent_name = 'f1_mco_pete_10'
 
-main_dict = {'name':agent_name, 'max_episodes':20000, 'max_steps':4e5, 'learning_method':'td3', 'runs':10, 'comment':''}
+main_dict = {'name':agent_name, 'max_episodes':20000, 'max_steps':5e5, 'learning_method':'td3', 'runs':10, 'comment':''}
 
 agent_ddpg_dict = {'alpha':0.000025, 'beta':0.00025, 'tau':0.001, 'gamma':0.99, 'max_size':1000000, 'layer1_size':400, 'layer2_size':300, 'batch_size':200}
 
@@ -37,15 +37,15 @@ car_params =   {'mu': 1.0489, 'C_Sf': 4.718, 'C_Sr': 5.4562, 'lf': 0.15875, 'lr'
                 , 'h': 0.074, 'm': 3.74, 'I': 0.04712, 's_min': -0.4189, 's_max': 0.4189, 'sv_min': -3.2
                 , 'sv_max': 3.2, 'v_switch': 7.319, 'a_max': 9.51, 'v_min':-5.0, 'v_max': 20.0, 'width': 0.31, 'length': 0.58}
 
-reward_signal = {'goal_reached':0, 'out_of_bounds':-1, 'max_steps':0, 'collision':-2, 
-                    'backwards':-0.01, 'park':-1, 'time_step':-0.01, 'progress':0, 'distance':0.3, 
+reward_signal = {'goal_reached':0, 'out_of_bounds':-1, 'max_steps':0, 'collision':-5, 
+                    'backwards':-0.01, 'park':-1, 'time_step':-0.01, 'progress':0, 'distance':0.2, 
                     'max_progress':0}    
 
 action_space_dict = {'action_space': 'continuous', 'vel_select':[3,5], 'R_range':[2]}
 
 #action_space_dict = {'action_space': 'discrete', 'n_waypoints': 10, 'vel_select':[7], 'R_range':[6]}
 
-steer_control_dict = {'steering_control': False, 'wpt_arc':np.pi/2, 'track_width':0.9}
+steer_control_dict = {'steering_control': True, 'wpt_arc':np.pi/2, 'track_width':0.9}
 
 if  steer_control_dict['steering_control'] == True:
     steer_control_dict['path_strategy'] = 'polynomial'  #circle or linear or polynomial or gradient
@@ -67,7 +67,7 @@ env_dict = {'sim_conf': functions.load_config(sys.path[0], "config")
         , 'max_steps': 20000
         , 'control_steps': 10
         , 'display': False
-        , 'velocity_control': False
+        , 'velocity_control': True
         , 'velocity_gain':1
         , 'steer_control_dict': steer_control_dict
         , 'car_params':car_params
@@ -79,20 +79,20 @@ env_dict = {'sim_conf': functions.load_config(sys.path[0], "config")
         } 
 
 # mu_frac_variation = np.array([-0.5,-0.4,-0.3,-0.2,-0.1,0])
-n_test=1
-a = main_multiple.trainingLoop(main_dict, agent_td3_dict, env_dict, load_agent='')
-a.train()
+n_test=100
+# a = main_multiple.trainingLoop(main_dict, agent_td3_dict, env_dict, load_agent='')
+# a.train()
 # main_multiple.lap_time_test(agent_name=agent_name, n_episodes=n_test, detect_issues=False, initial_conditions=True)
-main_multiple.lap_time_test_with_noise(agent_name=agent_name, n_episodes=n_test, detect_issues=False, initial_conditions=True, noise={'xy':0.025, 'theta':0.05, 'v':0.1, 'lidar':0.01})
+# main_multiple.lap_time_test_with_noise(agent_name=agent_name, n_episodes=n_test, detect_issues=False, initial_conditions=True, noise={'xy':0.025, 'theta':0.05, 'v':0.1, 'lidar':0.01})
 
 
 
-agent_name = 'f1_esp_ete_10'
+agent_name = 'f1_esp_pete_10'
 main_dict['name'] = agent_name
 env_dict['map_name'] = 'f1_esp'
-a = main_multiple.trainingLoop(main_dict, agent_td3_dict, env_dict, load_agent='')
-a.train()
-main_multiple.lap_time_test_with_noise(agent_name=agent_name, n_episodes=n_test, detect_issues=False, initial_conditions=True, noise={'xy':0.025, 'theta':0.05, 'v':0.1, 'lidar':0.01})
+# a = main_multiple.trainingLoop(main_dict, agent_td3_dict, env_dict, load_agent='')
+# a.train()
+# main_multiple.lap_time_test_with_noise(agent_name=agent_name, n_episodes=n_test, detect_issues=False, initial_conditions=True, noise={'xy':0.025, 'theta':0.05, 'v':0.1, 'lidar':0.01})
 
 
 
@@ -1060,15 +1060,26 @@ main_multiple.lap_time_test_with_noise(agent_name=agent_name, n_episodes=n_test,
 # agent_names = ['f1_mco_pete_mu_4']
 # agent_names = ['f1_mco_ete', 'f1_mco_pete_mu_4']
 
+
+
+# agent_names = ['f1_esp_ete_10']
+# agent_names = ['f1_mco_ete_10']
 # agent_names = ['f1_porto_ete_1']
+
+# agent_names = ['f1_porto_ete_1', 'f1_esp_ete_10', 'f1_mco_ete_10']
+agent_names = ['f1_esp_pete_10', 'f1_mco_pete_10']
 
 # legend = ['no noise', 'noise']
 # legend = ['180', '220']
 # legend = ['5', '10', '20']
 # legend = ['Nominal surface', 'Dry asphalt', 'Wet asphalt']
-legend_title = 'Standard deviation of road surface \n friction coefficient during training'
-legend = ['0.01', '0.05']
+# legend_title = 'Standard deviation of road surface \n friction coefficient during training'
+# legend = ['0.01', '0.05']
+legend_title = ''
 ns=[0,0,0,0,0,0]
+legend = ['Porto', 'Barcelona-Catalunya', 'Monaco']
+
+
 
 
 # agent_names = ['porto_ete_v5_r_collision_5']
@@ -1111,17 +1122,17 @@ ns=[0,0,0,0,0,0]
 #     print('------------------------------' + '\n' + agent_name + '\n' + '------------------------------')
 #     display_results_multiple.display_train_parameters(agent_name=agent_name)
 
-# for agent_name in agent_names:
-#     print('------------------------------' + '\n' + agent_name + '\n' + '------------------------------')
-#     display_results_multiple.display_lap_results(agent_name=agent_name)
+for agent_name in agent_names:
+    print('------------------------------' + '\n' + agent_name + '\n' + '------------------------------')
+    display_results_multiple.display_lap_results(agent_name=agent_name)
 
 
 mismatch_parameters = [['mu'], ['mu'], ['mu'], ['mu']]
 frac_vary = [[0],[0],[0],[0]]
 noise_dicts = [{'xy':0.025, 'theta':0.05, 'v':0.1, 'lidar':0.01}, {'xy':0.025, 'theta':0.05, 'v':0.1, 'lidar':0.01}, {'xy':0.025, 'theta':0.05, 'v':0.1, 'lidar':0.01}, {'xy':0.025, 'theta':0.05, 'v':0.1, 'lidar':0.01}]
-start_condition = {'x':10, 'y':4.5, 'v':3, 'theta':np.pi, 'delta':0, 'goal':0}
+# start_condition = {'x':10, 'y':4.5, 'v':3, 'theta':np.pi, 'delta':0, 'goal':0}
 # start_condition = {'x':24.3, 'y':24.6, 'v':3, 'theta':0, 'delta':0, 'goal':0}
-# start_condition = {'x':18, 'y':48.7, 'v':3, 'theta':0, 'delta':0, 'goal':0}
+start_condition = {'x':18, 'y':48.7, 'v':3, 'theta':0, 'delta':0, 'goal':0}
 
 
 
