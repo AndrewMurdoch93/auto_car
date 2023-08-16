@@ -21,9 +21,9 @@ import os
 
 
 
-agent_name = 'f1_mco_pete_10'
+agent_name = 'f1_esp_pete_stanley'
 
-main_dict = {'name':agent_name, 'max_episodes':20000, 'max_steps':5e5, 'learning_method':'td3', 'runs':10, 'comment':''}
+main_dict = {'name':agent_name, 'max_episodes':20000, 'max_steps':2e5, 'learning_method':'td3', 'runs':3, 'comment':''}
 
 agent_ddpg_dict = {'alpha':0.000025, 'beta':0.00025, 'tau':0.001, 'gamma':0.99, 'max_size':1000000, 'layer1_size':400, 'layer2_size':300, 'batch_size':200}
 
@@ -49,7 +49,7 @@ steer_control_dict = {'steering_control': True, 'wpt_arc':np.pi/2, 'track_width'
 
 if  steer_control_dict['steering_control'] == True:
     steer_control_dict['path_strategy'] = 'polynomial'  #circle or linear or polynomial or gradient
-    steer_control_dict['control_strategy'] = 'pure_pursuit'  #pure_pursuit or stanley
+    steer_control_dict['control_strategy'] = 'stanley'  #pure_pursuit or stanley
 
     if steer_control_dict['control_strategy'] == 'pure_pursuit':
         steer_control_dict['track_dict'] = {'k':0.1, 'Lfc':1}
@@ -80,10 +80,10 @@ env_dict = {'sim_conf': functions.load_config(sys.path[0], "config")
 
 # mu_frac_variation = np.array([-0.5,-0.4,-0.3,-0.2,-0.1,0])
 n_test=100
-# a = main_multiple.trainingLoop(main_dict, agent_td3_dict, env_dict, load_agent='')
-# a.train()
+a = main_multiple.trainingLoop(main_dict, agent_td3_dict, env_dict, load_agent='')
+a.train()
 # main_multiple.lap_time_test(agent_name=agent_name, n_episodes=n_test, detect_issues=False, initial_conditions=True)
-# main_multiple.lap_time_test_with_noise(agent_name=agent_name, n_episodes=n_test, detect_issues=False, initial_conditions=True, noise={'xy':0.025, 'theta':0.05, 'v':0.1, 'lidar':0.01})
+main_multiple.lap_time_test_with_noise(agent_name=agent_name, n_episodes=n_test, detect_issues=False, initial_conditions=True, noise={'xy':0.025, 'theta':0.05, 'v':0.1, 'lidar':0.01})
 
 
 
@@ -1069,6 +1069,11 @@ env_dict['map_name'] = 'f1_esp'
 agent_names = ['f1_porto_ete_1', 'f1_esp_ete_10', 'f1_mco_ete_10']
 # agent_names = ['f1_esp_pete_10', 'f1_mco_pete_10']
 
+agent_names = ['f1_mco_pete_10_1']
+
+# agent_names = ['f1_mco_pete_10']
+# agent_names = ['f1_esp_mco_10_1']
+
 # legend = ['no noise', 'noise']
 # legend = ['180', '220']
 # legend = ['5', '10', '20']
@@ -1076,7 +1081,7 @@ agent_names = ['f1_porto_ete_1', 'f1_esp_ete_10', 'f1_mco_ete_10']
 # legend_title = 'Standard deviation of road surface \n friction coefficient during training'
 # legend = ['0.01', '0.05']
 legend_title = ''
-ns=[0,0,0,0,0,0]
+ns=[5,0,0,0,0,0]
 legend = ['Porto', 'Barcelona-Catalunya', 'Monaco']
 
 
@@ -1134,16 +1139,15 @@ noise_dicts = [{'xy':0.025, 'theta':0.05, 'v':0.1, 'lidar':0.01}, {'xy':0.025, '
 # start_condition = {'x':24.3, 'y':24.6, 'v':3, 'theta':0, 'delta':0, 'goal':0}
 start_condition = {'x':18, 'y':48.7, 'v':3, 'theta':0, 'delta':0, 'goal':0}
 
-f1_esp_mco_10_1
 
 
 # display_results_multiple.display_moving_agent(agent_names=agent_names, ns=ns, legend_title=legend_title,          
 #                                              legend=legend, mismatch_parameters=mismatch_parameters, frac_vary=frac_vary, noise_dicts=noise_dicts,
 #                                              start_condition=start_condition)
 
-# display_results_multiple.display_path_multiple(agent_names=agent_names, ns=ns, legend_title=legend_title,          
-#                                              legend=legend, mismatch_parameters=mismatch_parameters, frac_vary=frac_vary, noise_dicts=noise_dicts,
-#                                              start_condition=start_condition)
+display_results_multiple.display_path_multiple(agent_names=agent_names, ns=ns, legend_title=legend_title,          
+                                             legend=legend, mismatch_parameters=mismatch_parameters, frac_vary=frac_vary, noise_dicts=noise_dicts,
+                                             start_condition=start_condition)
 
 # display_results_multiple.display_path_mismatch_multiple_by_state(agent_names=agent_names, ns=ns, legend_title=legend_title,          
 #                                              legend=legend, mismatch_parameters=mismatch_parameters, frac_vary=frac_vary, noise_dicts=noise_dicts,
